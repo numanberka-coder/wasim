@@ -183,7 +183,6 @@ function updateThemeButtons(theme) {
 
   if (theme === 'light') {
     darkBtn.classList.add('secondary');
-    darkBtn.classList.remove('');
     lightBtn.classList.remove('secondary');
     // Primary style for active button
     lightBtn.style.background = 'var(--wa-green)';
