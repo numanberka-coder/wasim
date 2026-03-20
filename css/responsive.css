@@ -1,0 +1,525 @@
+/* ========================================
+   RESPONSIVE - Media Queries & Mobile
+   Faz 8: Mobil Altyapı & Responsive
+   ======================================== */
+
+/* ===== OVERLAY & DROPDOWN (varsayılan: gizli) ===== */
+.header-dropdown,
+.mobile-overlay,
+.mobile-overlay-backdrop {
+  display: none;
+}
+
+/* is-open her ekranda çalışsın */
+.header-dropdown.is-open {
+  display: block;
+}
+.mobile-overlay.is-open {
+  display: flex;
+  animation: slideUp 0.25s ease-out;
+}
+.mobile-overlay-backdrop.is-open {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ===== HEADER DROPDOWN ===== */
+.header-actions {
+  position: relative;
+}
+
+.header-menu-trigger {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  /* Dokunma alanını genişlet — negatif margin yerine pseudo-element */
+  position: relative;
+}
+
+.header-menu-trigger::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+
+.header-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 220px;
+  background: #233138;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  z-index: 501;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: hdDropIn 0.15s ease-out;
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-top: 4px;
+}
+
+@keyframes hdDropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.hd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--wa-text);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+}
+
+.hd-item:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hd-item-danger {
+  color: #f87171;
+}
+
+.hd-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 2px 0;
+}
+
+/* ===== MOBILE OVERLAY ===== */
+.mobile-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 599;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: linear-gradient(180deg, #0f1923 0%, #0d1720 100%);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.mobile-overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 56px;
+  min-height: 56px;
+  background: linear-gradient(180deg, #1a252c 0%, #161f26 100%);
+  border-bottom: 1px solid var(--wa-divider);
+  flex-shrink: 0;
+}
+
+.mobile-overlay-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--wa-text);
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-overlay-back:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mobile-overlay-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--wa-text);
+  letter-spacing: -0.2px;
+  flex: 1;
+}
+
+.mobile-overlay-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mo-action-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+  padding: 0;
+}
+
+.mo-action-btn:active {
+  background: rgba(37, 211, 102, 0.2);
+}
+
+.mobile-overlay-body {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding: var(--space-lg);
+  padding-bottom: calc(var(--space-lg) + 20px + var(--keyboard-height, 0px));
+}
+
+/* Overlay içindeki form elemanları optimize */
+.mobile-overlay-body .form-grid {
+  grid-template-columns: 1fr;
+}
+
+.mobile-overlay-body .player-controls {
+  flex-direction: column;
+}
+
+.mobile-overlay-body .player-controls button {
+  width: 100%;
+}
+
+.mobile-overlay-body .builder-grid {
+  grid-template-columns: 1fr;
+}
+
+.mobile-overlay-body .script-tools {
+  grid-template-columns: 1fr;
+}
+
+/* Overlay'de iç tab'lar düzgün görünsün */
+.mobile-overlay-body .script-tabs {
+  margin: calc(-1 * var(--space-lg));
+  margin-bottom: var(--space-lg);
+  position: sticky;
+  top: calc(-1 * var(--space-lg));
+  z-index: 5;
+  background: #161f26;
+  border-radius: 0;
+}
+
+.mobile-overlay-body .builder-type-chips {
+  gap: 8px;
+}
+
+.mobile-overlay-body .builder-type-chip {
+  font-size: 13px;
+  min-height: 36px;
+  padding: 8px 14px;
+}
+
+/* ===== TABLET & SMALLER DESKTOP ===== */
+@media (max-width: 1200px) {
+  :root {
+    --panel-width: 360px;
+  }
+
+  .phone {
+    width: 380px;
+    height: 780px;
+  }
+}
+
+/* ===== TABLET (769px - 980px) ===== */
+@media (min-width: 769px) and (max-width: 980px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .panel-left {
+    width: 100%;
+    max-width: none;
+    border-right: none;
+    border-bottom: 1px solid var(--wa-divider);
+    height: 45vh;
+    min-height: 350px;
+  }
+
+  .stage {
+    padding: 20px;
+    min-height: 55vh;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 400px;
+    height: 65vh;
+    min-height: 500px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    white-space: nowrap;
+    padding: 12px 16px;
+  }
+
+  .script-tools {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================
+   MOBILE — ≤ 768px
+   Sol panel tamamen gizlenir, telefon tam ekran olur,
+   3 nokta FAB menü + overlay panel sistemi aktif olur
+   ========================================================== */
+@media (max-width: 768px) {
+  /* --- Genel --- */
+  html {
+    padding:
+      env(safe-area-inset-top)
+      env(safe-area-inset-right)
+      env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+  }
+
+  body {
+    overflow: hidden;
+    height: 100dvh;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  /* --- Sol panel gizle --- */
+  .panel-left {
+    display: none !important;
+  }
+
+  /* --- App container tam ekran --- */
+  .app-container {
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* --- Stage (telefon sarmalayıcı) --- */
+  .stage {
+    padding: 0;
+    min-height: 0;
+    height: 100dvh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #080e13;
+    overflow: hidden;
+  }
+
+  .stage::before,
+  .stage::after {
+    display: none;
+  }
+
+  /* --- Telefon: tam ekran, çerçevesiz --- */
+  .phone {
+    width: 100% !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+  }
+
+  /* Telefon kasa detayları gizle */
+  .phone-screen-glare,
+  .phone-btn-power,
+  .phone-btn-vol-up,
+  .phone-btn-vol-down,
+  .phone-only-toolbar {
+    display: none !important;
+  }
+
+  .phone::before,
+  .phone::after {
+    display: none !important;
+  }
+
+  /* --- Chat body optimize --- */
+  .chat-body {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* --- Chat input safe-area --- */
+  .chat-input {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  /* ========================================
+     TOUCH-FRIENDLY HEDEFLER
+     ======================================== */
+  .mobile-overlay-body button,
+  .mobile-overlay-body .accordion-header,
+  .mobile-overlay-body select,
+  .mobile-overlay-body .person-item {
+    min-height: 44px;
+  }
+
+  .mobile-overlay-body input[type="text"],
+  .mobile-overlay-body input[type="number"],
+  .mobile-overlay-body input[type="url"],
+  .mobile-overlay-body input[type="time"],
+  .mobile-overlay-body textarea,
+  .mobile-overlay-body select {
+    font-size: 16px; /* iOS zoom'u engeller */
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  /* ========================================
+     TOAST MOBİL POZİSYON
+     ======================================== */
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    text-align: center;
+  }
+}
+
+/* ===== SMALL MOBILE (≤ 380px) ===== */
+@media (max-width: 380px) {
+  .header-dropdown {
+    width: 200px;
+  }
+}
+
+/* ===== LANDSCAPE MOBILE ===== */
+@media (max-height: 500px) and (max-width: 768px) and (orientation: landscape) {
+  .mobile-overlay-header {
+    height: 44px;
+    min-height: 44px;
+    padding-top: 0;
+  }
+}
+
+/* ===== LARGE SCREENS ===== */
+@media (min-width: 1600px) {
+  :root {
+    --panel-width: 450px;
+  }
+
+  .phone {
+    width: 420px;
+    height: 860px;
+  }
+
+  .stage {
+    padding: 40px;
+  }
+}
+
+/* ===== STANDALONE / APK / PWA MODU =====
+   Gerçek telefonda açıldığında sahte status bar gizlenir,
+   telefonun kendi status bar'ı görünmeye devam eder.
+   display-mode: standalone → PWA / TWA / WebView (APK)
+   display-mode: fullscreen → Tam ekran modu
+   ========================================== */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .status-bar {
+    display: none !important;
+  }
+}
+
+/* ===== PRINT ===== */
+@media print {
+  .panel-left,
+  .action-bar,
+  .chat-input,
+  .header-dropdown {
+    display: none !important;
+  }
+
+  .stage {
+    padding: 0;
+    background: white;
+  }
+
+  .phone {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .msg-row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .header-dropdown,
+  .mobile-overlay,
+  .mobile-overlay-backdrop {
+    animation: none !important;
+  }
+}
+
+/* ===== HIGH CONTRAST ===== */
+@media (prefers-contrast: high) {
+  :root {
+    --wa-divider: #4a5568;
+    --wa-text-secondary: #a0aec0;
+  }
+
+  .msg-bubble {
+    border-width: 2px;
+  }
+}

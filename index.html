@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>WhatsApp Simülatör</title>
+
+  <!-- Google Fonts: Roboto (Android/WhatsApp) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS: Değişkenler en önce yüklenmeli -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/panels.css">
+  <link rel="stylesheet" href="css/phone.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- ==================== LEFT PANEL ==================== -->
+    <section class="panel-left">
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <div class="action-bar-brand">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l5.12-1.34A9.93 9.93 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" fill="#25d366"/><path d="M17 14.5c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.41-1.5-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.63-.93-2.24-.24-.58-.49-.5-.68-.51-.17 0-.37-.02-.57-.02-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.47 0 1.46 1.07 2.86 1.22 3.06.14.2 2.1 3.2 5.08 4.36.71.31 1.26.49 1.69.62.71.23 1.35.2 1.86.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35z" fill="#fff"/></svg>
+          <span class="brand-text">WA Simülatör</span>
+        </div>
+        <div class="action-bar-actions">
+          <button id="phoneOnlyBtn" class="action-btn action-btn-icon" title="Sadece Telefon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </button>
+          <button id="screenshotBtn" class="action-btn action-btn-icon" title="Ekran Al">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <div class="scale-controls" id="scaleControls" style="display:none;">
+            <button class="action-btn scale-btn" data-scale="0.75" title="%75">75%</button>
+            <button class="action-btn scale-btn active" data-scale="1" title="%100">100%</button>
+            <button class="action-btn scale-btn" data-scale="1.25" title="%125">125%</button>
+          </div>
+          <span class="action-bar-sep"></span>
+          <button id="saveAllBtn" class="action-btn action-btn-icon" title="Kaydet">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </button>
+          <button id="loadAllBtn" class="action-btn action-btn-icon" title="Yükle">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </button>
+          <button id="clearAllBtn" class="action-btn action-btn-icon action-btn-danger" title="Sıfırla">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" data-tab="group">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <span>Grup</span>
+        </div>
+        <div class="tab" data-tab="people">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Kişiler</span>
+        </div>
+        <div class="tab" data-tab="script">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span>Senaryo</span>
+        </div>
+        <div class="tab" data-tab="settings">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+          <span>Ayarlar</span>
+        </div>
+      </div>
+
+      <!-- ===== PANEL: GROUP ===== -->
+      <div class="panel active" id="group">
+        <!-- Group Info -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            📱 Grup Bilgileri
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="groupTitle">Grup Adı</label>
+              <input type="text" id="groupTitle" value="Felsefe Grubu" placeholder="Grup adı">
+            </div>
+            <div class="form-group">
+              <label for="groupSubtitle">Alt Başlık</label>
+              <input type="text" id="groupSubtitle" value="Online" placeholder="örn: Online, 5 kişi">
+            </div>
+            <div class="form-group">
+              <label for="dayLabel">Gün Etiketi</label>
+              <input type="text" id="dayLabel" value="Bugün" placeholder="örn: Bugün, Dün">
+            </div>
+            <div class="divider"></div>
+            <div class="form-group">
+              <label for="groupPhotoUrl">Fotoğraf URL</label>
+              <input type="url" id="groupPhotoUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+              <label>veya Dosya Yükle</label>
+              <div class="file-input">
+                <input type="file" id="groupPhotoFile" accept="image/*">
+                <button type="button" class="file-btn secondary btn-sm">📁 Dosya Seç</button>
+                <span class="file-name">Seçilmedi</span>
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 16px;">
+              <button id="applyGroupBtn" type="button">✓ Uygula</button>
+              <button id="clearGroupPhotoBtn" type="button" class="secondary">🗑️ Fotoğrafı Kaldır</button>
+            </div>
+          </div>
+        </details>
+
+        <!-- Status Bar -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🕐 Durum Çubuğu
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="operatorNameInput">Operatör Adı</label>
+              <input type="text" id="operatorNameInput" value="Turkcell" placeholder="örn: Turkcell, Vodafone, Türk Telekom">
+            </div>
+            <div class="divider"></div>
+            <div class="form-group">
+              <label for="statusTimeInput">Saat (boş bırak = gerçek saat)</label>
+              <input type="time" id="statusTimeInput" step="60">
+            </div>
+            <div class="divider"></div>
+            <label class="checkbox-row">
+              <input type="checkbox" id="batteryVisible" checked>
+              <span class="checkbox-label">Batarya Göster</span>
+            </label>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="form-group">
+                <label for="batteryPercentInput">Batarya %</label>
+                <input type="number" id="batteryPercentInput" min="0" max="100" value="95">
+              </div>
+              <div class="form-group">
+                <label for="batteryHealthInput">Sağlık %</label>
+                <input type="number" id="batteryHealthInput" min="0" max="100" value="100">
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Wallpaper -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🎨 Duvar Kağıdı
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="wallpaperPreset">Hazır Tema</label>
+              <select id="wallpaperPreset">
+                <option value="default">Varsayılan</option>
+                <option value="velvet">Kadife</option>
+                <option value="graph">Izgara</option>
+                <option value="plain">Düz</option>
+                <option value="custom-color">Özel Renk</option>
+                <option value="custom-image">Özel Görsel</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="wallpaperColor">Özel Renk</label>
+              <input type="color" id="wallpaperColor" value="#0b141a">
+            </div>
+            <div class="form-group">
+              <label>Özel Görsel</label>
+              <div class="file-input">
+                <input type="file" id="wallpaperImageFile" accept="image/*">
+                <button type="button" class="file-btn secondary btn-sm">📁 Görsel Seç</button>
+                <span class="file-name">Seçilmedi</span>
+              </div>
+            </div>
+            <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+          </div>
+        </details>
+
+        <!-- Header Color -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🎨 Header Rengi
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="headerColorInput">Renk Seçin</label>
+              <input type="color" id="headerColorInput" value="#1f2c33">
+            </div>
+            <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+          </div>
+        </details>
+      </div>
+
+      <!-- ===== PANEL: PEOPLE ===== -->
+      <div class="panel" id="people">
+        <!-- Person Form -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            ➕ Kişi Ekle/Düzenle
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="pName">İsim</label>
+              <input type="text" id="pName" placeholder="Kişi adı">
+            </div>
+            <div class="form-group">
+              <label for="pAvatar">Avatar URL</label>
+              <input type="url" id="pAvatar" placeholder="https://...">
+            </div>
+            <div class="form-group">
+              <label>veya Dosya Yükle</label>
+              <div class="file-input">
+                <input type="file" id="pAvatarFile" accept="image/*">
+                <button type="button" class="file-btn secondary btn-sm">📁 Avatar Seç</button>
+                <span class="file-name">Seçilmedi</span>
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 16px; gap: 8px;">
+              <button id="savePersonBtn" type="button">💾 Kaydet</button>
+              <button id="newPersonBtn" type="button" class="secondary">➕ Yeni</button>
+              <button id="clearAvatarBtn" type="button" class="secondary">🖼️ Avatar Sil</button>
+              <button id="deletePersonBtn" type="button" class="danger">🗑️ Sil</button>
+            </div>
+          </div>
+        </details>
+
+        <!-- People List -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            👥 Kişi Listesi
+          </summary>
+          <div class="accordion-body">
+            <div id="peopleList" class="people-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </details>
+
+        <!-- JSON Editor -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            📝 JSON Düzenle
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <textarea id="peopleJson" rows="8" style="font-family: monospace; font-size: 12px;"></textarea>
+            </div>
+            <div class="form-row">
+              <button id="applyJsonBtn" type="button">✓ JSON Uygula</button>
+              <button id="refreshJsonBtn" type="button" class="secondary">🔄 Yenile</button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- ===== PANEL: SCRIPT ===== -->
+      <div class="panel" id="script">
+
+        <!-- İç Tab Sistemi -->
+        <div class="script-tabs">
+          <button class="script-tab active" data-stab="tabSenaryo">📝 Senaryo</button>
+          <button class="script-tab" data-stab="tabInteractive">🎮 İnteraktif</button>
+          <button class="script-tab" data-stab="tabBuilder">🧩 Blok Builder</button>
+        </div>
+
+        <!-- ═══════ TAB 1: SENARYO ═══════ -->
+        <div class="script-tab-panel active" id="tabSenaryo">
+          <div class="form-group">
+            <textarea id="scriptBox" class="script-editor" rows="12" placeholder="Senaryonuzu buraya yazın..."></textarea>
+          </div>
+
+          <!-- Medya komutu yardımcıları -->
+          <div class="divider" style="margin: 12px 0;"></div>
+          <div class="form-group">
+            <label>Medya ekle (senaryoya satır ekler)</label>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="mediaSenderSelect">Gönderen</label>
+                <select id="mediaSenderSelect"></select>
+              </div>
+              <div class="form-group">
+                <label for="mediaTypeSelect">Tür</label>
+                <select id="mediaTypeSelect">
+                  <option value="photo">@photo</option>
+                  <option value="gif">@gif</option>
+                  <option value="video">@video</option>
+                  <option value="voice">@voice</option>
+                  <option value="location">@location</option>
+                  <option value="document">@document</option>
+                  <option value="sticker">@sticker</option>
+                  <option value="link">@link</option>
+                  <option value="viewonce">@viewonce</option>
+                </select>
+                <p class="hint">Dosya yolu (C:\...) yazmak çalışmaz; dosyayı buradan seçince komuta otomatik <code>data:</code> olarak eklenir.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label id="mediaFileLabel">Dosya (foto/gif)</label>
+                <div class="file-input">
+                  <input id="mediaFileInput" type="file" accept="image/*,image/gif">
+                  <button type="button" class="file-btn secondary btn-sm">📁 Dosya Seç</button>
+                  <span class="file-name">Seçilmedi</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label id="mediaUrlLabel" for="mediaUrlInput">URL (opsiyonel)</label>
+                <input id="mediaUrlInput" type="text" placeholder="https://...">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label id="mediaCaptionLabel" for="mediaCaptionInput">Açıklama / Not / Süre</label>
+              <input id="mediaCaptionInput" type="text" placeholder='Örn: "selam" veya voice için 12s'>
+            </div>
+
+            <div class="form-row" style="gap: 8px;">
+              <button id="mediaInsertBtn" type="button">➕ Senaryoya ekle</button>
+              <button id="mediaClearBtn" type="button" class="secondary">Temizle</button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="speed">Hız (ms)</label>
+              <input type="number" id="speed" value="900" min="100" max="5000" step="100">
+            </div>
+            <div class="form-group">
+              <label for="jitter">Rastgelelik (ms)</label>
+              <input type="number" id="jitter" value="250" min="0" max="1000" step="50">
+            </div>
+          </div>
+
+          <div class="player-controls" id="normalPlayerControls">
+            <button id="loadBtn" type="button" class="secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Yükle
+            </button>
+            <button id="stepBtn" type="button" class="secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+              Adım
+            </button>
+            <button id="playBtn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Oynat
+            </button>
+            <button id="pauseBtn" type="button" class="secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              Duraklat
+            </button>
+            <button id="resetBtn" type="button" class="danger">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+              Sıfırla
+            </button>
+          </div>
+
+          <div id="scriptValidation" class="form-group"></div>
+        </div>
+
+        <!-- ═══════ TAB 2: İNTERAKTİF ═══════ -->
+        <div class="script-tab-panel" id="tabInteractive">
+          <div class="form-group">
+            <label for="interactiveScriptBox">İnteraktif Senaryo</label>
+            <textarea id="interactiveScriptBox" class="script-editor" rows="10" placeholder="#selamlasma
+trigger: merhaba, selam, hey
+---
+@typing Destek 800
+Destek: Merhaba! 👋 Size nasıl yardımcı olabilirim?
+
+#default
+trigger: *
+---
+@typing Destek 800
+Destek: Bunu anlayamadım 🤔"></textarea>
+          </div>
+
+          <div class="form-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button id="interactiveToggleBtn" type="button">🎮 İnteraktif Modu Aç</button>
+            <button id="loadInteractiveDemoBtn" type="button" class="secondary">📥 Demo Yükle</button>
+            <button id="interactiveResetBtn" type="button" class="danger">🔄 Sıfırla</button>
+            <span id="interactiveBadge" class="badge badge-success" style="display:none;">AKTİF</span>
+          </div>
+
+          <div id="interactiveInfo" style="display:none;">
+            <p class="hint" style="margin:6px 0 4px;">
+              Telefon ekranındaki mesaj alanına tetikleyici kelimeyi yazıp gönderin.<br>
+              Karakter otomatik cevap verecek.
+            </p>
+          </div>
+
+          <details class="accordion" style="margin-top: 12px;">
+            <summary class="accordion-header">
+              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              ❓ Syntax Referansı
+            </summary>
+            <div class="accordion-body">
+              <div style="background: rgba(20,30,38,0.8); border: 1px solid var(--wa-divider); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; line-height: 1.8; color: var(--wa-text-secondary);">
+                <code style="color: var(--wa-green);">#blok_adi</code><br>
+                <code>trigger: kelime1, kelime2</code><br>
+                <code>---</code><br>
+                <code>Ahmet | 14:02 | Merhaba!</code><br><br>
+                <code style="color: var(--wa-green);">#default</code><br>
+                <code>trigger: *</code><br>
+                <code>---</code><br>
+                <code>Ahmet | 14:05 | Bunu anlayamadım.</code>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- ═══════ TAB 3: BLOK BUILDER ═══════ -->
+        <div class="script-tab-panel" id="tabBuilder">
+
+          <!-- Hazır Şablonlar -->
+          <div class="form-grid" style="align-items: end; margin-bottom: 12px;">
+            <div class="form-group">
+              <label for="scriptTemplateSelect">Hazır Şablonlar</label>
+              <select id="scriptTemplateSelect"></select>
+              <p class="hint">Tek tıkla başlangıç, tanışma veya soru-cevap akışlarını yükleyin.</p>
+            </div>
+            <button id="applyTemplateBtn" type="button">✨ Şablonu Yükle</button>
+          </div>
+
+          <div class="divider" style="margin: 8px 0 14px;"></div>
+
+          <!-- Trigger Bilgileri -->
+          <div class="builder-card" style="margin-bottom: 12px;">
+            <div class="builder-header">
+              <span>🎯 Trigger Ayarları</span>
+              <span class="hint" style="font-weight:400; font-size:11px;">(opsiyonel — boş bırakırsan normal satır üretir)</span>
+            </div>
+            <div class="builder-grid">
+              <div class="form-group">
+                <label for="builderBlockName">Blok Adı</label>
+                <input id="builderBlockName" type="text" placeholder="selamlasma">
+              </div>
+              <div class="form-group">
+                <label for="builderTrigger">Trigger Kelimeleri</label>
+                <input id="builderTrigger" type="text" placeholder="merhaba, selam, hey">
+                <p class="hint">Virgülle ayır. Varsayılan blok için * yaz.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blok Ekleme Formu -->
+          <div class="builder-card">
+            <div class="builder-header">
+              <span>🧩 Satır Ekle</span>
+            </div>
+
+            <!-- Tip Seçici: Chip'ler -->
+            <div class="builder-type-chips" id="builderTypeChips"></div>
+
+            <!-- Dinamik Form Alanları -->
+            <div class="builder-grid" id="builderDynamicFields">
+              <div class="form-group" id="bfGroup_who">
+                <label for="builderWho">Kim</label>
+                <select id="builderWho"></select>
+              </div>
+              <div class="form-group" id="bfGroup_text" style="display:none;">
+                <label for="builderText">Metin</label>
+                <textarea id="builderText" rows="3" placeholder="Mesaj ya da sistem notu"></textarea>
+              </div>
+              <div class="form-group" id="bfGroup_replyTo" style="display:none;">
+                <label for="builderReplyTo">Yanıtlanan</label>
+                <input id="builderReplyTo" type="text" placeholder="Kimi yanıtlıyor?">
+              </div>
+              <div class="form-group" id="bfGroup_url" style="display:none;">
+                <label for="builderUrl">URL</label>
+                <input id="builderUrl" type="url" placeholder="https://...">
+              </div>
+              <div class="form-group" id="bfGroup_caption" style="display:none;">
+                <label for="builderCaption">Açıklama</label>
+                <input id="builderCaption" type="text" placeholder="İsteğe bağlı">
+              </div>
+              <div class="form-group" id="bfGroup_duration" style="display:none;">
+                <label for="builderDuration">Süre</label>
+                <input id="builderDuration" type="text" placeholder="12s / 00:18 / 8000">
+              </div>
+              <div class="form-group" id="bfGroup_placeName" style="display:none;">
+                <label for="builderPlaceName">Yer Adı</label>
+                <input id="builderPlaceName" type="text" placeholder="İstanbul Havalimanı">
+              </div>
+              <div class="form-group" id="bfGroup_placeInfo" style="display:none;">
+                <label for="builderPlaceInfo">Alt Bilgi</label>
+                <input id="builderPlaceInfo" type="text" placeholder="Terminal 1, Arnavutköy">
+              </div>
+              <div class="form-group" id="bfGroup_fileName" style="display:none;">
+                <label for="builderFileName">Dosya Adı</label>
+                <input id="builderFileName" type="text" placeholder="rapor.pdf">
+              </div>
+              <div class="form-group" id="bfGroup_fileSize" style="display:none;">
+                <label for="builderFileSize">Boyut / Tip</label>
+                <input id="builderFileSize" type="text" placeholder="2.4 MB · PDF">
+              </div>
+              <div class="form-group" id="bfGroup_stickerVal" style="display:none;">
+                <label for="builderStickerVal">Sticker (URL veya Emoji)</label>
+                <input id="builderStickerVal" type="text" placeholder="🙂 veya https://...">
+              </div>
+              <div class="form-group" id="bfGroup_linkTitle" style="display:none;">
+                <label for="builderLinkTitle">Başlık</label>
+                <input id="builderLinkTitle" type="text" placeholder="Harika bir makale">
+              </div>
+              <div class="form-group" id="bfGroup_linkUrl" style="display:none;">
+                <label for="builderLinkUrl">URL</label>
+                <input id="builderLinkUrl" type="url" placeholder="https://ornek.com">
+              </div>
+              <div class="form-group" id="bfGroup_voMediaType" style="display:none;">
+                <label for="builderVoMediaType">Medya Tipi</label>
+                <select id="builderVoMediaType">
+                  <option value="photo">Fotoğraf</option>
+                  <option value="video">Video</option>
+                </select>
+              </div>
+              <div class="form-group" id="bfGroup_typingMs" style="display:none;">
+                <label for="builderTypingMs">Süre (ms)</label>
+                <input id="builderTypingMs" type="number" min="200" max="5000" value="800" placeholder="800">
+              </div>
+              <div class="form-group" id="bfGroup_emoji" style="display:none;">
+                <label for="builderEmoji">Emoji</label>
+                <input id="builderEmoji" type="text" placeholder="😂 👍 ❤️">
+              </div>
+              <div class="form-group" id="bfGroup_reactTarget" style="display:none;">
+                <label for="builderTarget">Hedef Kişi</label>
+                <input id="builderTarget" type="text" placeholder="Kimin mesajına?">
+              </div>
+              <div class="form-group" id="bfGroup_systemText" style="display:none;">
+                <label for="builderSystemText">Sistem Mesajı</label>
+                <input id="builderSystemText" type="text" placeholder="X mesajını sildi">
+              </div>
+              <div class="form-group" id="bfGroup_personName" style="display:none;">
+                <label for="builderPersonName">Kişi Adı</label>
+                <input id="builderPersonName" type="text" placeholder="Ahmet">
+              </div>
+            </div>
+
+            <div class="builder-actions">
+              <button id="builderAddBtn" type="button">➕ Satır Ekle</button>
+              <button id="builderClearBtn" type="button" class="danger">🗑️ Satırları Temizle</button>
+            </div>
+          </div>
+
+          <!-- Blok Sırası -->
+          <div class="builder-card">
+            <div class="builder-header">
+              <span>🎬 Satır Sırası</span>
+            </div>
+            <div id="builderList" class="builder-list"></div>
+          </div>
+
+          <div class="builder-actions" style="margin-top: 12px;">
+            <button id="builderPushBtn" type="button">⬇️ Metne Aktar</button>
+            <button id="builderNewBlockBtn" type="button" class="secondary">📦 Yeni Blok</button>
+          </div>
+
+          <div class="divider" style="margin: 14px 0;"></div>
+
+          <!-- Builder kendi textarea'sı -->
+          <div class="form-group">
+            <label for="builderScriptBox">Oluşturulan Senaryo</label>
+            <textarea id="builderScriptBox" class="script-editor" rows="8" placeholder="Yukarıdan satır ekleyip 'Metne Aktar' butonuna basın..."></textarea>
+          </div>
+
+          <div class="form-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button id="builderPlayNormalBtn" type="button">▶️ Normal Oynat</button>
+            <button id="builderPlayInteractiveBtn" type="button">🎮 İnteraktif Oynat</button>
+            <button id="builderResetBtn" type="button" class="danger">🔄 Sıfırla</button>
+          </div>
+        </div>
+
+        <!-- Manuel Gönderim (tab'ların altında accordion olarak kalır) -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            ✉️ Manuel Gönderim
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="manualSender">Gönderen</label>
+              <select id="manualSender">
+                <option value="Me">Me</option>
+              </select>
+            </div>
+            <p class="hint">Aşağıdaki mesaj kutusunu kullanarak manuel mesaj gönderebilirsiniz.</p>
+          </div>
+        </details>
+
+        <!-- Command Help -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            ❓ Komut Yardımı
+          </summary>
+          <div class="accordion-body">
+            <div class="command-help">
+              <p><code>@add İsim</code> — Kişiyi gruba ekle</p>
+              <p><code>@leave İsim</code> — Kişiyi gruptan çıkar</p>
+              <p><code>@system Mesaj</code> — Sistem mesajı göster</p>
+              <p><code>@typing İsim 800</code> — Yazıyor animasyonu</p>
+              <p><code>@reaction İsim 😂 Hedef</code> — Tepki ekle</p>
+              <p><code>@photo İsim URL [Açıklama]</code> — Fotoğraf mesajı (URL veya data URL)</p>
+              <p><code>@gif İsim URL [Açıklama]</code> — GIF mesajı</p>
+              <p><code>@video İsim URL [Açıklama]</code> — Video mesajı (yalnız önizleme)</p>
+              <p><code>@voice İsim 12s [Açıklama]</code> — Sesli mesaj (yalnız görünüm)</p>
+              <p><code>@location İsim "Yer Adı" [Alt Bilgi]</code> — Konum kartı</p>
+              <p><code>@document İsim "dosya.pdf" ["Boyut · PDF"]</code> — Döküman kartı</p>
+              <p><code>@sticker İsim [URL veya 🙂]</code> — Sticker (şeffaf balon)</p>
+              <p><code>@link İsim "Başlık" [URL] [ThumbnailURL]</code> — Link önizleme kartı</p>
+              <p><code>@viewonce İsim [photo|video]</code> — Bir kez görüntüle</p>
+              <p><code>İsim: Mesaj</code> — Normal mesaj</p>
+              <p><code>İsim > Hedef: Mesaj</code> — Yanıt mesajı</p>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- ===== PANEL: SETTINGS ===== -->
+      <div class="panel" id="settings">
+        <!-- Typography -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🔤 Tipografi
+          </summary>
+          <div class="accordion-body">
+            <div class="range-row">
+              <label>Yazı Boyutu</label>
+              <input type="range" id="fontSizeControl" min="12" max="18" step="1" value="14" data-unit="px">
+              <output id="fontSizeValue">14px</output>
+            </div>
+            <div class="range-row">
+              <label>Satır Aralığı</label>
+              <input type="range" id="lineHeightControl" min="1.2" max="1.6" step="0.05" value="1.4" data-unit="x">
+              <output id="lineHeightValue">1.4x</output>
+            </div>
+            <div class="range-row">
+              <label>Balon Genişliği</label>
+              <input type="range" id="bubbleSizeControl" min="70" max="90" step="1" value="78" data-unit="%">
+              <output id="bubbleSizeValue">78%</output>
+            </div>
+            <div class="range-row">
+              <label>Balon Dolgu (Y)</label>
+              <input type="range" id="bubblePaddingYControl" min="8" max="14" step="1" value="10" data-unit="px">
+              <output id="bubblePaddingYValue">10px</output>
+            </div>
+          </div>
+        </details>
+
+        <!-- Message Times -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            ⏱️ Mesaj Saatleri
+          </summary>
+          <div class="accordion-body">
+            <label class="checkbox-row">
+              <input type="checkbox" id="autoMessageTimesToggle" checked>
+              <span class="checkbox-label">Otomatik Saat Artışı</span>
+            </label>
+            
+            <div id="autoTimeSection" style="margin-top: 16px;">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="messageBaseTimeInput">Başlangıç Saati</label>
+                  <input type="time" id="messageBaseTimeInput" step="60">
+                </div>
+                <div class="form-group">
+                  <label for="messageIncrementInput">Artış (dk)</label>
+                  <input type="number" id="messageIncrementInput" min="0" max="180" value="1">
+                </div>
+              </div>
+              <p class="hint">Her mesaj otomatik olarak belirtilen dakika kadar ileri saate sahip olacak.</p>
+            </div>
+
+            <div id="manualTimeSection" style="display: none; margin-top: 16px;">
+              <p class="hint" style="margin-bottom: 12px;">Her mesajın saatini ayrı ayrı düzenleyebilirsiniz:</p>
+              <div id="manualTimeList" class="time-list">
+                <div class="hint">Henüz mesaj yok.</div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ==================== PHONE PREVIEW ==================== -->
+    <main class="stage">
+      <!-- Phone-only mod floating toolbar -->
+      <div class="phone-only-toolbar" id="phoneOnlyToolbar">
+        <button class="pot-btn" id="phoneOnlyExitBtn" title="Paneli Göster">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <span class="pot-sep"></span>
+        <button class="pot-btn pot-scale" data-scale="0.75" title="%75">75</button>
+        <button class="pot-btn pot-scale active" data-scale="1" title="%100">100</button>
+        <button class="pot-btn pot-scale" data-scale="1.25" title="%125">125</button>
+        <span class="pot-sep"></span>
+        <button class="pot-btn" id="potScreenshotBtn" title="Ekran Al">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+      </div>
+      <div class="phone">
+        <!-- Cam yansıması (Glass Glare Overlay) -->
+        <div class="phone-screen-glare"></div>
+        <!-- Yan tuşlar -->
+        <div class="phone-btn-power"></div>
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <div class="status-left">
+            <span id="statusTime">12:00</span>
+          </div>
+          <div class="status-center"></div>
+          <div class="status-right">
+            <!-- Signal Bars -->
+            <div class="signal-icon">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <!-- WiFi -->
+            <div class="wifi-icon">
+              <svg viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="7" cy="9.5" r="1.2" fill="currentColor"/>
+                <path d="M4.2 7.2a4 4 0 0 1 5.6 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                <path d="M1.8 4.8a7 7 0 0 1 10.4 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                <path d="M0 2.5A9.8 9.8 0 0 1 14 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <!-- Battery -->
+            <div class="battery">
+              <span id="batteryPercent">95%</span>
+              <div class="battery-icon">
+                <div class="battery-frame"></div>
+                <div class="battery-tip"></div>
+                <div class="battery-fill" style="--battery-level: 0.95;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="header-avatar online" id="headerAvatar">G</div>
+          <div class="header-info">
+            <div class="header-title" id="headerTitle">Grup</div>
+            <div class="header-status" id="headerStatus">Online</div>
+          </div>
+          <div class="header-actions">
+            <!-- Video Call -->
+            <svg class="header-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <!-- Voice Call -->
+            <svg class="header-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C9.39 21 3 14.61 3 6.5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1.02l-2.2 2.2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <!-- Three dots menu -->
+            <svg class="header-icon header-menu-trigger" id="headerMenuBtn" width="24" height="24" viewBox="0 0 24 24" fill="none" style="cursor:pointer; position:relative;">
+              <circle cx="12" cy="6" r="1.5" fill="currentColor"/>
+              <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
+            </svg>
+            <!-- Header Dropdown Menu (mobilde görünür) -->
+            <div class="header-dropdown" id="headerDropdown">
+              <button class="hd-item" data-action="scriptEditor">📜 Senaryo Editörü</button>
+              <button class="hd-item" data-action="people">👥 Kişi Yönetimi</button>
+              <button class="hd-item" data-action="group">📱 Grup Ayarları</button>
+              <button class="hd-item" data-action="settings">⚙️ Ayarlar</button>
+              <div class="hd-divider"></div>
+              <button class="hd-item" data-action="play">▶️ Oynat</button>
+              <button class="hd-item" data-action="pause">⏸️ Duraklat</button>
+              <button class="hd-item" data-action="reset">🔄 Sıfırla</button>
+              <div class="hd-divider"></div>
+              <button class="hd-item" data-action="screenshot">📷 Ekran Al</button>
+              <div class="hd-divider"></div>
+              <button class="hd-item" data-action="save">💾 Kaydet</button>
+              <button class="hd-item" data-action="load">📂 Yükle</button>
+              <button class="hd-item hd-item-danger" data-action="clear">🗑️ Tüm Veriyi Sil</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="chat-body" id="chatBody">
+          <div class="day-divider"><span id="dayDivider">Bugün</span></div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input">
+          <div class="composer-pill">
+            <button class="composer-icon-btn" type="button" aria-label="Emoji">
+              <svg class="composer-icon" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <circle cx="9" cy="10" r="1.1" fill="currentColor"/>
+                <circle cx="15" cy="10" r="1.1" fill="currentColor"/>
+                <path d="M8.5 14c.5 1.1 1.8 2 3.5 2s3-.9 3.5-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <input class="composer-input" id="liveInput" placeholder="Mesaj" autocomplete="off">
+
+            <button class="composer-icon-btn" id="attachBtn" type="button" aria-label="Dosya ekle">
+              <!-- WhatsApp paperclip: rotated classic clip shape -->
+              <svg class="composer-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <button class="composer-icon-btn" id="cameraBtn" type="button" aria-label="Kamera">
+              <!-- WhatsApp camera: body + lens + shutter bump -->
+              <svg class="composer-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.75"/>
+              </svg>
+            </button>
+
+            <input type="file" id="composerFileInput" accept="image/*,image/gif" style="display:none">
+          </div>
+
+          <button class="main-action-btn" id="mainActionBtn" type="button" aria-label="Sesli mesaj">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4a3 3 0 00-3 3v4a3 3 0 006 0V7a3 3 0 00-3-3z"/>
+              <path d="M6 11.5a6 6 0 0012 0"/>
+              <path d="M12 17.5V21"/>
+              <path d="M9.5 21h5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- FAB ve eski mobile-menu kaldırıldı — Faz 9: Header 3 noktaya taşındı -->
+
+    <!-- Mobile Overlay Backdrop -->
+    <div class="mobile-overlay-backdrop" id="mobileOverlayBackdrop"></div>
+
+    <!-- Mobile Panel Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay">
+      <div class="mobile-overlay-header">
+        <button class="mobile-overlay-back" id="mobileOverlayBack" type="button">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span class="mobile-overlay-title" id="mobileOverlayTitle">Senaryo Editörü</span>
+        <div class="mobile-overlay-actions" id="mobileOverlayActions">
+          <button class="mo-action-btn" id="moPlayBtn" type="button" title="Oynat">▶️</button>
+          <button class="mo-action-btn" id="moResetBtn" type="button" title="Sıfırla">🔄</button>
+        </div>
+      </div>
+      <div class="mobile-overlay-body" id="mobileOverlayBody">
+        <!-- Panel içeriği buraya taşınacak -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript (ES Modules) -->
+
+  <!-- html2canvas — PNG export için -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- JavaScript: Sıra önemli! Her modül bir öncekine bağımlı -->
+
+  <!-- Temel yardımcı araçlar -->
+  <script src="js/utils.js"></script>
+  <script src="js/config.js"></script>
+
+  <!-- Durum ve depolama yönetimi -->
+  <script src="js/state.js"></script>
+  <script src="js/storage.js"></script>
+
+  <!-- UI bileşenleri -->
+  <script src="js/ui/toast.js"></script>
+  <script src="js/ui/validation.js"></script>
+  <script src="js/ui/tabs.js"></script>
+  <script src="js/ui/accordion.js"></script>
+  <script src="js/ui/forms.js"></script>
+  <script src="js/ui/mobile.js"></script>
+
+  <!-- Telefon önizleme modülleri -->
+  <script src="js/phone/header.js"></script>
+  <script src="js/phone/statusbar.js"></script>
+  <script src="js/phone/wallpaper.js"></script>
+  <script src="js/phone/typography.js"></script>
+  <script src="js/phone/messages.js"></script>
+
+  <!-- Özellik modülleri -->
+  <script src="js/features/script-parser.js"></script>
+  <script src="js/features/interactive-engine.js"></script>
+  <script src="js/features/people.js"></script>
+  <script src="js/features/player.js"></script>
+  <script src="js/features/script-builder.js"></script>
+
+  <!-- Ana uygulama başlatıcı -->
+  <script src="js/app.js"></script>
+</body>
+</html>
