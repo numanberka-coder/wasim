@@ -250,6 +250,8 @@ const DEFAULT_STATE = {
   bubbleSize: 78,
   bubblePaddingY: 10,
   headerColor: '#1f2c33',
+  bubbleOutColor: null,
+  bubbleInColor: null,
 
   // Message Times
   messageTimesAuto: true,
