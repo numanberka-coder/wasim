@@ -40,6 +40,8 @@ class StateManager {
         bubbleSize: DEFAULT_STATE.bubbleSize,
         bubblePaddingY: DEFAULT_STATE.bubblePaddingY,
         headerColor: DEFAULT_STATE.headerColor,
+        bubbleOutColor: DEFAULT_STATE.bubbleOutColor,
+        bubbleInColor: DEFAULT_STATE.bubbleInColor,
       },
 
       // Message times
@@ -283,6 +285,8 @@ class StateManager {
       bubbleSize: 78,
       bubblePaddingY: 10,
       headerColor: '#1f2c33',
+      bubbleOutColor: null,
+      bubbleInColor: null,
     };
 
     this.data.messageTimes = {

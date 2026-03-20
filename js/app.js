@@ -109,6 +109,13 @@ function populateFormFields() {
   // Header color
   setInputValue('headerColorInput', settings.headerColor || '#1f2c33');
 
+  // Bubble colors
+  const theme = settings.theme || 'dark';
+  const defaultOutColor = theme === 'light' ? '#d9fdd3' : '#005c4b';
+  const defaultInColor = theme === 'light' ? '#ffffff' : '#1f2c33';
+  setInputValue('bubbleOutColorInput', settings.bubbleOutColor || defaultOutColor);
+  setInputValue('bubbleInColorInput', settings.bubbleInColor || defaultInColor);
+
   // Typography
   setInputValue('fontSizeControl', settings.chatFontSize);
   setTextContent('fontSizeValue', `${settings.chatFontSize}px`);
@@ -132,6 +139,25 @@ function populateFormFields() {
 }
 
 /**
+ * Bubble color picker varsayılanlarını temaya göre güncelle
+ * Özel renk seçilmişse korunur, seçilmemişse tema varsayılanı gösterilir
+ */
+function updateBubbleColorInputDefaults(theme) {
+  const defaultOut = theme === 'light' ? '#d9fdd3' : '#005c4b';
+  const defaultIn = theme === 'light' ? '#ffffff' : '#1f2c33';
+  const settings = state.get('settings');
+  // Özel renk yoksa input'ları güncelle
+  if (!settings.bubbleOutColor) {
+    setInputValue('bubbleOutColorInput', defaultOut);
+  }
+  if (!settings.bubbleInColor) {
+    setInputValue('bubbleInColorInput', defaultIn);
+  }
+  // Özel renk varsa tema değişse bile korumaya devam — applyBubbleColors zaten çalışıyor
+  applyBubbleColors(settings.bubbleOutColor, settings.bubbleInColor);
+}
+
+/**
  * Toggle theme between dark and light
  */
 function toggleTheme() {
@@ -143,6 +169,8 @@ function toggleTheme() {
   const defaultColor = next === 'light' ? '#008069' : '#1f2c33';
   setHeaderColor(defaultColor);
   setInputValue('headerColorInput', defaultColor);
+  // Bubble renk picker varsayılanlarını güncelle (özel renk yoksa)
+  updateBubbleColorInputDefaults(next);
 }
 
 /**
@@ -277,6 +305,7 @@ function bindEventHandlers() {
     const defaultDark = '#1f2c33';
     setHeaderColor(defaultDark);
     setInputValue('headerColorInput', defaultDark);
+    updateBubbleColorInputDefaults('dark');
     showSuccess('Dark mod aktif!');
   });
 
@@ -287,6 +316,7 @@ function bindEventHandlers() {
     const defaultLight = '#008069';
     setHeaderColor(defaultLight);
     setInputValue('headerColorInput', defaultLight);
+    updateBubbleColorInputDefaults('light');
     showSuccess('Light mod aktif!');
   });
 
@@ -309,6 +339,33 @@ function bindEventHandlers() {
     setHeaderColor(defaultColor);
     setInputValue('headerColorInput', defaultColor);
     showSuccess('Header rengi sıfırlandı!');
+  });
+
+  // === BUBBLE COLORS ===
+  bindInput('bubbleOutColorInput', (e) => {
+    setBubbleOutColor(e.target.value);
+  });
+
+  bindChange('bubbleOutColorInput', (e) => {
+    setBubbleOutColor(e.target.value);
+  });
+
+  bindInput('bubbleInColorInput', (e) => {
+    setBubbleInColor(e.target.value);
+  });
+
+  bindChange('bubbleInColorInput', (e) => {
+    setBubbleInColor(e.target.value);
+  });
+
+  bindClick('resetBubbleColorsBtn', () => {
+    resetBubbleColors();
+    const theme = state.get('settings.theme') || 'dark';
+    const defaultOut = theme === 'light' ? '#d9fdd3' : '#005c4b';
+    const defaultIn = theme === 'light' ? '#ffffff' : '#1f2c33';
+    setInputValue('bubbleOutColorInput', defaultOut);
+    setInputValue('bubbleInColorInput', defaultIn);
+    showSuccess('Balon renkleri sıfırlandı!');
   });
 
   // === TYPOGRAPHY ===

@@ -32,6 +32,9 @@ function syncHeader() {
   // Apply header color
   applyHeaderColor(settings.headerColor || '#1f2c33');
 
+  // Apply bubble colors
+  applyBubbleColors(settings.bubbleOutColor, settings.bubbleInColor);
+
   // Update avatar
   renderHeaderAvatar();
 }
@@ -131,6 +134,60 @@ function applyHeaderColor(color) {
 function setHeaderColor(color) {
   state.set('settings.headerColor', color);
   applyHeaderColor(color);
+}
+
+/**
+ * Apply bubble colors via CSS variable overrides
+ * null = tema varsayılanını kullan (removeProperty)
+ */
+function applyBubbleColors(outColor, inColor) {
+  const phone = document.querySelector('.phone');
+  if (!phone) return;
+
+  if (outColor) {
+    phone.style.setProperty('--wa-bubble-out-bg', outColor);
+    phone.style.setProperty('--wa-bubble-out-solid', outColor);
+    phone.style.setProperty('--wa-bubble-out', outColor);
+  } else {
+    phone.style.removeProperty('--wa-bubble-out-bg');
+    phone.style.removeProperty('--wa-bubble-out-solid');
+    phone.style.removeProperty('--wa-bubble-out');
+  }
+
+  if (inColor) {
+    phone.style.setProperty('--wa-bubble-in-bg', inColor);
+    phone.style.setProperty('--wa-bubble-in-solid', inColor);
+    phone.style.setProperty('--wa-bubble-in', inColor);
+  } else {
+    phone.style.removeProperty('--wa-bubble-in-bg');
+    phone.style.removeProperty('--wa-bubble-in-solid');
+    phone.style.removeProperty('--wa-bubble-in');
+  }
+}
+
+/**
+ * Set bubble out color — updates state + applies
+ */
+function setBubbleOutColor(color) {
+  state.set('settings.bubbleOutColor', color);
+  applyBubbleColors(color, state.get('settings.bubbleInColor'));
+}
+
+/**
+ * Set bubble in color — updates state + applies
+ */
+function setBubbleInColor(color) {
+  state.set('settings.bubbleInColor', color);
+  applyBubbleColors(state.get('settings.bubbleOutColor'), color);
+}
+
+/**
+ * Reset bubble colors to theme defaults
+ */
+function resetBubbleColors() {
+  state.set('settings.bubbleOutColor', null);
+  state.set('settings.bubbleInColor', null);
+  applyBubbleColors(null, null);
 }
 
 /**
