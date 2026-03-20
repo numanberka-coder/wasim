@@ -57,4 +57,58 @@
   --z-index-header: 100;
   --z-toast: 1000;
   --panel-width: 410px;         /* Sol listenin standart genişliği */
+
+  /* ===== TEMA DESTEĞİ (THEME) ===== */
+  /* Bubble gradient/solid renkleri — dark varsayılan */
+  --wa-bubble-in-bg: linear-gradient(180deg, #1f2c33 0%, #18232a 100%);
+  --wa-bubble-in-solid: #1f2c33;    /* Kuyruk ve border trick için */
+  --wa-bubble-out-bg: #005c4b;
+  --wa-bubble-out-solid: #005c4b;
+  --wa-bubble-in-border: rgba(255, 255, 255, 0.03);
+  --wa-bubble-out-border: rgba(255, 255, 255, 0.06);
+  --wa-bubble-shadow: rgba(11, 20, 26, 0.13);
+
+  /* Overlay/meta renkleri */
+  --wa-overlay-bg: rgba(32, 44, 51, 0.82);     /* Day divider, system msg */
+  --wa-overlay-text: rgba(233, 237, 239, 0.82); /* Day divider text */
+  --wa-system-bg: rgba(32, 44, 51, 0.92);
+  --wa-system-text: rgba(233, 237, 239, 0.9);
+  --wa-meta-color: rgba(233, 237, 239, 0.6);    /* Saat, tik */
+  --wa-reply-snippet: rgba(233, 237, 239, 0.72);
+  --wa-reply-bg: rgba(0, 0, 0, 0.20);
+
+  /* Reaction */
+  --wa-reaction-bg: #1e2d35;
+  --wa-reaction-out-bg: #0a3d30;
+  --wa-reaction-border: rgba(255, 255, 255, 0.08);
+  --wa-reaction-count: rgba(233, 237, 239, 0.85);
+
+  /* Typing bubble */
+  --wa-typing-bg: linear-gradient(180deg, #1f2c33 0%, #18232a 100%);
+  --wa-typing-border: rgba(255, 255, 255, 0.03);
+
+  /* Composer */
+  --wa-composer-bg: rgba(42, 47, 50, 0.92);
+  --wa-composer-border: rgba(255, 255, 255, 0.03);
+  --wa-composer-icon: rgba(255, 255, 255, 0.55);
+  --wa-composer-placeholder: rgba(255, 255, 255, 0.35);
+
+  /* Location info */
+  --wa-location-info-bg: rgba(31, 44, 51, 0.95);
+  --wa-link-body-bg: rgba(0, 0, 0, 0.18);
+
+  /* Home indicator */
+  --wa-home-indicator: rgba(255, 255, 255, 0.28);
+
+  /* Header border */
+  --wa-header-border: rgba(255, 255, 255, 0.05);
+
+  /* Mesaj avatar */
+  --wa-msg-avatar-bg: #3b4a54;
+  --wa-msg-avatar-shadow: rgba(255, 255, 255, 0.12);
+
+  /* Voice */
+  --wa-voice-wave: rgba(134, 150, 160, 0.55);
+  --wa-voice-dur: rgba(134, 150, 160, 0.85);
+  --wa-voice-mic: rgba(134, 150, 160, 0.6);
 }

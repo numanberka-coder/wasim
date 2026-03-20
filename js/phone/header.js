@@ -132,3 +132,51 @@ function setHeaderColor(color) {
   state.set('settings.headerColor', color);
   applyHeaderColor(color);
 }
+
+/**
+ * Apply theme (dark/light) — adds/removes .light class on .phone
+ */
+function applyTheme(theme) {
+  const phone = document.querySelector('.phone');
+  if (!phone) return;
+
+  if (theme === 'light') {
+    phone.classList.add('light');
+    // Light modda header rengi yeşil olmalı (kullanıcı özelleştirmemişse)
+    const currentHeaderColor = state.get('settings.headerColor');
+    if (currentHeaderColor === '#1f2c33') {
+      phone.style.setProperty('--wa-header-color', '#008069');
+    }
+    // Light wallpaper uygula (kullanıcı custom seçmemişse)
+    const currentPreset = state.get('settings.wallpaperPreset');
+    if (currentPreset === 'default' || currentPreset === 'velvet' || currentPreset === 'graph' || currentPreset === 'plain') {
+      state.set('settings.wallpaperPreset', 'light-default', true);
+      applyWallpaper();
+      const presetEl = document.getElementById('wallpaperPreset');
+      if (presetEl) presetEl.value = 'light-default';
+    }
+  } else {
+    phone.classList.remove('light');
+    // Dark moda geri dön
+    const currentHeaderColor = state.get('settings.headerColor');
+    if (currentHeaderColor === '#1f2c33' || currentHeaderColor === '#008069') {
+      phone.style.setProperty('--wa-header-color', '#1f2c33');
+    }
+    // Dark wallpaper uygula
+    const currentPreset = state.get('settings.wallpaperPreset');
+    if (currentPreset === 'light-default' || currentPreset === 'light-plain') {
+      state.set('settings.wallpaperPreset', 'default', true);
+      applyWallpaper();
+      const presetEl = document.getElementById('wallpaperPreset');
+      if (presetEl) presetEl.value = 'default';
+    }
+  }
+}
+
+/**
+ * Set theme — updates state + applies
+ */
+function setTheme(theme) {
+  state.set('settings.theme', theme);
+  applyTheme(theme);
+}

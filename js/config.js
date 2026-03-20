@@ -204,10 +204,32 @@ const WALLPAPER_PRESETS = {
     background: 'linear-gradient(180deg, #0c161c 0%, #0b141a 100%)',
     size: 'auto',
     blend: 'normal'
+  },
+
+  // Light Default: WhatsApp light mod — bej tonlu doodle pattern
+  'light-default': {
+    background: `
+      radial-gradient(ellipse 70% 40% at 15% 8%, rgba(0,128,105,.04), transparent),
+      radial-gradient(ellipse 50% 30% at 85% 5%, rgba(239,234,226,.35), transparent),
+      radial-gradient(ellipse 80% 60% at 50% 95%, rgba(0,0,0,.04), transparent),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23c8b89a%3Bfill-opacity:.12%7D%3C/style%3E%3C/defs%3E%3Cg%3E%3Ccircle class='a' cx='20' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='20' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='60' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='100' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='140' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='180' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='220' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='260' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='300' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='340' r='1.4'/%3E%3Ccircle class='a' cx='20' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='60' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='100' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='140' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='180' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='220' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='260' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='300' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='340' cy='380' r='1.4'/%3E%3Ccircle class='a' cx='380' cy='380' r='1.4'/%3E%3C/g%3E%3C/svg%3E"),
+      linear-gradient(180deg, #ece5dd 0%, #efeae2 45%, #e4ddd4 100%)`,
+    size: 'auto, auto, auto, 400px 400px, auto',
+    blend: 'normal, normal, normal, overlay, normal'
+  },
+
+  // Light Plain: Sade, açık bej
+  'light-plain': {
+    background: 'linear-gradient(180deg, #ece5dd 0%, #efeae2 100%)',
+    size: 'auto',
+    blend: 'normal'
   }
 };
 
 const DEFAULT_STATE = {
+  // Theme
+  theme: 'dark',
+
   // Group
   groupTitle: 'Felsefe Grubu',
   groupSubtitle: 'Online',

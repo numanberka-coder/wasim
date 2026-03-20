@@ -85,8 +85,11 @@ function setWallpaperImage(dataUrl) {
  * Clear wallpaper to default
  */
 function clearWallpaper() {
-  state.set('settings.wallpaperPreset', 'default');
-  state.set('settings.wallpaperColor', '#0b141a');
+  const theme = state.get('settings.theme') || 'dark';
+  const defaultPreset = theme === 'light' ? 'light-default' : 'default';
+  const defaultColor = theme === 'light' ? '#efeae2' : '#0b141a';
+  state.set('settings.wallpaperPreset', defaultPreset);
+  state.set('settings.wallpaperColor', defaultColor);
   state.set('settings.wallpaperImageDataUrl', null);
   applyWallpaper();
 }

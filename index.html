@@ -36,6 +36,7 @@
           <button id="screenshotBtn" class="action-btn action-btn-icon" title="Ekran Al">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </button>
+          <button id="actionThemeToggleBtn" class="action-btn action-btn-icon" title="Tema Değiştir">🌗</button>
           <div class="scale-controls" id="scaleControls" style="display:none;">
             <button class="action-btn scale-btn" data-scale="0.75" title="%75">75%</button>
             <button class="action-btn scale-btn active" data-scale="1" title="%100">100%</button>
@@ -163,6 +164,8 @@
                 <option value="velvet">Kadife</option>
                 <option value="graph">Izgara</option>
                 <option value="plain">Düz</option>
+                <option value="light-default">Light Varsayılan</option>
+                <option value="light-plain">Light Düz</option>
                 <option value="custom-color">Özel Renk</option>
                 <option value="custom-image">Özel Görsel</option>
               </select>
@@ -180,6 +183,20 @@
               </div>
             </div>
             <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+          </div>
+        </details>
+
+        <!-- Theme Toggle -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🌗 Tema
+          </summary>
+          <div class="accordion-body">
+            <div class="form-row" style="gap: 8px;">
+              <button id="themeDarkBtn" type="button" style="flex:1;">🌙 Dark</button>
+              <button id="themeLightBtn" type="button" class="secondary" style="flex:1;">☀️ Light</button>
+            </div>
           </div>
         </details>
 
@@ -706,6 +723,8 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         <button class="pot-btn pot-scale" data-scale="0.75" title="%75">75</button>
         <button class="pot-btn pot-scale active" data-scale="1" title="%100">100</button>
         <button class="pot-btn pot-scale" data-scale="1.25" title="%125">125</button>
+        <span class="pot-sep"></span>
+        <button class="pot-btn" id="potThemeToggleBtn" title="Tema Değiştir">🌗</button>
         <span class="pot-sep"></span>
         <button class="pot-btn" id="potScreenshotBtn" title="Ekran Al">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>

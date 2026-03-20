@@ -59,6 +59,11 @@ function init() {
   // Init script helpers after forms are ready
   initScriptTools();
 
+  // Apply saved theme
+  const savedTheme = state.get('settings.theme') || 'dark';
+  applyTheme(savedTheme);
+  updateThemeButtons(savedTheme);
+
   // Bind event handlers
   bindEventHandlers();
 
@@ -98,6 +103,9 @@ function populateFormFields() {
   setInputValue('wallpaperPreset', settings.wallpaperPreset);
   setInputValue('wallpaperColor', settings.wallpaperColor);
 
+  // Theme
+  updateThemeButtons(settings.theme || 'dark');
+
   // Header color
   setInputValue('headerColorInput', settings.headerColor || '#1f2c33');
 
@@ -121,6 +129,52 @@ function populateFormFields() {
   setInputValue('scriptBox', player.script);
   setInputValue('speed', player.speed);
   setInputValue('jitter', player.jitter);
+}
+
+/**
+ * Toggle theme between dark and light
+ */
+function toggleTheme() {
+  const current = state.get('settings.theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  setTheme(next);
+  updateThemeButtons(next);
+  // Header rengi temaya uygun varsayılana dönsün
+  const defaultColor = next === 'light' ? '#008069' : '#1f2c33';
+  setHeaderColor(defaultColor);
+  setInputValue('headerColorInput', defaultColor);
+}
+
+/**
+ * Update theme toggle button states
+ */
+function updateThemeButtons(theme) {
+  const darkBtn = $('themeDarkBtn');
+  const lightBtn = $('themeLightBtn');
+  if (!darkBtn || !lightBtn) return;
+
+  if (theme === 'light') {
+    darkBtn.classList.add('secondary');
+    darkBtn.classList.remove('');
+    lightBtn.classList.remove('secondary');
+    // Primary style for active button
+    lightBtn.style.background = 'var(--wa-green)';
+    lightBtn.style.color = '#111b21';
+    lightBtn.style.borderColor = 'transparent';
+    darkBtn.style.background = '';
+    darkBtn.style.color = '';
+    darkBtn.style.borderColor = '';
+  } else {
+    lightBtn.classList.add('secondary');
+    darkBtn.classList.remove('secondary');
+    // Primary style for active button
+    darkBtn.style.background = 'var(--wa-green)';
+    darkBtn.style.color = '#111b21';
+    darkBtn.style.borderColor = 'transparent';
+    lightBtn.style.background = '';
+    lightBtn.style.color = '';
+    lightBtn.style.borderColor = '';
+  }
 }
 
 /**
@@ -205,12 +259,40 @@ function bindEventHandlers() {
 
   bindClick('clearWallpaperBtn', () => {
     clearWallpaper();
-    setInputValue('wallpaperPreset', 'default');
-    setInputValue('wallpaperColor', '#0b141a');
+    const theme = state.get('settings.theme') || 'dark';
+    const defaultPreset = theme === 'light' ? 'light-default' : 'default';
+    const defaultColor = theme === 'light' ? '#efeae2' : '#0b141a';
+    setInputValue('wallpaperPreset', defaultPreset);
+    setInputValue('wallpaperColor', defaultColor);
     const fileInput = $('wallpaperImageFile');
     if (fileInput) fileInput.value = '';
     showSuccess('Duvar kağıdı sıfırlandı!');
   });
+
+  // === THEME TOGGLE ===
+  bindClick('themeDarkBtn', () => {
+    setTheme('dark');
+    updateThemeButtons('dark');
+    // Header rengi dark varsayılana dönsün
+    const defaultDark = '#1f2c33';
+    setHeaderColor(defaultDark);
+    setInputValue('headerColorInput', defaultDark);
+    showSuccess('Dark mod aktif!');
+  });
+
+  bindClick('themeLightBtn', () => {
+    setTheme('light');
+    updateThemeButtons('light');
+    // Header rengi light varsayılana dönsün
+    const defaultLight = '#008069';
+    setHeaderColor(defaultLight);
+    setInputValue('headerColorInput', defaultLight);
+    showSuccess('Light mod aktif!');
+  });
+
+  // Action bar & phone-only toolbar quick theme toggle
+  bindClick('actionThemeToggleBtn', toggleTheme);
+  bindClick('potThemeToggleBtn', toggleTheme);
 
   // === HEADER COLOR ===
   bindInput('headerColorInput', (e) => {
@@ -222,7 +304,8 @@ function bindEventHandlers() {
   });
 
   bindClick('resetHeaderColorBtn', () => {
-    const defaultColor = '#1f2c33';
+    const theme = state.get('settings.theme') || 'dark';
+    const defaultColor = theme === 'light' ? '#008069' : '#1f2c33';
     setHeaderColor(defaultColor);
     setInputValue('headerColorInput', defaultColor);
     showSuccess('Header rengi sıfırlandı!');
@@ -358,6 +441,8 @@ function bindEventHandlers() {
       if (!file) return;
       try {
         await storage.importFromFile(file);
+        const importedTheme = state.get('settings.theme') || 'dark';
+        applyTheme(importedTheme);
         populateFormFields();
         renderPeopleList();
         syncHeader();
@@ -377,6 +462,7 @@ function bindEventHandlers() {
     storage.clear();
     state.reset();
     state.set('player.script', DEFAULT_SCRIPT);
+    applyTheme('dark');
     populateFormFields();
     renderPeopleList();
     syncHeader();

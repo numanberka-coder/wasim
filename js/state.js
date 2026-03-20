@@ -27,6 +27,7 @@ class StateManager {
 
       // Phone settings
       settings: {
+        theme: DEFAULT_STATE.theme,
         statusTimeOverride: DEFAULT_STATE.statusTimeOverride,
         wallpaperPreset: DEFAULT_STATE.wallpaperPreset,
         wallpaperColor: DEFAULT_STATE.wallpaperColor,
@@ -269,6 +270,7 @@ class StateManager {
     };
 
     this.data.settings = {
+      theme: 'dark',
       statusTimeOverride: '',
       wallpaperPreset: 'default',
       wallpaperColor: '#0b141a',
