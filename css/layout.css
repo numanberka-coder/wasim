@@ -1,0 +1,253 @@
+/* ========================================
+   LAYOUT - Main Structure
+   ======================================== */
+
+/* Main Container */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== LEFT PANEL ===== */
+.panel-left {
+  width: var(--panel-width);
+  max-width: 50vw;
+  background: linear-gradient(180deg, #0f1923 0%, #0d1720 100%);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+}
+
+/* Action Bar */
+.action-bar {
+  padding: 10px var(--space-lg);
+  border-bottom: 1px solid var(--wa-divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  background: linear-gradient(180deg, #1a252c 0%, #161f26 100%);
+  flex-shrink: 0;
+}
+
+.action-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wa-text);
+  letter-spacing: -0.2px;
+  opacity: 0.85;
+}
+
+.action-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.1px;
+}
+
+.action-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--wa-text);
+  border-color: rgba(255,255,255,0.14);
+  transform: none;
+  filter: none;
+}
+
+.action-btn svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.action-btn-icon {
+  padding: 7px;
+  gap: 0;
+}
+
+.action-bar-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.action-btn-danger {
+  color: #f87171;
+  border-color: rgba(248,113,113,0.2);
+  background: rgba(248,113,113,0.06);
+}
+
+.action-btn-danger:hover {
+  background: rgba(248,113,113,0.14);
+  color: #fca5a5;
+  border-color: rgba(248,113,113,0.3);
+}
+
+/* ===== SCALE CONTROLS ===== */
+.scale-controls {
+  display: inline-flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.scale-btn {
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  border: none !important;
+  background: transparent !important;
+  min-width: auto;
+  border-radius: 4px !important;
+}
+
+.scale-btn.active {
+  background: rgba(37,211,102,0.2) !important;
+  color: var(--wa-green) !important;
+}
+
+/* ===== PHONE-ONLY MODE ===== */
+.phone-only-toolbar {
+  display: none;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(15,25,35,0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.pot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--wa-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pot-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--wa-text);
+}
+
+.pot-btn.active,
+.pot-scale.active {
+  background: rgba(37,211,102,0.18);
+  color: var(--wa-green);
+}
+
+.pot-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.app-container.phone-only-mode .phone-only-toolbar {
+  display: flex;
+}
+
+.app-container.phone-only-mode .panel-left {
+  display: none !important;
+}
+
+.app-container.phone-only-mode .stage {
+  flex: 1;
+  width: 100%;
+}
+
+.app-container.phone-only-mode #phoneOnlyBtn {
+  background: rgba(37,211,102,0.15);
+  border-color: var(--wa-green);
+  color: var(--wa-green);
+}
+
+/* ===== RIGHT STAGE ===== */
+.stage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: 
+    /* WhatsApp yeşil ambient ışık — sol üst */
+    radial-gradient(ellipse 45% 30% at 8% 8%, rgba(37,211,102,.05) 0%, transparent 100%),
+    /* Sağ alt soft ışık */
+    radial-gradient(ellipse 40% 28% at 92% 92%, rgba(37,211,102,.025) 0%, transparent 100%),
+    /* Telefon altındaki parlama */
+    radial-gradient(ellipse 60% 20% at 50% 98%, rgba(37,211,102,.035) 0%, transparent 100%),
+    /* Merkez derinlik */
+    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(15,22,28,.8) 0%, transparent 100%),
+    linear-gradient(160deg, #07100f 0%, #0b141a 35%, #080e13 70%, #060d11 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* Telefon altında zemin yansıması */
+.stage::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 440px;
+  height: 120px;
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(37,211,102,.06), transparent);
+  pointer-events: none;
+  filter: blur(18px);
+}

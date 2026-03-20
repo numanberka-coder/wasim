@@ -1,0 +1,114 @@
+/* ========================================
+   CSS VARIABLES - WhatsApp Simulator
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ===== ANA RENKLER (COLORS) ===== */
+  --wa-bg: #0b141a;             /* Ana arka plan (Sohbet alanı) */
+  --wa-header: #202c33;         /* Üst bar ve aktif olmayan sekmeler */
+  --wa-panel: #111b21;          /* Sol liste paneli */
+  --wa-input-bg: #2a3942;       /* Mesaj yazma alanı arka planı */
+  
+  /* ===== MESAJ BALONLARI (BUBBLES) ===== */
+  --wa-bubble-out: #005c4b;     /* Giden mesaj (Sizin) */
+  --wa-bubble-in: #202c33;      /* Gelen mesaj (Karşı taraf) */
+  --wa-bubble-meta: #8696a0;    /* Balon içindeki saat ve ikon rengi */
+  
+  /* ===== VURGU VE DURUM RENKLERİ ===== */
+  --wa-green: #25d366;          /* Marka yeşili (Parlak) */
+  --wa-green-dim: #00a884;      /* Butonlar ve onaylar için daha soft yeşil */
+  --wa-check-blue: #53bdeb;     /* Okundu bilgisi (Çift mavi tık) */
+  --wa-danger: #ea0038;         /* Silme / Engelleme gibi uyarı renkleri */
+  
+  /* ===== TİPOGRAFİ (TEXT) ===== */
+  --wa-text: #e9edef;           /* Ana metin rengi (Kırık beyaz) */
+  --wa-text-secondary: #8696a0; /* İkincil metin (Son görülme, önizleme) */
+  --wa-icon: #aebac1;           /* İkonların genel rengi */
+  --wa-divider: #222d34;        /* Liste arası ince çizgiler */
+
+  /* ===== BOŞLUKLAR (SPACING) ===== */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  
+  /* ===== KENAR OVALIĞI (RADIUS) ===== */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;            /* Mesaj balonları için ideal */
+  --radius-full: 50%;           /* Profil fotoğrafları */
+
+  /* ===== DİĞER (MISC) ===== */
+  --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-size-xs: 10px;
+  --font-size-sm: 11px;
+  --font-size-base: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
+  --shadow-main: 0 1px 0.5px rgba(11, 20, 26, .13);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.2);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.4);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --wa-danger-hover: #c5002f;
+  --z-index-header: 100;
+  --z-toast: 1000;
+  --panel-width: 410px;         /* Sol listenin standart genişliği */
+
+  /* ===== TEMA DESTEĞİ (THEME) ===== */
+  /* Bubble gradient/solid renkleri — dark varsayılan */
+  --wa-bubble-in-bg: linear-gradient(180deg, #1f2c33 0%, #18232a 100%);
+  --wa-bubble-in-solid: #1f2c33;    /* Kuyruk ve border trick için */
+  --wa-bubble-out-bg: #005c4b;
+  --wa-bubble-out-solid: #005c4b;
+  --wa-bubble-in-border: rgba(255, 255, 255, 0.03);
+  --wa-bubble-out-border: rgba(255, 255, 255, 0.06);
+  --wa-bubble-shadow: rgba(11, 20, 26, 0.13);
+
+  /* Overlay/meta renkleri */
+  --wa-overlay-bg: rgba(32, 44, 51, 0.82);     /* Day divider, system msg */
+  --wa-overlay-text: rgba(233, 237, 239, 0.82); /* Day divider text */
+  --wa-system-bg: rgba(32, 44, 51, 0.92);
+  --wa-system-text: rgba(233, 237, 239, 0.9);
+  --wa-meta-color: rgba(233, 237, 239, 0.6);    /* Saat, tik */
+  --wa-reply-snippet: rgba(233, 237, 239, 0.72);
+  --wa-reply-bg: rgba(0, 0, 0, 0.20);
+
+  /* Reaction */
+  --wa-reaction-bg: #1e2d35;
+  --wa-reaction-out-bg: #0a3d30;
+  --wa-reaction-border: rgba(255, 255, 255, 0.08);
+  --wa-reaction-count: rgba(233, 237, 239, 0.85);
+
+  /* Typing bubble */
+  --wa-typing-bg: linear-gradient(180deg, #1f2c33 0%, #18232a 100%);
+  --wa-typing-border: rgba(255, 255, 255, 0.03);
+
+  /* Composer */
+  --wa-composer-bg: rgba(42, 47, 50, 0.92);
+  --wa-composer-border: rgba(255, 255, 255, 0.03);
+  --wa-composer-icon: rgba(255, 255, 255, 0.55);
+  --wa-composer-placeholder: rgba(255, 255, 255, 0.35);
+
+  /* Location info */
+  --wa-location-info-bg: rgba(31, 44, 51, 0.95);
+  --wa-link-body-bg: rgba(0, 0, 0, 0.18);
+
+  /* Home indicator */
+  --wa-home-indicator: rgba(255, 255, 255, 0.28);
+
+  /* Header border */
+  --wa-header-border: rgba(255, 255, 255, 0.05);
+
+  /* Mesaj avatar */
+  --wa-msg-avatar-bg: #3b4a54;
+  --wa-msg-avatar-shadow: rgba(255, 255, 255, 0.12);
+
+  /* Voice */
+  --wa-voice-wave: rgba(134, 150, 160, 0.55);
+  --wa-voice-dur: rgba(134, 150, 160, 0.85);
+  --wa-voice-mic: rgba(134, 150, 160, 0.6);
+}

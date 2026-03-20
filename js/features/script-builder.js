@@ -1,0 +1,765 @@
+/* ========================================
+   SCRIPT TOOLS - Builder (16 tip), templates,
+   validation, inner tabs, interactive demo
+   ======================================== */
+
+let blocks = [];
+
+/** Aktif builder tip */
+let activeBuilderType = 'message';
+
+/** 16 tip tanımı */
+const BUILDER_TYPES = [
+  { id: 'message',  label: '💬 Mesaj' },
+  { id: 'reply',    label: '↩️ Yanıt' },
+  { id: 'photo',    label: '📷 Fotoğraf' },
+  { id: 'gif',      label: '🎞️ GIF' },
+  { id: 'video',    label: '🎬 Video' },
+  { id: 'voice',    label: '🎤 Ses' },
+  { id: 'location', label: '📍 Konum' },
+  { id: 'document', label: '📄 Döküman' },
+  { id: 'sticker',  label: '🏷️ Sticker' },
+  { id: 'link',     label: '🔗 Link' },
+  { id: 'viewonce', label: '👁️ Bir Kez' },
+  { id: 'typing',   label: '⏳ Yazıyor' },
+  { id: 'reaction', label: '😂 Tepki' },
+  { id: 'system',   label: '⚙️ Sistem' },
+  { id: 'add',      label: '➕ Katılma' },
+  { id: 'leave',    label: '🚪 Ayrılma' },
+];
+
+/** Her tip için görünen alan listesi */
+const BUILDER_FIELDS = {
+  message:  ['who', 'text'],
+  reply:    ['who', 'replyTo', 'text'],
+  photo:    ['who', 'url', 'caption'],
+  gif:      ['who', 'url', 'caption'],
+  video:    ['who', 'url', 'caption'],
+  voice:    ['who', 'duration', 'caption'],
+  location: ['who', 'placeName', 'placeInfo'],
+  document: ['who', 'fileName', 'fileSize'],
+  sticker:  ['who', 'stickerVal'],
+  link:     ['who', 'linkTitle', 'linkUrl'],
+  viewonce: ['who', 'voMediaType'],
+  typing:   ['who', 'typingMs'],
+  reaction: ['who', 'emoji', 'reactTarget'],
+  system:   ['systemText'],
+  add:      ['personName'],
+  leave:    ['personName'],
+};
+
+/** Tüm dinamik alan ID'leri */
+const ALL_BUILDER_FIELDS = [
+  'who', 'text', 'replyTo', 'url', 'caption', 'duration',
+  'placeName', 'placeInfo', 'fileName', 'fileSize',
+  'stickerVal', 'linkTitle', 'linkUrl', 'voMediaType',
+  'typingMs', 'emoji', 'reactTarget', 'systemText', 'personName'
+];
+
+function makeId() {
+  const hasCrypto = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function';
+  return hasCrypto ? crypto.randomUUID() : String(Date.now()) + Math.random();
+}
+
+/* ========================================
+   INIT
+   ======================================== */
+
+function initScriptTools() {
+  populateTemplateOptions();
+  setupTemplateActions();
+  setupBuilder();
+  setupValidation();
+  setupMediaInsertTool();
+  setupScriptInnerTabs();
+  setupInteractiveDemo();
+}
+
+/* ========================================
+   INNER TAB SYSTEM
+   ======================================== */
+
+function setupScriptInnerTabs() {
+  const tabs = document.querySelectorAll('.script-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.stab;
+      if (!target) return;
+
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      document.querySelectorAll('.script-tab-panel').forEach(p => p.classList.remove('active'));
+      const panel = $(target);
+      if (panel) panel.classList.add('active');
+    });
+  });
+}
+
+/* ========================================
+   INTERACTIVE DEMO
+   ======================================== */
+
+function setupInteractiveDemo() {
+  const btn = $('loadInteractiveDemoBtn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const tpl = (typeof SCRIPT_TEMPLATES !== 'undefined')
+      ? SCRIPT_TEMPLATES.find(t => t.id === 'interactive-demo')
+      : null;
+    if (tpl) {
+      const box = $('interactiveScriptBox');
+      if (box) box.value = tpl.script.trim();
+      showSuccess('İnteraktif demo şablonu yüklendi!');
+    } else {
+      showError('İnteraktif demo şablonu bulunamadı');
+    }
+  });
+}
+
+/* ========================================
+   TEMPLATES
+   ======================================== */
+
+function populateTemplateOptions() {
+  const select = $('scriptTemplateSelect');
+  if (!select) return;
+  select.innerHTML = '';
+  SCRIPT_TEMPLATES.forEach(tpl => {
+    const option = document.createElement('option');
+    option.value = tpl.id;
+    option.textContent = `${tpl.title} — ${tpl.description}`;
+    select.appendChild(option);
+  });
+}
+
+function setupTemplateActions() {
+  const select = $('scriptTemplateSelect');
+  const btn = $('applyTemplateBtn');
+  if (!select || !btn) return;
+  btn.addEventListener('click', () => {
+    const tpl = SCRIPT_TEMPLATES.find(t => t.id === select.value) || SCRIPT_TEMPLATES[0];
+    if (!tpl) return;
+    setBuilderScriptBox(tpl.script.trim());
+    syncBlocksFromScript(tpl.script);
+    showSuccess('Şablon yüklendi!');
+  });
+}
+
+/* ========================================
+   BUILDER — TYPE CHIPS
+   ======================================== */
+
+function renderBuilderTypeChips() {
+  const container = $('builderTypeChips');
+  if (!container) return;
+  container.innerHTML = '';
+  BUILDER_TYPES.forEach(t => {
+    const chip = document.createElement('button');
+    chip.className = 'builder-type-chip' + (t.id === activeBuilderType ? ' active' : '');
+    chip.textContent = t.label;
+    chip.type = 'button';
+    chip.addEventListener('click', () => {
+      activeBuilderType = t.id;
+      renderBuilderTypeChips();
+      updateBuilderFields();
+    });
+    container.appendChild(chip);
+  });
+}
+
+/* ========================================
+   BUILDER — DYNAMIC FIELDS
+   ======================================== */
+
+function updateBuilderFields() {
+  const visible = new Set(BUILDER_FIELDS[activeBuilderType] || []);
+  ALL_BUILDER_FIELDS.forEach(fid => {
+    const group = $(`bfGroup_${fid}`);
+    if (group) group.style.display = visible.has(fid) ? '' : 'none';
+  });
+  updateBuilderSenderOptions();
+}
+
+function updateBuilderSenderOptions() {
+  const sel = $('builderWho');
+  if (!sel) return;
+  const people = state.get('people') || {};
+  const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
+  const list = ['Me', ...names.filter(n => n !== 'Me')];
+  const current = sel.value || 'Me';
+  sel.innerHTML = '';
+  list.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n;
+    opt.textContent = n;
+    sel.appendChild(opt);
+  });
+  sel.value = list.includes(current) ? current : 'Me';
+}
+
+/* ========================================
+   BUILDER — LINE GENERATION (16 tip)
+   ======================================== */
+
+function buildLineFromForm() {
+  const q = (s) => {
+    const v = String(s ?? '').trim();
+    if (!v) return '';
+    if (/[\s"]/.test(v)) return '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    return v;
+  };
+  const qForce = (s) => '"' + String(s ?? '').trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+  const sender = q($('builderWho')?.value || 'Me');
+
+  switch (activeBuilderType) {
+    case 'message': {
+      const text = $('builderText')?.value?.trim();
+      if (!text) { showError('Mesaj boş olamaz'); return null; }
+      const who = $('builderWho')?.value?.trim() || 'Me';
+      return `${who}: ${text}`;
+    }
+    case 'reply': {
+      const text = $('builderText')?.value?.trim();
+      const replyTo = $('builderReplyTo')?.value?.trim();
+      if (!text) { showError('Mesaj boş olamaz'); return null; }
+      if (!replyTo) { showError('Yanıtlanan kişi gerekli'); return null; }
+      const who = $('builderWho')?.value?.trim() || 'Me';
+      return `${who} > ${replyTo}: ${text}`;
+    }
+    case 'photo': {
+      const url = $('builderUrl')?.value?.trim();
+      if (!url) { showError('URL gerekli'); return null; }
+      const cap = $('builderCaption')?.value?.trim();
+      return `@photo ${sender} ${qForce(url)}${cap ? ' ' + qForce(cap) : ''}`;
+    }
+    case 'gif': {
+      const url = $('builderUrl')?.value?.trim();
+      if (!url) { showError('URL gerekli'); return null; }
+      const cap = $('builderCaption')?.value?.trim();
+      return `@gif ${sender} ${qForce(url)}${cap ? ' ' + qForce(cap) : ''}`;
+    }
+    case 'video': {
+      const url = $('builderUrl')?.value?.trim();
+      if (!url) { showError('URL gerekli'); return null; }
+      const cap = $('builderCaption')?.value?.trim();
+      return `@video ${sender} ${qForce(url)}${cap ? ' ' + qForce(cap) : ''}`;
+    }
+    case 'voice': {
+      const dur = $('builderDuration')?.value?.trim() || '12s';
+      const cap = $('builderCaption')?.value?.trim();
+      return `@voice ${sender} ${dur}${cap ? ' ' + qForce(cap) : ''}`;
+    }
+    case 'location': {
+      const name = $('builderPlaceName')?.value?.trim();
+      if (!name) { showError('Yer adı gerekli'); return null; }
+      const info = $('builderPlaceInfo')?.value?.trim();
+      return `@location ${sender} ${qForce(name)}${info ? ' ' + qForce(info) : ''}`;
+    }
+    case 'document': {
+      const fname = $('builderFileName')?.value?.trim() || 'dosya.pdf';
+      const fsize = $('builderFileSize')?.value?.trim();
+      return `@document ${sender} ${qForce(fname)}${fsize ? ' ' + qForce(fsize) : ''}`;
+    }
+    case 'sticker': {
+      const val = $('builderStickerVal')?.value?.trim() || '🙂';
+      return `@sticker ${sender} ${qForce(val)}`;
+    }
+    case 'link': {
+      const title = $('builderLinkTitle')?.value?.trim();
+      if (!title) { showError('Başlık gerekli'); return null; }
+      const url = $('builderLinkUrl')?.value?.trim();
+      return `@link ${sender} ${qForce(title)}${url ? ' ' + qForce(url) : ''}`;
+    }
+    case 'viewonce': {
+      const mt = $('builderVoMediaType')?.value || 'photo';
+      return `@viewonce ${sender} ${mt}`;
+    }
+    case 'typing': {
+      const ms = $('builderTypingMs')?.value?.trim() || '800';
+      return `@typing ${sender} ${ms}`;
+    }
+    case 'reaction': {
+      const emoji = $('builderEmoji')?.value?.trim();
+      const target = $('builderTarget')?.value?.trim();
+      if (!emoji) { showError('Emoji gerekli'); return null; }
+      if (!target) { showError('Hedef gerekli'); return null; }
+      return `@reaction ${sender} ${emoji} ${target}`;
+    }
+    case 'system': {
+      const text = $('builderSystemText')?.value?.trim();
+      if (!text) { showError('Sistem mesajı boş olamaz'); return null; }
+      return `@system ${text}`;
+    }
+    case 'add': {
+      const name = $('builderPersonName')?.value?.trim();
+      if (!name) { showError('Kişi adı gerekli'); return null; }
+      return `@add ${name}`;
+    }
+    case 'leave': {
+      const name = $('builderPersonName')?.value?.trim();
+      if (!name) { showError('Kişi adı gerekli'); return null; }
+      return `@leave ${name}`;
+    }
+    default:
+      return null;
+  }
+}
+
+function clearBuilderForm() {
+  const ids = [
+    'builderText', 'builderReplyTo', 'builderUrl', 'builderCaption',
+    'builderDuration', 'builderPlaceName', 'builderPlaceInfo',
+    'builderFileName', 'builderFileSize', 'builderStickerVal',
+    'builderLinkTitle', 'builderLinkUrl', 'builderTypingMs',
+    'builderEmoji', 'builderTarget', 'builderSystemText', 'builderPersonName'
+  ];
+  ids.forEach(id => {
+    const el = $(id);
+    if (el) el.value = '';
+  });
+}
+
+/* ========================================
+   BUILDER — SETUP & EVENTS
+   ======================================== */
+
+function setupBuilder() {
+  const addBtn = $('builderAddBtn');
+  const pushBtn = $('builderPushBtn');
+  const clearBtn = $('builderClearBtn');
+  const newBlockBtn = $('builderNewBlockBtn');
+
+  // Builder'ın kendi textarea'sından başlangıç bloklarını yükle
+  blocks = parseToBlocks($('builderScriptBox')?.value || '');
+  renderBlocks();
+
+  addBtn?.addEventListener('click', addBlockFromForm);
+  pushBtn?.addEventListener('click', pushBlocksToBuilderTextarea);
+  clearBtn?.addEventListener('click', () => {
+    blocks = [];
+    renderBlocks();
+  });
+
+  // Yeni Blok — mevcut satırları aktar + trigger alanlarını temizle
+  newBlockBtn?.addEventListener('click', () => {
+    pushBlocksToBuilderTextarea();
+    blocks = [];
+    renderBlocks();
+    const nameEl = $('builderBlockName');
+    const triggerEl = $('builderTrigger');
+    if (nameEl) nameEl.value = '';
+    if (triggerEl) triggerEl.value = '';
+    showSuccess('Yeni blok hazır — ad ve trigger belirle, satır ekle.');
+  });
+
+  // Builder oynat butonları
+  bindClick('builderPlayNormalBtn', () => {
+    const text = $('builderScriptBox')?.value || '';
+    if (!text.trim()) { showError('Senaryo boş'); return; }
+    // Normal scriptBox'a yaz ve normal oynat
+    setScriptBox(text);
+    if (typeof loadScript === 'function') loadScript();
+    if (typeof play === 'function') play();
+  });
+
+  bindClick('builderPlayInteractiveBtn', () => {
+    const text = $('builderScriptBox')?.value || '';
+    if (!text.trim()) { showError('Senaryo boş'); return; }
+    enableInteractiveMode(text);
+  });
+
+  bindClick('builderResetBtn', () => {
+    if (typeof interactive !== 'undefined' && interactive.enabled) {
+      disableInteractiveMode();
+    }
+    state.clearActive();
+    state.clearMessages();
+    if (typeof clearChat === 'function') clearChat();
+    if (typeof syncHeader === 'function') syncHeader();
+    showSuccess('Sıfırlandı!');
+  });
+
+  renderBuilderTypeChips();
+  updateBuilderFields();
+}
+
+function addBlockFromForm() {
+  const raw = buildLineFromForm();
+  if (!raw) return;
+
+  blocks.push({ id: makeId(), raw });
+  renderBlocks();
+  clearBuilderForm();
+  showSuccess('Satır eklendi');
+}
+
+/* ========================================
+   VALIDATION
+   ======================================== */
+
+function setupValidation() {
+  const scriptBox = $('scriptBox');
+  if (!scriptBox) return;
+  const validationBox = $('scriptValidation');
+  const run = () => {
+    const errors = validateScript(scriptBox.value || '');
+    renderValidation(errors, validationBox);
+    state.set('player.script', scriptBox.value || '');
+  };
+  scriptBox.addEventListener('input', run);
+  run();
+}
+
+function renderValidation(errors, target) {
+  if (!target) return;
+  target.innerHTML = '';
+  if (!errors.length) {
+    target.innerHTML = '<div class="pill pill-success">✅ Senaryo temiz görünüyor</div>';
+    return;
+  }
+  const list = document.createElement('ul');
+  list.className = 'error-list';
+  errors.forEach(err => {
+    const li = document.createElement('li');
+    li.textContent = `Satır ${err.line}: ${err.message}`;
+    list.appendChild(li);
+  });
+  target.appendChild(list);
+}
+
+/* ========================================
+   MEDIA INSERT TOOL (Tab 1)
+   ======================================== */
+
+function setupMediaInsertTool() {
+  const btn = $('mediaInsertBtn');
+  if (!btn) return;
+
+  const typeEl = $('mediaTypeSelect');
+  const senderEl = $('mediaSenderSelect');
+  const fileInput = $('mediaFileInput');
+  const urlInput = $('mediaUrlInput');
+  const captionInput = $('mediaCaptionInput');
+  const clearBtn = $('mediaClearBtn');
+
+  const fileLabel = $('mediaFileLabel');
+  const urlLabel = $('mediaUrlLabel');
+  const captionLabel = $('mediaCaptionLabel');
+
+  refreshManualSenderOptions();
+
+  const quoteToken = (token) => {
+    const s = String(token ?? '').trim();
+    if (!s) return '"Me"';
+    if (/[\s"]/g.test(s)) return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    return s;
+  };
+
+  const quoteArg = (arg) => '"' + String(arg ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+
+  const insertLineIntoScript = (line) => {
+    const box = $('scriptBox');
+    if (!box) return;
+    const value = box.value ?? '';
+    const start = (typeof box.selectionStart === 'number') ? box.selectionStart : value.length;
+    const end = (typeof box.selectionEnd === 'number') ? box.selectionEnd : value.length;
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    const needsNlBefore = before.length > 0 && !before.endsWith('\n');
+    const prefix = needsNlBefore ? '\n' : '';
+    box.value = before + prefix + line + '\n' + after;
+    const newPos = (before + prefix + line + '\n').length;
+    box.selectionStart = box.selectionEnd = newPos;
+    box.dispatchEvent(new Event('input', { bubbles: true }));
+    box.focus();
+  };
+
+  const resetInputs = () => {
+    if (fileInput) {
+      fileInput.value = '';
+      const nameEl = fileInput.closest('.file-input')?.querySelector('.file-name');
+      if (nameEl) nameEl.textContent = 'Seçilmedi';
+    }
+    if (urlInput) urlInput.value = '';
+    if (captionInput) captionInput.value = '';
+  };
+
+  const syncFields = () => {
+    const type = typeEl?.value || 'photo';
+    const fileGroup = fileInput?.closest('.form-group');
+    const urlGroup = urlInput?.closest('.form-group');
+
+    if (type === 'photo') {
+      if (fileLabel) fileLabel.textContent = 'Dosya (fotoğraf)';
+      if (urlLabel) urlLabel.textContent = 'URL (opsiyonel)';
+      if (captionLabel) captionLabel.textContent = 'Açıklama (opsiyonel)';
+      if (fileInput) fileInput.setAttribute('accept', 'image/*');
+      if (fileGroup) fileGroup.style.display = '';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'gif') {
+      if (fileLabel) fileLabel.textContent = 'Dosya (GIF)';
+      if (urlLabel) urlLabel.textContent = 'GIF URL (opsiyonel)';
+      if (captionLabel) captionLabel.textContent = 'Açıklama (opsiyonel)';
+      if (fileInput) fileInput.setAttribute('accept', 'image/gif');
+      if (fileGroup) fileGroup.style.display = '';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'video') {
+      if (urlLabel) urlLabel.textContent = 'Video URL (zorunlu)';
+      if (captionLabel) captionLabel.textContent = 'Açıklama (opsiyonel)';
+      if (fileGroup) fileGroup.style.display = 'none';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'voice') {
+      if (urlLabel) urlLabel.textContent = 'Not (opsiyonel)';
+      if (captionLabel) captionLabel.textContent = 'Süre (örn: 12s / 00:18 / 8000)';
+      if (fileGroup) fileGroup.style.display = 'none';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'location') {
+      if (urlLabel) urlLabel.textContent = 'Yer Adı (zorunlu)';
+      if (captionLabel) captionLabel.textContent = 'Alt Bilgi (opsiyonel)';
+      if (fileGroup) fileGroup.style.display = 'none';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'document') {
+      if (urlLabel) urlLabel.textContent = 'Dosya Adı (örn: rapor.pdf)';
+      if (captionLabel) captionLabel.textContent = 'Boyut/Tip (örn: 2.4 MB · PDF)';
+      if (fileGroup) fileGroup.style.display = 'none';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'sticker') {
+      if (fileLabel) fileLabel.textContent = 'Dosya (sticker görseli)';
+      if (urlLabel) urlLabel.textContent = 'URL (opsiyonel)';
+      if (captionLabel) captionLabel.textContent = 'Emoji (URL yoksa kullanılır)';
+      if (fileInput) fileInput.setAttribute('accept', 'image/*');
+      if (fileGroup) fileGroup.style.display = '';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'link') {
+      if (urlLabel) urlLabel.textContent = 'Başlık (zorunlu)';
+      if (captionLabel) captionLabel.textContent = 'URL (görünür link metni)';
+      if (fileGroup) fileGroup.style.display = 'none';
+      if (urlGroup) urlGroup.style.display = '';
+    } else if (type === 'viewonce') {
+      if (urlLabel) urlLabel.textContent = 'Tür (photo veya video)';
+      if (captionLabel) captionLabel.textContent = '(kullanılmaz)';
+      if (fileGroup) fileGroup.style.display = 'none';
+      if (urlGroup) urlGroup.style.display = '';
+    }
+  };
+
+  if (typeEl) typeEl.addEventListener('change', syncFields);
+  syncFields();
+
+  btn.addEventListener('click', async () => {
+    try {
+      const type = typeEl?.value || 'photo';
+      const sender = quoteToken(senderEl?.value);
+      const file = fileInput?.files?.[0];
+      const url = urlInput?.value?.trim() || '';
+      const caption = captionInput?.value?.trim() || '';
+
+      if (type === 'location') {
+        if (!url) throw new Error('Yer adı gerekiyor');
+        const line = `@location ${sender} ${quoteArg(url)}${caption ? ' ' + quoteArg(caption) : ''}`;
+        insertLineIntoScript(line);
+        showSuccess('Konum komutu eklendi');
+        resetInputs(); return;
+      }
+      if (type === 'document') {
+        const line = `@document ${sender} ${quoteArg(url || 'dosya.pdf')}${caption ? ' ' + quoteArg(caption) : ''}`;
+        insertLineIntoScript(line);
+        showSuccess('Döküman komutu eklendi');
+        resetInputs(); return;
+      }
+      if (type === 'sticker') {
+        let src = '';
+        if (file) src = await readFileAsDataURL(file);
+        else if (url) src = url;
+        else src = caption || '🙂';
+        insertLineIntoScript(`@sticker ${sender} ${quoteArg(src)}`);
+        showSuccess('Sticker komutu eklendi');
+        resetInputs(); return;
+      }
+      if (type === 'link') {
+        const line = `@link ${sender} ${quoteArg(url || 'Bağlantı')}${caption ? ' ' + quoteArg(caption) : ''}`;
+        insertLineIntoScript(line);
+        showSuccess('Link önizleme komutu eklendi');
+        resetInputs(); return;
+      }
+      if (type === 'viewonce') {
+        const mt = (url || 'photo').toLowerCase() === 'video' ? 'video' : 'photo';
+        insertLineIntoScript(`@viewonce ${sender} ${mt}`);
+        showSuccess('Bir kez görüntüle komutu eklendi');
+        resetInputs(); return;
+      }
+      if (type === 'voice') {
+        const dur = caption || '12s';
+        const line = `@voice ${sender} ${dur}${url ? ' ' + quoteArg(url) : ''}`;
+        insertLineIntoScript(line);
+        showSuccess('Sesli mesaj komutu eklendi');
+        resetInputs(); return;
+      }
+      if (type === 'video') {
+        if (!url) throw new Error('Video için URL gerekiyor');
+        const line = `@video ${sender} ${quoteArg(url)}${caption ? ' ' + quoteArg(caption) : ''}`;
+        insertLineIntoScript(line);
+        showSuccess('Video komutu eklendi');
+        resetInputs(); return;
+      }
+      // photo / gif
+      let src = '';
+      if (file) src = await readFileAsDataURL(file);
+      else if (url) src = url;
+      else throw new Error('Foto/GIF için dosya seçin veya URL girin');
+      const cmd = type === 'gif' ? '@gif' : '@photo';
+      const line = `${cmd} ${sender} ${quoteArg(src)}${caption ? ' ' + quoteArg(caption) : ''}`;
+      insertLineIntoScript(line);
+      showSuccess((type === 'gif' ? 'GIF' : 'Fotoğraf') + ' komutu eklendi');
+      resetInputs();
+    } catch (err) {
+      showError(err?.message || 'Medya komutu eklenemedi');
+    }
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      resetInputs();
+      showSuccess('Temizlendi');
+    });
+  }
+}
+
+/* ========================================
+   BLOCK RENDERING & DRAG-DROP
+   ======================================== */
+
+function renderBlocks() {
+  const list = $('builderList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (!blocks.length) {
+    list.innerHTML = '<div class="empty">Henüz blok eklenmedi. Yukarıdaki formdan ekleyin.</div>';
+    return;
+  }
+
+  blocks.forEach((block, index) => {
+    const item = createElement('div', { className: 'builder-item', draggable: true, dataset: { id: block.id } }, [
+      createElement('div', { className: 'builder-handle', title: 'Sürükle-bırak' }, ['↕']),
+      createElement('div', { className: 'builder-summary' }, [summaryText(block)]),
+      createElement('button', { className: 'icon-btn', onClick: () => removeBlock(block.id), title: 'Sil' }, ['✖'])
+    ]);
+    attachDragEvents(item, index);
+    list.appendChild(item);
+  });
+}
+
+function summaryText(block) {
+  const raw = block.raw || '';
+  if (raw.startsWith('@add '))      return `➕ ${raw.slice(5).trim()} katılır`;
+  if (raw.startsWith('@leave '))    return `🚪 ${raw.slice(7).trim()} ayrılır`;
+  if (raw.startsWith('@system '))   return `⚙️ ${raw.slice(8).trim()}`;
+  if (raw.startsWith('@typing '))   return `⏳ ${tokenizeCommand(raw)[1] || '?'} yazıyor…`;
+  if (raw.startsWith('@reaction ')) { const t = tokenizeCommand(raw); return `😂 ${t[1]||'?'} → ${t[2]||''} → ${t.slice(3).join(' ')}`; }
+  if (raw.startsWith('@photo '))    return `📷 ${tokenizeCommand(raw)[1] || '?'}: Fotoğraf`;
+  if (raw.startsWith('@gif '))      return `🎞️ ${tokenizeCommand(raw)[1] || '?'}: GIF`;
+  if (raw.startsWith('@video '))    return `🎬 ${tokenizeCommand(raw)[1] || '?'}: Video`;
+  if (raw.startsWith('@voice '))    return `🎤 ${tokenizeCommand(raw)[1] || '?'}: Ses`;
+  if (raw.startsWith('@location ')) return `📍 ${tokenizeCommand(raw)[1] || '?'}: Konum`;
+  if (raw.startsWith('@document ')) return `📄 ${tokenizeCommand(raw)[1] || '?'}: Döküman`;
+  if (raw.startsWith('@sticker '))  return `🏷️ ${tokenizeCommand(raw)[1] || '?'}: Sticker`;
+  if (raw.startsWith('@link '))     return `🔗 ${tokenizeCommand(raw)[1] || '?'}: Link`;
+  if (raw.startsWith('@viewonce ')) return `👁️ ${tokenizeCommand(raw)[1] || '?'}: Bir kez`;
+  const replyMatch = raw.match(/^(.+?)\s*>\s*(.+?)\s*:\s*(.+)$/);
+  if (replyMatch) return `↩️ ${replyMatch[1].trim()}: ${replyMatch[3].trim().slice(0, 40)}`;
+  const msgMatch = raw.match(/^(.+?)\s*:\s*(.+)$/);
+  if (msgMatch) return `💬 ${msgMatch[1].trim()}: ${msgMatch[2].trim().slice(0, 40)}`;
+  return raw.slice(0, 50);
+}
+
+function attachDragEvents(el, index) {
+  el.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', index.toString());
+    el.classList.add('dragging');
+  });
+  el.addEventListener('dragend', () => el.classList.remove('dragging'));
+  el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', (e) => {
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    const fromIndex = Number(e.dataTransfer.getData('text/plain'));
+    const toIndex = Array.from(el.parentElement.children).indexOf(el);
+    moveBlock(fromIndex, toIndex);
+  });
+}
+
+function moveBlock(from, to) {
+  if (from === to || from < 0 || to < 0) return;
+  const [item] = blocks.splice(from, 1);
+  blocks.splice(to, 0, item);
+  renderBlocks();
+  syncScriptFromBlocks();
+}
+
+function removeBlock(id) {
+  blocks = blocks.filter(b => b.id !== id);
+  renderBlocks();
+}
+
+/* ========================================
+   SCRIPT ↔ BLOCKS SYNC
+   ======================================== */
+
+function syncBlocksFromScript(text) {
+  blocks = parseToBlocks(text || '');
+  renderBlocks();
+}
+
+function parseToBlocks(text) {
+  const lines = (text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  return lines.map(raw => ({ id: makeId(), raw }));
+}
+
+/** Satır listesini builder textarea'ya aktar (trigger syntax'ıyla sarmalayarak) */
+function pushBlocksToBuilderTextarea() {
+  if (blocks.length === 0) {
+    showError('Eklenecek satır yok');
+    return;
+  }
+
+  const lines = blocks.map(b => b.raw).join('\n');
+  const blockName = $('builderBlockName')?.value?.trim() || '';
+  const trigger = $('builderTrigger')?.value?.trim() || '';
+
+  let output;
+  if (blockName && trigger) {
+    // İnteraktif blok formatı
+    output = `#${blockName}\ntrigger: ${trigger}\n---\n${lines}`;
+  } else {
+    // Normal satırlar
+    output = lines;
+  }
+
+  // Mevcut textarea'ya APPEND et (yeni bloklar öncekinin altına eklenir)
+  const box = $('builderScriptBox');
+  if (!box) return;
+  const existing = box.value.trim();
+  box.value = existing ? existing + '\n\n' + output : output;
+  showSuccess('Metne aktarıldı!');
+}
+
+function syncScriptFromBlocks() {
+  const script = blocks.map(b => b.raw).join('\n');
+  setBuilderScriptBox(script);
+}
+
+function setBuilderScriptBox(value) {
+  const box = $('builderScriptBox');
+  if (box) box.value = value;
+}
+
+function setScriptBox(value) {
+  const box = $('scriptBox');
+  if (!box) return;
+  box.value = value;
+  state.set('player.script', value);
+  box.dispatchEvent(new Event('input', { bubbles: true }));
+}
