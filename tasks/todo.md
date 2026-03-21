@@ -1,68 +1,72 @@
-# Faz 23 — Test Altyapısı
+# Faz 24 — Performans Optimizasyonu
 
 > **Tarih:** 2026-03-21
-> **Kapsam:** Vitest kurulumu, kritik modüller için unit testler, CI entegrasyonu, coverage raporu
+> **Kapsam:** Message virtualization, rebuildChat optimizasyonu, CSS bölme, lazy loading, rAF geçişi, timer temizleme
 > **Durum:** ✅ Tamamlandı
 
 ---
 
 ## Görevler
 
-### 23.1 — Vitest kurulumu ✅
-- [x] `vitest` + `@vitest/coverage-v8` + `jsdom` devDependency
-- [x] `vitest.config.js` — jsdom environment, coverage ayarları
-- [x] `package.json` — `test`, `test:watch`, `test:coverage` script'leri
-- [x] `tests/` klasör yapısı
+### 24.1 — Message Virtualization ✅
+- [x] `js/ui/virtual-scroller.js` modülü — IntersectionObserver tabanlı
+- [x] 50+ mesajda otomatik aktif (VIRTUAL_THRESHOLD)
+- [x] Viewport dışı mesajlar placeholder div ile değiştirilir (yükseklik korunur)
+- [x] Scroll ile viewport'a giren placeholderlar otomatik materialize edilir
+- [x] Son 30 mesaj her zaman render edilir (kullanıcının gördüğü alan)
+- [x] PNG export öncesi `materializeAllMessages()` ile tüm mesajlar render edilir
+- [x] `estimateRowHeight()` — mesaj tipine göre yükseklik tahmini
 
-### 23.2 — Config & utils testleri ✅
-- [x] `tests/utils.test.js` — escapeHtml (XSS vektörleri), isValidUrl, clamp, deepClone, debounce, throttle, formatBytes, timeToMinutes, minutesToTime, safeJsonParse, isEmpty, generateId, nowTime
-- [x] `tests/config.test.js` — THEME_DEFAULTS yapı, CONFIG sabitleri, DEFAULT_STATE, COLOR_POOL, SCRIPT_TEMPLATES, WALLPAPER_PRESETS
+### 24.2 — rebuildChat() Optimizasyonu ✅
+- [x] DocumentFragment ile batch DOM insert (tek reflow)
+- [x] Tick status değişikliğinde `updateAllTicks()` — full rebuild yerine sadece tick SVG güncelleme
+- [x] `rebuildChat()` çağrı noktaları optimize edildi (app.js:423)
 
-### 23.3 — Script parser testleri ✅
-- [x] `tests/script-parser.test.js` — parseLine() tüm mesaj tipleri (metin, görsel, ses, video, sticker, konum, belge, link, viewonce, tepki, yazıyor, katılma/ayrılma, tik durumu)
-- [x] Edge case'ler: boş satır, yorum, bozuk girdi, tırnaklı metin
-- [x] parseScript(), tokenizeCommand(), validateScript(), isValidCommand()
-- [x] eventsToScript() roundtrip testi
+### 24.3 — phone.css Bölme ✅
+- [x] `css/phone-container.css` — Phone çerçeve + cam yansıması + yan tuşlar (~145 satır)
+- [x] `css/phone-statusbar.css` — Status bar (~155 satır)
+- [x] `css/phone-header.css` — Chat header (~102 satır)
+- [x] `css/phone-messages.css` — Mesaj balonları + voice (~587 satır)
+- [x] `css/phone-typing.css` — Typing indicator (~80 satır)
+- [x] `css/phone-composer.css` — Chat input (~111 satır)
+- [x] `css/phone-media.css` — Medya tipleri (~297 satır)
+- [x] `css/phone-light.css` — Light tema override'ları (~228 satır)
+- [x] `css/phone.css` → barrel import (8 @import)
+- [x] Vite build doğrulandı — tek CSS bundle
 
-### 23.4 — StateManager testleri ✅
-- [x] `tests/state.test.js` — get/set nested path, subscribe/notify, silent set
-- [x] addMessage/clearMessages, addActive/removeActive/clearActive/isActive
-- [x] export/import roundtrip, reset, recomputeColors/getColorForSpeaker
+### 24.4 — Avatar Lazy Loading ✅
+- [x] Header avatar'da `loading="lazy"` (header.js)
+- [x] Header avatar innerHTML → createElement geçişi (XSS riski azaltma)
+- [x] Mesaj avatarlarında `loading="lazy"` (messages.js:createAvatarNode)
 
-### 23.5 — Storage testleri ✅
-- [x] `tests/storage.test.js` — localStorage mock ile save/load/clear
-- [x] hasData/getSize, sceneManager save/load/delete/rename/getAll
+### 24.5 — Wallpaper Lazy Loading ✅
+- [x] Custom image wallpaper preload pattern (`preloadImage()`)
+- [x] Default wallpaper gösterilir, custom image arka planda yüklenir
+- [x] Preset değişikliği kontrolü (yükleme sırasında preset değişirse güncelleme iptal)
 
-### 23.6 — Player testleri ✅
-- [x] `tests/player.test.js` — getBaseDelay, handleEvent (ADD/LEAVE/SYSTEM/TICK_STATUS/TYPING/MESSAGE)
-- [x] pause/reset, jitter variation, inactive user skip
+### 24.6 — requestAnimationFrame Geçişi ✅
+- [x] Voice playback `setInterval(fn, 80ms)` → `requestAnimationFrame` loop
+- [x] Bar index değişmediğinde DOM güncelleme atlanır (reflow azaltma)
+- [x] Timestamp tabanlı ilerleme — frame rate bağımsız
 
-### 23.7 — DOM testleri (jsdom) ✅
-- [x] `tests/messages.test.js` — addMessage (DOM + state), outgoing (.out) / incoming (.in)
-- [x] addSystemMessage, clearChat, addTypingBubble/removeTypingBubble, findMessageByTarget
-
-### 23.8 — CI entegrasyonu ✅
-- [x] `.github/workflows/test.yml` — push/PR'da otomatik test
-- [x] Node.js matrix (20.x, 22.x)
-- [x] Coverage artifact
-
-### 23.9 — Coverage raporu ✅
-- [x] v8 coverage provider aktif
-- [x] Kritik modüller: config %100, state %100, parser %92, storage %67, utils %57
-- [x] Ölçülen modüllerde %42 global (UI-heavy modüller exclude)
-- [x] Coverage CI'da artifact olarak saklanıyor
+### 24.7 — Timer Temizleme Sistemi ✅
+- [x] `clearVoiceTimers()` — clearChat() öncesi tüm voice animasyon timer'ları temizlenir
+- [x] `cancelAnimationFrame` kullanımı (rAF geçişi ile uyumlu)
+- [x] Orphan timer sorunu çözüldü
 
 ---
 
 ## Sonuç Özeti
 
-| Metrik | Değer |
-|--------|-------|
-| Test dosyası | 7 |
-| Toplam test | 191 |
-| Geçen | 191 (%100) |
-| config.js coverage | %100 |
-| state.js coverage | %100 |
-| script-parser.js coverage | %92 |
-| storage.js coverage | %67 |
-| utils.js coverage | %57 |
+| Metrik | Önce | Sonra |
+|--------|------|-------|
+| Tick status değişikliği | Full DOM rebuild | Sadece SVG güncelleme |
+| rebuildChat() DOM insert | Tek tek appendChild | DocumentFragment batch |
+| Voice animasyon | setInterval 80ms | requestAnimationFrame |
+| phone.css | 1712 satır tek dosya | 8 modüler dosya |
+| Avatar loading | Eager | Lazy |
+| Wallpaper loading | Senkron | Preload + async |
+| 100+ mesaj rebuild | Tüm mesajlar render | Son 30 render + placeholder |
+| Voice timer temizleme | Yok (orphan risk) | clearChat() öncesi cleanup |
+| Test | 191 PASS | 191 PASS |
+| Build | 34 modül | 35 modül |

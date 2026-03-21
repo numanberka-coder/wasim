@@ -6,9 +6,10 @@ gerçekçi WhatsApp görünümü sağlar. Senaryo yazılır, telefon simülatör
 oynatılır, PNG export alınır.
 
 ## Mevcut Durum
-Faz 1–23 tamamlandı. Proje production-ready görsel kalitede.
+Faz 1–24 tamamlandı. Proje production-ready görsel kalitede.
 Faz 22: Build Sistemi — Vite + ES modules geçişi, tek bundle.
 Faz 23: Test Altyapısı — Vitest + 191 unit test, CI entegrasyonu, coverage raporu.
+Faz 24: Performans — Message virtualization, rAF animasyon, CSS modülleme, lazy loading.
 
 ## Dosya Mimarisi
 - `index.html` — Ana giriş noktası
@@ -20,7 +21,8 @@ Faz 23: Test Altyapısı — Vitest + 191 unit test, CI entegrasyonu, coverage r
 - `js/features/autocomplete.js` — Senaryo editörü otomatik tamamlama
 - `js/ui/highlight.js` — Syntax highlighting overlay motoru
 - `js/ui/` — Header, mesaj render, status bar vb.
-- `css/phone.css` — Telefon simülatörü stilleri (pixel-perfect)
+- `js/ui/virtual-scroller.js` — Message virtualization (IntersectionObserver)
+- `css/phone.css` — Telefon simülatörü stilleri (7 modüler dosya + barrel import)
 - `css/variables.css` — Tüm CSS değişkenleri
 - `css/responsive.css` — Mobil layout
 - `css/components.css` — UI bileşenleri

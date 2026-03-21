@@ -1,0 +1,587 @@
+/* ===== CHAT BODY ===== */
+.chat-body {
+  flex: 1;
+  padding: 20px 16px 22px;
+  overflow-y: auto;
+  background: transparent;
+}
+
+/* Day Divider */
+.day-divider {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 18px;
+}
+
+.day-divider span {
+  font-size: 11.5px;
+  color: var(--wa-overlay-text);
+  font-weight: 500;
+  background: var(--wa-overlay-bg);
+  padding: 4px 11px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.40);
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* System Message */
+.system-msg {
+  display: flex;
+  justify-content: center;
+  margin: 14px 0;
+}
+
+.system-msg span {
+  font-size: 13px;
+  color: var(--wa-system-text);
+  font-weight: 400;
+  background: var(--wa-system-bg);
+  padding: 6px 12px;
+  border-radius: 7.5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== MESSAGE ROWS ===== */
+.msg-row {
+  display: flex;
+  gap: 9px;
+  margin: 0;
+  padding-bottom: 12px; /* grup sonu varsayılan */
+  align-items: flex-end;
+  opacity: 0;
+}
+
+/* Incoming: slide in from left */
+.msg-row.in {
+  transform: translateX(-14px) scale(0.97);
+  animation: msgPopIn 0.22s cubic-bezier(0.2, 0.9, 0.25, 1.2) forwards;
+}
+
+/* Outgoing: slide in from right */
+.msg-row.out {
+  transform: translateX(14px) scale(0.97);
+  animation: msgPopOut 0.22s cubic-bezier(0.2, 0.9, 0.25, 1.2) forwards;
+}
+
+@keyframes msgPopIn {
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes msgPopOut {
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.msg-row.in  { justify-content: flex-start; }
+.msg-row.out { justify-content: flex-end; }
+
+/* Grouped message spacing */
+.msg-row.group-first  { margin-top: 0; padding-bottom: 2px; }
+.msg-row.group-middle { margin-top: 0; padding-bottom: 2px; }
+.msg-row.group-last   { margin-top: 0; padding-bottom: 12px; }
+
+
+/* Message Avatar */
+.msg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--wa-msg-avatar-bg);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  align-self: flex-start;
+  margin-bottom: 2px;
+  position: relative;
+  box-shadow: 0 0 0 1.5px var(--wa-msg-avatar-shadow);
+}
+
+.msg-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-full);
+}
+
+/* Message Bubble */
+.msg-bubble {
+  max-width: var(--bubble-max-width);
+  padding: 6px 7px 8px 9px;
+  border-radius: 7.5px;
+  white-space: pre-wrap;
+  font-size: 14.2px;
+  line-height: 19px;
+  position: relative;
+  word-wrap: break-word;
+  overflow: visible;
+  box-shadow: var(--wa-bubble-shadow) 0px 1px 0.5px 0px;
+  display: inline-block;
+}
+
+.msg-bubble.in {
+  background: var(--wa-bubble-in-bg);
+  border-radius: 0px 7.5px 7.5px 7.5px;
+  border: 1px solid var(--wa-bubble-in-border);
+}
+
+/* ── Gelen Mesaj Kuyruğu — CSS border trick (width:0, height:0 üçgen) ── */
+.msg-bubble.in::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  top: -1px;
+  left: -8px;
+  border-top: 6px solid var(--wa-bubble-in-solid);
+  border-right: 6px solid var(--wa-bubble-in-solid);
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid transparent;
+}
+
+.msg-bubble.out {
+  background: var(--wa-bubble-out-bg);
+  border-radius: 7.5px 0px 7.5px 7.5px;
+  border: 1px solid var(--wa-bubble-out-border);
+}
+
+/* ── Giden Mesaj Kuyruğu — CSS border trick ── */
+.msg-bubble.out::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  top: -1px;
+  right: -8px;
+  border-top: 6px solid var(--wa-bubble-out-solid);
+  border-left: 6px solid var(--wa-bubble-out-solid);
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid transparent;
+}
+
+/* === GROUPING === */
+/* Kuyruk sadece grubun ilk (veya tekil) mesajında görünür */
+.msg-bubble.group-mid::before,
+.msg-bubble.group-bottom::before,
+.msg-bubble.no-tail::before {
+  display: none !important;
+}
+
+/* Incoming: gruplama köşe radiusları */
+.msg-bubble.in.group-top,
+.msg-bubble.in:not(.group-mid):not(.group-bottom) {
+  border-top-left-radius: 0px !important;
+}
+.msg-bubble.in.group-top {
+  border-bottom-left-radius: 4px;
+}
+.msg-bubble.in.group-mid {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.msg-bubble.in.group-bottom {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 7.5px;
+}
+
+/* Outgoing: gruplama köşe radiusları */
+.msg-bubble.out.group-top,
+.msg-bubble.out:not(.group-mid):not(.group-bottom) {
+  border-top-right-radius: 0px !important;
+}
+.msg-bubble.out.group-top {
+  border-bottom-right-radius: 4px;
+}
+.msg-bubble.out.group-mid {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.msg-bubble.out.group-bottom {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 7.5px;
+}
+
+/* Avatar spacer — keeps alignment when avatar is hidden */
+.msg-avatar-spacer {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.msg-name {
+  font-size: calc(var(--chat-font-size) - 1px);
+  font-weight: 600;
+  margin-bottom: 2px;
+  letter-spacing: 0.05px;
+  margin-top: -7px;    /* ← yukarı almak için */
+  margin-left: -1px;   /* ← içeri almak için */
+}
+
+.msg-reply {
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+  margin: -1px 0 7px 0;
+  background: var(--wa-reply-bg);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.msg-reply-bar {
+  width: 4px;
+  border-radius: 3px;
+  flex: 0 0 4px;
+}
+
+.msg-reply-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.msg-reply-name {
+  font-size: calc(var(--chat-font-size) - 1px);
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msg-reply-snippet {
+  font-size: calc(var(--chat-font-size) - 2px);
+  color: var(--wa-reply-snippet);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msg-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px 3px 5px;
+  border-radius: 999px;
+  background: var(--wa-reaction-bg);
+  border: 1px solid var(--wa-reaction-border);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  position: absolute;
+  bottom: -14px;
+  left: 8px;
+  z-index: 2;
+  /* Pop-in animation */
+  animation: reactionPop 0.28s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  transform-origin: center left;
+}
+
+@keyframes reactionPop {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.msg-bubble.out .msg-reaction {
+  left: auto;
+  right: 8px;
+  background: var(--wa-reaction-out-bg);
+  border-color: var(--wa-reaction-border);
+  transform-origin: center right;
+}
+
+/* Re-trigger animation when emoji changes */
+.msg-reaction.reaction-update {
+  animation: reactionUpdate 0.22s cubic-bezier(0.2, 1.2, 0.4, 1) forwards;
+}
+
+@keyframes reactionUpdate {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3) rotate(-8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+
+.msg-reaction-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--wa-reaction-count);
+  margin-left: 1px;
+  letter-spacing: -0.2px;
+}
+
+.msg-row.has-reaction {
+  padding-bottom: 22px;
+}
+
+
+
+.msg-text {
+  display: inline;
+}
+
+/* Media (photo/gif) */
+.msg-media {
+  margin-top: 2px;
+}
+
+.msg-media-img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  border-radius: 7.5px;
+  cursor: pointer;
+}
+
+.msg-media-fallback {
+  width: 240px;
+  height: 160px;
+  border-radius: 7.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(233, 237, 239, 0.85);
+  font-size: calc(var(--chat-font-size) - 1px);
+}
+
+.msg-caption {
+  margin-top: 6px;
+}
+
+/* Video (preview only) */
+.msg-video {
+  width: 100%;
+  min-width: 220px;
+  max-width: 240px;
+  height: 160px;
+  border-radius: 7.5px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* Video içeren bubble geniş olsun */
+.msg-bubble:has(.msg-video) {
+  min-width: 240px;
+}
+
+.msg-video::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.10), rgba(0, 0, 0, 0.10) 55%, rgba(0, 0, 0, 0.25));
+}
+
+.msg-video-play {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: #fff;
+  font-size: 18px;
+}
+
+.msg-video-label {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  color: rgba(233, 237, 239, 0.85);
+  font-size: calc(var(--chat-font-size) - 2px);
+  letter-spacing: 0.02em;
+}
+
+/* Voice note (visual only) */
+.msg-voice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+  min-width: 200px;
+  max-width: 260px;
+}
+
+.msg-voice-play {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(37, 211, 102, 0.18);
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  color: #25d366;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.msg-voice-play:hover {
+  background: rgba(37, 211, 102, 0.28);
+  transform: scale(1.05);
+}
+
+.msg-voice-play:active {
+  transform: scale(0.95);
+}
+
+.msg-bubble.out .msg-voice-play {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+.msg-bubble.out .msg-voice-play:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+.msg-voice-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.msg-voice-wave {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
+
+.msg-voice-wave span {
+  width: 3px;
+  border-radius: 3px;
+  background: var(--wa-voice-wave);
+  flex-shrink: 0;
+  transition: background 0.08s;
+}
+
+.msg-bubble.out .msg-voice-wave span {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Played bars turn green/white */
+.msg-voice-wave span.played {
+  background: #25d366;
+}
+
+.msg-bubble.out .msg-voice-wave span.played {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Current bar pulses */
+.msg-voice-wave span.current {
+  background: #25d366;
+  animation: currentBarPulse 0.5s ease-in-out infinite alternate;
+}
+
+.msg-bubble.out .msg-voice-wave span.current {
+  background: #fff;
+}
+
+@keyframes currentBarPulse {
+  from { opacity: 0.7; transform: scaleY(0.9); }
+  to   { opacity: 1;   transform: scaleY(1.1); }
+}
+
+.msg-voice-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.msg-voice-dur {
+  font-size: calc(var(--chat-font-size) - 2px);
+  color: var(--wa-voice-dur);
+  white-space: nowrap;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s;
+}
+
+.msg-bubble.out .msg-voice-dur {
+  color: rgba(233, 237, 239, 0.6);
+}
+
+.msg-voice.playing .msg-voice-dur {
+  color: #25d366;
+}
+
+.msg-bubble.out .msg-voice.playing .msg-voice-dur {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.msg-voice-mic {
+  width: 14px;
+  height: 14px;
+  color: var(--wa-voice-mic);
+}
+
+.msg-bubble.out .msg-voice-mic {
+  color: rgba(233, 237, 239, 0.45);
+}
+
+.msg-meta {
+  display: inline-flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--wa-meta-color);
+  float: right;
+  margin-left: 8px;
+  letter-spacing: -0.1px;
+  position: relative;
+  white-space: nowrap;
+  transform: translateY(3px);
+}
+
+.msg-time {
+  white-space: nowrap;
+  font-weight: 500;
+  opacity: 0.74;
+  transform: translateY(1px);
+}
+
+.msg-tick {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1px;
+  transform: translateY(0.5px);
+}
+
