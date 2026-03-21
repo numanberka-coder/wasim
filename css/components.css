@@ -822,3 +822,99 @@ label {
   display: grid;
   gap: 6px;
 }
+
+/* ===== AUTOCOMPLETE ===== */
+.autocomplete-dropdown {
+  position: fixed;
+  z-index: 9999;
+  background: var(--wa-panel);
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  max-height: 240px;
+  overflow-y: auto;
+  width: 280px;
+  animation: contextMenuIn 0.12s ease-out;
+}
+
+.ac-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  min-height: 36px;
+}
+
+.ac-item:hover,
+.ac-item.selected {
+  background: rgba(37, 211, 102, 0.12);
+}
+
+.ac-item.selected {
+  border-left: 2px solid var(--wa-green);
+  padding-left: 10px;
+}
+
+.ac-icon {
+  flex-shrink: 0;
+  font-size: 13px;
+  width: 18px;
+  text-align: center;
+}
+
+.ac-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--wa-text);
+  white-space: nowrap;
+}
+
+.ac-desc {
+  font-size: 11px;
+  color: var(--wa-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: auto;
+}
+
+/* Parametre ipucu */
+.autocomplete-hint {
+  position: fixed;
+  z-index: 9998;
+  background: var(--wa-header);
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: 'Roboto Mono', monospace;
+  color: var(--wa-green);
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 768px) {
+  .autocomplete-dropdown {
+    width: calc(100vw - 32px);
+    max-width: 320px;
+  }
+
+  .ac-item {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+
+  .ac-name {
+    font-size: 14px;
+  }
+
+  .ac-desc {
+    font-size: 12px;
+  }
+}

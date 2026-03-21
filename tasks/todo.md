@@ -1,47 +1,52 @@
-# Faz 16 — Tab Öğreticileri ✅
+# Faz 17 — Autocomplete ✅
 
 ## Tamamlanan Adımlar
 
-### Adım 1: CSS Stilleri ✅
-- [x] `.tutorial-guide` — accordion'a özel margin
-- [x] `.guide-section` — bölüm aralıkları
-- [x] `.guide-title` — yeşil uppercase başlık
-- [x] `.guide-code` — monospace kod kutusu
-- [x] `.guide-text` — açıklama metni
-- [x] `.guide-table` — komut tablosu (th/td stilli)
-- [x] `.guide-tip` — yeşil vurgulu ipucu kutusu
+### Adım 1: Autocomplete Modülü ✅
+- [x] `js/features/autocomplete.js` — IIFE modül
+- [x] 17 @ komut listesi (ad, açıklama, parametre ipucu)
+- [x] Cursor pozisyonu algılama (selectionStart)
+- [x] @ komut filtreleme — `@` yazınca dropdown açılır
+- [x] Kişi adı tamamlama — satır başında yazınca `state.get('people')` üzerinden öneri
+- [x] Parametre ipucu (17.4) — komut seçildikten sonra ghost text
 
-### Adım 2: Senaryo Tab Rehberi (16.1 + 16.5) ✅
-- [x] `#tutorialSenaryo` accordion eklendi
-- [x] Temel kullanım açıklaması
-- [x] Mesaj format örnekleri (Kişi: Metin, yanıt, @typing, @photo)
-- [x] 16 komutluk tam tablo (komut / açıklama / örnek)
-- [x] Hız & Rastgelelik açıklaması
-- [x] 1-1 sohbet ipucu (16.5) — yeşil tip kutusu
+### Adım 2: Dropdown HTML ✅
+- [x] `#autocompleteDropdown` — fixed pozisyonlu popup container
+- [x] `#autocompleteHint` — parametre ipucu elementi
+- [x] Script tag: `autocomplete.js` — script-builder.js sonrası, app.js öncesi
 
-### Adım 3: İnteraktif Tab Rehberi (16.2) ✅
-- [x] `#tutorialInteractive` accordion eklendi
-- [x] İnteraktif mod açıklaması
-- [x] Blok yapısı kod örneği (#blok_adi, trigger, ---)
-- [x] Adım adım kullanım akışı (4 adım)
-- [x] #default + trigger: * ipucu
+### Adım 3: CSS Stilleri ✅
+- [x] `.autocomplete-dropdown` — popup stili (z-index: 9999, contextMenuIn animasyon)
+- [x] `.ac-item` — satır hover/selected durumu, yeşil sol kenar
+- [x] `.ac-icon`, `.ac-name`, `.ac-desc` — ikon, ad, açıklama
+- [x] `.autocomplete-hint` — monospace ipucu kutusu
+- [x] Mobil uyumluluk — min 44px touch target, genişlik ayarı
 
-### Adım 4: Builder Tab Rehberi (16.3) ✅
-- [x] `#tutorialBuilder` accordion eklendi
-- [x] Blok Builder açıklaması
-- [x] 5 adımlı kullanım akışı
-- [x] Araya ekleme & hızlı menü açıklaması
-- [x] Trigger opsiyonellik ipucu
+### Adım 4: Klavye & Etkileşim ✅
+- [x] `input` event → filtre ve dropdown göster
+- [x] ArrowUp/Down → navigasyon
+- [x] Enter/Tab → seçim
+- [x] Escape → kapat
+- [x] blur → kapat (150ms gecikme ile tıklama koruması)
+- [x] scroll/resize → kapat
+- [x] Mousedown event delegation → tıklama ile seçim
 
-### Adım 5: İlk Açılış Davranışı (16.4) ✅
-- [x] `initTutorials()` fonksiyonu — app.js
-- [x] localStorage key: `wa_sim_tutorials_seen`
-- [x] İlk ziyarette rehberler open attribute ile açık
-- [x] Sonraki ziyaretlerde kapalı (varsayılan)
+### Adım 5: app.js Entegrasyonu ✅
+- [x] `initAutocomplete()` çağrısı `init()` fonksiyonuna eklendi
+- [x] `scriptBox` ve `interactiveScriptBox` textarea'ları bağlandı
+
+### Adım 6: Doğrulama ✅
+- [x] JS syntax doğru (Node.js kontrolü)
+- [x] HTML elementleri mevcut
+- [x] Script yükleme sırası doğru
+- [x] CSS sınıfları JS ile uyumlu
+- [x] `contextMenuIn` animasyonu mevcut
+- [x] `state` değişkeni erişilebilir
 
 ## Değişen Dosyalar
-- `index.html` — 3 tutorial accordion (#tutorialSenaryo, #tutorialInteractive, #tutorialBuilder)
-- `css/components.css` — tutorial-guide, guide-section, guide-title, guide-code, guide-text, guide-table, guide-tip stilleri
-- `js/app.js` — initTutorials() fonksiyonu, init()'e çağrı ekleme
-- `ROADMAP.md` — Faz 16 tamamlandı olarak işaretlendi
-- `README.md` — Mevcut durum 1-16 olarak güncellendi
+- `js/features/autocomplete.js` (YENİ) — Ana autocomplete motoru
+- `index.html` — dropdown HTML + script tag
+- `css/components.css` — autocomplete stilleri + mobil uyumluluk
+- `js/app.js` — initAutocomplete() çağrısı
+- `ROADMAP.md` — Faz 17 tamamlandı olarak işaretlendi
+- `README.md` — Mevcut durum 1-17, dosya mimarisi güncellendi
