@@ -680,7 +680,8 @@ function buildMessageRow(msg) {
     if (isMe) {
       const tickWrapper = document.createElement('span');
       tickWrapper.className = 'msg-tick';
-      tickWrapper.appendChild(createTickSVG(true));
+      const tickVal = msg.tickStatus || state.get('settings.tickStatus') || 'read';
+      tickWrapper.appendChild(createTickSVG(tickVal));
       meta.appendChild(tickWrapper);
     }
 
@@ -724,7 +725,7 @@ function buildMessageRow(msg) {
 /**
  * Add a new message
  */
-function addMessage({ speaker, text, replyTo = null, time = null, kind = null, src = null, durationSec = null } = {}) {
+function addMessage({ speaker, text, replyTo = null, time = null, kind = null, src = null, durationSec = null, tickStatus = null } = {}) {
   const chatBody = $('chatBody');
   if (!chatBody) return null;
 
@@ -735,7 +736,8 @@ function addMessage({ speaker, text, replyTo = null, time = null, kind = null, s
     time: time || getNextMessageTime(),
     kind: kind || null,
     src: src || null,
-    durationSec: (typeof durationSec === 'number') ? durationSec : (durationSec ?? null)
+    durationSec: (typeof durationSec === 'number') ? durationSec : (durationSec ?? null),
+    tickStatus: tickStatus || null
   };
 
   // Add to state

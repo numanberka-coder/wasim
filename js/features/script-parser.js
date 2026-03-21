@@ -12,6 +12,7 @@ const EventType = {
   REACTION: 'reaction',
   TYPING: 'typing',
   MESSAGE: 'msg',
+  TICK_STATUS: 'tick_status',
 };
 
 /**
@@ -99,6 +100,14 @@ function parseLine(line) {
   // Skip interactive mode syntax lines (#block, trigger:, ---)
   if (line.startsWith('#') || line === '---' || /^trigger\s*:/i.test(line)) {
     return null;
+  }
+
+  // @sent / @delivered / @read — tik durumu değiştir
+  if (line === '@sent' || line === '@delivered' || line === '@read') {
+    return {
+      type: EventType.TICK_STATUS,
+      status: line.slice(1) // 'sent', 'delivered', 'read'
+    };
   }
 
   // @add Name
@@ -333,7 +342,7 @@ function validateScript(text) {
  * Check if command is valid
  */
 function isValidCommand(line) {
-  const validCommands = ['@add', '@leave', '@system', '@reaction', '@typing', '@photo', '@video', '@voice', '@gif', '@location', '@document', '@sticker', '@link', '@viewonce'];
+  const validCommands = ['@add', '@leave', '@system', '@reaction', '@typing', '@photo', '@video', '@voice', '@gif', '@location', '@document', '@sticker', '@link', '@viewonce', '@sent', '@delivered', '@read'];
   const cmd = line.split(' ')[0];
   return validCommands.includes(cmd);
 }
@@ -354,6 +363,8 @@ function eventsToScript(events) {
         return `@reaction ${event.who} ${event.emoji} ${event.target}`;
       case EventType.TYPING:
         return `@typing ${event.who} ${event.ms}`;
+      case EventType.TICK_STATUS:
+        return `@${event.status}`;
       case EventType.MESSAGE:
         if (event.kind === 'location') {
           const sub = event.src ? ` ${event.src}` : '';

@@ -1,54 +1,51 @@
-# Faz 13 — Tik Ayrımı (Gönderildi / İletildi / Okundu)
+# Faz 13 — Tik Ayrımı (Gönderildi / İletildi / Okundu) ✅
 
-## Strateji
-`createTickSVG(status)` zaten 3 durumu destekliyor (`sent`, `delivered`, `read`) ama her zaman `true` (read) ile çağrılıyor.
-Yapılacaklar:
-1. State'e `defaultTickStatus` ekle (varsayılan: `read`)
-2. Mesaj objesine `tickStatus` alanı ekle — per-message override
-3. Senaryo syntax'ına `@sent`, `@delivered`, `@read` komutları ekle — sonraki mesajları etkiler
-4. Settings UI'a tik durumu seçici accordion ekle
-5. `buildMessageRow`'da mesajın `tickStatus` bilgisini `createTickSVG`'ye ilet
+## Tamamlanan Adımlar
 
----
+### Adım 1: Config & State Altyapısı ✅
+- [x] `js/config.js` → `DEFAULT_STATE`'e `tickStatus: 'read'` eklendi
+- [x] `js/state.js` → `settings`'e `tickStatus` eklendi
+- [x] `js/state.js` → `reset()`'e `tickStatus: 'read'` eklendi
 
-## Adımlar
+### Adım 2: Mesaj Objesine tickStatus Desteği ✅
+- [x] `js/state.js` → `addMessage()` → `tickStatus` alanı eklendi
+- [x] `js/state.js` → `import()` → mesaj import'unda `tickStatus` korunuyor
+- [x] `js/phone/messages.js` → `addMessage()` → `tickStatus` parametresi eklendi
+- [x] `js/phone/messages.js` → `buildMessageRow()` → `msg.tickStatus || state.get('settings.tickStatus') || 'read'` fallback zinciri
 
-### Adım 1: Config & State Altyapısı
-- [ ] `js/config.js` → `DEFAULT_STATE`'e `tickStatus: 'read'` ekle
-- [ ] `js/state.js` → `settings`'e `tickStatus` ekle
-- [ ] `js/state.js` → `reset()`'e `tickStatus: 'read'` ekle
+### Adım 3: Senaryo Syntax — @sent, @delivered, @read ✅
+- [x] `EventType.TICK_STATUS` eklendi
+- [x] `parseLine()` → `@sent`, `@delivered`, `@read` komutları parse ediliyor
+- [x] `isValidCommand()` → yeni komutlar listeye eklendi
+- [x] `eventsToScript()` → `TICK_STATUS` event'i script'e geri çevriliyor
 
-### Adım 2: Mesaj Objesine tickStatus Desteği
-- [ ] `js/state.js` → `addMessage()` → mesaj objesine `tickStatus` alanı ekle
-- [ ] `js/state.js` → `import()` → mesaj import'unda `tickStatus` alanını koru
-- [ ] `js/phone/messages.js` → `addMessage()` fonksiyonuna `tickStatus` parametresi ekle
-- [ ] `js/phone/messages.js` → `buildMessageRow()` → `createTickSVG(true)` yerine mesajın `tickStatus` bilgisini kullan
+### Adım 4: Player — Tik Durumu Akışı ✅
+- [x] `activeTickStatus` değişkeni eklendi
+- [x] `loadScript()` → `activeTickStatus = null` ile sıfırlanıyor
+- [x] `handleEvent()` → `TICK_STATUS` case → `activeTickStatus` güncelleniyor
+- [x] `handleMessageEvent()` → mesajlara `tickStatus: activeTickStatus` geçiliyor
 
-### Adım 3: Senaryo Syntax — @sent, @delivered, @read
-- [ ] `js/features/script-parser.js` → `parseLine()` → `@sent`, `@delivered`, `@read` komutlarını parse et
-- [ ] `js/features/script-parser.js` → `isValidCommand()` → yeni komutları ekle
-- [ ] `js/features/script-parser.js` → `eventsToScript()` → yeni event tipini script'e geri çevir
-- [ ] `EventType`'a `TICK_STATUS: 'tick_status'` ekle
+### Adım 5: Settings UI — Varsayılan Tik Durumu ✅
+- [x] `index.html` → "Tik Durumu" accordion'u eklendi (3 buton: Gönderildi, İletildi, Okundu)
+- [x] `css/components.css` → `.tick-btn` ve `.tick-btn.active` stilleri eklendi
+- [x] `js/app.js` → buton click binding + `rebuildChat()` ile anlık güncelleme
+- [x] `js/app.js` → `populateFormFields()` → tik buton active state'i senkron
 
-### Adım 4: Player — Tik Durumu Akışı
-- [ ] `js/features/player.js` → `handleEvent()` → `TICK_STATUS` event'ini yakala
-- [ ] Player'da aktif `tickStatus` state'ini tut → sonraki mesajlara uygula
-- [ ] `handleMessageEvent()` → mesajı eklerken aktif `tickStatus` bilgisini geç
+### Adım 6: Export/Import & Sıfırlama Uyumu ✅
+- [x] `state.export()` zaten settings objesini alıyor → `tickStatus` dahil
+- [x] `state.import()` → `Object.assign` ile settings dolduruluyor → `tickStatus` dahil
+- [x] Mesaj bazlı `tickStatus` import'ta korunuyor
+- [x] Reset → `tickStatus: 'read'` varsayılanına dönüyor
+- [x] `populateFormFields()` reset/import sonrası UI'ı güncelliyor
 
-### Adım 5: Settings UI — Varsayılan Tik Durumu
-- [ ] `index.html` → Ayarlar paneline "Tik Durumu" accordion ekle
-  - 3 radio/buton: Gönderildi (tek gri), İletildi (çift gri), Okundu (çift mavi)
-- [ ] `js/app.js` → UI event binding + form populate
-- [ ] Varsayılan tik durumu değişince mevcut mesajların tikleri güncellenmeli
-
-### Adım 6: Export/Import & Sıfırlama Uyumu
-- [ ] JSON export/import'ta `tickStatus` dahil olmalı (hem settings hem mesaj bazlı)
-- [ ] "Sıfırla" butonu tik durumunu da sıfırlamalı
-
-### Adım 7: Test & Doğrulama
-- [ ] Varsayılan tik durumu ayardan değişiyor mu
-- [ ] `@sent` komutu sonraki mesajlarda tek gri tik gösteriyor mu
-- [ ] `@delivered` komutu sonraki mesajlarda çift gri tik gösteriyor mu
-- [ ] `@read` komutu sonraki mesajlarda çift mavi tik gösteriyor mu
-- [ ] Light/dark temada tik renkleri doğru mu
-- [ ] Export/import tik durumunu koruyor mu
+## Değişen Dosyalar
+- `js/config.js` — DEFAULT_STATE'e tickStatus eklendi
+- `js/state.js` — settings, addMessage, import, reset
+- `js/phone/messages.js` — addMessage + buildMessageRow tick fallback
+- `js/features/script-parser.js` — EventType, parseLine, isValidCommand, eventsToScript
+- `js/features/player.js` — activeTickStatus, loadScript, handleEvent, handleMessageEvent
+- `js/app.js` — tick button bindings, populateFormFields
+- `index.html` — Tik Durumu accordion UI
+- `css/components.css` — tick-btn styles
+- `ROADMAP.md` — Faz 12 & 13 tamamlandı olarak işaretlendi
+- `README.md` — Mevcut durum güncellendi

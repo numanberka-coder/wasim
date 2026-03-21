@@ -233,6 +233,31 @@
             <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
           </div>
         </details>
+
+        <!-- Tick Status -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            ✅ Tik Durumu
+          </summary>
+          <div class="accordion-body">
+            <label style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
+            <div class="tick-status-group" style="display: flex; gap: 6px;">
+              <button id="tickSentBtn" type="button" class="tick-btn secondary btn-sm" data-tick="sent">
+                <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                Gönderildi
+              </button>
+              <button id="tickDeliveredBtn" type="button" class="tick-btn secondary btn-sm" data-tick="delivered">
+                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                İletildi
+              </button>
+              <button id="tickReadBtn" type="button" class="tick-btn secondary btn-sm active" data-tick="read">
+                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                Okundu
+              </button>
+            </div>
+          </div>
+        </details>
       </div>
 
       <!-- ===== PANEL: PEOPLE ===== -->

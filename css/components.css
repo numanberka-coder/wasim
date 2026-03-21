@@ -53,6 +53,20 @@ button.btn-sm {
   font-size: var(--font-size-base);
 }
 
+button.tick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  justify-content: center;
+}
+
+button.tick-btn.active {
+  background: rgba(37, 211, 102, 0.15);
+  border-color: var(--wa-green);
+  color: var(--wa-green);
+}
+
 button.btn-icon {
   width: 36px;
   height: 36px;
