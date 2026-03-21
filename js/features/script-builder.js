@@ -8,6 +8,9 @@ let blocks = [];
 /** Aktif builder tip */
 let activeBuilderType = 'message';
 
+/** Araya ekleme modu: null = sonuna ekle, sayı = o index'in altına ekle */
+let insertAfterIndex = null;
+
 /** 16 tip tanımı */
 const BUILDER_TYPES = [
   { id: 'message',  label: '💬 Mesaj' },
@@ -338,6 +341,7 @@ function setupBuilder() {
   pushBtn?.addEventListener('click', pushBlocksToBuilderTextarea);
   clearBtn?.addEventListener('click', () => {
     blocks = [];
+    clearInsertMode();
     renderBlocks();
   });
 
@@ -388,10 +392,66 @@ function addBlockFromForm() {
   const raw = buildLineFromForm();
   if (!raw) return;
 
-  blocks.push({ id: makeId(), raw });
+  const newBlock = { id: makeId(), raw };
+
+  if (insertAfterIndex !== null && insertAfterIndex >= 0 && insertAfterIndex < blocks.length) {
+    blocks.splice(insertAfterIndex + 1, 0, newBlock);
+    showSuccess(`Satır ${insertAfterIndex + 2}. sıraya eklendi`);
+  } else {
+    blocks.push(newBlock);
+    showSuccess('Satır eklendi');
+  }
+
+  clearInsertMode();
   renderBlocks();
   clearBuilderForm();
-  showSuccess('Satır eklendi');
+}
+
+/** Araya ekleme modunu aktifle */
+function setInsertMode(index) {
+  insertAfterIndex = index;
+  renderBlocks();
+  renderInsertIndicator();
+
+  // Forma scroll
+  const form = $('builderDynamicFields');
+  if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/** Araya ekleme modunu iptal et */
+function clearInsertMode() {
+  insertAfterIndex = null;
+  renderInsertIndicator();
+}
+
+/** Insert modu göstergesini güncelle */
+function renderInsertIndicator() {
+  let indicator = $('builderInsertIndicator');
+  if (insertAfterIndex !== null && insertAfterIndex >= 0) {
+    const block = blocks[insertAfterIndex];
+    const label = block ? summaryText(block) : '';
+    const shortLabel = label.length > 30 ? label.slice(0, 30) + '…' : label;
+    if (!indicator) {
+      // Indicator'ı builder-actions'ın hemen önüne ekle
+      const actions = $('builderAddBtn')?.closest('.builder-actions');
+      if (actions) {
+        indicator = document.createElement('div');
+        indicator.id = 'builderInsertIndicator';
+        indicator.className = 'builder-insert-indicator';
+        actions.parentElement.insertBefore(indicator, actions);
+      }
+    }
+    if (indicator) {
+      indicator.innerHTML = `<span>📍 ${insertAfterIndex + 1}. satırın altına eklenecek: <strong>${shortLabel}</strong></span><button type="button" class="builder-insert-cancel" title="İptal">✕</button>`;
+      indicator.style.display = '';
+      indicator.querySelector('.builder-insert-cancel')?.addEventListener('click', () => {
+        clearInsertMode();
+        renderBlocks();
+      });
+    }
+  } else {
+    if (indicator) indicator.style.display = 'none';
+  }
 }
 
 /* ========================================
@@ -641,14 +701,112 @@ function renderBlocks() {
   }
 
   blocks.forEach((block, index) => {
-    const item = createElement('div', { className: 'builder-item', draggable: true, dataset: { id: block.id } }, [
+    const isInsertTarget = insertAfterIndex === index;
+
+    const insertBtn = createElement('button', {
+      className: 'icon-btn builder-insert-btn',
+      title: 'Altına satır ekle',
+      onClick: (e) => { e.stopPropagation(); setInsertMode(index); }
+    }, ['+']);
+
+    const summaryEl = createElement('div', {
+      className: 'builder-summary',
+      onClick: (e) => { e.stopPropagation(); showContextMenu(e, index); }
+    }, [summaryText(block)]);
+
+    const item = createElement('div', {
+      className: 'builder-item' + (isInsertTarget ? ' insert-target' : ''),
+      draggable: true,
+      dataset: { id: block.id }
+    }, [
       createElement('div', { className: 'builder-handle', title: 'Sürükle-bırak' }, ['↕']),
-      createElement('div', { className: 'builder-summary' }, [summaryText(block)]),
+      summaryEl,
+      insertBtn,
       createElement('button', { className: 'icon-btn', onClick: () => removeBlock(block.id), title: 'Sil' }, ['✖'])
     ]);
     attachDragEvents(item, index);
     list.appendChild(item);
   });
+}
+
+/* ========================================
+   CONTEXT MENU — Hızlı Komut Menüsü
+   ======================================== */
+
+const CONTEXT_MENU_ITEMS = [
+  { type: 'message',  label: '💬 Mesaj' },
+  { type: 'photo',    label: '📷 Fotoğraf' },
+  { type: 'typing',   label: '⏳ Yazıyor' },
+  { type: 'reaction', label: '😂 Tepki' },
+  { type: 'voice',    label: '🎤 Ses' },
+  { type: 'system',   label: '⚙️ Sistem' },
+  { type: 'sticker',  label: '🏷️ Sticker' },
+  { type: 'reply',    label: '↩️ Yanıt' },
+];
+
+function showContextMenu(event, index) {
+  closeContextMenu();
+
+  const menu = document.createElement('div');
+  menu.className = 'builder-context-menu';
+  menu.id = 'builderContextMenu';
+
+  CONTEXT_MENU_ITEMS.forEach(item => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'builder-context-item';
+    btn.textContent = item.label;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activeBuilderType = item.type;
+      renderBuilderTypeChips();
+      updateBuilderFields();
+      setInsertMode(index);
+      closeContextMenu();
+    });
+    menu.appendChild(btn);
+  });
+
+  // Pozisyonlama
+  document.body.appendChild(menu);
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
+
+  let top = rect.bottom + 4;
+  let left = rect.left;
+
+  // Ekranın dışına taşma kontrolü
+  if (top + menuRect.height > window.innerHeight) {
+    top = rect.top - menuRect.height - 4;
+  }
+  if (left + menuRect.width > window.innerWidth) {
+    left = window.innerWidth - menuRect.width - 8;
+  }
+
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
+
+  // Dışına tıklayınca kapat
+  setTimeout(() => {
+    document.addEventListener('click', handleContextMenuClose);
+    document.addEventListener('keydown', handleContextMenuEsc);
+  }, 10);
+}
+
+function closeContextMenu() {
+  const existing = $('builderContextMenu');
+  if (existing) existing.remove();
+  document.removeEventListener('click', handleContextMenuClose);
+  document.removeEventListener('keydown', handleContextMenuEsc);
+}
+
+function handleContextMenuClose(e) {
+  const menu = $('builderContextMenu');
+  if (menu && !menu.contains(e.target)) closeContextMenu();
+}
+
+function handleContextMenuEsc(e) {
+  if (e.key === 'Escape') closeContextMenu();
 }
 
 function summaryText(block) {
@@ -695,12 +853,24 @@ function moveBlock(from, to) {
   if (from === to || from < 0 || to < 0) return;
   const [item] = blocks.splice(from, 1);
   blocks.splice(to, 0, item);
+  clearInsertMode();
   renderBlocks();
   syncScriptFromBlocks();
 }
 
 function removeBlock(id) {
+  const removedIndex = blocks.findIndex(b => b.id === id);
   blocks = blocks.filter(b => b.id !== id);
+
+  // insertAfterIndex düzelt
+  if (insertAfterIndex !== null) {
+    if (removedIndex === insertAfterIndex) {
+      clearInsertMode();
+    } else if (removedIndex < insertAfterIndex) {
+      insertAfterIndex--;
+    }
+  }
+
   renderBlocks();
 }
 

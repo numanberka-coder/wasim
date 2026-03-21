@@ -1,44 +1,51 @@
-# Faz 14 — Sahne Yönetimi (Kaydet / Yükle / Sil) ✅
+# Faz 15 — Senaryo Zenginleştirici ✅
 
 ## Tamamlanan Adımlar
 
-### Adım 1: Storage Altyapısı ✅
-- [x] `js/config.js` → `CONFIG.SCENES_KEY` eklendi (`whatsapp_simulator_scenes`)
-- [x] `js/storage.js` → `sceneManager` objesi eklendi
-- [x] `sceneManager.save(name)` → state.export() + isim + timestamp → scenes dizisine ekle
-- [x] `sceneManager.load(id)` → scenes dizisinden bul → state.import(data)
-- [x] `sceneManager.delete(id)` → scenes dizisinden sil
-- [x] `sceneManager.rename(id, newName)` → sahne adını güncelle
-- [x] `sceneManager.getAll()` → tüm sahneleri getir
+### Adım 1: Satır Arası Ekleme Altyapısı ✅
+- [x] `insertAfterIndex` değişkeni eklendi (null = sonuna ekle, sayı = o index'in altına ekle)
+- [x] `addBlockFromForm()` güncellendi — insertAfterIndex varsa `blocks.splice(insertAfterIndex + 1, 0, block)`
+- [x] Ekleme sonrası `clearInsertMode()` ile sıfırlama
+- [x] `setInsertMode(index)` — insertAfterIndex set, render, indicator güncelle, forma scroll
+- [x] `clearInsertMode()` — insertAfterIndex null, indicator gizle
+- [x] `renderInsertIndicator()` — "X. satırın altına eklenecek" bilgi barı
 
-### Adım 2: UI — Sahne Yönetimi Accordion ✅
-- [x] `index.html` → Settings paneline "Sahne Yönetimi" accordion'u eklendi
-- [x] İsim input + "Kaydet" butonu
-- [x] `<div id="sceneList">` — dinamik render alanı
+### Adım 2: Builder Listesine "+" Butonu ✅
+- [x] `renderBlocks()` → her `.builder-item`'a "+" butonu eklendi (4 sütunlu grid)
+- [x] "+" tıklanınca `setInsertMode(index)` çağrılıyor
+- [x] Aktif insert modu → ilgili satır yeşil border ile vurgulanıyor (`.insert-target`)
+- [x] Insert indicator cancel butonu ile iptal edilebiliyor
 
-### Adım 3: App Entegrasyonu ✅
-- [x] `js/app.js` → `renderSceneList()` fonksiyonu eklendi
-- [x] Her sahne satırı: isim, tarih, "Yükle" butonu, "Sil" butonu
-- [x] Kaydet butonu → sceneManager.save(name) → listeyi yenile
-- [x] Yükle butonu → onay → sceneManager.load(id) → tam UI refresh
-- [x] Sil butonu → onay → sceneManager.delete(id) → listeyi yenile
-- [x] Enter ile kaydetme desteği
-- [x] Boş isim kontrolü
-- [x] Uygulama açılışında sahne listesi render
+### Adım 3: Hızlı Komut Menüsü (Context Menu) ✅
+- [x] Satır summary alanına tıklanınca popup menü açılıyor
+- [x] 8 sık kullanılan komut: Mesaj, Fotoğraf, Yazıyor, Tepki, Ses, Sistem, Sticker, Yanıt
+- [x] Seçim → activeBuilderType değişir + setInsertMode(index) çağrılır + form açılır
+- [x] Click-outside ve ESC ile kapatma
+- [x] Ekran taşma kontrolü (bottom/right overflow)
 
 ### Adım 4: CSS Stilleri ✅
-- [x] `.scene-list` → flex column container
-- [x] `.scene-item` → flex row (isim+tarih + butonlar)
-- [x] `.scene-name` → text overflow ellipsis
-- [x] `.scene-date` → küçük gri tarih
-- [x] `.scene-actions` → buton grubu
-- [x] Mevcut btn-sm, danger sınıfları kullanıldı
+- [x] `.builder-item` grid → 4 sütun (handle | summary | + | sil)
+- [x] `.builder-insert-btn` — yeşil "+" butonu
+- [x] `.builder-item.insert-target` — yeşil border vurgusu
+- [x] `.builder-insert-indicator` — bilgi barı + iptal butonu
+- [x] `.builder-context-menu` — fixed pozisyonlu popup, animasyonlu
+- [x] `.builder-context-item` — hover efektli menü satırları
+
+### Adım 5: Mobil Uyumluluk ✅
+- [x] Insert butonu min 36px touch target
+- [x] Context menü genişletilmiş padding (mobil)
+- [x] Context item min-height 40px touch-friendly
+- [x] Insert indicator mobilde görünür
+
+### Adım 6: Edge Case Korumaları ✅
+- [x] `removeBlock()` → silinen block insert target ise clearInsertMode()
+- [x] `removeBlock()` → silinen block öncesindeyse insertAfterIndex--
+- [x] `moveBlock()` → sürükle-bırak sonrası clearInsertMode()
+- [x] `clearBtn` (Satırları Temizle) → clearInsertMode()
 
 ## Değişen Dosyalar
-- `js/config.js` — SCENES_KEY eklendi
-- `js/storage.js` — sceneManager objesi (save, load, delete, rename, getAll)
-- `js/app.js` — renderSceneList, scene button bindings, init'e renderSceneList eklendi
-- `index.html` — Sahne Yönetimi accordion UI
-- `css/components.css` — scene-list, scene-item stilleri
-- `ROADMAP.md` — Faz 14 tamamlandı olarak işaretlendi
-- `README.md` — Mevcut durum güncellendi
+- `js/features/script-builder.js` — insertAfterIndex, setInsertMode, clearInsertMode, renderInsertIndicator, showContextMenu, closeContextMenu, renderBlocks güncelleme, removeBlock/moveBlock edge case koruması
+- `css/components.css` — builder-item 4 sütun grid, insert-btn, insert-target, insert-indicator, context-menu stilleri
+- `css/responsive.css` — mobil uyumluluk (touch target, padding)
+- `ROADMAP.md` — Faz 15 tamamlandı olarak işaretlendi
+- `README.md` — Mevcut durum güncellendi (1-15)
