@@ -23,7 +23,7 @@ function initAccordions() {
     }
   });
 
-  console.log('📂 Accordions initialized');
+  Logger.info('📂 Accordions initialized');
 }
 
 /**

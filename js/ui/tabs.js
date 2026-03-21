@@ -34,7 +34,7 @@ function initTabs() {
     });
   });
 
-  console.log('📑 Tabs initialized');
+  Logger.info('📑 Tabs initialized');
 }
 
 /**

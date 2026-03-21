@@ -60,8 +60,15 @@ function renderHeaderAvatar() {
 
   // Then URL
   if (group.photoUrl) {
-    const initial = escapeHtml((title[0] || 'G').toUpperCase());
-    avatarEl.innerHTML = `<img src="${escapeHtml(group.photoUrl)}" alt="group" onerror="this.parentElement.textContent='${initial}'">`;
+    const initial = (title[0] || 'G').toUpperCase();
+    const img = document.createElement('img');
+    img.src = group.photoUrl;
+    img.alt = 'group';
+    img.addEventListener('error', () => {
+      avatarEl.textContent = initial;
+    });
+    avatarEl.innerHTML = '';
+    avatarEl.appendChild(img);
     return;
   }
 

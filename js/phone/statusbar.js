@@ -103,7 +103,7 @@ function startTimeUpdates() {
   
   updateStatusBar();
   updateInterval = setInterval(updateStatusBar, 60000);
-  console.log('⏰ Status bar updates started');
+  Logger.info('⏰ Status bar updates started');
 }
 
 /**

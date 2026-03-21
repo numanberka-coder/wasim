@@ -16,9 +16,9 @@ const storage = {
     try {
       const data = state.export();
       localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
-      console.log('💾 State saved');
+      Logger.info('💾 State saved');
     } catch (e) {
-      console.warn('LocalStorage save error:', e);
+      Logger.warn('LocalStorage save error:', e);
     }
   }, 1000),
 
@@ -34,10 +34,10 @@ const storage = {
       if (!data) return false;
 
       state.import(data);
-      console.log('📂 State loaded');
+      Logger.info('📂 State loaded');
       return true;
     } catch (e) {
-      console.warn('LocalStorage load error:', e);
+      Logger.warn('LocalStorage load error:', e);
       return false;
     }
   },
@@ -48,9 +48,9 @@ const storage = {
   clear() {
     try {
       localStorage.removeItem(CONFIG.STORAGE_KEY);
-      console.log('🗑️ Storage cleared');
+      Logger.info('🗑️ Storage cleared');
     } catch (e) {
-      console.warn('LocalStorage clear error:', e);
+      Logger.warn('LocalStorage clear error:', e);
     }
   },
 
@@ -121,7 +121,7 @@ const sceneManager = {
       const raw = localStorage.getItem(CONFIG.SCENES_KEY);
       return raw ? JSON.parse(raw) : [];
     } catch (e) {
-      console.warn('Scene load error:', e);
+      Logger.warn('Scene load error:', e);
       return [];
     }
   },
@@ -133,7 +133,7 @@ const sceneManager = {
     try {
       localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify(scenes));
     } catch (e) {
-      console.warn('Scene save error:', e);
+      Logger.warn('Scene save error:', e);
     }
   },
 
@@ -150,7 +150,7 @@ const sceneManager = {
     };
     scenes.unshift(scene);
     this._save(scenes);
-    console.log('🎬 Scene saved:', name);
+    Logger.info('🎬 Scene saved:', name);
     return scene;
   },
 
@@ -163,7 +163,7 @@ const sceneManager = {
     if (!scene) return false;
     state.import(scene.data);
     storage.save();
-    console.log('🎬 Scene loaded:', scene.name);
+    Logger.info('🎬 Scene loaded:', scene.name);
     return true;
   },
 
@@ -174,7 +174,7 @@ const sceneManager = {
     const scenes = this.getAll();
     const filtered = scenes.filter(s => s.id !== id);
     this._save(filtered);
-    console.log('🎬 Scene deleted');
+    Logger.info('🎬 Scene deleted');
     return true;
   },
 
@@ -205,5 +205,5 @@ function initAutoSave() {
     storage.save();
   }, CONFIG.AUTO_SAVE_INTERVAL);
 
-  console.log('⚡ Auto-save initialized');
+  Logger.info('⚡ Auto-save initialized');
 }

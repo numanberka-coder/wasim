@@ -205,3 +205,21 @@ function safeJsonParse(str, fallback = null) {
     return fallback;
   }
 }
+
+/**
+ * Yapısal loglama utility
+ * Production'da sessiz, ?debug=true ile verbose
+ */
+const Logger = (() => {
+  const DEBUG = new URLSearchParams(window.location.search).has('debug');
+
+  const noop = () => {};
+
+  return {
+    get DEBUG() { return DEBUG; },
+    info:  DEBUG ? console.log.bind(console)  : noop,
+    warn:  DEBUG ? console.warn.bind(console) : noop,
+    error: console.error.bind(console), // Hatalar her zaman gösterilsin
+    debug: DEBUG ? console.debug.bind(console) : noop
+  };
+})();

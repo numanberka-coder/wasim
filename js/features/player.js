@@ -483,5 +483,5 @@ function initPlayer() {
     updateMainActionButton();
   }
 
-  console.log('🎬 Player initialized');
+  Logger.info('🎬 Player initialized');
 }
