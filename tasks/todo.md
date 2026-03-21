@@ -1,51 +1,47 @@
-# Faz 13 — Tik Ayrımı (Gönderildi / İletildi / Okundu) ✅
+# Faz 14 — Sahne Yönetimi (Birden fazla senaryo kaydet, yükle, geç)
 
-## Tamamlanan Adımlar
+## Plan
 
-### Adım 1: Config & State Altyapısı ✅
-- [x] `js/config.js` → `DEFAULT_STATE`'e `tickStatus: 'read'` eklendi
-- [x] `js/state.js` → `settings`'e `tickStatus` eklendi
-- [x] `js/state.js` → `reset()`'e `tickStatus: 'read'` eklendi
+### Adım 1: Storage Altyapısı — `js/storage.js`
+- [ ] Yeni localStorage key: `whatsapp_simulator_scenes` (mevcut state'ten bağımsız)
+- [ ] `storage.saveScene(name)` → `state.export()` + isim + timestamp → scenes dizisine ekle
+- [ ] `storage.loadScene(id)` → scenes dizisinden bul → `state.import(data)` çağır
+- [ ] `storage.deleteScene(id)` → scenes dizisinden sil
+- [ ] `storage.getScenes()` → kayıtlı sahnelerin listesi (id, name, timestamp)
+- [ ] `storage.renameScene(id, newName)` → sahne adını güncelle
+- [ ] Scene ID: `Date.now()` timestamp yeterli (unique)
 
-### Adım 2: Mesaj Objesine tickStatus Desteği ✅
-- [x] `js/state.js` → `addMessage()` → `tickStatus` alanı eklendi
-- [x] `js/state.js` → `import()` → mesaj import'unda `tickStatus` korunuyor
-- [x] `js/phone/messages.js` → `addMessage()` → `tickStatus` parametresi eklendi
-- [x] `js/phone/messages.js` → `buildMessageRow()` → `msg.tickStatus || state.get('settings.tickStatus') || 'read'` fallback zinciri
+### Adım 2: UI — `index.html`
+- [ ] Settings tab'ına (veya Group tab'ına) "Sahne Yönetimi" accordion'u ekle
+- [ ] Kaydet: İsim input + "Kaydet" butonu
+- [ ] Sahne listesi: `<div id="scene-list">` — dinamik render
+- [ ] Her sahne satırı: isim, tarih, "Yükle" butonu, "Sil" butonu
 
-### Adım 3: Senaryo Syntax — @sent, @delivered, @read ✅
-- [x] `EventType.TICK_STATUS` eklendi
-- [x] `parseLine()` → `@sent`, `@delivered`, `@read` komutları parse ediliyor
-- [x] `isValidCommand()` → yeni komutlar listeye eklendi
-- [x] `eventsToScript()` → `TICK_STATUS` event'i script'e geri çevriliyor
+### Adım 3: App Entegrasyonu — `js/app.js`
+- [ ] Sahne kaydet butonu → `storage.saveScene(name)` → listeyi yenile
+- [ ] Sahne yükle butonu → `storage.loadScene(id)` → mevcut import refresh akışı
+- [ ] Sahne sil butonu → onay → `storage.deleteScene(id)` → listeyi yenile
+- [ ] `renderSceneList()` fonksiyonu → sahne listesini DOM'a render et
+- [ ] Uygulama açılışında sahne listesini render et
 
-### Adım 4: Player — Tik Durumu Akışı ✅
-- [x] `activeTickStatus` değişkeni eklendi
-- [x] `loadScript()` → `activeTickStatus = null` ile sıfırlanıyor
-- [x] `handleEvent()` → `TICK_STATUS` case → `activeTickStatus` güncelleniyor
-- [x] `handleMessageEvent()` → mesajlara `tickStatus: activeTickStatus` geçiliyor
+### Adım 4: CSS — `css/components.css`
+- [ ] `.scene-item` satır stili (isim + tarih + butonlar)
+- [ ] `.scene-list` container stili
+- [ ] Mevcut btn-sm, danger, secondary sınıflarını kullan
 
-### Adım 5: Settings UI — Varsayılan Tik Durumu ✅
-- [x] `index.html` → "Tik Durumu" accordion'u eklendi (3 buton: Gönderildi, İletildi, Okundu)
-- [x] `css/components.css` → `.tick-btn` ve `.tick-btn.active` stilleri eklendi
-- [x] `js/app.js` → buton click binding + `rebuildChat()` ile anlık güncelleme
-- [x] `js/app.js` → `populateFormFields()` → tik buton active state'i senkron
+### Adım 5: Test & Doğrulama
+- [ ] Sahne kaydet → listede görünüyor mu?
+- [ ] Sahne yükle → tüm state doğru restore ediliyor mu?
+- [ ] Sahne sil → listeden kalkıyor mu?
+- [ ] Boş isim kontrolü
+- [ ] Light/dark tema uyumu
+- [ ] Mobil responsive uyumu
+- [ ] Export/import ile çakışma yok mu?
 
-### Adım 6: Export/Import & Sıfırlama Uyumu ✅
-- [x] `state.export()` zaten settings objesini alıyor → `tickStatus` dahil
-- [x] `state.import()` → `Object.assign` ile settings dolduruluyor → `tickStatus` dahil
-- [x] Mesaj bazlı `tickStatus` import'ta korunuyor
-- [x] Reset → `tickStatus: 'read'` varsayılanına dönüyor
-- [x] `populateFormFields()` reset/import sonrası UI'ı güncelliyor
-
-## Değişen Dosyalar
-- `js/config.js` — DEFAULT_STATE'e tickStatus eklendi
-- `js/state.js` — settings, addMessage, import, reset
-- `js/phone/messages.js` — addMessage + buildMessageRow tick fallback
-- `js/features/script-parser.js` — EventType, parseLine, isValidCommand, eventsToScript
-- `js/features/player.js` — activeTickStatus, loadScript, handleEvent, handleMessageEvent
-- `js/app.js` — tick button bindings, populateFormFields
-- `index.html` — Tik Durumu accordion UI
-- `css/components.css` — tick-btn styles
-- `ROADMAP.md` — Faz 12 & 13 tamamlandı olarak işaretlendi
-- `README.md` — Mevcut durum güncellendi
+## Değişecek Dosyalar
+- `js/storage.js` — Scene CRUD fonksiyonları
+- `js/app.js` — Scene UI binding + renderSceneList
+- `index.html` — Sahne Yönetimi accordion UI
+- `css/components.css` — Scene list stilleri
+- `ROADMAP.md` — Faz 14 tamamlandı olarak işaretlenecek
+- `README.md` — Mevcut durum güncellenecek
