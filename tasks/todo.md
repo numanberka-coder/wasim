@@ -1,44 +1,66 @@
-# Faz 14 — Sahne Yönetimi (Kaydet / Yükle / Sil) ✅
+# Faz 15 — Senaryo Zenginleştirici
 
-## Tamamlanan Adımlar
+## Konsept
+Builder satır listesindeki her satırın yanına **"+"** butonu ekle. Tıklanınca mevcut form "araya ekleme" moduna geçer — satır seçilen satırın altına eklenir. Ayrıca satıra tıklayınca hızlı komut menüsü açılır (Fotoğraf, Tepki, Yazıyor, Sistem vb.).
 
-### Adım 1: Storage Altyapısı ✅
-- [x] `js/config.js` → `CONFIG.SCENES_KEY` eklendi (`whatsapp_simulator_scenes`)
-- [x] `js/storage.js` → `sceneManager` objesi eklendi
-- [x] `sceneManager.save(name)` → state.export() + isim + timestamp → scenes dizisine ekle
-- [x] `sceneManager.load(id)` → scenes dizisinden bul → state.import(data)
-- [x] `sceneManager.delete(id)` → scenes dizisinden sil
-- [x] `sceneManager.rename(id, newName)` → sahne adını güncelle
-- [x] `sceneManager.getAll()` → tüm sahneleri getir
+ROADMAP notu: "Alternatif basit yol — Builder listesindeki her satırın yanına '+' butonu koymak. Mevcut form aynı şekilde çalışır, sadece 'sonuna ekle' yerine 'araya ekle' olur."
 
-### Adım 2: UI — Sahne Yönetimi Accordion ✅
-- [x] `index.html` → Settings paneline "Sahne Yönetimi" accordion'u eklendi
-- [x] İsim input + "Kaydet" butonu
-- [x] `<div id="sceneList">` — dinamik render alanı
+---
 
-### Adım 3: App Entegrasyonu ✅
-- [x] `js/app.js` → `renderSceneList()` fonksiyonu eklendi
-- [x] Her sahne satırı: isim, tarih, "Yükle" butonu, "Sil" butonu
-- [x] Kaydet butonu → sceneManager.save(name) → listeyi yenile
-- [x] Yükle butonu → onay → sceneManager.load(id) → tam UI refresh
-- [x] Sil butonu → onay → sceneManager.delete(id) → listeyi yenile
-- [x] Enter ile kaydetme desteği
-- [x] Boş isim kontrolü
-- [x] Uygulama açılışında sahne listesi render
+## Plan
 
-### Adım 4: CSS Stilleri ✅
-- [x] `.scene-list` → flex column container
-- [x] `.scene-item` → flex row (isim+tarih + butonlar)
-- [x] `.scene-name` → text overflow ellipsis
-- [x] `.scene-date` → küçük gri tarih
-- [x] `.scene-actions` → buton grubu
-- [x] Mevcut btn-sm, danger sınıfları kullanıldı
+### Adım 1: Satır Arası Ekleme Altyapısı (script-builder.js)
+- [ ] `insertAfterIndex` değişkeni ekle (null = sonuna ekle, sayı = o index'in altına ekle)
+- [ ] `addBlockFromForm()` fonksiyonunu güncelle — `insertAfterIndex` null değilse `blocks.splice(insertAfterIndex + 1, 0, block)` yap
+- [ ] Ekleme sonrası `insertAfterIndex = null` sıfırla
+- [ ] `setInsertMode(index)` fonksiyonu — insertAfterIndex'i set eder, formu vurgular, scroll yapar
 
-## Değişen Dosyalar
-- `js/config.js` — SCENES_KEY eklendi
-- `js/storage.js` — sceneManager objesi (save, load, delete, rename, getAll)
-- `js/app.js` — renderSceneList, scene button bindings, init'e renderSceneList eklendi
-- `index.html` — Sahne Yönetimi accordion UI
-- `css/components.css` — scene-list, scene-item stilleri
-- `ROADMAP.md` — Faz 14 tamamlandı olarak işaretlendi
+### Adım 2: Builder Listesine "+" Butonu (script-builder.js + HTML)
+- [ ] `renderBlocks()` → her `.builder-item` satırına "+" butonu ekle (sil butonunun yanına veya satırın altına)
+- [ ] "+" tıklanınca `setInsertMode(index)` çağır
+- [ ] Aktif insert modu varken ilgili satırı yeşil border ile vurgula
+- [ ] Formda "Araya Ekle" modunu gösteren bir indicator ekle (cancelable)
+
+### Adım 3: Hızlı Komut Menüsü (Context Menu)
+- [ ] Satıra tıklanınca (summary alanına) popup menü aç
+- [ ] Menü seçenekleri: sık kullanılan komutlar (📷 Fotoğraf, ⏳ Yazıyor, 😂 Tepki, ⚙️ Sistem, ➕ Katılma, 🚪 Ayrılma)
+- [ ] Seçim yapılınca: `activeBuilderType` değiştir + `setInsertMode(index)` çağır + formu aç
+- [ ] Menü dışına tıklayınca kapat
+- [ ] Click-outside ve ESC ile kapatma
+
+### Adım 4: CSS Stilleri (components.css)
+- [ ] `.builder-item` grid'ini 4 sütuna güncelle (handle | summary | + | sil)
+- [ ] `.builder-insert-btn` stili — küçük yeşil "+" butonu
+- [ ] `.builder-item.insert-target` — yeşil border vurgusu
+- [ ] `.builder-insert-indicator` — formda "X. satırın altına ekleniyor" bar stili
+- [ ] `.builder-context-menu` — popup menü stili (position: absolute)
+- [ ] `.builder-context-item` — menü satır stili
+
+### Adım 5: Mobil Uyumluluk (responsive.css)
+- [ ] Mobil overlay'de "+" butonunun touch-friendly olması (min 36px)
+- [ ] Context menünün mobilde doğru pozisyonlanması
+- [ ] Form indicator'ın mobilde görünmesi
+
+### Adım 6: Test ve Doğrulama
+- [ ] Normal ekleme hala çalışıyor (sonuna ekleme)
+- [ ] "+" ile araya ekleme doğru pozisyona ekliyor
+- [ ] Context menüden tip seçip araya ekleme çalışıyor
+- [ ] Insert modu iptal edilebiliyor
+- [ ] Drag-drop hala çalışıyor
+- [ ] Mobilde düzgün görünüyor
+- [ ] Light/dark temada uyumlu
+
+### Adım 7: Dokümantasyon
+- [ ] ROADMAP.md → Faz 15 tamamlandı olarak işaretle
+- [ ] README.md → Mevcut durum güncelle
+- [ ] Commit ve push
+
+---
+
+## Etkilenen Dosyalar
+- `js/features/script-builder.js` — insertAfterIndex, setInsertMode, context menu, renderBlocks güncelleme
+- `css/components.css` — builder-item grid güncelleme, context menu stilleri
+- `css/responsive.css` — mobil uyumluluk
+- `index.html` — insert indicator HTML (minimal)
+- `ROADMAP.md` — Faz 15 tamamlandı
 - `README.md` — Mevcut durum güncellendi
