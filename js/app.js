@@ -116,6 +116,12 @@ function populateFormFields() {
   setInputValue('bubbleOutColorInput', settings.bubbleOutColor || defaultOutColor);
   setInputValue('bubbleInColorInput', settings.bubbleInColor || defaultInColor);
 
+  // Tick status
+  const tickVal = settings.tickStatus || 'read';
+  document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
+  const activeTickBtn = document.querySelector(`.tick-btn[data-tick="${tickVal}"]`);
+  if (activeTickBtn) activeTickBtn.classList.add('active');
+
   // Typography
   setInputValue('fontSizeControl', settings.chatFontSize);
   setTextContent('fontSizeValue', `${settings.chatFontSize}px`);
@@ -365,6 +371,21 @@ function bindEventHandlers() {
     setInputValue('bubbleOutColorInput', defaultOut);
     setInputValue('bubbleInColorInput', defaultIn);
     showSuccess('Balon renkleri sıfırlandı!');
+  });
+
+  // === TICK STATUS ===
+  ['tickSentBtn', 'tickDeliveredBtn', 'tickReadBtn'].forEach(id => {
+    bindClick(id, () => {
+      const btn = $(id);
+      if (!btn) return;
+      const tickVal = btn.dataset.tick;
+      state.set('settings.tickStatus', tickVal);
+      // Update active class
+      document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Re-render all messages to apply new default tick
+      rebuildChat();
+    });
   });
 
   // === TYPOGRAPHY ===

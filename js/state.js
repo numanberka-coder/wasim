@@ -42,6 +42,7 @@ class StateManager {
         headerColor: DEFAULT_STATE.headerColor,
         bubbleOutColor: DEFAULT_STATE.bubbleOutColor,
         bubbleInColor: DEFAULT_STATE.bubbleInColor,
+        tickStatus: DEFAULT_STATE.tickStatus,
       },
 
       // Message times
@@ -173,7 +174,7 @@ class StateManager {
    */
   addMessage(msg) {
     const id = this.data.messageSeq++;
-    const message = { id, ...msg, reactions: Array.isArray(msg.reactions) ? msg.reactions : [] };
+    const message = { id, ...msg, tickStatus: msg.tickStatus || null, reactions: Array.isArray(msg.reactions) ? msg.reactions : [] };
     this.data.messages.push(message);
     this.notify('messages');
     return message;
@@ -235,6 +236,7 @@ class StateManager {
         kind: m.kind || null,
         src: m.src || null,
         durationSec: (typeof m.durationSec === 'number') ? m.durationSec : (m.durationSec ?? null),
+        tickStatus: m.tickStatus || null,
       }));
     }
 
@@ -287,6 +289,7 @@ class StateManager {
       headerColor: '#1f2c33',
       bubbleOutColor: null,
       bubbleInColor: null,
+      tickStatus: 'read',
     };
 
     this.data.messageTimes = {

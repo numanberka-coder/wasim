@@ -252,6 +252,7 @@ const DEFAULT_STATE = {
   headerColor: '#1f2c33',
   bubbleOutColor: null,
   bubbleInColor: null,
+  tickStatus: 'read',
 
   // Message Times
   messageTimesAuto: true,

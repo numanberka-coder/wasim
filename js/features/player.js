@@ -2,8 +2,8 @@
    PLAYER - Script Player
    ======================================== */
 
-
-
+// Aktif tik durumu — senaryo içinde @sent/@delivered/@read ile değişir
+let activeTickStatus = null;
 
 
 
@@ -102,6 +102,7 @@ function loadScript() {
 
   player.cursor = 0;
   player.paused = false;
+  activeTickStatus = null;
 
   state.clearActive();
   state.clearMessages();
@@ -209,6 +210,11 @@ function handleEvent(event, onComplete = () => {}) {
       break;
     }
 
+    case EventType.TICK_STATUS:
+      activeTickStatus = event.status; // 'sent', 'delivered', 'read'
+      onComplete();
+      break;
+
     case EventType.TYPING:
       handleTypingEvent(event, onComplete);
       break;
@@ -268,7 +274,8 @@ function handleMessageEvent(event, onComplete) {
       replyTo: event.replyTo,
       kind: event.kind,
       src: event.src,
-      durationSec: event.durationSec
+      durationSec: event.durationSec,
+      tickStatus: activeTickStatus
     });
     onComplete();
   }, typingMs);
