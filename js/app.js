@@ -67,6 +67,9 @@ function init() {
   // Bind event handlers
   bindEventHandlers();
 
+  // Render scene list
+  renderSceneList();
+
   // Initialize mobile module (Faz 8)
   initMobile();
 
@@ -534,6 +537,32 @@ function bindEventHandlers() {
     input.click();
   });
 
+  // === SCENE MANAGEMENT ===
+  bindClick('saveSceneBtn', () => {
+    const input = $('sceneNameInput');
+    const name = input?.value?.trim();
+    if (!name) {
+      showError('Sahne adı boş bırakılamaz.');
+      return;
+    }
+    sceneManager.save(name);
+    input.value = '';
+    renderSceneList();
+    showSuccess('Sahne kaydedildi!');
+  });
+
+  // Enter ile kaydet
+  bindChange('sceneNameInput', () => {});
+  const sceneInput = $('sceneNameInput');
+  if (sceneInput) {
+    sceneInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        $('saveSceneBtn')?.click();
+      }
+    });
+  }
+
   bindClick('clearAllBtn', () => {
     if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz?')) return;
     storage.clear();
@@ -713,6 +742,72 @@ async function takeScreenshot() {
     console.error('Screenshot error:', err);
     showError('Ekran görüntüsü alınamadı: ' + err.message);
   }
+}
+
+// === SCENE MANAGEMENT ===
+
+function renderSceneList() {
+  const container = $('sceneList');
+  if (!container) return;
+
+  const scenes = sceneManager.getAll();
+
+  if (scenes.length === 0) {
+    container.innerHTML = '<p class="hint">Henüz kaydedilmiş sahne yok.</p>';
+    return;
+  }
+
+  container.innerHTML = scenes.map(scene => {
+    const date = new Date(scene.timestamp);
+    const dateStr = date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const timeStr = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="scene-item" data-scene-id="${scene.id}">
+      <div class="scene-info">
+        <span class="scene-name">${escapeHtml(scene.name)}</span>
+        <span class="scene-date">${dateStr} ${timeStr}</span>
+      </div>
+      <div class="scene-actions">
+        <button type="button" class="btn-sm scene-load-btn" data-scene-id="${scene.id}">Yükle</button>
+        <button type="button" class="btn-sm danger scene-delete-btn" data-scene-id="${scene.id}">Sil</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Event delegation
+  container.querySelectorAll('.scene-load-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.sceneId);
+      if (!confirm('Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.')) return;
+      const ok = sceneManager.load(id);
+      if (ok) {
+        const importedTheme = state.get('settings.theme') || 'dark';
+        applyTheme(importedTheme);
+        populateFormFields();
+        renderPeopleList();
+        syncHeader();
+        rebuildChat();
+        applyWallpaper();
+        applyAllTypography();
+        showSuccess('Sahne yüklendi!');
+      }
+    });
+  });
+
+  container.querySelectorAll('.scene-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.sceneId);
+      if (!confirm('Bu sahneyi silmek istediğinizden emin misiniz?')) return;
+      sceneManager.delete(id);
+      renderSceneList();
+      showSuccess('Sahne silindi!');
+    });
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 // === PHONE SCALE ===

@@ -6,7 +6,7 @@ gerçekçi WhatsApp görünümü sağlar. Senaryo yazılır, telefon simülatör
 oynatılır, PNG export alınır.
 
 ## Mevcut Durum
-Faz 1–13 tamamlandı. Proje production-ready görsel kalitede.
+Faz 1–14 tamamlandı. Proje production-ready görsel kalitede.
 
 ## Dosya Mimarisi
 - `index.html` — Ana giriş noktası

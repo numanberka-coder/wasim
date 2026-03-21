@@ -4,6 +4,7 @@
 
 const CONFIG = {
   STORAGE_KEY: 'whatsapp_simulator_v2',
+  SCENES_KEY: 'whatsapp_simulator_scenes',
   AUTO_SAVE_INTERVAL: 30000,
   TYPING_BASE_MS: 400,
   TYPING_CHAR_MS: 30,

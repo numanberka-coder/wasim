@@ -549,6 +549,52 @@ label {
   box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.15);
 }
 
+/* ===== SCENE LIST ===== */
+.scene-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.scene-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-md);
+  background: var(--wa-header);
+}
+
+.scene-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.scene-name {
+  font-size: var(--font-size-md);
+  color: var(--wa-text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scene-date {
+  font-size: var(--font-size-xs);
+  color: var(--wa-text-secondary);
+}
+
+.scene-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .error-list {
   list-style: disc;
   padding-left: 18px;
