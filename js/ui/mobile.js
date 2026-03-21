@@ -43,6 +43,7 @@ const PANEL_TITLES = {
 
 function initMobile() {
   bindMobileEvents();
+  initCommandCopy();
   if (isMobileView()) {
     setupVisualViewport();
   }
@@ -387,6 +388,109 @@ function restoreDesktopActiveTab() {
 
   const panel = $(tabId);
   if (panel) panel.classList.add('active');
+}
+
+/* ========================================
+   COMMAND COPY (Long-press / Right-click)
+   Faz 19: Mobil Komut Yardımı
+   ======================================== */
+
+function initCommandCopy() {
+  let pressTimer = null;
+  let pressTarget = null;
+
+  /**
+   * Kopyalanabilir satırı bul — tıklanan elementin en yakın hedefi
+   * .guide-table tr (komut tablosu satırı) veya .command-help p
+   */
+  function findCopyRow(el) {
+    // guide-table satırı (th hariç)
+    const tr = el.closest('.guide-table tr');
+    if (tr && !tr.querySelector('th')) return tr;
+    // command-help paragrafı
+    const p = el.closest('.command-help p');
+    if (p) return p;
+    return null;
+  }
+
+  /** Satırdan kopyalanacak metni çıkar */
+  function extractText(row) {
+    if (row.tagName === 'TR') {
+      // İlk sütun: komut, üçüncü sütun: örnek
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 3) return cells[2].textContent.trim();
+      if (cells.length >= 1) return cells[0].textContent.trim();
+    }
+    // command-help p — code elemanının text'i
+    const code = row.querySelector('code');
+    if (code) return code.textContent.trim();
+    return row.textContent.trim();
+  }
+
+  /** Flash efekti uygula */
+  function flashRow(row) {
+    row.classList.add('copy-flash');
+    setTimeout(() => {
+      row.classList.remove('copy-flash');
+      row.classList.add('copy-flash-out');
+      setTimeout(() => row.classList.remove('copy-flash-out'), 400);
+    }, 600);
+  }
+
+  /** Clipboard'a kopyala + toast + flash */
+  async function copyRow(row) {
+    const text = extractText(row);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      showSuccess('Kopyalandı!');
+      flashRow(row);
+    } catch {
+      // Fallback: execCommand
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;left:-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      showSuccess('Kopyalandı!');
+      flashRow(row);
+    }
+  }
+
+  // Touch long-press (mobil)
+  document.addEventListener('touchstart', (e) => {
+    const row = findCopyRow(e.target);
+    if (!row) return;
+    pressTarget = row;
+    pressTimer = setTimeout(() => {
+      e.preventDefault();
+      copyRow(row);
+      pressTarget = null;
+    }, 500);
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    clearTimeout(pressTimer);
+    pressTarget = null;
+  });
+
+  document.addEventListener('touchmove', () => {
+    clearTimeout(pressTimer);
+    pressTarget = null;
+  });
+
+  // Right-click / contextmenu (masaüstü alternatif)
+  document.addEventListener('contextmenu', (e) => {
+    const row = findCopyRow(e.target);
+    if (!row) return;
+    // Sadece mobilde context menu'yü engelle (masaüstünde varsayılan davranış korunsun)
+    if (isMobileView()) {
+      e.preventDefault();
+      copyRow(row);
+    }
+  });
 }
 
 /* ========================================
