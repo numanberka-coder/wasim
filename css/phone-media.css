@@ -1,0 +1,298 @@
+/* ===== FAZ 4 — YENİ MESAJ TİPLERİ ===== */
+
+/* ---- 4.1 KONUM MESAJI ---- */
+.msg-location {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.msg-location-map {
+  width: 100%;
+  height: 130px;
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%, rgba(66,133,244,0.12), transparent),
+    linear-gradient(160deg, #1a3a2a 0%, #1e4030 30%, #243d32 60%, #1a3228 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Subtle grid lines for map feel */
+.msg-location-map::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Road-like lines */
+.msg-location-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.1) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255,255,255,.07) 2px, transparent 2px),
+    linear-gradient(45deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 80px 60px, 110px 80px, 55px 55px;
+  background-position: 20px 40px, 50px 10px, 15px 15px;
+}
+
+.msg-location-pin {
+  width: 36px;
+  height: 36px;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+}
+
+.msg-location-info {
+  background: var(--wa-location-info-bg);
+  padding: 8px 12px 6px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.msg-location-name {
+  font-size: calc(var(--chat-font-size) - 0px);
+  font-weight: 600;
+  color: var(--wa-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msg-location-sub {
+  font-size: calc(var(--chat-font-size) - 3px);
+  color: rgba(233,237,239,0.55);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Konum balonu geniş olsun */
+.msg-bubble:has(.msg-location) {
+  padding: 4px 4px 8px;
+}
+
+/* ---- 4.2 DÖKÜMAN MESAJI ---- */
+.msg-document {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px 4px;
+  min-width: 200px;
+  max-width: 260px;
+  cursor: pointer;
+}
+
+.msg-document-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-document-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.msg-document-name {
+  font-size: calc(var(--chat-font-size) - 0px);
+  font-weight: 500;
+  color: var(--wa-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.msg-document-size {
+  font-size: calc(var(--chat-font-size) - 3px);
+  color: rgba(233,237,239,0.55);
+}
+
+.msg-document-dl {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(233,237,239,0.45);
+}
+
+.msg-document + .msg-meta {
+  padding-top: 0;
+}
+
+/* ---- 4.3 STICKER MESAJI ---- */
+.msg-bubble.sticker-bubble {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.msg-bubble.sticker-bubble::before,
+.msg-bubble.sticker-bubble::after {
+  display: none !important;
+}
+
+.msg-sticker {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-sticker-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+
+.msg-sticker-fallback {
+  font-size: 80px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  user-select: none;
+}
+
+/* ---- 4.4 LİNK ÖNİZLEME ---- */
+.msg-link {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.msg-link-thumb {
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-link-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.msg-link-thumb-placeholder {
+  color: rgba(233,237,239,0.3);
+}
+
+.msg-link-body {
+  padding: 8px 10px 6px;
+  background: var(--wa-link-body-bg);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.msg-link-site {
+  font-size: calc(var(--chat-font-size) - 3px);
+  color: #25d366;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.msg-link-title {
+  font-size: calc(var(--chat-font-size) - 1px);
+  font-weight: 600;
+  color: var(--wa-text);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.msg-link-url {
+  font-size: calc(var(--chat-font-size) - 3px);
+  color: rgba(233,237,239,0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+/* Link balonu geniş olsun */
+.msg-bubble:has(.msg-link) {
+  padding: 4px 4px 8px;
+}
+
+/* ---- 4.5 BİR KEZ GÖRÜNTÜLE ---- */
+.msg-viewonce {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px 2px;
+  min-width: 180px;
+  max-width: 240px;
+  cursor: pointer;
+}
+
+.msg-viewonce-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(37,211,102,0.12);
+  border: 1.5px solid rgba(37,211,102,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #25d366;
+}
+
+.msg-bubble.out .msg-viewonce-icon {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.75);
+}
+
+.msg-viewonce-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.msg-viewonce-type {
+  font-size: calc(var(--chat-font-size) + 0px);
+  font-weight: 600;
+  color: var(--wa-text);
+}
+
+.msg-viewonce-sub {
+  font-size: calc(var(--chat-font-size) - 2px);
+  color: rgba(233,237,239,0.55);
+}
+

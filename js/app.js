@@ -23,7 +23,7 @@ import { syncHeader, applyTheme, setTheme, setHeaderColor, applyBubbleColors, se
 import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible } from './phone/statusbar.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
-import { addMessage, clearChat, rebuildChat, regenerateMessageTimes, updateMessageTimesInDOM, scrollToBottom } from './phone/messages.js';
+import { addMessage, clearChat, rebuildChat, updateAllTicks, materializeAllMessages, regenerateMessageTimes, updateMessageTimesInDOM, scrollToBottom } from './phone/messages.js';
 
 
 // Feature Modules
@@ -420,7 +420,7 @@ function bindEventHandlers() {
       state.set('settings.tickStatus', btn.dataset.tick);
       document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      rebuildChat();
+      updateAllTicks();
     });
   });
 
@@ -668,6 +668,9 @@ async function takeScreenshot() {
 
   try {
     showSuccess('Ekran görüntüsü hazırlanıyor...');
+
+    // Virtualize edilmiş mesajları materialize et
+    materializeAllMessages();
 
     const { default: html2canvas } = await import('html2canvas');
 

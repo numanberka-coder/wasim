@@ -5,6 +5,13 @@
 import { $, escapeHtml, timeToMinutes, minutesToTime, nowTime, Logger } from '../utils.js';
 import { showToast } from '../ui/toast.js';
 import { state } from '../state.js';
+import {
+  initVirtualScroller,
+  shouldVirtualize,
+  createPlaceholderRow,
+  estimateRowHeight,
+  materializeAll,
+} from '../ui/virtual-scroller.js';
 
 
 
@@ -52,6 +59,7 @@ function createAvatarNode(name) {
     const img = document.createElement('img');
     img.src = url;
     img.alt = name;
+    img.loading = 'lazy';
     img.onerror = () => { img.remove(); };
     av.appendChild(img);
   }
@@ -290,7 +298,7 @@ function renderVoiceContent(msg, bubble) {
     e.stopPropagation();
 
     if (voice._playTimer) {
-      clearInterval(voice._playTimer);
+      cancelAnimationFrame(voice._playTimer);
       voice._playTimer = null;
       voice.classList.remove('playing');
       Array.from(wave.querySelectorAll('span')).forEach(b => b.classList.remove('played', 'current'));
@@ -305,23 +313,30 @@ function renderVoiceContent(msg, bubble) {
     const totalSec   = Math.max(1, duration);
     const allBars    = Array.from(wave.querySelectorAll('span'));
     const totalBars  = allBars.length;
-    const totalTicks = Math.round((totalSec * 1000) / VOICE_TICK_MS);
-    let   tick       = 0;
+    const totalMs    = totalSec * 1000;
+    let   startTime  = null;
+    let   prevBar    = -1;
 
-    voice._playTimer = setInterval(() => {
-      tick++;
-      const progress   = tick / totalTicks;
+    function animateVoice(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const elapsed  = timestamp - startTime;
+      const progress = Math.min(elapsed / totalMs, 1);
       const currentBar = Math.floor(progress * totalBars);
-      dur.textContent  = formatVoiceDuration(Math.max(0, Math.round(totalSec * (1 - progress))));
 
-      allBars.forEach((b, i) => {
-        if (i < currentBar) { b.classList.add('played'); b.classList.remove('current'); }
-        else if (i === currentBar) { b.classList.remove('played'); b.classList.add('current'); }
-        else { b.classList.remove('played', 'current'); }
-      });
+      // Only update DOM when bar index changes (reduce reflows)
+      if (currentBar !== prevBar) {
+        dur.textContent = formatVoiceDuration(Math.max(0, Math.round(totalSec * (1 - progress))));
+        allBars.forEach((b, i) => {
+          if (i < currentBar) { b.classList.add('played'); b.classList.remove('current'); }
+          else if (i === currentBar) { b.classList.remove('played'); b.classList.add('current'); }
+          else { b.classList.remove('played', 'current'); }
+        });
+        prevBar = currentBar;
+      }
 
-      if (tick >= totalTicks) {
-        clearInterval(voice._playTimer);
+      if (progress < 1) {
+        voice._playTimer = requestAnimationFrame(animateVoice);
+      } else {
         voice._playTimer = null;
         voice.classList.remove('playing');
         play.innerHTML = VOICE_PLAY_ICON;
@@ -330,7 +345,9 @@ function renderVoiceContent(msg, bubble) {
           dur.textContent = formatVoiceDuration(duration);
         }, 400);
       }
-    }, VOICE_TICK_MS);
+    }
+
+    voice._playTimer = requestAnimationFrame(animateVoice);
   });
 
   voice.appendChild(play);
@@ -956,9 +973,26 @@ function _clearHeaderTyping() {
 }
 
 /**
+ * Clear all active voice playback timers before DOM removal
+ */
+function clearVoiceTimers() {
+  const chatBody = $('chatBody');
+  if (!chatBody) return;
+
+  chatBody.querySelectorAll('.msg-voice').forEach(voice => {
+    if (voice._playTimer) {
+      cancelAnimationFrame(voice._playTimer);
+      voice._playTimer = null;
+    }
+  });
+}
+
+/**
  * Clear chat but keep day divider
  */
 function clearChat() {
+  clearVoiceTimers();
+
   const chatBody = $('chatBody');
   if (!chatBody) return;
 
@@ -967,7 +1001,7 @@ function clearChat() {
 }
 
 /**
- * Rebuild chat from messages state
+ * Rebuild chat from messages state (DocumentFragment + virtualization)
  */
 function rebuildChat() {
   clearChat();
@@ -975,17 +1009,65 @@ function rebuildChat() {
   if (!chatBody) return;
 
   const messages = state.get('messages');
-  for (const msg of messages) {
+  const useVirtual = shouldVirtualize(messages.length);
+
+  if (useVirtual) {
+    initVirtualScroller(chatBody, buildMessageRow, () => state.get('messages') || []);
+  }
+
+  const fragment = document.createDocumentFragment();
+  // Son 30 mesaj her zaman render edilir — kullanıcının gördüğü alan
+  const renderStart = useVirtual ? Math.max(0, messages.length - 30) : 0;
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
     try {
-      const row = buildMessageRow(msg);
-      chatBody.appendChild(row);
+      if (useVirtual && i < renderStart) {
+        fragment.appendChild(createPlaceholderRow(msg, estimateRowHeight(msg)));
+      } else {
+        fragment.appendChild(buildMessageRow(msg));
+      }
     } catch (err) {
       Logger.error('Mesaj rebuild hatası:', msg.id, err);
     }
   }
 
+  chatBody.appendChild(fragment);
+
   if (messages.length) {
     chatBody.scrollTop = chatBody.scrollHeight;
+  }
+}
+
+/**
+ * Materialize all virtual placeholders (PNG export öncesi çağır)
+ */
+function materializeAllMessages() {
+  const chatBody = $('chatBody');
+  if (chatBody) materializeAll(chatBody);
+}
+
+/**
+ * Update only tick icons in existing DOM (avoids full rebuildChat)
+ */
+function updateAllTicks() {
+  const chatBody = $('chatBody');
+  if (!chatBody) return;
+
+  const tickStatus = state.get('settings.tickStatus') || 'read';
+  const tickWrappers = chatBody.querySelectorAll('.msg-row.out .msg-tick');
+
+  for (const wrapper of tickWrappers) {
+    // Skip messages with per-message tick override
+    const row = wrapper.closest('.msg-row');
+    if (!row) continue;
+    const msgId = row.dataset.msgId;
+    const messages = state.get('messages') || [];
+    const msg = messages.find(m => String(m.id) === msgId);
+    const effectiveTick = msg?.tickStatus || tickStatus;
+
+    wrapper.textContent = '';
+    wrapper.appendChild(createTickSVG(effectiveTick));
   }
 }
 
@@ -1049,6 +1131,8 @@ export {
   removeTypingBubble,
   clearChat,
   rebuildChat,
+  updateAllTicks,
+  materializeAllMessages,
   scrollToBottom,
   findMessageByTarget,
   applyReactionToMessage,

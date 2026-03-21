@@ -59,7 +59,12 @@ export function renderHeaderAvatar() {
 
   // File data URL takes priority
   if (group.avatarDataUrl) {
-    avatarEl.innerHTML = `<img src="${group.avatarDataUrl}" alt="group">`;
+    const img = document.createElement('img');
+    img.src = group.avatarDataUrl;
+    img.alt = 'group';
+    img.loading = 'lazy';
+    avatarEl.textContent = '';
+    avatarEl.appendChild(img);
     return;
   }
 
@@ -69,10 +74,11 @@ export function renderHeaderAvatar() {
     const img = document.createElement('img');
     img.src = group.photoUrl;
     img.alt = 'group';
+    img.loading = 'lazy';
     img.addEventListener('error', () => {
       avatarEl.textContent = initial;
     });
-    avatarEl.innerHTML = '';
+    avatarEl.textContent = '';
     avatarEl.appendChild(img);
     return;
   }
