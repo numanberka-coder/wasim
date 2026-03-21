@@ -26,7 +26,7 @@
  * Initialize application
  */
 function init() {
-  console.log('🚀 Initializing WhatsApp Simulator...');
+  Logger.info('🚀 Initializing WhatsApp Simulator...');
 
   // Load saved state or use defaults
   const hasData = storage.load();
@@ -85,78 +85,83 @@ function init() {
   // Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
   initTutorials();
 
-  console.log('✅ WhatsApp Simulator ready!');
+  Logger.info('✅ WhatsApp Simulator ready!');
 }
 
 /**
  * Populate form fields from state
  */
 function populateFormFields() {
-  const group = state.get('group');
-  const settings = state.get('settings');
-  const messageTimes = state.get('messageTimes');
-  const player = state.get('player');
+  try {
+    const group = state.get('group') || {};
+    const settings = state.get('settings') || {};
+    const messageTimes = state.get('messageTimes') || {};
+    const player = state.get('player') || {};
 
-  // Group fields
-  setInputValue('groupTitle', group.title);
-  setInputValue('groupSubtitle', group.subtitle);
-  setInputValue('dayLabel', group.dayLabel);
-  setInputValue('groupPhotoUrl', group.photoUrl);
+    // Group fields
+    setInputValue('groupTitle', group.title);
+    setInputValue('groupSubtitle', group.subtitle);
+    setInputValue('dayLabel', group.dayLabel);
+    setInputValue('groupPhotoUrl', group.photoUrl);
 
-  // Status bar
-  setInputValue('statusTimeInput', settings.statusTimeOverride || nowTime());
+    // Status bar
+    setInputValue('statusTimeInput', settings.statusTimeOverride || nowTime());
 
-  // Battery
-  setChecked('batteryVisible', settings.batteryVisible);
-  setInputValue('batteryPercentInput', settings.batteryPercent);
-  setInputValue('batteryHealthInput', settings.batteryHealth);
+    // Battery
+    setChecked('batteryVisible', settings.batteryVisible);
+    setInputValue('batteryPercentInput', settings.batteryPercent);
+    setInputValue('batteryHealthInput', settings.batteryHealth);
 
-  // Wallpaper
-  setInputValue('wallpaperPreset', settings.wallpaperPreset);
-  setInputValue('wallpaperColor', settings.wallpaperColor);
+    // Wallpaper
+    setInputValue('wallpaperPreset', settings.wallpaperPreset);
+    setInputValue('wallpaperColor', settings.wallpaperColor);
 
-  // Theme
-  updateThemeButtons(settings.theme || 'dark');
+    // Theme
+    updateThemeButtons(settings.theme || 'dark');
 
-  // Header color
-  setInputValue('headerColorInput', settings.headerColor || '#1f2c33');
+    // Header color
+    setInputValue('headerColorInput', settings.headerColor || '#1f2c33');
 
-  // Bubble colors
-  const theme = settings.theme || 'dark';
-  const defaultOutColor = theme === 'light' ? '#d9fdd3' : '#005c4b';
-  const defaultInColor = theme === 'light' ? '#ffffff' : '#1f2c33';
-  setInputValue('bubbleOutColorInput', settings.bubbleOutColor || defaultOutColor);
-  setInputValue('bubbleInColorInput', settings.bubbleInColor || defaultInColor);
+    // Bubble colors
+    const theme = settings.theme || 'dark';
+    const defaultOutColor = theme === 'light' ? '#d9fdd3' : '#005c4b';
+    const defaultInColor = theme === 'light' ? '#ffffff' : '#1f2c33';
+    setInputValue('bubbleOutColorInput', settings.bubbleOutColor || defaultOutColor);
+    setInputValue('bubbleInColorInput', settings.bubbleInColor || defaultInColor);
 
-  // Tick status
-  const tickVal = settings.tickStatus || 'read';
-  document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
-  const activeTickBtn = document.querySelector(`.tick-btn[data-tick="${tickVal}"]`);
-  if (activeTickBtn) activeTickBtn.classList.add('active');
+    // Tick status
+    const tickVal = settings.tickStatus || 'read';
+    document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
+    const activeTickBtn = document.querySelector(`.tick-btn[data-tick="${tickVal}"]`);
+    if (activeTickBtn) activeTickBtn.classList.add('active');
 
-  // Typography
-  setInputValue('fontSizeControl', settings.chatFontSize);
-  setTextContent('fontSizeValue', `${settings.chatFontSize}px`);
-  setInputValue('lineHeightControl', settings.chatLineHeight);
-  setTextContent('lineHeightValue', `${settings.chatLineHeight.toFixed(2).replace(/\.00$/, '')}x`);
-  setInputValue('bubbleSizeControl', settings.bubbleSize);
-  setTextContent('bubbleSizeValue', `${settings.bubbleSize}%`);
-  setInputValue('bubblePaddingYControl', settings.bubblePaddingY);
-  setTextContent('bubblePaddingYValue', `${settings.bubblePaddingY}px`);
+    // Typography
+    setInputValue('fontSizeControl', settings.chatFontSize);
+    setTextContent('fontSizeValue', `${settings.chatFontSize}px`);
+    setInputValue('lineHeightControl', settings.chatLineHeight);
+    const lineHeight = Number(settings.chatLineHeight) || 1.4;
+    setTextContent('lineHeightValue', `${lineHeight.toFixed(2).replace(/\.00$/, '')}x`);
+    setInputValue('bubbleSizeControl', settings.bubbleSize);
+    setTextContent('bubbleSizeValue', `${settings.bubbleSize}%`);
+    setInputValue('bubblePaddingYControl', settings.bubblePaddingY);
+    setTextContent('bubblePaddingYValue', `${settings.bubblePaddingY}px`);
 
-  // Message times
-  setChecked('autoMessageTimesToggle', messageTimes.auto);
-  setInputValue('messageBaseTimeInput', messageTimes.baseTime || nowTime());
-  setInputValue('messageIncrementInput', messageTimes.increment);
-  updateMessageTimeModeUI();
+    // Message times
+    setChecked('autoMessageTimesToggle', messageTimes.auto);
+    setInputValue('messageBaseTimeInput', messageTimes.baseTime || nowTime());
+    setInputValue('messageIncrementInput', messageTimes.increment);
+    updateMessageTimeModeUI();
 
-  // Script
-  setInputValue('scriptBox', player.script);
-  setInputValue('speed', player.speed);
-  setInputValue('jitter', player.jitter);
+    // Script
+    setInputValue('scriptBox', player.script);
+    setInputValue('speed', player.speed);
+    setInputValue('jitter', player.jitter);
 
-  // Syntax highlight overlay'i güncelle
-  if (typeof SyntaxHighlight !== 'undefined') SyntaxHighlight.refresh();
+    // Syntax highlight overlay'i güncelle
+    if (typeof SyntaxHighlight !== 'undefined') SyntaxHighlight.refresh();
+  } catch (err) {
+    Logger.error('Form alanları doldurulurken hata:', err);
+  }
 }
 
 /**

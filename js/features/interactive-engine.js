@@ -240,7 +240,7 @@ function enableInteractiveMode(sourceText) {
   const blockCount = blocks.length;
   showSuccess(`İnteraktif mod aktif! ${blockCount} blok, ${triggerCount} tetikleyici yüklendi.`);
 
-  console.log('🎮 Interactive mode enabled', { blockCount, triggerCount, hasDefault: !!defaultBlock });
+  Logger.info('🎮 Interactive mode enabled', { blockCount, triggerCount, hasDefault: !!defaultBlock });
   return true;
 }
 
@@ -255,7 +255,7 @@ function disableInteractiveMode() {
 
   updateInteractiveModeUI(false);
   showSuccess('İnteraktif mod kapatıldı.');
-  console.log('🎮 Interactive mode disabled');
+  Logger.info('🎮 Interactive mode disabled');
 }
 
 /**
@@ -373,5 +373,5 @@ function initInteractive() {
     showSuccess('Sıfırlandı!');
   });
 
-  console.log('🎮 Interactive engine initialized');
+  Logger.info('🎮 Interactive engine initialized');
 }

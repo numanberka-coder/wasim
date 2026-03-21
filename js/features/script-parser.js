@@ -19,6 +19,8 @@ const EventType = {
  * Parse script text into events
  */
 function parseScript(text) {
+  if (!text || typeof text !== 'string') return [];
+
   const lines = text
     .split(/\r?\n/)
     .map(line => line.trim())
@@ -27,9 +29,13 @@ function parseScript(text) {
   const events = [];
 
   for (const line of lines) {
-    const event = parseLine(line);
-    if (event) {
-      events.push(event);
+    try {
+      const event = parseLine(line);
+      if (event) {
+        events.push(event);
+      }
+    } catch (err) {
+      Logger.error('Satır parse hatası:', line, err);
     }
   }
 
@@ -97,6 +103,7 @@ function parseVoiceDurationToSeconds(token) {
 }
 
 function parseLine(line) {
+  try {
   // Skip interactive mode syntax lines (#block, trigger:, ---)
   if (line.startsWith('#') || line === '---' || /^trigger\s*:/i.test(line)) {
     return null;
@@ -295,6 +302,10 @@ function parseLine(line) {
     type: EventType.SYSTEM,
     text: line
   };
+  } catch (err) {
+    Logger.error('parseLine hatası:', line, err);
+    return null;
+  }
 }
 
 /**

@@ -10,7 +10,7 @@ function initForms() {
   initFileInputs();
   initRangeInputs();
   initCheckboxRows();
-  console.log('📝 Forms initialized');
+  Logger.info('📝 Forms initialized');
 }
 
 /**

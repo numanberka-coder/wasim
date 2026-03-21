@@ -751,16 +751,24 @@ function addMessage({ speaker, text, replyTo = null, time = null, kind = null, s
     if (String(prevMsg.speaker).toLowerCase() === String(savedMsg.speaker).toLowerCase()) {
       const prevRow = chatBody.querySelector(`[data-msg-id="${String(prevMsg.id)}"]`);
       if (prevRow) {
-        const updated = buildMessageRow(prevMsg);
-        prevRow.replaceWith(updated);
+        try {
+          const updated = buildMessageRow(prevMsg);
+          prevRow.replaceWith(updated);
+        } catch (err) {
+          Logger.error('Mesaj yeniden render hatası:', prevMsg.id, err);
+        }
       }
     }
   }
 
   // Render new message
-  const row = buildMessageRow(savedMsg);
-  chatBody.appendChild(row);
-  chatBody.scrollTop = chatBody.scrollHeight;
+  try {
+    const row = buildMessageRow(savedMsg);
+    chatBody.appendChild(row);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  } catch (err) {
+    Logger.error('Mesaj render hatası:', savedMsg.id, err);
+  }
 
   return savedMsg;
 }
@@ -992,8 +1000,12 @@ function rebuildChat() {
 
   const messages = state.get('messages');
   for (const msg of messages) {
-    const row = buildMessageRow(msg);
-    chatBody.appendChild(row);
+    try {
+      const row = buildMessageRow(msg);
+      chatBody.appendChild(row);
+    } catch (err) {
+      Logger.error('Mesaj rebuild hatası:', msg.id, err);
+    }
   }
 
   if (messages.length) {
