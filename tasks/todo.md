@@ -1,41 +1,51 @@
-# Faz 20 — Güvenlik & Stabilite ✅
+# Faz 21 — Kod Kalitesi & Refactoring ✅
 
 > **Tarih:** 2026-03-21
-> **Kapsam:** XSS düzeltmesi, hata koruması, console.log temizliği, Logger utility
+> **Kapsam:** Refactoring odaklı — davranış değişikliği yok, bakım maliyetini düşür
 > **Durum:** Tamamlandı
 
 ---
 
 ## Görevler
 
-### 20.1 — header.js onerror XSS düzeltmesi 🔴 ✅
-- [x] `js/phone/header.js:62-70` — `onerror="..."` inline handler → `createElement` + `addEventListener('error', ...)` geçişi
-- **Çözüm:** img elementi DOM API ile oluşturuldu, error listener ile fallback initial gösterildi
+### 21.1 — bindEventHandlers() refactoring 🔴 ✅
+- [x] 362 satırlık fonksiyon data-driven yapıya dönüştürüldü
+- [x] `CLICK_MAP` — 19 basit click handler tek array'de
+- [x] `COLOR_PICKER_MAP` — 4 color picker input+change duplicate kaldırıldı
+- [x] `handleScaleClick()` — 2 scale button loop birleştirildi
+- [x] Gereksiz `bindChange('sceneNameInput', () => {})` kaldırıldı
 
-### 20.2 — Script parser try-catch 🔴 ✅
-- [x] `parseScript()` — for döngüsü try-catch ile sarıldı, bozuk satır skip edilir
-- [x] `parseLine()` — tüm fonksiyon body'si try-catch ile sarıldı, hata durumunda `null` döner
-- **Çözüm:** Her iki fonksiyona try-catch + Logger.error eklendi
+### 21.2 — Tema renk sabitleri merkezileştirme 🔴 ✅
+- [x] `THEME_DEFAULTS` objesi config.js'e eklendi (dark/light renk çiftleri)
+- [x] 27 hardcoded renk referansı → tek kaynak (`THEME_DEFAULTS`)
+- [x] Etkilenen dosyalar: app.js, config.js, header.js, wallpaper.js, state.js
 
-### 20.3 — populateFormFields() hata koruması 🔴 ✅
-- [x] `app.js:94-162` — Tüm fonksiyon body'si try-catch ile sarıldı
-- [x] State objeleri `|| {}` fallback ile korundu
-- [x] `chatLineHeight` güvenli Number() dönüşümü eklendi
+### 21.3 — renderSceneList() event listener leak düzeltmesi 🔴 ✅
+- [x] Per-button listener pattern kaldırıldı
+- [x] `initSceneListDelegation()` — container üzerinde tek event delegation
+- [x] `applyFullState()` helper ile 3 yerdeki tekrarlanan state uygulama kodu birleştirildi
 
-### 20.4 — buildMessageRow() hata koruması 🟡 ✅
-- [x] `addMessage()` içinde buildMessageRow çağrıları try-catch ile sarıldı
-- [x] `rebuildChat()` içinde per-message try-catch eklendi
-- **Çözüm:** Tek bozuk mesaj tüm chat'i kırmaz, hata loglanır
+### 21.4 — Event binding boilerplate azaltma 🟡 ✅
+- [x] `bindEvent(id, event, handler)` generic utility eklendi
+- [x] `bindClick`, `bindChange`, `bindInput` → `bindEvent` üzerine wrapper
 
-### 20.5 — console.log temizliği 🟡 ✅
-- [x] 17 console.log + 5 console.warn → Logger geçişi tamamlandı
-- **Dosyalar:** app.js, storage.js, interactive-engine.js, player.js, statusbar.js, accordion.js, forms.js, tabs.js
+### 21.5 — buildMessageRow() parçalama 🟡 ✅
+- [x] 544 satırlık monolitik fonksiyon → 10 ayrı renderer fonksiyonu
+- [x] `MESSAGE_RENDERERS` dispatch table ile tip bazlı dağıtım
+- [x] Reply target matching duplicate kodu → tek `resolveReplyTarget()`
+- [x] `findMessageByTarget()` → 1 satırlık wrapper
+- [x] Magic number'lar → sabitler (`VOICE_WAVEFORM_BARS`, `VOICE_TICK_MS`, `DOC_EXT_COLORS` vb.)
+- [x] `renderReplyBlock()`, `renderMessageMeta()`, `renderReactionChip()` ayrı fonksiyonlar
+- [x] `appendCaption()` ile photo/video/voice caption tekrarı giderildi
 
-### 20.6 — Logger utility 🟢 ✅
-- [x] `js/utils.js` içine `Logger` IIFE objesi eklendi
-- [x] `Logger.info()`, `Logger.warn()`, `Logger.error()`, `Logger.debug()` metodları
-- [x] `?debug=true` URL parametresi ile verbose mod
-- [x] Production'da sadece `Logger.error()` aktif, diğerleri sessiz
+### 21.6 — Header renk sıfırlama mantığı birleştirme 🟡 ✅
+- [x] `resetThemeColors(theme)` fonksiyonu oluşturuldu
+- [x] 4 yerdeki tekrarlanan header+bubble renk sıfırlama kodu birleştirildi
+
+### 21.7 — handleEvent() değerlendirme 🟢 ✅
+- [x] `play()` 27 satır — temiz, refactoring gerekmez
+- [x] `handleEvent()` 65 satır — zaten modüler (handleTypingEvent, handleMessageEvent)
+- **Sonuç:** Ek refactoring gereksiz — kod yeterince temiz
 
 ---
 
@@ -43,7 +53,10 @@
 
 | Metrik | Önce | Sonra |
 |--------|------|-------|
-| XSS risk noktası | 1 (onerror attribute) | 0 |
-| Korumasız kritik fonksiyon | 3 (parser, form, message) | 0 |
-| console.log/warn | 22 | 0 (Logger'a geçirildi) |
-| Yapısal loglama | Yok | Logger utility |
+| Hardcoded renk referansı | 27 (6 dosyada) | 0 (tek THEME_DEFAULTS) |
+| bindEventHandlers() satır | 362 | ~280 (data-driven) |
+| buildMessageRow() satır | 544 (monolitik) | ~60 (dispatch + alt fonksiyonlar) |
+| Reply matching tekrar | 2 yerde (19 satır × 2) | 1 yerde (resolveReplyTarget) |
+| Event listener leak | renderSceneList her render'da | Tek delegation listener |
+| Tekrarlanan state uygulama | 4 yerde | 1 yerde (applyFullState) |
+| Magic number | 15+ inline | Sabitler |

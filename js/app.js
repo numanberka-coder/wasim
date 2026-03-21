@@ -67,7 +67,8 @@ function init() {
   // Bind event handlers
   bindEventHandlers();
 
-  // Render scene list
+  // Render scene list + event delegation
+  initSceneListDelegation();
   renderSceneList();
 
   // Initialize mobile module (Faz 8)
@@ -120,12 +121,13 @@ function populateFormFields() {
     updateThemeButtons(settings.theme || 'dark');
 
     // Header color
-    setInputValue('headerColorInput', settings.headerColor || '#1f2c33');
+    setInputValue('headerColorInput', settings.headerColor || THEME_DEFAULTS.dark.headerColor);
 
     // Bubble colors
     const theme = settings.theme || 'dark';
-    const defaultOutColor = theme === 'light' ? '#d9fdd3' : '#005c4b';
-    const defaultInColor = theme === 'light' ? '#ffffff' : '#1f2c33';
+    const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+    const defaultOutColor = themeColors.bubbleOutColor;
+    const defaultInColor = themeColors.bubbleInColor;
     setInputValue('bubbleOutColorInput', settings.bubbleOutColor || defaultOutColor);
     setInputValue('bubbleInColorInput', settings.bubbleInColor || defaultInColor);
 
@@ -169,8 +171,9 @@ function populateFormFields() {
  * Özel renk seçilmişse korunur, seçilmemişse tema varsayılanı gösterilir
  */
 function updateBubbleColorInputDefaults(theme) {
-  const defaultOut = theme === 'light' ? '#d9fdd3' : '#005c4b';
-  const defaultIn = theme === 'light' ? '#ffffff' : '#1f2c33';
+  const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+  const defaultOut = themeColors.bubbleOutColor;
+  const defaultIn = themeColors.bubbleInColor;
   const settings = state.get('settings');
   // Özel renk yoksa input'ları güncelle
   if (!settings.bubbleOutColor) {
@@ -184,6 +187,16 @@ function updateBubbleColorInputDefaults(theme) {
 }
 
 /**
+ * Tema renklerini varsayılana sıfırla (header + bubble)
+ */
+function resetThemeColors(theme) {
+  const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+  setHeaderColor(themeColors.headerColor);
+  setInputValue('headerColorInput', themeColors.headerColor);
+  updateBubbleColorInputDefaults(theme);
+}
+
+/**
  * Toggle theme between dark and light
  */
 function toggleTheme() {
@@ -191,12 +204,7 @@ function toggleTheme() {
   const next = current === 'dark' ? 'light' : 'dark';
   setTheme(next);
   updateThemeButtons(next);
-  // Header rengi temaya uygun varsayılana dönsün
-  const defaultColor = next === 'light' ? '#008069' : '#1f2c33';
-  setHeaderColor(defaultColor);
-  setInputValue('headerColorInput', defaultColor);
-  // Bubble renk picker varsayılanlarını güncelle (özel renk yoksa)
-  updateBubbleColorInputDefaults(next);
+  resetThemeColors(next);
 }
 
 /**
@@ -212,7 +220,7 @@ function updateThemeButtons(theme) {
     lightBtn.classList.remove('secondary');
     // Primary style for active button
     lightBtn.style.background = 'var(--wa-green)';
-    lightBtn.style.color = '#111b21';
+    lightBtn.style.color = THEME_DEFAULTS.activeButtonTextColor;
     lightBtn.style.borderColor = 'transparent';
     darkBtn.style.background = '';
     darkBtn.style.color = '';
@@ -222,7 +230,7 @@ function updateThemeButtons(theme) {
     darkBtn.classList.remove('secondary');
     // Primary style for active button
     darkBtn.style.background = 'var(--wa-green)';
-    darkBtn.style.color = '#111b21';
+    darkBtn.style.color = THEME_DEFAULTS.activeButtonTextColor;
     darkBtn.style.borderColor = 'transparent';
     lightBtn.style.background = '';
     lightBtn.style.color = '';
@@ -231,9 +239,68 @@ function updateThemeButtons(theme) {
 }
 
 /**
+ * Basit click → fonksiyon eşleştirmeleri (data-driven event map)
+ */
+const CLICK_MAP = [
+  // People
+  ['savePersonBtn',     savePerson],
+  ['newPersonBtn',      clearPersonForm],
+  ['clearAvatarBtn',    clearPersonAvatar],
+  ['deletePersonBtn',   deletePerson],
+  ['applyJsonBtn',      applyPeopleFromJson],
+  ['refreshJsonBtn',    refreshPeopleJson],
+  // Player
+  ['loadBtn',           loadScript],
+  ['stepBtn',           step],
+  ['playBtn',           play],
+  ['pauseBtn',          pause],
+  ['resetBtn',          reset],
+  // Phone-only mode
+  ['phoneOnlyBtn',      togglePhoneOnlyMode],
+  ['phoneOnlyExitBtn',  togglePhoneOnlyMode],
+  // Theme toggle (quick)
+  ['actionThemeToggleBtn', toggleTheme],
+  ['potThemeToggleBtn',    toggleTheme],
+  // Screenshot
+  ['screenshotBtn',     takeScreenshot],
+  ['potScreenshotBtn',  takeScreenshot],
+];
+
+/**
+ * Color picker eşleştirmeleri — input + change aynı handler'ı tetikler
+ */
+const COLOR_PICKER_MAP = [
+  ['wallpaperColor',      setWallpaperColor],
+  ['headerColorInput',    setHeaderColor],
+  ['bubbleOutColorInput',  setBubbleOutColor],
+  ['bubbleInColorInput',   setBubbleInColor],
+];
+
+/**
+ * Scale butonlarının ortak handler'ı
+ */
+function handleScaleClick(e) {
+  const btn = e.target.closest('[data-scale]');
+  if (!btn) return;
+  const scale = parseFloat(btn.dataset.scale);
+  setPhoneScale(scale);
+  syncScaleButtons(scale);
+}
+
+/**
  * Bind all event handlers
  */
 function bindEventHandlers() {
+  // Data-driven click bindings
+  CLICK_MAP.forEach(([id, handler]) => bindClick(id, handler));
+
+  // Color picker bindings (input + change → value handler)
+  COLOR_PICKER_MAP.forEach(([id, setter]) => {
+    const handler = (e) => setter(e.target.value);
+    bindInput(id, handler);
+    bindChange(id, handler);
+  });
+
   // === GROUP SETTINGS ===
   bindClick('applyGroupBtn', () => {
     const ok = updateGroupFromForm();
@@ -263,17 +330,9 @@ function bindEventHandlers() {
   });
 
   // === STATUS BAR ===
-  bindInput('operatorNameInput', (e) => {
-    setOperatorName(e.target.value.trim());
-  });
-
-  bindInput('statusTimeInput', (e) => {
-    setStatusTime(e.target.value);
-  });
-
-  bindChange('batteryVisible', (e) => {
-    setBatteryVisible(e.target.checked);
-  });
+  bindInput('operatorNameInput', (e) => setOperatorName(e.target.value.trim()));
+  bindInput('statusTimeInput', (e) => setStatusTime(e.target.value));
+  bindChange('batteryVisible', (e) => setBatteryVisible(e.target.checked));
 
   bindInput('batteryPercentInput', (e) => {
     const value = clampInputValue(e.target, 0, 100, 95, 'Batarya % 0-100 arasında olmalı.');
@@ -286,17 +345,7 @@ function bindEventHandlers() {
   });
 
   // === WALLPAPER ===
-  bindChange('wallpaperPreset', (e) => {
-    setWallpaperPreset(e.target.value);
-  });
-
-  bindInput('wallpaperColor', (e) => {
-    setWallpaperColor(e.target.value);
-  });
-
-  bindChange('wallpaperColor', (e) => {
-    setWallpaperColor(e.target.value);
-  });
+  bindChange('wallpaperPreset', (e) => setWallpaperPreset(e.target.value));
 
   bindChange('wallpaperImageFile', async (e) => {
     const file = e.target.files?.[0];
@@ -313,10 +362,9 @@ function bindEventHandlers() {
   bindClick('clearWallpaperBtn', () => {
     clearWallpaper();
     const theme = state.get('settings.theme') || 'dark';
-    const defaultPreset = theme === 'light' ? 'light-default' : 'default';
-    const defaultColor = theme === 'light' ? '#efeae2' : '#0b141a';
-    setInputValue('wallpaperPreset', defaultPreset);
-    setInputValue('wallpaperColor', defaultColor);
+    const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+    setInputValue('wallpaperPreset', themeColors.wallpaperPreset);
+    setInputValue('wallpaperColor', themeColors.wallpaperColor);
     const fileInput = $('wallpaperImageFile');
     if (fileInput) fileInput.value = '';
     showSuccess('Duvar kağıdı sıfırlandı!');
@@ -326,70 +374,30 @@ function bindEventHandlers() {
   bindClick('themeDarkBtn', () => {
     setTheme('dark');
     updateThemeButtons('dark');
-    // Header rengi dark varsayılana dönsün
-    const defaultDark = '#1f2c33';
-    setHeaderColor(defaultDark);
-    setInputValue('headerColorInput', defaultDark);
-    updateBubbleColorInputDefaults('dark');
+    resetThemeColors('dark');
     showSuccess('Dark mod aktif!');
   });
 
   bindClick('themeLightBtn', () => {
     setTheme('light');
     updateThemeButtons('light');
-    // Header rengi light varsayılana dönsün
-    const defaultLight = '#008069';
-    setHeaderColor(defaultLight);
-    setInputValue('headerColorInput', defaultLight);
-    updateBubbleColorInputDefaults('light');
+    resetThemeColors('light');
     showSuccess('Light mod aktif!');
   });
 
-  // Action bar & phone-only toolbar quick theme toggle
-  bindClick('actionThemeToggleBtn', toggleTheme);
-  bindClick('potThemeToggleBtn', toggleTheme);
-
-  // === HEADER COLOR ===
-  bindInput('headerColorInput', (e) => {
-    setHeaderColor(e.target.value);
-  });
-
-  bindChange('headerColorInput', (e) => {
-    setHeaderColor(e.target.value);
-  });
-
+  // === RESET BUTTONS ===
   bindClick('resetHeaderColorBtn', () => {
     const theme = state.get('settings.theme') || 'dark';
-    const defaultColor = theme === 'light' ? '#008069' : '#1f2c33';
-    setHeaderColor(defaultColor);
-    setInputValue('headerColorInput', defaultColor);
+    resetThemeColors(theme);
     showSuccess('Header rengi sıfırlandı!');
-  });
-
-  // === BUBBLE COLORS ===
-  bindInput('bubbleOutColorInput', (e) => {
-    setBubbleOutColor(e.target.value);
-  });
-
-  bindChange('bubbleOutColorInput', (e) => {
-    setBubbleOutColor(e.target.value);
-  });
-
-  bindInput('bubbleInColorInput', (e) => {
-    setBubbleInColor(e.target.value);
-  });
-
-  bindChange('bubbleInColorInput', (e) => {
-    setBubbleInColor(e.target.value);
   });
 
   bindClick('resetBubbleColorsBtn', () => {
     resetBubbleColors();
     const theme = state.get('settings.theme') || 'dark';
-    const defaultOut = theme === 'light' ? '#d9fdd3' : '#005c4b';
-    const defaultIn = theme === 'light' ? '#ffffff' : '#1f2c33';
-    setInputValue('bubbleOutColorInput', defaultOut);
-    setInputValue('bubbleInColorInput', defaultIn);
+    const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+    setInputValue('bubbleOutColorInput', themeColors.bubbleOutColor);
+    setInputValue('bubbleInColorInput', themeColors.bubbleInColor);
     showSuccess('Balon renkleri sıfırlandı!');
   });
 
@@ -398,12 +406,9 @@ function bindEventHandlers() {
     bindClick(id, () => {
       const btn = $(id);
       if (!btn) return;
-      const tickVal = btn.dataset.tick;
-      state.set('settings.tickStatus', tickVal);
-      // Update active class
+      state.set('settings.tickStatus', btn.dataset.tick);
       document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      // Re-render all messages to apply new default tick
       rebuildChat();
     });
   });
@@ -437,34 +442,21 @@ function bindEventHandlers() {
   bindChange('autoMessageTimesToggle', (e) => {
     state.set('messageTimes.auto', e.target.checked);
     updateMessageTimeModeUI();
-    if (e.target.checked) {
-      regenerateMessageTimes();
-    }
+    if (e.target.checked) regenerateMessageTimes();
   });
 
   bindInput('messageBaseTimeInput', (e) => {
     state.set('messageTimes.baseTime', e.target.value || nowTime());
-    if (state.get('messageTimes.auto')) {
-      regenerateMessageTimes();
-    }
+    if (state.get('messageTimes.auto')) regenerateMessageTimes();
   });
 
   bindInput('messageIncrementInput', (e) => {
     const val = clampInputValue(e.target, 0, 180, 1, 'Artış dakikası 0-180 arasında olmalı.');
     state.set('messageTimes.increment', val);
-    if (state.get('messageTimes.auto')) {
-      regenerateMessageTimes();
-    }
+    if (state.get('messageTimes.auto')) regenerateMessageTimes();
   });
 
-  // === PEOPLE ===
-  bindClick('savePersonBtn', savePerson);
-  bindClick('newPersonBtn', clearPersonForm);
-  bindClick('clearAvatarBtn', clearPersonAvatar);
-  bindClick('deletePersonBtn', deletePerson);
-  bindClick('applyJsonBtn', applyPeopleFromJson);
-  bindClick('refreshJsonBtn', refreshPeopleJson);
-
+  // === PEOPLE (file upload) ===
   bindChange('pAvatarFile', async (e) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -480,52 +472,14 @@ function bindEventHandlers() {
     }
   });
 
-  // === PLAYER ===
-  bindClick('loadBtn', () => {
-    loadScript();
-  });
-
-  bindClick('stepBtn', step);
-
-  bindClick('playBtn', () => {
-    play();
-  });
-
-  bindClick('pauseBtn', () => {
-    pause();
-  });
-
-  bindClick('resetBtn', () => {
-    reset();
-  });
-
-  // === PHONE-ONLY MODE ===
-  bindClick('phoneOnlyBtn', togglePhoneOnlyMode);
-  bindClick('phoneOnlyExitBtn', togglePhoneOnlyMode);
-
-  // === SCREENSHOT ===
-  bindClick('screenshotBtn', takeScreenshot);
-  bindClick('potScreenshotBtn', takeScreenshot);
-
-  // === SCALE CONTROLS (action bar + floating toolbar) ===
-  document.querySelectorAll('.scale-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const scale = parseFloat(btn.dataset.scale);
-      setPhoneScale(scale);
-      syncScaleButtons(scale);
-    });
-  });
-  document.querySelectorAll('.pot-scale').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const scale = parseFloat(btn.dataset.scale);
-      setPhoneScale(scale);
-      syncScaleButtons(scale);
-    });
+  // === SCALE CONTROLS (event delegation) ===
+  document.querySelectorAll('.scale-btn, .pot-scale').forEach(btn => {
+    btn.addEventListener('click', handleScaleClick);
   });
 
   // === EXPORT/IMPORT ===
   bindClick('saveAllBtn', () => {
-    const filename = storage.exportToFile();
+    storage.exportToFile();
     showSuccess('Dosya indirildi!');
   });
 
@@ -538,14 +492,7 @@ function bindEventHandlers() {
       if (!file) return;
       try {
         await storage.importFromFile(file);
-        const importedTheme = state.get('settings.theme') || 'dark';
-        applyTheme(importedTheme);
-        populateFormFields();
-        renderPeopleList();
-        syncHeader();
-        rebuildChat();
-        applyWallpaper();
-        applyAllTypography();
+        applyFullState();
         showSuccess('Dosya yüklendi!');
       } catch (err) {
         showError(err.message);
@@ -568,30 +515,19 @@ function bindEventHandlers() {
     showSuccess('Sahne kaydedildi!');
   });
 
-  // Enter ile kaydet
-  bindChange('sceneNameInput', () => {});
-  const sceneInput = $('sceneNameInput');
-  if (sceneInput) {
-    sceneInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        $('saveSceneBtn')?.click();
-      }
-    });
-  }
+  bindEvent('sceneNameInput', 'keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('saveSceneBtn')?.click();
+    }
+  });
 
   bindClick('clearAllBtn', () => {
     if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz?')) return;
     storage.clear();
     state.reset();
     state.set('player.script', DEFAULT_SCRIPT);
-    applyTheme('dark');
-    populateFormFields();
-    renderPeopleList();
-    syncHeader();
-    rebuildChat();
-    applyWallpaper();
-    applyAllTypography();
+    applyFullState();
     showSuccess('Tüm veri silindi!');
   });
 }
@@ -661,20 +597,14 @@ function setChecked(id, checked) {
   if (el) el.checked = Boolean(checked);
 }
 
-function bindClick(id, handler) {
+function bindEvent(id, event, handler) {
   const el = $(id);
-  if (el) el.addEventListener('click', handler);
+  if (el) el.addEventListener(event, handler);
 }
 
-function bindChange(id, handler) {
-  const el = $(id);
-  if (el) el.addEventListener('change', handler);
-}
-
-function bindInput(id, handler) {
-  const el = $(id);
-  if (el) el.addEventListener('input', handler);
-}
+function bindClick(id, handler) { bindEvent(id, 'click', handler); }
+function bindChange(id, handler) { bindEvent(id, 'change', handler); }
+function bindInput(id, handler) { bindEvent(id, 'input', handler); }
 
 function clampInputValue(input, min, max, fallback, message = '') {
   if (!input) return fallback;
@@ -763,6 +693,18 @@ async function takeScreenshot() {
 
 // === SCENE MANAGEMENT ===
 
+/** Sahne yüklendikten sonra tüm UI'ı senkronize et */
+function applyFullState() {
+  const importedTheme = state.get('settings.theme') || 'dark';
+  applyTheme(importedTheme);
+  populateFormFields();
+  renderPeopleList();
+  syncHeader();
+  rebuildChat();
+  applyWallpaper();
+  applyAllTypography();
+}
+
 function renderSceneList() {
   const container = $('sceneList');
   if (!container) return;
@@ -789,35 +731,34 @@ function renderSceneList() {
       </div>
     </div>`;
   }).join('');
+}
 
-  // Event delegation
-  container.querySelectorAll('.scene-load-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.dataset.sceneId);
+/** Scene list event delegation — tek listener, her render'da yeniden eklenmez */
+function initSceneListDelegation() {
+  const container = $('sceneList');
+  if (!container) return;
+
+  container.addEventListener('click', (e) => {
+    const loadBtn = e.target.closest('.scene-load-btn');
+    if (loadBtn) {
+      const id = Number(loadBtn.dataset.sceneId);
       if (!confirm('Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.')) return;
       const ok = sceneManager.load(id);
       if (ok) {
-        const importedTheme = state.get('settings.theme') || 'dark';
-        applyTheme(importedTheme);
-        populateFormFields();
-        renderPeopleList();
-        syncHeader();
-        rebuildChat();
-        applyWallpaper();
-        applyAllTypography();
+        applyFullState();
         showSuccess('Sahne yüklendi!');
       }
-    });
-  });
+      return;
+    }
 
-  container.querySelectorAll('.scene-delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.dataset.sceneId);
+    const deleteBtn = e.target.closest('.scene-delete-btn');
+    if (deleteBtn) {
+      const id = Number(deleteBtn.dataset.sceneId);
       if (!confirm('Bu sahneyi silmek istediğinizden emin misiniz?')) return;
       sceneManager.delete(id);
       renderSceneList();
       showSuccess('Sahne silindi!');
-    });
+    }
   });
 }
 

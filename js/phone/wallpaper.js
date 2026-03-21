@@ -15,7 +15,7 @@ function applyWallpaper() {
 
   const presetKey = settings.wallpaperPreset || 'default';
   const preset = WALLPAPER_PRESETS[presetKey] || WALLPAPER_PRESETS.default;
-  const customColor = settings.wallpaperColor || '#0b141a';
+  const customColor = settings.wallpaperColor || THEME_DEFAULTS.dark.wallpaperColor;
 
   let background = preset.background;
   let size = preset.size || 'auto';
@@ -86,8 +86,9 @@ function setWallpaperImage(dataUrl) {
  */
 function clearWallpaper() {
   const theme = state.get('settings.theme') || 'dark';
-  const defaultPreset = theme === 'light' ? 'light-default' : 'default';
-  const defaultColor = theme === 'light' ? '#efeae2' : '#0b141a';
+  const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+  const defaultPreset = themeColors.wallpaperPreset;
+  const defaultColor = themeColors.wallpaperColor;
   state.set('settings.wallpaperPreset', defaultPreset);
   state.set('settings.wallpaperColor', defaultColor);
   state.set('settings.wallpaperImageDataUrl', null);
