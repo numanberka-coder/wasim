@@ -248,6 +248,25 @@
   padding: 8px 14px;
 }
 
+.mobile-overlay-body .builder-insert-btn {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.mobile-overlay-body .builder-context-menu {
+  min-width: 180px;
+}
+
+.mobile-overlay-body .builder-context-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.mobile-overlay-body .builder-insert-indicator {
+  font-size: 13px;
+}
+
 /* ===== TABLET & SMALLER DESKTOP ===== */
 @media (max-width: 1200px) {
   :root {

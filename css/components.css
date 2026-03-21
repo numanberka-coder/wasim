@@ -515,13 +515,14 @@ label {
 
 .builder-item {
   display: grid;
-  grid-template-columns: 32px 1fr 32px;
+  grid-template-columns: 32px 1fr 32px 32px;
   align-items: center;
   gap: var(--space-sm);
   padding: 10px 12px;
   border: 1px solid var(--wa-divider);
   border-radius: var(--radius-md);
   background: var(--wa-header);
+  transition: border-color 0.2s ease;
 }
 
 .builder-handle {
@@ -547,6 +548,120 @@ label {
 .builder-item.drag-over {
   border-color: var(--wa-green);
   box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.15);
+}
+
+.builder-item.insert-target {
+  border-color: var(--wa-green);
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+  background: rgba(37, 211, 102, 0.05);
+}
+
+.builder-summary {
+  cursor: pointer;
+}
+
+.builder-summary:hover {
+  color: var(--wa-green);
+}
+
+/* Insert butonu */
+.builder-insert-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid var(--wa-divider);
+  color: var(--wa-green);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.builder-insert-btn:hover {
+  background: rgba(37, 211, 102, 0.15);
+  border-color: var(--wa-green);
+}
+
+/* Insert indicator */
+.builder-insert-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 8px 12px;
+  margin-bottom: var(--space-sm);
+  background: rgba(37, 211, 102, 0.08);
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  color: var(--wa-green);
+}
+
+.builder-insert-indicator span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.builder-insert-cancel {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid rgba(37, 211, 102, 0.3);
+  color: var(--wa-green);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.builder-insert-cancel:hover {
+  background: rgba(37, 211, 102, 0.15);
+}
+
+/* Context Menu */
+.builder-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--wa-panel);
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 4px 0;
+  min-width: 160px;
+  animation: contextMenuIn 0.12s ease-out;
+}
+
+@keyframes contextMenuIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.builder-context-item {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  color: var(--wa-text);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.builder-context-item:hover {
+  background: rgba(37, 211, 102, 0.1);
+  color: var(--wa-green);
 }
 
 /* ===== SCENE LIST ===== */
