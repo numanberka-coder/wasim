@@ -2,6 +2,10 @@
    MESSAGES - Message Management & Rendering
    ======================================== */
 
+import { $, escapeHtml, timeToMinutes, minutesToTime, nowTime, Logger } from '../utils.js';
+import { showToast } from '../ui/toast.js';
+import { state } from '../state.js';
+
 
 
 /**
@@ -1037,3 +1041,17 @@ function scrollToBottom() {
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 }
+
+export {
+  addMessage,
+  addSystemMessage,
+  addTypingBubble,
+  removeTypingBubble,
+  clearChat,
+  rebuildChat,
+  scrollToBottom,
+  findMessageByTarget,
+  applyReactionToMessage,
+  updateMessageTimesInDOM,
+  regenerateMessageTimes,
+};

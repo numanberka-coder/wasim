@@ -4,6 +4,15 @@
    interaktif mod motoru
    ======================================== */
 
+import { $, Logger } from '../utils.js';
+import { state } from '../state.js';
+import { showSuccess, showError } from '../ui/toast.js';
+import { EventType, parseLine } from './script-parser.js';
+import { addMessage, clearChat } from '../phone/messages.js';
+import { renderPeopleList, refreshManualSenderOptions } from './people.js';
+import { syncHeader } from '../phone/header.js';
+import { getBaseDelay, handleEvent } from './player.js';
+
 /**
  * Interactive mode state
  */
@@ -354,7 +363,8 @@ function getInteractiveSummary() {
  */
 function initInteractive() {
   // Toggle button (reads from interactiveScriptBox)
-  bindClick('interactiveToggleBtn', () => {
+  const toggleBtn = $('interactiveToggleBtn');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => {
     if (interactive.enabled) {
       disableInteractiveMode();
     } else {
@@ -364,14 +374,24 @@ function initInteractive() {
   });
 
   // Reset button
-  bindClick('interactiveResetBtn', () => {
+  const resetBtn = $('interactiveResetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
     if (interactive.enabled) disableInteractiveMode();
     state.clearActive();
     state.clearMessages();
-    if (typeof clearChat === 'function') clearChat();
-    if (typeof syncHeader === 'function') syncHeader();
+    clearChat();
+    syncHeader();
     showSuccess('Sıfırlandı!');
   });
 
   Logger.info('🎮 Interactive engine initialized');
 }
+
+export {
+  interactive,
+  enableInteractiveMode,
+  disableInteractiveMode,
+  handleInteractiveInput,
+  initInteractive,
+  getInteractiveSummary,
+};

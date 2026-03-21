@@ -3,7 +3,9 @@
    Faz 17: @ komut + kişi adı önerileri
    ======================================== */
 
-const Autocomplete = (() => {
+import { state } from '../state.js';
+
+export const Autocomplete = (() => {
   'use strict';
 
   // @ komut listesi — açıklama ve parametre ipucu
@@ -363,6 +365,6 @@ const Autocomplete = (() => {
 /**
  * Modül başlatma fonksiyonu — app.js'den çağrılır
  */
-function initAutocomplete() {
+export function initAutocomplete() {
   Autocomplete.init();
 }

@@ -2,12 +2,13 @@
    STATE - Application State Management
    ======================================== */
 
-
+import { DEFAULT_STATE, DEFAULT_PEOPLE, COLOR_POOL, THEME_DEFAULTS } from './config.js';
+import { deepClone, nowTime } from './utils.js';
 
 /**
  * Reactive State Manager
  */
-class StateManager {
+export class StateManager {
   constructor() {
     this.data = {
       // People & Active members
@@ -318,4 +319,4 @@ class StateManager {
 }
 
 // Export singleton instance
-const state = new StateManager();
+export const state = new StateManager();

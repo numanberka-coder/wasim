@@ -219,6 +219,8 @@ const SyntaxHighlight = (() => {
 /**
  * Global init fonksiyonu — app.js'den çağrılır
  */
-function initHighlight() {
+export function initHighlight() {
   SyntaxHighlight.init();
 }
+
+export { SyntaxHighlight };

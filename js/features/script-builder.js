@@ -3,6 +3,17 @@
    validation, inner tabs, interactive demo
    ======================================== */
 
+import { $, createElement, readFileAsDataURL, Logger } from '../utils.js';
+import { SCRIPT_TEMPLATES, CONFIG } from '../config.js';
+import { state } from '../state.js';
+import { showSuccess, showError } from '../ui/toast.js';
+import { tokenizeCommand, validateScript } from './script-parser.js';
+import { refreshManualSenderOptions } from './people.js';
+import { clearChat } from '../phone/messages.js';
+import { syncHeader } from '../phone/header.js';
+import { enableInteractiveMode, disableInteractiveMode, interactive } from './interactive-engine.js';
+import { loadScript, play } from './player.js';
+
 let blocks = [];
 
 /** Aktif builder tip */
@@ -107,9 +118,7 @@ function setupInteractiveDemo() {
   const btn = $('loadInteractiveDemoBtn');
   if (!btn) return;
   btn.addEventListener('click', () => {
-    const tpl = (typeof SCRIPT_TEMPLATES !== 'undefined')
-      ? SCRIPT_TEMPLATES.find(t => t.id === 'interactive-demo')
-      : null;
+    const tpl = SCRIPT_TEMPLATES.find(t => t.id === 'interactive-demo') || null;
     if (tpl) {
       const box = $('interactiveScriptBox');
       if (box) box.value = tpl.script.trim();
@@ -358,29 +367,31 @@ function setupBuilder() {
   });
 
   // Builder oynat butonları
-  bindClick('builderPlayNormalBtn', () => {
+  const playNormalBtn = $('builderPlayNormalBtn');
+  if (playNormalBtn) playNormalBtn.addEventListener('click', () => {
     const text = $('builderScriptBox')?.value || '';
     if (!text.trim()) { showError('Senaryo boş'); return; }
-    // Normal scriptBox'a yaz ve normal oynat
     setScriptBox(text);
-    if (typeof loadScript === 'function') loadScript();
-    if (typeof play === 'function') play();
+    loadScript();
+    play();
   });
 
-  bindClick('builderPlayInteractiveBtn', () => {
+  const playInteractiveBtn = $('builderPlayInteractiveBtn');
+  if (playInteractiveBtn) playInteractiveBtn.addEventListener('click', () => {
     const text = $('builderScriptBox')?.value || '';
     if (!text.trim()) { showError('Senaryo boş'); return; }
     enableInteractiveMode(text);
   });
 
-  bindClick('builderResetBtn', () => {
-    if (typeof interactive !== 'undefined' && interactive.enabled) {
+  const resetBtn = $('builderResetBtn');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    if (interactive.enabled) {
       disableInteractiveMode();
     }
     state.clearActive();
     state.clearMessages();
-    if (typeof clearChat === 'function') clearChat();
-    if (typeof syncHeader === 'function') syncHeader();
+    clearChat();
+    syncHeader();
     showSuccess('Sıfırlandı!');
   });
 
@@ -933,3 +944,5 @@ function setScriptBox(value) {
   state.set('player.script', value);
   box.dispatchEvent(new Event('input', { bubbles: true }));
 }
+
+export { initScriptTools };

@@ -2,6 +2,16 @@
    PLAYER - Script Player
    ======================================== */
 
+import { $, readFileAsDataURL, Logger } from '../utils.js';
+import { CONFIG } from '../config.js';
+import { state } from '../state.js';
+import { showToast, showError } from '../ui/toast.js';
+import { EventType, parseScript } from './script-parser.js';
+import { addMessage, addSystemMessage, addTypingBubble, removeTypingBubble, clearChat, findMessageByTarget, applyReactionToMessage } from '../phone/messages.js';
+import { renderPeopleList, refreshManualSenderOptions } from './people.js';
+import { syncHeader } from '../phone/header.js';
+import { interactive, disableInteractiveMode, handleInteractiveInput } from './interactive-engine.js';
+
 // Aktif tik durumu — senaryo içinde @sent/@delivered/@read ile değişir
 let activeTickStatus = null;
 
@@ -485,3 +495,18 @@ function initPlayer() {
 
   Logger.info('🎬 Player initialized');
 }
+
+export {
+  getBaseDelay,
+  handleEvent,
+  loadScript,
+  play,
+  pause,
+  step,
+  reset,
+  sendLiveMessage,
+  sendLiveVoiceMessage,
+  sendLiveMediaFile,
+  updateMainActionButton,
+  initPlayer,
+};

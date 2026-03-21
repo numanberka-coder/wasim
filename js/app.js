@@ -2,25 +2,36 @@
    APP - Main Application Entry Point
    ======================================== */
 
-
-
+// Utils & Config
+import { $, escapeHtml, isValidUrl, nowTime, readFileAsDataURL, clamp, Logger } from './utils.js';
+import { CONFIG, THEME_DEFAULTS, DEFAULT_PEOPLE, DEFAULT_SCRIPT, SCRIPT_TEMPLATES } from './config.js';
+import { state } from './state.js';
+import { storage, sceneManager, initAutoSave } from './storage.js';
 
 
 // UI Modules
-
-
-
+import { showToast, showSuccess, showError } from './ui/toast.js';
+import { initTabs } from './ui/tabs.js';
+import { initAccordions } from './ui/accordion.js';
+import { initForms } from './ui/forms.js';
+import { markInvalid, clearInvalid } from './ui/validation.js';
+import { initMobile, registerMobileCallback } from './ui/mobile.js';
+import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 
 // Phone Modules
-
-
-
+import { syncHeader, applyTheme, setTheme, setHeaderColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
+import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible } from './phone/statusbar.js';
+import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
+import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
+import { addMessage, clearChat, rebuildChat, regenerateMessageTimes, updateMessageTimesInDOM, scrollToBottom } from './phone/messages.js';
 
 
 // Feature Modules
-
-
-
+import { renderPeopleList, refreshManualSenderOptions, savePerson, deletePerson, clearPersonForm, clearPersonAvatar, applyPeopleFromJson, refreshPeopleJson } from './features/people.js';
+import { loadScript, play, pause, step, reset, initPlayer } from './features/player.js';
+import { initInteractive } from './features/interactive-engine.js';
+import { initScriptTools } from './features/script-builder.js';
+import { initAutocomplete } from './features/autocomplete.js';
 
 /**
  * Initialize application
@@ -160,7 +171,7 @@ function populateFormFields() {
     setInputValue('jitter', player.jitter);
 
     // Syntax highlight overlay'i güncelle
-    if (typeof SyntaxHighlight !== 'undefined') SyntaxHighlight.refresh();
+    SyntaxHighlight.refresh();
   } catch (err) {
     Logger.error('Form alanları doldurulurken hata:', err);
   }
@@ -652,16 +663,13 @@ function syncScaleButtons(scale) {
 // === SCREENSHOT ===
 
 async function takeScreenshot() {
-  if (typeof html2canvas === 'undefined') {
-    showError('html2canvas yüklenemedi. İnternet bağlantısını kontrol edin.');
-    return;
-  }
-
   const phone = document.querySelector('.phone');
   if (!phone) return;
 
   try {
     showSuccess('Ekran görüntüsü hazırlanıyor...');
+
+    const { default: html2canvas } = await import('html2canvas');
 
     // Geçici olarak ölçeği sıfırla — export temiz olsun
     const currentScale = phone.style.transform;
@@ -762,11 +770,7 @@ function initSceneListDelegation() {
   });
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+// escapeHtml is imported from utils.js
 
 // === PHONE SCALE ===
 
@@ -796,6 +800,10 @@ function initTutorials() {
     localStorage.setItem(TUTORIAL_KEY, '1');
   }
 }
+
+// Register mobile callbacks for app-level functions
+registerMobileCallback('populateFormFields', populateFormFields);
+registerMobileCallback('takeScreenshot', takeScreenshot);
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

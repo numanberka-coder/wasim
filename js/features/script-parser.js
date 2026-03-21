@@ -2,10 +2,12 @@
    SCRIPT PARSER - Script Parsing
    ======================================== */
 
+import { Logger } from '../utils.js';
+
 /**
  * Event types
  */
-const EventType = {
+export const EventType = {
   ADD: 'add',
   LEAVE: 'leave',
   SYSTEM: 'system',
@@ -18,7 +20,7 @@ const EventType = {
 /**
  * Parse script text into events
  */
-function parseScript(text) {
+export function parseScript(text) {
   if (!text || typeof text !== 'string') return [];
 
   const lines = text
@@ -49,7 +51,7 @@ function parseScript(text) {
 /**
  * Tokenize a command line (supports quoted tokens)
  */
-function tokenizeCommand(line) {
+export function tokenizeCommand(line) {
   const tokens = [];
   const re = /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|(\S+)/g;
   let m;
@@ -65,7 +67,7 @@ function tokenizeCommand(line) {
  * Remove wrapping single/double quotes from a token, without splitting spaces.
  * Also unescapes common escaped quote characters (\", \' and \\).
  */
-function unquoteWrappedToken(s) {
+export function unquoteWrappedToken(s) {
   const t = String(s ?? '').trim();
   if (!t) return '';
   const q = t[0];
@@ -79,7 +81,7 @@ function unquoteWrappedToken(s) {
 /**
  * Parse duration token like "12s" or "8000" (ms) into seconds
  */
-function parseVoiceDurationToSeconds(token) {
+export function parseVoiceDurationToSeconds(token) {
   const t = String(token || '').trim();
   if (!t) return 12;
   // 0:12 or 00:12
@@ -102,7 +104,7 @@ function parseVoiceDurationToSeconds(token) {
   return Math.max(1, n);
 }
 
-function parseLine(line) {
+export function parseLine(line) {
   try {
   // Skip interactive mode syntax lines (#block, trigger:, ---)
   if (line.startsWith('#') || line === '---' || /^trigger\s*:/i.test(line)) {
@@ -311,7 +313,7 @@ function parseLine(line) {
 /**
  * Validate script and return errors
  */
-function validateScript(text) {
+export function validateScript(text) {
   const errors = [];
   const lines = text.split(/\r?\n/);
 
@@ -352,7 +354,7 @@ function validateScript(text) {
 /**
  * Check if command is valid
  */
-function isValidCommand(line) {
+export function isValidCommand(line) {
   const validCommands = ['@add', '@leave', '@system', '@reaction', '@typing', '@photo', '@video', '@voice', '@gif', '@location', '@document', '@sticker', '@link', '@viewonce', '@sent', '@delivered', '@read'];
   const cmd = line.split(' ')[0];
   return validCommands.includes(cmd);
@@ -361,7 +363,7 @@ function isValidCommand(line) {
 /**
  * Format events back to script text
  */
-function eventsToScript(events) {
+export function eventsToScript(events) {
   return events.map(event => {
     switch (event.type) {
       case EventType.ADD:

@@ -2,6 +2,11 @@
    PEOPLE - People Management
    ======================================== */
 
+import { $, escapeHtml, isValidUrl } from '../utils.js';
+import { state } from '../state.js';
+import { showError, showSuccess } from '../ui/toast.js';
+import { markInvalid, clearInvalid } from '../ui/validation.js';
+
 
 
 
@@ -256,3 +261,15 @@ function getCurrentSender() {
   const senderEl = $('manualSender');
   return senderEl?.value || 'Me';
 }
+
+export {
+  renderPeopleList,
+  refreshManualSenderOptions,
+  getCurrentSender,
+  savePerson,
+  deletePerson,
+  clearPersonForm,
+  clearPersonAvatar,
+  applyPeopleFromJson,
+  refreshPeopleJson,
+};
