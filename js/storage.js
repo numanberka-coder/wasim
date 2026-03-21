@@ -2,13 +2,17 @@
    STORAGE - LocalStorage Operations
    ======================================== */
 
+import { state } from './state.js';
+import { CONFIG } from './config.js';
+import { debounce, safeJsonParse, downloadFile, Logger } from './utils.js';
+
 
 
 
 /**
  * Storage Manager
  */
-const storage = {
+export const storage = {
   /**
    * Save state to localStorage (debounced)
    */
@@ -112,7 +116,7 @@ const storage = {
 //   SCENE MANAGEMENT
 // ========================================
 
-const sceneManager = {
+export const sceneManager = {
   /**
    * Tüm sahneleri getir
    */
@@ -194,7 +198,7 @@ const sceneManager = {
 /**
  * Auto-save on state changes
  */
-function initAutoSave() {
+export function initAutoSave() {
   // Subscribe to state changes
   state.subscribe(() => {
     storage.save();

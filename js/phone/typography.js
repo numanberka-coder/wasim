@@ -2,12 +2,15 @@
    TYPOGRAPHY - Font & Bubble Settings
    ======================================== */
 
+import { $one, clamp } from '../utils.js';
+import { state } from '../state.js';
+
 
 
 /**
  * Apply font size setting
  */
-function applyFontSize() {
+export function applyFontSize() {
   const phoneEl = $one('.phone');
   if (!phoneEl) return;
 
@@ -18,7 +21,7 @@ function applyFontSize() {
 /**
  * Set font size
  */
-function setFontSize(size) {
+export function setFontSize(size) {
   const clamped = clamp(size, 12, 18);
   state.set('settings.chatFontSize', clamped);
   applyFontSize();
@@ -27,7 +30,7 @@ function setFontSize(size) {
 /**
  * Apply line height setting
  */
-function applyLineHeight() {
+export function applyLineHeight() {
   const phoneEl = $one('.phone');
   if (!phoneEl) return;
 
@@ -38,7 +41,7 @@ function applyLineHeight() {
 /**
  * Set line height
  */
-function setLineHeight(height) {
+export function setLineHeight(height) {
   const clamped = clamp(height, 1.2, 1.6);
   state.set('settings.chatLineHeight', clamped);
   applyLineHeight();
@@ -47,7 +50,7 @@ function setLineHeight(height) {
 /**
  * Apply bubble size setting
  */
-function applyBubbleSize() {
+export function applyBubbleSize() {
   const phoneEl = $one('.phone');
   if (!phoneEl) return;
 
@@ -66,7 +69,7 @@ function applyBubbleSize() {
 /**
  * Set bubble size
  */
-function setBubbleSize(size) {
+export function setBubbleSize(size) {
   const clamped = clamp(size, 70, 90);
   state.set('settings.bubbleSize', clamped);
   applyBubbleSize();
@@ -75,7 +78,7 @@ function setBubbleSize(size) {
 /**
  * Apply bubble padding Y setting
  */
-function applyBubblePaddingY() {
+export function applyBubblePaddingY() {
   const phoneEl = $one('.phone');
   if (!phoneEl) return;
 
@@ -90,7 +93,7 @@ function applyBubblePaddingY() {
 /**
  * Set bubble padding Y
  */
-function setBubblePaddingY(padding) {
+export function setBubblePaddingY(padding) {
   const clamped = clamp(padding, 8, 14);
   state.set('settings.bubblePaddingY', clamped);
   applyBubblePaddingY();
@@ -99,7 +102,7 @@ function setBubblePaddingY(padding) {
 /**
  * Apply all typography settings
  */
-function applyAllTypography() {
+export function applyAllTypography() {
   applyFontSize();
   applyLineHeight();
   applyBubbleSize();
@@ -109,7 +112,7 @@ function applyAllTypography() {
 /**
  * Reset typography to defaults
  */
-function resetTypography() {
+export function resetTypography() {
   state.set('settings.chatFontSize', 14);
   state.set('settings.chatLineHeight', 1.4);
   state.set('settings.bubbleSize', 78);

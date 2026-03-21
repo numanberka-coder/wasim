@@ -5,14 +5,14 @@
 /**
  * DOM Selectors
  */
-const $ = (id) => document.getElementById(id);
-const $$ = (selector) => document.querySelectorAll(selector);
-const $one = (selector) => document.querySelector(selector);
+export const $ = (id) => document.getElementById(id);
+export const $$ = (selector) => document.querySelectorAll(selector);
+export const $one = (selector) => document.querySelector(selector);
 
 /**
  * Escape HTML to prevent XSS
  */
-function escapeHtml(str) {
+export function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -24,7 +24,7 @@ function escapeHtml(str) {
 /**
  * Get current time as HH:MM string
  */
-function nowTime() {
+export function nowTime() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
@@ -32,7 +32,7 @@ function nowTime() {
 /**
  * Clamp number between min and max
  */
-function clamp(value, min, max) {
+export function clamp(value, min, max) {
   const num = Number(value || 0);
   if (Number.isNaN(num)) return min;
   return Math.min(Math.max(num, min), max);
@@ -41,14 +41,14 @@ function clamp(value, min, max) {
 /**
  * Deep clone object (simple version)
  */
-function deepClone(obj) {
+export function deepClone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
 /**
  * Debounce function
  */
-function debounce(fn, ms = 300) {
+export function debounce(fn, ms = 300) {
   let timer;
   return function (...args) {
     clearTimeout(timer);
@@ -59,7 +59,7 @@ function debounce(fn, ms = 300) {
 /**
  * Throttle function
  */
-function throttle(fn, ms = 100) {
+export function throttle(fn, ms = 100) {
   let lastCall = 0;
   return function (...args) {
     const now = Date.now();
@@ -73,7 +73,7 @@ function throttle(fn, ms = 100) {
 /**
  * Convert time string (HH:MM) to minutes
  */
-function timeToMinutes(str) {
+export function timeToMinutes(str) {
   const match = String(str || '').match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;
   const hours = clamp(Number(match[1]), 0, 23);
@@ -84,7 +84,7 @@ function timeToMinutes(str) {
 /**
  * Convert minutes to time string (HH:MM)
  */
-function minutesToTime(total) {
+export function minutesToTime(total) {
   const mins = ((total % 1440) + 1440) % 1440; // Handle negative/overflow
   const h = Math.floor(mins / 60);
   const m = mins % 60;
@@ -94,14 +94,14 @@ function minutesToTime(total) {
 /**
  * Generate unique ID
  */
-function generateId() {
+export function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
 /**
  * Format file size
  */
-function formatBytes(bytes) {
+export function formatBytes(bytes) {
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -112,14 +112,14 @@ function formatBytes(bytes) {
 /**
  * Check if value is empty (null, undefined, empty string)
  */
-function isEmpty(value) {
+export function isEmpty(value) {
   return value === null || value === undefined || value === '';
 }
 
 /**
  * Check if a string is a valid URL
  */
-function isValidUrl(str) {
+export function isValidUrl(str) {
   if (!str) return false;
   try {
     new URL(str);
@@ -132,7 +132,7 @@ function isValidUrl(str) {
 /**
  * Create element with attributes
  */
-function createElement(tag, attrs = {}, children = []) {
+export function createElement(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
   
   for (const [key, value] of Object.entries(attrs)) {
@@ -161,7 +161,7 @@ function createElement(tag, attrs = {}, children = []) {
 /**
  * Read file as Data URL
  */
-function readFileAsDataURL(file) {
+export function readFileAsDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
@@ -173,7 +173,7 @@ function readFileAsDataURL(file) {
 /**
  * Read file as Text
  */
-function readFileAsText(file) {
+export function readFileAsText(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
@@ -185,7 +185,7 @@ function readFileAsText(file) {
 /**
  * Download data as file
  */
-function downloadFile(data, filename, type = 'application/json') {
+export function downloadFile(data, filename, type = 'application/json') {
   const blob = new Blob([data], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -198,7 +198,7 @@ function downloadFile(data, filename, type = 'application/json') {
 /**
  * Safe JSON parse
  */
-function safeJsonParse(str, fallback = null) {
+export function safeJsonParse(str, fallback = null) {
   try {
     return JSON.parse(str);
   } catch {
@@ -210,7 +210,7 @@ function safeJsonParse(str, fallback = null) {
  * Yapısal loglama utility
  * Production'da sessiz, ?debug=true ile verbose
  */
-const Logger = (() => {
+export const Logger = (() => {
   const DEBUG = new URLSearchParams(window.location.search).has('debug');
 
   const noop = () => {};

@@ -3,6 +3,27 @@
    Faz 8: Mobil Altyapı & Responsive
    ======================================== */
 
+import { $, debounce, throttle } from '../utils.js';
+import { showSuccess, showError } from '../ui/toast.js';
+import { state } from '../state.js';
+import { storage } from '../storage.js';
+import { DEFAULT_SCRIPT } from '../config.js';
+import { loadScript, play, pause, reset } from '../features/player.js';
+import { renderPeopleList } from '../features/people.js';
+import { syncHeader } from '../phone/header.js';
+import { rebuildChat } from '../phone/messages.js';
+import { applyWallpaper } from '../phone/wallpaper.js';
+import { applyAllTypography } from '../phone/typography.js';
+
+/**
+ * Registry for app-level callbacks that mobile module can invoke.
+ * app.js registers these after all modules are initialized.
+ */
+const appCallbacks = {};
+export function registerMobileCallback(name, fn) {
+  appCallbacks[name] = fn;
+}
+
 const MOBILE_BREAKPOINT = 768;
 
 function isMobileView() {
@@ -100,14 +121,14 @@ function bindMobileEvents() {
     moPlayBtn.addEventListener('click', () => {
       closeMobileOverlay();
       setTimeout(() => {
-        safeCall('loadScript');
-        safeCall('play');
+        loadScript();
+        play();
       }, 300);
     });
   }
   if (moResetBtn) {
     moResetBtn.addEventListener('click', () => {
-      safeCall('reset');
+      reset();
     });
   }
 
@@ -181,25 +202,25 @@ function handleMobileAction(action) {
     case 'play':
       if (mobileState.overlayOpen) closeMobileOverlay();
       setTimeout(() => {
-        safeCall('loadScript');
-        safeCall('play');
+        loadScript();
+        play();
       }, 150);
       break;
     case 'pause':
-      safeCall('pause');
+      pause();
       break;
     case 'reset':
       if (mobileState.overlayOpen) closeMobileOverlay();
-      safeCall('reset');
+      reset();
       break;
     case 'save':
-      if (typeof storage !== 'undefined' && storage.exportToFile) {
+      if (storage.exportToFile) {
         storage.exportToFile();
-        safeCall('showSuccess', 'Dosya indirildi!');
+        showSuccess('Dosya indirildi!');
       }
       break;
     case 'screenshot':
-      safeCall('takeScreenshot');
+      if (appCallbacks.takeScreenshot) appCallbacks.takeScreenshot();
       break;
     case 'load':
       triggerMobileFileLoad();
@@ -211,10 +232,10 @@ function handleMobileAction(action) {
   }
 }
 
-/** Safely call a global function if it exists */
-function safeCall(fnName, ...args) {
-  if (typeof window[fnName] === 'function') {
-    window[fnName](...args);
+/** Call an app-registered callback if it exists */
+function callApp(fnName, ...args) {
+  if (typeof appCallbacks[fnName] === 'function') {
+    appCallbacks[fnName](...args);
   }
 }
 
@@ -227,13 +248,13 @@ function triggerMobileFileLoad() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      if (typeof storage !== 'undefined' && storage.importFromFile) {
+      if (storage.importFromFile) {
         await storage.importFromFile(file);
       }
       mobileRefreshAll();
-      safeCall('showSuccess', 'Dosya yüklendi!');
+      showSuccess('Dosya yüklendi!');
     } catch (err) {
-      safeCall('showError', err.message || 'Dosya yüklenemedi');
+      showError(err.message || 'Dosya yüklenemedi');
     }
   };
   input.click();
@@ -241,23 +262,21 @@ function triggerMobileFileLoad() {
 
 /** Clear all data */
 function mobileClearAll() {
-  if (typeof storage !== 'undefined' && storage.clear) storage.clear();
-  if (typeof state !== 'undefined' && state.reset) {
-    state.reset();
-    state.set('player.script', typeof DEFAULT_SCRIPT !== 'undefined' ? DEFAULT_SCRIPT : '');
-  }
+  if (storage.clear) storage.clear();
+  state.reset();
+  state.set('player.script', DEFAULT_SCRIPT);
   mobileRefreshAll();
-  safeCall('showSuccess', 'Tüm veri silindi!');
+  showSuccess('Tüm veri silindi!');
 }
 
 /** Refresh all UI after data change */
 function mobileRefreshAll() {
-  safeCall('populateFormFields');
-  safeCall('renderPeopleList');
-  safeCall('syncHeader');
-  safeCall('rebuildChat');
-  safeCall('applyWallpaper');
-  safeCall('applyAllTypography');
+  if (appCallbacks.populateFormFields) appCallbacks.populateFormFields();
+  renderPeopleList();
+  syncHeader();
+  rebuildChat();
+  applyWallpaper();
+  applyAllTypography();
 }
 
 /* ========================================
@@ -530,3 +549,5 @@ function detectStandaloneMode() {
     if (statusBar) statusBar.style.display = 'none';
   }
 }
+
+export { initMobile };

@@ -2,11 +2,12 @@
    FORMS - Form Handling & Custom Inputs
    ======================================== */
 
+import { $$, Logger, readFileAsDataURL } from '../utils.js';
 
 /**
  * Initialize custom form elements
  */
-function initForms() {
+export function initForms() {
   initFileInputs();
   initRangeInputs();
   initCheckboxRows();
@@ -16,7 +17,7 @@ function initForms() {
 /**
  * Initialize custom file inputs
  */
-function initFileInputs() {
+export function initFileInputs() {
   const fileInputs = $$('.file-input');
 
   fileInputs.forEach(container => {
@@ -43,7 +44,7 @@ function initFileInputs() {
 /**
  * Initialize range inputs with output display
  */
-function initRangeInputs() {
+export function initRangeInputs() {
   const rangeRows = $$('.range-row');
 
   rangeRows.forEach(row => {
@@ -65,7 +66,7 @@ function initRangeInputs() {
 /**
  * Update range output display
  */
-function updateRangeOutput(input, output) {
+export function updateRangeOutput(input, output) {
   const value = input.value;
   const unit = input.dataset.unit || '';
   output.textContent = value + unit;
@@ -74,7 +75,7 @@ function updateRangeOutput(input, output) {
 /**
  * Initialize checkbox rows
  */
-function initCheckboxRows() {
+export function initCheckboxRows() {
   const checkboxRows = $$('.checkbox-row');
 
   checkboxRows.forEach(row => {
@@ -94,7 +95,7 @@ function initCheckboxRows() {
 /**
  * Create custom file input element
  */
-function createFileInput(options = {}) {
+export function createFileInput(options = {}) {
   const {
     accept = 'image/*',
     buttonText = '📁 Dosya Seç',
@@ -143,7 +144,7 @@ function createFileInput(options = {}) {
 /**
  * Create range input with label and output
  */
-function createRangeInput(options = {}) {
+export function createRangeInput(options = {}) {
   const {
     label = 'Value',
     min = 0,
@@ -188,7 +189,7 @@ function createRangeInput(options = {}) {
 /**
  * Create checkbox row
  */
-function createCheckboxRow(options = {}) {
+export function createCheckboxRow(options = {}) {
   const {
     label = 'Option',
     checked = false,
@@ -221,7 +222,7 @@ function createCheckboxRow(options = {}) {
 /**
  * Get form data from a container
  */
-function getFormData(container) {
+export function getFormData(container) {
   const data = {};
   const inputs = container.querySelectorAll('input, select, textarea');
 
@@ -244,7 +245,7 @@ function getFormData(container) {
 /**
  * Set form data to a container
  */
-function setFormData(container, data) {
+export function setFormData(container, data) {
   for (const [name, value] of Object.entries(data)) {
     const input = container.querySelector(`[name="${name}"], #${name}`);
     if (!input) continue;

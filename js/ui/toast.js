@@ -31,7 +31,7 @@ function ensureContainer() {
 /**
  * Show toast notification
  */
-function showToast(message, duration = 2500) {
+export function showToast(message, duration = 2500) {
   const container = ensureContainer();
 
   const toast = document.createElement('div');
@@ -55,14 +55,14 @@ function showToast(message, duration = 2500) {
 /**
  * Show success toast
  */
-function showSuccess(message) {
+export function showSuccess(message) {
   return showToast(`✓ ${message}`);
 }
 
 /**
  * Show error toast
  */
-function showError(message) {
+export function showError(message) {
   const toast = showToast(`❌ ${message}`, 4000);
   toast.style.borderColor = 'var(--wa-danger)';
   return toast;
@@ -71,7 +71,7 @@ function showError(message) {
 /**
  * Show warning toast
  */
-function showWarning(message) {
+export function showWarning(message) {
   const toast = showToast(`⚠️ ${message}`, 3500);
   toast.style.borderColor = '#fbbf24';
   return toast;

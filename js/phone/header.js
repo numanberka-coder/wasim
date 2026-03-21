@@ -2,12 +2,17 @@
    HEADER - Chat Header Management
    ======================================== */
 
+import { $ } from '../utils.js';
+import { state } from '../state.js';
+import { THEME_DEFAULTS } from '../config.js';
+import { applyWallpaper } from './wallpaper.js';
+
 
 
 /**
  * Sync header with current state
  */
-function syncHeader() {
+export function syncHeader() {
   const group = state.get('group');
   const settings = state.get('settings');
   
@@ -42,7 +47,7 @@ function syncHeader() {
 /**
  * Render header avatar
  */
-function renderHeaderAvatar() {
+export function renderHeaderAvatar() {
   const avatarEl = $('headerAvatar');
   if (!avatarEl) return;
 
@@ -79,7 +84,7 @@ function renderHeaderAvatar() {
 /**
  * Update group title
  */
-function setGroupTitle(title) {
+export function setGroupTitle(title) {
   state.set('group.title', title);
   syncHeader();
 }
@@ -87,7 +92,7 @@ function setGroupTitle(title) {
 /**
  * Update group subtitle/status
  */
-function setGroupSubtitle(subtitle) {
+export function setGroupSubtitle(subtitle) {
   state.set('group.subtitle', subtitle);
   syncHeader();
 }
@@ -95,7 +100,7 @@ function setGroupSubtitle(subtitle) {
 /**
  * Update day label
  */
-function setDayLabel(label) {
+export function setDayLabel(label) {
   state.set('group.dayLabel', label);
   syncHeader();
 }
@@ -103,7 +108,7 @@ function setDayLabel(label) {
 /**
  * Set group photo URL
  */
-function setGroupPhotoUrl(url) {
+export function setGroupPhotoUrl(url) {
   state.set('group.photoUrl', url);
   renderHeaderAvatar();
 }
@@ -111,7 +116,7 @@ function setGroupPhotoUrl(url) {
 /**
  * Set group photo from file (data URL)
  */
-function setGroupPhotoData(dataUrl) {
+export function setGroupPhotoData(dataUrl) {
   state.set('group.avatarDataUrl', dataUrl);
   renderHeaderAvatar();
 }
@@ -119,7 +124,7 @@ function setGroupPhotoData(dataUrl) {
 /**
  * Clear group photo
  */
-function clearGroupPhoto() {
+export function clearGroupPhoto() {
   state.set('group.photoUrl', '');
   state.set('group.avatarDataUrl', null);
   renderHeaderAvatar();
@@ -128,7 +133,7 @@ function clearGroupPhoto() {
 /**
  * Apply header color via CSS variable
  */
-function applyHeaderColor(color) {
+export function applyHeaderColor(color) {
   const phone = document.querySelector('.phone');
   if (phone) {
     phone.style.setProperty('--wa-header-color', color);
@@ -138,7 +143,7 @@ function applyHeaderColor(color) {
 /**
  * Set header color — updates state + applies
  */
-function setHeaderColor(color) {
+export function setHeaderColor(color) {
   state.set('settings.headerColor', color);
   applyHeaderColor(color);
 }
@@ -147,7 +152,7 @@ function setHeaderColor(color) {
  * Apply bubble colors via CSS variable overrides
  * null = tema varsayılanını kullan (removeProperty)
  */
-function applyBubbleColors(outColor, inColor) {
+export function applyBubbleColors(outColor, inColor) {
   const phone = document.querySelector('.phone');
   if (!phone) return;
 
@@ -175,7 +180,7 @@ function applyBubbleColors(outColor, inColor) {
 /**
  * Set bubble out color — updates state + applies
  */
-function setBubbleOutColor(color) {
+export function setBubbleOutColor(color) {
   state.set('settings.bubbleOutColor', color);
   applyBubbleColors(color, state.get('settings.bubbleInColor'));
 }
@@ -183,7 +188,7 @@ function setBubbleOutColor(color) {
 /**
  * Set bubble in color — updates state + applies
  */
-function setBubbleInColor(color) {
+export function setBubbleInColor(color) {
   state.set('settings.bubbleInColor', color);
   applyBubbleColors(state.get('settings.bubbleOutColor'), color);
 }
@@ -191,7 +196,7 @@ function setBubbleInColor(color) {
 /**
  * Reset bubble colors to theme defaults
  */
-function resetBubbleColors() {
+export function resetBubbleColors() {
   state.set('settings.bubbleOutColor', null);
   state.set('settings.bubbleInColor', null);
   applyBubbleColors(null, null);
@@ -200,7 +205,7 @@ function resetBubbleColors() {
 /**
  * Apply theme (dark/light) — adds/removes .light class on .phone
  */
-function applyTheme(theme) {
+export function applyTheme(theme) {
   const phone = document.querySelector('.phone');
   if (!phone) return;
 
@@ -240,7 +245,7 @@ function applyTheme(theme) {
 /**
  * Set theme — updates state + applies
  */
-function setTheme(theme) {
+export function setTheme(theme) {
   state.set('settings.theme', theme);
   applyTheme(theme);
 }

@@ -2,14 +2,15 @@
    TABS - Tab Navigation System
    ======================================== */
 
+import { $$, Logger } from '../utils.js';
 
-let activeTab = 'group';
+export let activeTab = 'group';
 const tabListeners = new Set();
 
 /**
  * Initialize tab system
  */
-function initTabs() {
+export function initTabs() {
   const tabs = $$('.tab');
   const panels = $$('.panel');
 
@@ -40,7 +41,7 @@ function initTabs() {
 /**
  * Switch to specific tab programmatically
  */
-function switchTab(tabId) {
+export function switchTab(tabId) {
   const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
   if (tab) {
     tab.click();
@@ -50,14 +51,14 @@ function switchTab(tabId) {
 /**
  * Get current active tab
  */
-function getActiveTab() {
+export function getActiveTab() {
   return activeTab;
 }
 
 /**
  * Subscribe to tab changes
  */
-function onTabChange(callback) {
+export function onTabChange(callback) {
   tabListeners.add(callback);
   return () => tabListeners.delete(callback);
 }
@@ -65,7 +66,7 @@ function onTabChange(callback) {
 /**
  * Notify tab change
  */
-function notifyTabChange(tabId) {
+export function notifyTabChange(tabId) {
   for (const callback of tabListeners) {
     callback(tabId);
   }

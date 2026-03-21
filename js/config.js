@@ -2,7 +2,7 @@
    CONFIG - Constants & Defaults
    ======================================== */
 
-const THEME_DEFAULTS = {
+export const THEME_DEFAULTS = {
   dark: {
     headerColor: '#1f2c33',
     bubbleOutColor: '#005c4b',
@@ -20,7 +20,7 @@ const THEME_DEFAULTS = {
   activeButtonTextColor: '#111b21',
 };
 
-const CONFIG = {
+export const CONFIG = {
   STORAGE_KEY: 'whatsapp_simulator_v2',
   SCENES_KEY: 'whatsapp_simulator_scenes',
   AUTO_SAVE_INTERVAL: 30000,
@@ -32,13 +32,13 @@ const CONFIG = {
   DEFAULT_JITTER: 250,
 };
 
-const COLOR_POOL = [
+export const COLOR_POOL = [
   '#7dd3fc', '#fda4af', '#fbbf24', '#a7f3d0',
   '#c4b5fd', '#fca5a5', '#86efac', '#fde68a',
   '#93c5fd', '#f9a8d4', '#fb923c', '#a78bfa'
 ];
 
-const DEFAULT_PEOPLE = {
+export const DEFAULT_PEOPLE = {
   'Me': { avatar: '' },
   'Nietzsche': { avatar: 'https://i.pravatar.cc/80?img=13' },
   'Kant': { avatar: 'https://i.pravatar.cc/80?img=14' },
@@ -46,7 +46,7 @@ const DEFAULT_PEOPLE = {
   'Aristoteles': { avatar: 'https://i.pravatar.cc/80?img=12' }
 };
 
-const DEFAULT_SCRIPT = `@add Aristoteles
+export const DEFAULT_SCRIPT = `@add Aristoteles
 @add Nietzsche
 @add Kant
 
@@ -66,7 +66,7 @@ Diogenes: 🐕
 @typing Me 900
 Me: Ya bi sakin… daha yeni başladık.`;
 
-const SCRIPT_TEMPLATES = [
+export const SCRIPT_TEMPLATES = [
   {
     id: 'default',
     title: 'Felsefe Sohbeti',
@@ -183,7 +183,7 @@ Destek: "kargo", "iade" veya "merhaba" yazarak başlayabilirsiniz.`,
   },
 ];
 
-const WALLPAPER_PRESETS = {
+export const WALLPAPER_PRESETS = {
   // Default: WhatsApp dark mod — katmanlı geometrik desen + soft ışık
   default: {
     background: `
@@ -245,7 +245,7 @@ const WALLPAPER_PRESETS = {
   }
 };
 
-const DEFAULT_STATE = {
+export const DEFAULT_STATE = {
   // Theme
   theme: 'dark',
 

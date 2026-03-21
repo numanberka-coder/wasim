@@ -2,8 +2,9 @@
    VALIDATION - Inline helpers
    ======================================== */
 
+import { $ } from '../utils.js';
 
-function markInvalid(id, message) {
+export function markInvalid(id, message) {
   const input = $(id);
   if (!input) return;
   input.classList.add('input-error');
@@ -19,7 +20,7 @@ function markInvalid(id, message) {
   }
 }
 
-function clearInvalid(id) {
+export function clearInvalid(id) {
   const input = $(id);
   if (!input) return;
   input.classList.remove('input-error');
@@ -30,7 +31,7 @@ function clearInvalid(id) {
   }
 }
 
-function showHint(id, message) {
+export function showHint(id, message) {
   const input = $(id);
   const container = input?.closest('.form-group') || input?.parentElement;
   if (!container) return;

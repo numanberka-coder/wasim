@@ -2,11 +2,12 @@
    ACCORDION - Collapsible Sections
    ======================================== */
 
+import { $$, Logger } from '../utils.js';
 
 /**
  * Initialize all accordions
  */
-function initAccordions() {
+export function initAccordions() {
   const accordions = $$('.accordion');
 
   accordions.forEach(accordion => {
@@ -29,7 +30,7 @@ function initAccordions() {
 /**
  * Open specific accordion by ID
  */
-function openAccordion(id) {
+export function openAccordion(id) {
   const accordion = document.getElementById(id);
   if (accordion && accordion.tagName === 'DETAILS') {
     accordion.open = true;
@@ -39,7 +40,7 @@ function openAccordion(id) {
 /**
  * Close specific accordion by ID
  */
-function closeAccordion(id) {
+export function closeAccordion(id) {
   const accordion = document.getElementById(id);
   if (accordion && accordion.tagName === 'DETAILS') {
     accordion.open = false;
@@ -49,7 +50,7 @@ function closeAccordion(id) {
 /**
  * Toggle specific accordion by ID
  */
-function toggleAccordion(id) {
+export function toggleAccordion(id) {
   const accordion = document.getElementById(id);
   if (accordion && accordion.tagName === 'DETAILS') {
     accordion.open = !accordion.open;
@@ -59,7 +60,7 @@ function toggleAccordion(id) {
 /**
  * Close all accordions in a container
  */
-function closeAllAccordions(container = document) {
+export function closeAllAccordions(container = document) {
   const accordions = container.querySelectorAll('.accordion');
   accordions.forEach(acc => {
     if (acc.tagName === 'DETAILS') {
@@ -71,7 +72,7 @@ function closeAllAccordions(container = document) {
 /**
  * Open only one accordion, close others
  */
-function openOnlyAccordion(id, container = document) {
+export function openOnlyAccordion(id, container = document) {
   const accordions = container.querySelectorAll('.accordion');
   accordions.forEach(acc => {
     if (acc.tagName === 'DETAILS') {

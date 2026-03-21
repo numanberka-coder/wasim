@@ -2,13 +2,17 @@
    WALLPAPER - Chat Wallpaper Management
    ======================================== */
 
+import { $one } from '../utils.js';
+import { state } from '../state.js';
+import { THEME_DEFAULTS, WALLPAPER_PRESETS } from '../config.js';
+
 
 
 
 /**
  * Apply current wallpaper settings
  */
-function applyWallpaper() {
+export function applyWallpaper() {
   const settings = state.get('settings');
   const phoneEl = $one('.phone');
   if (!phoneEl) return;
@@ -52,7 +56,7 @@ function applyWallpaper() {
 /**
  * Set wallpaper preset
  */
-function setWallpaperPreset(preset) {
+export function setWallpaperPreset(preset) {
   state.set('settings.wallpaperPreset', preset);
   applyWallpaper();
 }
@@ -60,7 +64,7 @@ function setWallpaperPreset(preset) {
 /**
  * Set custom wallpaper color
  */
-function setWallpaperColor(color) {
+export function setWallpaperColor(color) {
   state.set('settings.wallpaperColor', color);
   // Renk değiştiğinde otomatik olarak özel renk moduna geç
   if (state.get('settings.wallpaperPreset') !== 'custom-color') {
@@ -75,7 +79,7 @@ function setWallpaperColor(color) {
 /**
  * Set custom wallpaper image
  */
-function setWallpaperImage(dataUrl) {
+export function setWallpaperImage(dataUrl) {
   state.set('settings.wallpaperImageDataUrl', dataUrl);
   state.set('settings.wallpaperPreset', 'custom-image');
   applyWallpaper();
@@ -84,7 +88,7 @@ function setWallpaperImage(dataUrl) {
 /**
  * Clear wallpaper to default
  */
-function clearWallpaper() {
+export function clearWallpaper() {
   const theme = state.get('settings.theme') || 'dark';
   const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
   const defaultPreset = themeColors.wallpaperPreset;
@@ -98,6 +102,6 @@ function clearWallpaper() {
 /**
  * Get available wallpaper presets
  */
-function getWallpaperPresets() {
+export function getWallpaperPresets() {
   return Object.keys(WALLPAPER_PRESETS);
 }

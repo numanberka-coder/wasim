@@ -2,6 +2,9 @@
    STATUSBAR - Phone Status Bar Management
    ======================================== */
 
+import { $, $one, nowTime, clamp, Logger } from '../utils.js';
+import { state } from '../state.js';
+
 
 
 let updateInterval = null;
@@ -9,7 +12,7 @@ let updateInterval = null;
 /**
  * Update status bar time
  */
-function updateStatusBar() {
+export function updateStatusBar() {
   const settings = state.get('settings');
   const timeEl = $('statusTime');
   
@@ -22,7 +25,7 @@ function updateStatusBar() {
 /**
  * Set status bar time override
  */
-function setStatusTime(time) {
+export function setStatusTime(time) {
   state.set('settings.statusTimeOverride', time);
   updateStatusBar();
 }
@@ -30,7 +33,7 @@ function setStatusTime(time) {
 /**
  * Clear status bar time override (use real time)
  */
-function clearStatusTime() {
+export function clearStatusTime() {
   state.set('settings.statusTimeOverride', '');
   updateStatusBar();
 }
@@ -38,7 +41,7 @@ function clearStatusTime() {
 /**
  * Apply battery settings
  */
-function applyBatterySettings() {
+export function applyBatterySettings() {
   const settings = state.get('settings');
   const phoneEl = $one('.phone');
   const batteryContainer = $one('.battery');
@@ -74,7 +77,7 @@ function applyBatterySettings() {
 /**
  * Set battery percentage
  */
-function setBatteryPercent(percent) {
+export function setBatteryPercent(percent) {
   state.set('settings.batteryPercent', clamp(percent, 0, 100));
   applyBatterySettings();
 }
@@ -82,7 +85,7 @@ function setBatteryPercent(percent) {
 /**
  * Set battery health
  */
-function setBatteryHealth(health) {
+export function setBatteryHealth(health) {
   state.set('settings.batteryHealth', clamp(health, 0, 100));
   applyBatterySettings();
 }
@@ -90,7 +93,7 @@ function setBatteryHealth(health) {
 /**
  * Toggle battery visibility
  */
-function setBatteryVisible(visible) {
+export function setBatteryVisible(visible) {
   state.set('settings.batteryVisible', visible);
   applyBatterySettings();
 }
@@ -98,7 +101,7 @@ function setBatteryVisible(visible) {
 /**
  * Start automatic time updates
  */
-function startTimeUpdates() {
+export function startTimeUpdates() {
   if (updateInterval) return;
   
   updateStatusBar();
@@ -109,7 +112,7 @@ function startTimeUpdates() {
 /**
  * Stop automatic time updates
  */
-function stopTimeUpdates() {
+export function stopTimeUpdates() {
   if (updateInterval) {
     clearInterval(updateInterval);
     updateInterval = null;
@@ -119,7 +122,7 @@ function stopTimeUpdates() {
 /**
  * Set operator name in status bar
  */
-function setOperatorName(name) {
+export function setOperatorName(name) {
   const el = $one('.status-operator');
   if (el) el.textContent = name || 'Turkcell';
   state.set('settings.operatorName', name || 'Turkcell');
@@ -128,7 +131,7 @@ function setOperatorName(name) {
 /**
  * Initialize status bar
  */
-function initStatusBar() {
+export function initStatusBar() {
   updateStatusBar();
   applyBatterySettings();
   startTimeUpdates();
