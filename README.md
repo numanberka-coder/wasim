@@ -6,8 +6,9 @@ gerçekçi WhatsApp görünümü sağlar. Senaryo yazılır, telefon simülatör
 oynatılır, PNG export alınır.
 
 ## Mevcut Durum
-Faz 1–21 tamamlandı. Proje production-ready görsel kalitede.
-Faz 21: Kod Kalitesi & Refactoring — tema sabitleri, event map, modüler mesaj render.
+Faz 1–23 tamamlandı. Proje production-ready görsel kalitede.
+Faz 22: Build Sistemi — Vite + ES modules geçişi, tek bundle.
+Faz 23: Test Altyapısı — Vitest + 191 unit test, CI entegrasyonu, coverage raporu.
 
 ## Dosya Mimarisi
 - `index.html` — Ana giriş noktası
