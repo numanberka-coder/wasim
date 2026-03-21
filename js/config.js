@@ -2,6 +2,24 @@
    CONFIG - Constants & Defaults
    ======================================== */
 
+const THEME_DEFAULTS = {
+  dark: {
+    headerColor: '#1f2c33',
+    bubbleOutColor: '#005c4b',
+    bubbleInColor: '#1f2c33',
+    wallpaperColor: '#0b141a',
+    wallpaperPreset: 'default',
+  },
+  light: {
+    headerColor: '#008069',
+    bubbleOutColor: '#d9fdd3',
+    bubbleInColor: '#ffffff',
+    wallpaperColor: '#efeae2',
+    wallpaperPreset: 'light-default',
+  },
+  activeButtonTextColor: '#111b21',
+};
+
 const CONFIG = {
   STORAGE_KEY: 'whatsapp_simulator_v2',
   SCENES_KEY: 'whatsapp_simulator_scenes',
@@ -241,7 +259,7 @@ const DEFAULT_STATE = {
   // Settings
   statusTimeOverride: '',
   wallpaperPreset: 'default',
-  wallpaperColor: '#0b141a',
+  wallpaperColor: THEME_DEFAULTS.dark.wallpaperColor,
   wallpaperImageDataUrl: null,
   batteryVisible: true,
   batteryPercent: 95,
@@ -250,7 +268,7 @@ const DEFAULT_STATE = {
   chatLineHeight: 1.4,
   bubbleSize: 78,
   bubblePaddingY: 10,
-  headerColor: '#1f2c33',
+  headerColor: THEME_DEFAULTS.dark.headerColor,
   bubbleOutColor: null,
   bubbleInColor: null,
   tickStatus: 'read',
