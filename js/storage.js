@@ -108,6 +108,89 @@ const storage = {
   }
 };
 
+// ========================================
+//   SCENE MANAGEMENT
+// ========================================
+
+const sceneManager = {
+  /**
+   * Tüm sahneleri getir
+   */
+  getAll() {
+    try {
+      const raw = localStorage.getItem(CONFIG.SCENES_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.warn('Scene load error:', e);
+      return [];
+    }
+  },
+
+  /**
+   * Sahneleri localStorage'a yaz
+   */
+  _save(scenes) {
+    try {
+      localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify(scenes));
+    } catch (e) {
+      console.warn('Scene save error:', e);
+    }
+  },
+
+  /**
+   * Mevcut state'i isimli sahne olarak kaydet
+   */
+  save(name) {
+    const scenes = this.getAll();
+    const scene = {
+      id: Date.now(),
+      name: name.trim(),
+      timestamp: new Date().toISOString(),
+      data: state.export()
+    };
+    scenes.unshift(scene);
+    this._save(scenes);
+    console.log('🎬 Scene saved:', name);
+    return scene;
+  },
+
+  /**
+   * Sahneyi yükle (state'e import et)
+   */
+  load(id) {
+    const scenes = this.getAll();
+    const scene = scenes.find(s => s.id === id);
+    if (!scene) return false;
+    state.import(scene.data);
+    storage.save();
+    console.log('🎬 Scene loaded:', scene.name);
+    return true;
+  },
+
+  /**
+   * Sahneyi sil
+   */
+  delete(id) {
+    const scenes = this.getAll();
+    const filtered = scenes.filter(s => s.id !== id);
+    this._save(filtered);
+    console.log('🎬 Scene deleted');
+    return true;
+  },
+
+  /**
+   * Sahne adını değiştir
+   */
+  rename(id, newName) {
+    const scenes = this.getAll();
+    const scene = scenes.find(s => s.id === id);
+    if (!scene) return false;
+    scene.name = newName.trim();
+    this._save(scenes);
+    return true;
+  }
+};
+
 /**
  * Auto-save on state changes
  */

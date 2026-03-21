@@ -1,51 +1,44 @@
-# Faz 13 — Tik Ayrımı (Gönderildi / İletildi / Okundu) ✅
+# Faz 14 — Sahne Yönetimi (Kaydet / Yükle / Sil) ✅
 
 ## Tamamlanan Adımlar
 
-### Adım 1: Config & State Altyapısı ✅
-- [x] `js/config.js` → `DEFAULT_STATE`'e `tickStatus: 'read'` eklendi
-- [x] `js/state.js` → `settings`'e `tickStatus` eklendi
-- [x] `js/state.js` → `reset()`'e `tickStatus: 'read'` eklendi
+### Adım 1: Storage Altyapısı ✅
+- [x] `js/config.js` → `CONFIG.SCENES_KEY` eklendi (`whatsapp_simulator_scenes`)
+- [x] `js/storage.js` → `sceneManager` objesi eklendi
+- [x] `sceneManager.save(name)` → state.export() + isim + timestamp → scenes dizisine ekle
+- [x] `sceneManager.load(id)` → scenes dizisinden bul → state.import(data)
+- [x] `sceneManager.delete(id)` → scenes dizisinden sil
+- [x] `sceneManager.rename(id, newName)` → sahne adını güncelle
+- [x] `sceneManager.getAll()` → tüm sahneleri getir
 
-### Adım 2: Mesaj Objesine tickStatus Desteği ✅
-- [x] `js/state.js` → `addMessage()` → `tickStatus` alanı eklendi
-- [x] `js/state.js` → `import()` → mesaj import'unda `tickStatus` korunuyor
-- [x] `js/phone/messages.js` → `addMessage()` → `tickStatus` parametresi eklendi
-- [x] `js/phone/messages.js` → `buildMessageRow()` → `msg.tickStatus || state.get('settings.tickStatus') || 'read'` fallback zinciri
+### Adım 2: UI — Sahne Yönetimi Accordion ✅
+- [x] `index.html` → Settings paneline "Sahne Yönetimi" accordion'u eklendi
+- [x] İsim input + "Kaydet" butonu
+- [x] `<div id="sceneList">` — dinamik render alanı
 
-### Adım 3: Senaryo Syntax — @sent, @delivered, @read ✅
-- [x] `EventType.TICK_STATUS` eklendi
-- [x] `parseLine()` → `@sent`, `@delivered`, `@read` komutları parse ediliyor
-- [x] `isValidCommand()` → yeni komutlar listeye eklendi
-- [x] `eventsToScript()` → `TICK_STATUS` event'i script'e geri çevriliyor
+### Adım 3: App Entegrasyonu ✅
+- [x] `js/app.js` → `renderSceneList()` fonksiyonu eklendi
+- [x] Her sahne satırı: isim, tarih, "Yükle" butonu, "Sil" butonu
+- [x] Kaydet butonu → sceneManager.save(name) → listeyi yenile
+- [x] Yükle butonu → onay → sceneManager.load(id) → tam UI refresh
+- [x] Sil butonu → onay → sceneManager.delete(id) → listeyi yenile
+- [x] Enter ile kaydetme desteği
+- [x] Boş isim kontrolü
+- [x] Uygulama açılışında sahne listesi render
 
-### Adım 4: Player — Tik Durumu Akışı ✅
-- [x] `activeTickStatus` değişkeni eklendi
-- [x] `loadScript()` → `activeTickStatus = null` ile sıfırlanıyor
-- [x] `handleEvent()` → `TICK_STATUS` case → `activeTickStatus` güncelleniyor
-- [x] `handleMessageEvent()` → mesajlara `tickStatus: activeTickStatus` geçiliyor
-
-### Adım 5: Settings UI — Varsayılan Tik Durumu ✅
-- [x] `index.html` → "Tik Durumu" accordion'u eklendi (3 buton: Gönderildi, İletildi, Okundu)
-- [x] `css/components.css` → `.tick-btn` ve `.tick-btn.active` stilleri eklendi
-- [x] `js/app.js` → buton click binding + `rebuildChat()` ile anlık güncelleme
-- [x] `js/app.js` → `populateFormFields()` → tik buton active state'i senkron
-
-### Adım 6: Export/Import & Sıfırlama Uyumu ✅
-- [x] `state.export()` zaten settings objesini alıyor → `tickStatus` dahil
-- [x] `state.import()` → `Object.assign` ile settings dolduruluyor → `tickStatus` dahil
-- [x] Mesaj bazlı `tickStatus` import'ta korunuyor
-- [x] Reset → `tickStatus: 'read'` varsayılanına dönüyor
-- [x] `populateFormFields()` reset/import sonrası UI'ı güncelliyor
+### Adım 4: CSS Stilleri ✅
+- [x] `.scene-list` → flex column container
+- [x] `.scene-item` → flex row (isim+tarih + butonlar)
+- [x] `.scene-name` → text overflow ellipsis
+- [x] `.scene-date` → küçük gri tarih
+- [x] `.scene-actions` → buton grubu
+- [x] Mevcut btn-sm, danger sınıfları kullanıldı
 
 ## Değişen Dosyalar
-- `js/config.js` — DEFAULT_STATE'e tickStatus eklendi
-- `js/state.js` — settings, addMessage, import, reset
-- `js/phone/messages.js` — addMessage + buildMessageRow tick fallback
-- `js/features/script-parser.js` — EventType, parseLine, isValidCommand, eventsToScript
-- `js/features/player.js` — activeTickStatus, loadScript, handleEvent, handleMessageEvent
-- `js/app.js` — tick button bindings, populateFormFields
-- `index.html` — Tik Durumu accordion UI
-- `css/components.css` — tick-btn styles
-- `ROADMAP.md` — Faz 12 & 13 tamamlandı olarak işaretlendi
+- `js/config.js` — SCENES_KEY eklendi
+- `js/storage.js` — sceneManager objesi (save, load, delete, rename, getAll)
+- `js/app.js` — renderSceneList, scene button bindings, init'e renderSceneList eklendi
+- `index.html` — Sahne Yönetimi accordion UI
+- `css/components.css` — scene-list, scene-item stilleri
+- `ROADMAP.md` — Faz 14 tamamlandı olarak işaretlendi
 - `README.md` — Mevcut durum güncellendi
