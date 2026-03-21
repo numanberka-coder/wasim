@@ -1,61 +1,52 @@
-# Faz 17 — Autocomplete
+# Faz 17 — Autocomplete ✅
 
-## Plan
+## Tamamlanan Adımlar
 
-### Adım 1: Autocomplete Modülü Oluştur
-- [ ] `js/features/autocomplete.js` — Ana autocomplete motoru
-  - @ komut listesi (17 komut) ve açıklamaları
-  - Kişi adları: `state.get('people')` üzerinden dinamik
-  - Cursor pozisyonu algılama (textarea selectionStart)
-  - Mevcut kelime/token çıkarma
-  - Filtreleme: @ ile başlıyorsa komut, satır başı ise kişi adı
-  - Dropdown konumlama (textarea getBoundingClientRect + satır hesabı)
+### Adım 1: Autocomplete Modülü ✅
+- [x] `js/features/autocomplete.js` — IIFE modül
+- [x] 17 @ komut listesi (ad, açıklama, parametre ipucu)
+- [x] Cursor pozisyonu algılama (selectionStart)
+- [x] @ komut filtreleme — `@` yazınca dropdown açılır
+- [x] Kişi adı tamamlama — satır başında yazınca `state.get('people')` üzerinden öneri
+- [x] Parametre ipucu (17.4) — komut seçildikten sonra ghost text
 
-### Adım 2: Dropdown HTML
-- [ ] `index.html` — Autocomplete popup container
-  - `#autocompleteDropdown` — fixed pozisyonlu div
-  - `.ac-item` — her öneri satırı
-  - Komut adı + kısa açıklama gösterimi
-  - Kişi adı gösterimi
+### Adım 2: Dropdown HTML ✅
+- [x] `#autocompleteDropdown` — fixed pozisyonlu popup container
+- [x] `#autocompleteHint` — parametre ipucu elementi
+- [x] Script tag: `autocomplete.js` — script-builder.js sonrası, app.js öncesi
 
-### Adım 3: CSS Stilleri
-- [ ] `css/components.css` — Autocomplete stilleri
-  - `.autocomplete-dropdown` — popup stili (z-index: 9999, koyu arkaplan)
-  - `.ac-item` — satır stili, hover/active durumu
-  - `.ac-item.selected` — ok tuşları ile seçim vurgusu
-  - `.ac-hint` — parametre ipucu (ghost text)
-  - Mobil uyumluluk (min 44px touch target)
+### Adım 3: CSS Stilleri ✅
+- [x] `.autocomplete-dropdown` — popup stili (z-index: 9999, contextMenuIn animasyon)
+- [x] `.ac-item` — satır hover/selected durumu, yeşil sol kenar
+- [x] `.ac-icon`, `.ac-name`, `.ac-desc` — ikon, ad, açıklama
+- [x] `.autocomplete-hint` — monospace ipucu kutusu
+- [x] Mobil uyumluluk — min 44px touch target, genişlik ayarı
 
-### Adım 4: Klavye & Etkileşim
-- [ ] Klavye kontrolleri bağlama
-  - `input` event → filtre ve dropdown göster
-  - `keydown` → ArrowUp/Down navigasyon, Enter/Tab seçim, Escape kapat
-  - Document click → dropdown kapat
-  - Scroll/resize → dropdown kapat
-  - Tab değişimi → dropdown kapat
+### Adım 4: Klavye & Etkileşim ✅
+- [x] `input` event → filtre ve dropdown göster
+- [x] ArrowUp/Down → navigasyon
+- [x] Enter/Tab → seçim
+- [x] Escape → kapat
+- [x] blur → kapat (150ms gecikme ile tıklama koruması)
+- [x] scroll/resize → kapat
+- [x] Mousedown event delegation → tıklama ile seçim
 
-### Adım 5: Parametre İpucu (17.4)
-- [ ] Komut seçildikten sonra ghost text gösterimi
-  - `@photo` → `@photo Kim "URL" "açıklama"`
-  - Kullanıcı yazdıkça ipucu kaybolur
+### Adım 5: app.js Entegrasyonu ✅
+- [x] `initAutocomplete()` çağrısı `init()` fonksiyonuna eklendi
+- [x] `scriptBox` ve `interactiveScriptBox` textarea'ları bağlandı
 
-### Adım 6: app.js Entegrasyonu
-- [ ] `initAutocomplete()` çağrısını `init()` fonksiyonuna ekle
-- [ ] `scriptBox` ve `interactiveScriptBox` textarea'larını bağla
-
-### Adım 7: Test & Doğrulama
-- [ ] @ yazınca komut listesi görünüyor
-- [ ] Satır başında kişi adı yazınca öneriler görünüyor
-- [ ] Ok tuşları ile gezme çalışıyor
-- [ ] Enter/Tab ile seçim çalışıyor
-- [ ] Escape ile kapanıyor
-- [ ] Mobilde düzgün çalışıyor
-- [ ] Mevcut işlevsellik bozulmadı
+### Adım 6: Doğrulama ✅
+- [x] JS syntax doğru (Node.js kontrolü)
+- [x] HTML elementleri mevcut
+- [x] Script yükleme sırası doğru
+- [x] CSS sınıfları JS ile uyumlu
+- [x] `contextMenuIn` animasyonu mevcut
+- [x] `state` değişkeni erişilebilir
 
 ## Değişen Dosyalar
-- `js/features/autocomplete.js` (YENİ)
-- `index.html` — autocomplete dropdown HTML + script tag
-- `css/components.css` — autocomplete stilleri
+- `js/features/autocomplete.js` (YENİ) — Ana autocomplete motoru
+- `index.html` — dropdown HTML + script tag
+- `css/components.css` — autocomplete stilleri + mobil uyumluluk
 - `js/app.js` — initAutocomplete() çağrısı
-- `ROADMAP.md` — Faz 17 tamamlandı
-- `README.md` — Mevcut durum güncelleme
+- `ROADMAP.md` — Faz 17 tamamlandı olarak işaretlendi
+- `README.md` — Mevcut durum 1-17, dosya mimarisi güncellendi

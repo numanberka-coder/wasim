@@ -76,6 +76,9 @@ function init() {
   // Start auto-save
   initAutoSave();
 
+  // Autocomplete — senaryo editörü otomatik tamamlama (Faz 17)
+  initAutocomplete();
+
   // Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
   initTutorials();
 
