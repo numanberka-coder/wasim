@@ -1,51 +1,49 @@
-# Faz 15 — Senaryo Zenginleştirici ✅
+# Faz 16 — Tab Öğreticileri
 
-## Tamamlanan Adımlar
+## Plan
 
-### Adım 1: Satır Arası Ekleme Altyapısı ✅
-- [x] `insertAfterIndex` değişkeni eklendi (null = sonuna ekle, sayı = o index'in altına ekle)
-- [x] `addBlockFromForm()` güncellendi — insertAfterIndex varsa `blocks.splice(insertAfterIndex + 1, 0, block)`
-- [x] Ekleme sonrası `clearInsertMode()` ile sıfırlama
-- [x] `setInsertMode(index)` — insertAfterIndex set, render, indicator güncelle, forma scroll
-- [x] `clearInsertMode()` — insertAfterIndex null, indicator gizle
-- [x] `renderInsertIndicator()` — "X. satırın altına eklenecek" bilgi barı
+Her 3 script alt tab'ına (Senaryo, İnteraktif, Blok Builder) collapsible "Nasıl Kullanılır?" rehberi eklenecek. Mevcut `<details class="accordion">` pattern'i kullanılacak. İlk ziyarette rehber açık gelecek, sonra localStorage ile hatırlanacak.
 
-### Adım 2: Builder Listesine "+" Butonu ✅
-- [x] `renderBlocks()` → her `.builder-item`'a "+" butonu eklendi (4 sütunlu grid)
-- [x] "+" tıklanınca `setInsertMode(index)` çağrılıyor
-- [x] Aktif insert modu → ilgili satır yeşil border ile vurgulanıyor (`.insert-target`)
-- [x] Insert indicator cancel butonu ile iptal edilebiliyor
+### Adım 1: Senaryo Tab Rehberi (16.1)
+- `tabSenaryo` paneline, textarea'nın hemen üstüne bir `<details class="accordion">` ekle
+- İçerik: Komut listesi tablosu, syntax örnekleri, hız/jitter açıklaması, 1-1 sohbet ipucu (16.5)
+- [ ] HTML ekleme
+- [ ] İlk ziyaret: `open` attribute
 
-### Adım 3: Hızlı Komut Menüsü (Context Menu) ✅
-- [x] Satır summary alanına tıklanınca popup menü açılıyor
-- [x] 8 sık kullanılan komut: Mesaj, Fotoğraf, Yazıyor, Tepki, Ses, Sistem, Sticker, Yanıt
-- [x] Seçim → activeBuilderType değişir + setInsertMode(index) çağrılır + form açılır
-- [x] Click-outside ve ESC ile kapatma
-- [x] Ekran taşma kontrolü (bottom/right overflow)
+### Adım 2: İnteraktif Tab Rehberi (16.2)
+- `tabInteractive` paneline, textarea'nın üstüne accordion ekle
+- İçerik: Blok syntax (#blok_adi, trigger, ---), adım adım akış, demo yükleme ipucu
+- Mevcut "Syntax Referansı" accordion'u korunacak (zaten var)
+- [ ] HTML ekleme
 
-### Adım 4: CSS Stilleri ✅
-- [x] `.builder-item` grid → 4 sütun (handle | summary | + | sil)
-- [x] `.builder-insert-btn` — yeşil "+" butonu
-- [x] `.builder-item.insert-target` — yeşil border vurgusu
-- [x] `.builder-insert-indicator` — bilgi barı + iptal butonu
-- [x] `.builder-context-menu` — fixed pozisyonlu popup, animasyonlu
-- [x] `.builder-context-item` — hover efektli menü satırları
+### Adım 3: Builder Tab Rehberi (16.3)
+- `tabBuilder` paneline, hazır şablonların üstüne accordion ekle
+- İçerik: Trigger ayarları, satır ekleme akışı, metne aktarma, insert modu, context menü
+- [ ] HTML ekleme
 
-### Adım 5: Mobil Uyumluluk ✅
-- [x] Insert butonu min 36px touch target
-- [x] Context menü genişletilmiş padding (mobil)
-- [x] Context item min-height 40px touch-friendly
-- [x] Insert indicator mobilde görünür
+### Adım 4: CSS Stilleri
+- Tutorial accordion'a özel `.tutorial-guide` stili (opsiyonel - ihtiyaç olursa)
+- İçerik için `.guide-section`, `.guide-code` gibi yardımcı stiller
+- Kod örnekleri için monospace kutu stili (mevcut interactive syntax referansındaki gibi)
+- [ ] components.css güncelleme
 
-### Adım 6: Edge Case Korumaları ✅
-- [x] `removeBlock()` → silinen block insert target ise clearInsertMode()
-- [x] `removeBlock()` → silinen block öncesindeyse insertAfterIndex--
-- [x] `moveBlock()` → sürükle-bırak sonrası clearInsertMode()
-- [x] `clearBtn` (Satırları Temizle) → clearInsertMode()
+### Adım 5: İlk Açılış Davranışı (16.4)
+- localStorage key: `wa_sim_tutorials_seen`
+- İlk ziyarette rehberler `open` attribute ile açık
+- Kullanıcı kapatınca localStorage'a kaydet
+- Sonraki ziyaretlerde kapalı başla
+- [ ] JS mantığı (app.js veya ayrı fonksiyon)
 
-## Değişen Dosyalar
-- `js/features/script-builder.js` — insertAfterIndex, setInsertMode, clearInsertMode, renderInsertIndicator, showContextMenu, closeContextMenu, renderBlocks güncelleme, removeBlock/moveBlock edge case koruması
-- `css/components.css` — builder-item 4 sütun grid, insert-btn, insert-target, insert-indicator, context-menu stilleri
-- `css/responsive.css` — mobil uyumluluk (touch target, padding)
-- `ROADMAP.md` — Faz 15 tamamlandı olarak işaretlendi
-- `README.md` — Mevcut durum güncellendi (1-15)
+### Adım 6: Doğrulama & Test
+- [ ] 3 tab'da da rehber görünüyor
+- [ ] Açılıp kapanıyor (accordion çalışıyor)
+- [ ] İlk ziyarette açık, sonra kapalı
+- [ ] Mobilde düzgün görünüyor
+- [ ] Light mode'da düzgün görünüyor
+
+## Değişecek Dosyalar
+- `index.html` — 3 accordion rehber ekleme
+- `css/components.css` — Tutorial-specific stiller
+- `js/app.js` — İlk açılış localStorage kontrolü
+- `ROADMAP.md` — Faz 16 tamamlandı olarak işaretleme
+- `README.md` — Durum güncelleme
