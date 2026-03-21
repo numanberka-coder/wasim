@@ -1,62 +1,136 @@
-# Faz 21 — Kod Kalitesi & Refactoring ✅
+# Faz 22 — Build Sistemi
 
 > **Tarih:** 2026-03-21
-> **Kapsam:** Refactoring odaklı — davranış değişikliği yok, bakım maliyetini düşür
-> **Durum:** Tamamlandı
+> **Kapsam:** Vite + ES modules geçişi — 23 JS dosyası modüler sisteme taşınacak
+> **Durum:** Plan aşaması
+
+---
+
+## Genel Strateji
+
+Projedeki 23 JS dosyası şu anda global scope'ta çalışıyor (24 `<script>` etiketi).
+Hedef: Vite ile modern build sistemi, ES modules ile sıfır global namespace kirliliği.
+
+**Bağımlılık katmanları (aşağıdan yukarı):**
+```
+utils.js, config.js          → Sıfır bağımlılık (temel katman)
+state.js                     → config, utils
+storage.js                   → state, config, utils
+ui/toast.js                  → Sıfır bağımlılık
+ui/validation.js             → utils ($, $one)
+ui/tabs.js                   → utils (Logger)
+ui/accordion.js              → Sıfır bağımlılık
+ui/forms.js                  → utils ($$, Logger)
+ui/mobile.js                 → utils, state, storage, toast
+ui/highlight.js              → utils, script-parser
+phone/header.js              → utils, state, config
+phone/statusbar.js           → utils, state
+phone/wallpaper.js           → utils, state, config
+phone/typography.js          → utils, state
+phone/messages.js            → utils, config, state
+features/script-parser.js    → utils (Logger)
+features/interactive-engine.js → script-parser, state, utils
+features/people.js           → utils, state, toast, validation
+features/player.js           → state, utils, config, script-parser, messages, people, toast, interactive
+features/script-builder.js   → utils, state, config, script-parser, people, toast, validation
+features/autocomplete.js     → utils ($)
+app.js → main.js             → HER ŞEY (orchestrator)
+```
+
+**Önemli not:** `html2canvas` CDN'den async yükleniyor → npm paketi olarak eklenecek, lazy import ile sadece export'ta yüklenecek.
 
 ---
 
 ## Görevler
 
-### 21.1 — bindEventHandlers() refactoring 🔴 ✅
-- [x] 362 satırlık fonksiyon data-driven yapıya dönüştürüldü
-- [x] `CLICK_MAP` — 19 basit click handler tek array'de
-- [x] `COLOR_PICKER_MAP` — 4 color picker input+change duplicate kaldırıldı
-- [x] `handleScaleClick()` — 2 scale button loop birleştirildi
-- [x] Gereksiz `bindChange('sceneNameInput', () => {})` kaldırıldı
+### 22.1 — package.json oluşturma 🔴
+- [ ] `package.json` oluştur: name, version, type: "module", scripts (dev, build, preview)
+- [ ] `html2canvas` npm dependency olarak ekle
+- [ ] `npm install` ile bağımlılıkları kur
 
-### 21.2 — Tema renk sabitleri merkezileştirme 🔴 ✅
-- [x] `THEME_DEFAULTS` objesi config.js'e eklendi (dark/light renk çiftleri)
-- [x] 27 hardcoded renk referansı → tek kaynak (`THEME_DEFAULTS`)
-- [x] Etkilenen dosyalar: app.js, config.js, header.js, wallpaper.js, state.js
+### 22.2 — Vite kurulumu 🔴
+- [ ] `vite` devDependency olarak ekle
+- [ ] `vite.config.js` oluştur (minimal config, root: './')
+- [ ] Dev server + hot reload çalışır durumda
 
-### 21.3 — renderSceneList() event listener leak düzeltmesi 🔴 ✅
-- [x] Per-button listener pattern kaldırıldı
-- [x] `initSceneListDelegation()` — container üzerinde tek event delegation
-- [x] `applyFullState()` helper ile 3 yerdeki tekrarlanan state uygulama kodu birleştirildi
+### 22.3 — ES6 module geçişi 🔴
+Tüm 23 JS dosyasını `import`/`export` sisteme geçir. Sıra kritik — aşağıdan yukarı:
 
-### 21.4 — Event binding boilerplate azaltma 🟡 ✅
-- [x] `bindEvent(id, event, handler)` generic utility eklendi
-- [x] `bindClick`, `bindChange`, `bindInput` → `bindEvent` üzerine wrapper
+**Katman 1 — Sıfır bağımlılık:**
+- [ ] `js/utils.js` — tüm fonksiyonlara `export` ekle
+- [ ] `js/config.js` — tüm sabitlere `export` ekle
+- [ ] `js/ui/toast.js` — `export` ekle
+- [ ] `js/ui/accordion.js` — `export` ekle
 
-### 21.5 — buildMessageRow() parçalama 🟡 ✅
-- [x] 544 satırlık monolitik fonksiyon → 10 ayrı renderer fonksiyonu
-- [x] `MESSAGE_RENDERERS` dispatch table ile tip bazlı dağıtım
-- [x] Reply target matching duplicate kodu → tek `resolveReplyTarget()`
-- [x] `findMessageByTarget()` → 1 satırlık wrapper
-- [x] Magic number'lar → sabitler (`VOICE_WAVEFORM_BARS`, `VOICE_TICK_MS`, `DOC_EXT_COLORS` vb.)
-- [x] `renderReplyBlock()`, `renderMessageMeta()`, `renderReactionChip()` ayrı fonksiyonlar
-- [x] `appendCaption()` ile photo/video/voice caption tekrarı giderildi
+**Katman 2 — Temel bağımlılıklar:**
+- [ ] `js/state.js` — import utils/config, export state/StateManager
+- [ ] `js/ui/validation.js` — import utils
+- [ ] `js/ui/tabs.js` — import utils
+- [ ] `js/ui/forms.js` — import utils
+- [ ] `js/features/script-parser.js` — import utils
+- [ ] `js/features/autocomplete.js` — import utils
 
-### 21.6 — Header renk sıfırlama mantığı birleştirme 🟡 ✅
-- [x] `resetThemeColors(theme)` fonksiyonu oluşturuldu
-- [x] 4 yerdeki tekrarlanan header+bubble renk sıfırlama kodu birleştirildi
+**Katman 3 — Orta bağımlılıklar:**
+- [ ] `js/storage.js` — import state, config, utils
+- [ ] `js/phone/header.js` — import utils, state, config
+- [ ] `js/phone/statusbar.js` — import utils, state
+- [ ] `js/phone/wallpaper.js` — import utils, state, config
+- [ ] `js/phone/typography.js` — import utils, state
+- [ ] `js/phone/messages.js` — import utils, config, state
+- [ ] `js/ui/highlight.js` — import utils, script-parser
 
-### 21.7 — handleEvent() değerlendirme 🟢 ✅
-- [x] `play()` 27 satır — temiz, refactoring gerekmez
-- [x] `handleEvent()` 65 satır — zaten modüler (handleTypingEvent, handleMessageEvent)
-- **Sonuç:** Ek refactoring gereksiz — kod yeterince temiz
+**Katman 4 — Yüksek bağımlılıklar:**
+- [ ] `js/features/people.js` — import utils, state, toast, validation
+- [ ] `js/features/interactive-engine.js` — import script-parser, state, utils
+- [ ] `js/features/player.js` — import state, utils, config, script-parser, messages, people, toast, interactive
+- [ ] `js/features/script-builder.js` — import utils, state, config, script-parser, people, toast, validation
+- [ ] `js/ui/mobile.js` — import utils, state, storage, toast + diğerleri
+
+**Katman 5 — Entry point:**
+- [ ] `js/app.js` — tüm modülleri import et
+
+### 22.4 — Tek entry point 🔴
+- [ ] `index.html`'den 24 `<script>` etiketi kaldır
+- [ ] Tek `<script type="module" src="js/app.js"></script>` ekle
+- [ ] CDN html2canvas script etiketi kaldır
+- [ ] DOMContentLoaded → modül seviyesinde çalışma (top-level await veya init pattern)
+
+### 22.5 — Production build 🟡
+- [ ] `npm run build` çalışır durumda
+- [ ] Minification + tree-shaking + source maps
+- [ ] `dist/` klasöründe production output
+
+### 22.6 — html2canvas lazy import 🟡
+- [ ] CDN script → `import('html2canvas')` dynamic import
+- [ ] Sadece PNG export butonuna tıklayınca yüklensin
+- [ ] typeof kontrolü yerine dynamic import kullanımı
+
+### 22.7 — CSS optimizasyonu 🟢
+- [ ] Vite CSS processing ile minification otomatik gelecek
+- [ ] CSS dosyaları import ile çekilebilir (opsiyonel)
+
+### 22.8 — Lint & format 🟢
+- [ ] ESLint konfigürasyonu (ES modules uyumlu)
+- [ ] Prettier konfigürasyonu
+- [ ] `npm run lint` script'i
 
 ---
 
-## Özet
+## Risk Analizi
 
-| Metrik | Önce | Sonra |
-|--------|------|-------|
-| Hardcoded renk referansı | 27 (6 dosyada) | 0 (tek THEME_DEFAULTS) |
-| bindEventHandlers() satır | 362 | ~280 (data-driven) |
-| buildMessageRow() satır | 544 (monolitik) | ~60 (dispatch + alt fonksiyonlar) |
-| Reply matching tekrar | 2 yerde (19 satır × 2) | 1 yerde (resolveReplyTarget) |
-| Event listener leak | renderSceneList her render'da | Tek delegation listener |
-| Tekrarlanan state uygulama | 4 yerde | 1 yerde (applyFullState) |
-| Magic number | 15+ inline | Sabitler |
+| Risk | Etki | Azaltma |
+|------|------|---------|
+| Circular dependency | Yüksek | Bağımlılık grafiğini katman katman takip et |
+| html2canvas async yükleme | Orta | npm paketi + dynamic import |
+| Tüm dosyalar aynı anda değişir | Yüksek | Katman sırasıyla ilerle, her katman sonrası test et |
+| DOM event binding zamanlaması | Orta | DOMContentLoaded yerine modül yükleme sırası |
+
+---
+
+## Doğrulama Planı
+
+1. `npm run dev` ile Vite dev server başlatılır
+2. Tüm UI fonksiyonları test edilir (tema değişimi, mesaj ekleme, senaryo oynatma, export)
+3. `npm run build` ile production build alınır
+4. `npm run preview` ile production build test edilir
+5. Konsol hatası sıfır olmalı
