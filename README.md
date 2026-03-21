@@ -6,7 +6,7 @@ gerçekçi WhatsApp görünümü sağlar. Senaryo yazılır, telefon simülatör
 oynatılır, PNG export alınır.
 
 ## Mevcut Durum
-Faz 1–17 tamamlandı. Proje production-ready görsel kalitede.
+Faz 1–18 tamamlandı. Proje production-ready görsel kalitede.
 
 ## Dosya Mimarisi
 - `index.html` — Ana giriş noktası
@@ -16,6 +16,7 @@ Faz 1–17 tamamlandı. Proje production-ready görsel kalitede.
 - `js/features/conditional-engine.js` — Trigger eşleştirme motoru
 - `js/features/script-builder.js` — Blok Builder UI
 - `js/features/autocomplete.js` — Senaryo editörü otomatik tamamlama
+- `js/ui/highlight.js` — Syntax highlighting overlay motoru
 - `js/ui/` — Header, mesaj render, status bar vb.
 - `css/phone.css` — Telefon simülatörü stilleri (pixel-perfect)
 - `css/variables.css` — Tüm CSS değişkenleri
