@@ -404,7 +404,8 @@
             </div>
           </details>
 
-          <div class="form-group">
+          <div class="form-group sh-wrapper">
+            <pre class="sh-overlay" aria-hidden="true"></pre>
             <textarea id="scriptBox" class="script-editor" rows="12" placeholder="Senaryonuzu buraya yazın..."></textarea>
           </div>
 
@@ -545,8 +546,9 @@
             </div>
           </details>
 
-          <div class="form-group">
+          <div class="form-group sh-wrapper">
             <label for="interactiveScriptBox">İnteraktif Senaryo</label>
+            <pre class="sh-overlay" aria-hidden="true"></pre>
             <textarea id="interactiveScriptBox" class="script-editor" rows="10" placeholder="#selamlasma
 trigger: merhaba, selam, hey
 ---
@@ -1145,6 +1147,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
   <script src="js/features/player.js"></script>
   <script src="js/features/script-builder.js"></script>
   <script src="js/features/autocomplete.js"></script>
+  <script src="js/ui/highlight.js"></script>
 
   <!-- Ana uygulama başlatıcı -->
   <script src="js/app.js"></script>

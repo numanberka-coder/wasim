@@ -76,6 +76,9 @@ function init() {
   // Start auto-save
   initAutoSave();
 
+  // Syntax Highlight — senaryo editörü renklendirme (Faz 18)
+  initHighlight();
+
   // Autocomplete — senaryo editörü otomatik tamamlama (Faz 17)
   initAutocomplete();
 
@@ -151,6 +154,9 @@ function populateFormFields() {
   setInputValue('scriptBox', player.script);
   setInputValue('speed', player.speed);
   setInputValue('jitter', player.jitter);
+
+  // Syntax highlight overlay'i güncelle
+  if (typeof SyntaxHighlight !== 'undefined') SyntaxHighlight.refresh();
 }
 
 /**

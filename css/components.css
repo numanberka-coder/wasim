@@ -918,3 +918,87 @@ label {
     font-size: 12px;
   }
 }
+
+/* ===== SYNTAX HIGHLIGHT (Faz 18) ===== */
+.sh-wrapper {
+  position: relative;
+  background: rgba(20, 30, 38, 0.8);
+  border-radius: var(--radius-md);
+}
+
+.sh-wrapper > label {
+  position: relative;
+  z-index: 3;
+}
+
+.sh-overlay {
+  position: absolute;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+  /* Textarea ile birebir aynı tipografi */
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--wa-text);
+  background: transparent;
+}
+
+.sh-wrapper:focus-within {
+  background: rgba(20, 34, 43, 0.95);
+}
+
+/* Textarea şeffaf metin, overlay renkleri görünsün */
+.sh-wrapper .script-editor {
+  position: relative;
+  z-index: 3;
+  background: transparent !important;
+  color: transparent;
+  caret-color: var(--wa-text);
+}
+
+.sh-wrapper .script-editor::selection {
+  background: rgba(37, 211, 102, 0.25);
+  color: transparent;
+}
+
+.sh-wrapper .script-editor::-moz-selection {
+  background: rgba(37, 211, 102, 0.25);
+  color: transparent;
+}
+
+/* Placeholder rengi korunsun */
+.sh-wrapper .script-editor::placeholder {
+  color: rgba(134, 150, 160, 0.55);
+}
+
+/* Token renkleri */
+.sh-command {
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+.sh-person {
+  color: #53bdeb;
+  font-weight: 500;
+}
+
+.sh-string {
+  color: #25d366;
+}
+
+.sh-block {
+  color: #ffa348;
+  font-weight: 600;
+}
+
+.sh-meta {
+  color: #8696a0;
+  font-style: italic;
+}
