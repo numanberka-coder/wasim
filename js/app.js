@@ -76,6 +76,9 @@ function init() {
   // Start auto-save
   initAutoSave();
 
+  // Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
+  initTutorials();
+
   console.log('✅ WhatsApp Simulator ready!');
 }
 
@@ -821,6 +824,21 @@ function setPhoneScale(scale) {
   } else {
     phone.style.transform = `scale(${scale})`;
     phone.style.transformOrigin = 'center center';
+  }
+}
+
+/**
+ * Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
+ */
+function initTutorials() {
+  const TUTORIAL_KEY = 'wa_sim_tutorials_seen';
+  const seen = localStorage.getItem(TUTORIAL_KEY);
+  const tutorials = document.querySelectorAll('.tutorial-guide');
+
+  if (!seen) {
+    // İlk ziyaret — rehberleri açık göster
+    tutorials.forEach(t => t.setAttribute('open', ''));
+    localStorage.setItem(TUTORIAL_KEY, '1');
   }
 }
 

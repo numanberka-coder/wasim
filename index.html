@@ -337,6 +337,73 @@
 
         <!-- ═══════ TAB 1: SENARYO ═══════ -->
         <div class="script-tab-panel active" id="tabSenaryo">
+
+          <!-- Rehber -->
+          <details class="accordion tutorial-guide" id="tutorialSenaryo">
+            <summary class="accordion-header">
+              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              📖 Nasıl Kullanılır?
+            </summary>
+            <div class="accordion-body">
+
+              <div class="guide-section">
+                <div class="guide-title">Temel Kullanım</div>
+                <div class="guide-text">
+                  Her satır bir mesaj veya komuttur. <strong>Kişi: Mesaj</strong> formatında yazın, ardından <strong>Yükle → Oynat</strong> basın.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Mesaj Formatı</div>
+                <div class="guide-code">
+                  Ahmet: Merhaba! 👋<br>
+                  Mehmet: Selam, nasılsın?<br>
+                  Ahmet > Mehmet: Katılıyorum<br>
+                  <code>@typing</code> Ahmet 800<br>
+                  <code>@photo</code> Ahmet "https://..." "açıklama"
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Komut Listesi</div>
+                <table class="guide-table">
+                  <tr><th>Komut</th><th>Açıklama</th><th>Örnek</th></tr>
+                  <tr><td>Kişi: Metin</td><td>Normal mesaj</td><td>Ahmet: Merhaba!</td></tr>
+                  <tr><td>Kişi > Hedef: Metin</td><td>Yanıt mesajı</td><td>Ahmet > Mehmet: Evet</td></tr>
+                  <tr><td>@typing</td><td>Yazıyor göstergesi</td><td>@typing Ahmet 800</td></tr>
+                  <tr><td>@photo</td><td>Fotoğraf</td><td>@photo Ahmet "url" "not"</td></tr>
+                  <tr><td>@voice</td><td>Sesli mesaj</td><td>@voice Ahmet 12s</td></tr>
+                  <tr><td>@video</td><td>Video önizleme</td><td>@video Ahmet "url"</td></tr>
+                  <tr><td>@gif</td><td>GIF mesajı</td><td>@gif Ahmet "url"</td></tr>
+                  <tr><td>@sticker</td><td>Sticker</td><td>@sticker Ahmet 🙂</td></tr>
+                  <tr><td>@location</td><td>Konum kartı</td><td>@location Ahmet "İstanbul"</td></tr>
+                  <tr><td>@document</td><td>Döküman</td><td>@document Ahmet "rapor.pdf"</td></tr>
+                  <tr><td>@link</td><td>Link önizleme</td><td>@link Ahmet "Başlık" "url"</td></tr>
+                  <tr><td>@viewonce</td><td>Bir kez görüntüle</td><td>@viewonce Ahmet photo</td></tr>
+                  <tr><td>@reaction</td><td>Emoji tepki</td><td>@reaction Ahmet 😂 Mehmet</td></tr>
+                  <tr><td>@system</td><td>Sistem mesajı</td><td>@system Grup adı değişti</td></tr>
+                  <tr><td>@add / @leave</td><td>Katılma/Ayrılma</td><td>@add Ahmet</td></tr>
+                  <tr><td>@sent / @delivered / @read</td><td>Tik durumu</td><td>@delivered</td></tr>
+                </table>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Hız & Rastgelelik</div>
+                <div class="guide-text">
+                  <strong>Hız (ms):</strong> Mesajlar arası bekleme süresi. 900ms doğal görünür.<br>
+                  <strong>Rastgelelik (ms):</strong> Her mesaja ±rastgele ms eklenir. 250ms yeterli.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-tip">
+                  <strong>💡 1-1 Sohbet İpucu:</strong> Tek kişi ekleyin, grup adını kişi adı yapın, alt başlığa "son görülme bugün 14:02" yazın — gerçek bir özel sohbet gibi görünür.
+                </div>
+              </div>
+
+            </div>
+          </details>
+
           <div class="form-group">
             <textarea id="scriptBox" class="script-editor" rows="12" placeholder="Senaryonuzu buraya yazın..."></textarea>
           </div>
@@ -432,6 +499,52 @@
 
         <!-- ═══════ TAB 2: İNTERAKTİF ═══════ -->
         <div class="script-tab-panel" id="tabInteractive">
+
+          <!-- Rehber -->
+          <details class="accordion tutorial-guide" id="tutorialInteractive">
+            <summary class="accordion-header">
+              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              📖 Nasıl Kullanılır?
+            </summary>
+            <div class="accordion-body">
+
+              <div class="guide-section">
+                <div class="guide-title">İnteraktif Mod Nedir?</div>
+                <div class="guide-text">
+                  Kullanıcı telefondaki mesaj alanına yazıp gönderince, <strong>trigger kelimeye</strong> göre otomatik cevap üretilir. Sohbet simülasyonu gibi çalışır.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Blok Yapısı</div>
+                <div class="guide-code">
+                  <code>#blok_adi</code><br>
+                  trigger: kelime1, kelime2, kelime3<br>
+                  ---<br>
+                  @typing Destek 800<br>
+                  Destek: Merhaba! Size nasıl yardımcı olabilirim?
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Adım Adım</div>
+                <div class="guide-text">
+                  <strong>1.</strong> Blokları yazın — her blok bir tetikleyici grubuna karşılık gelir.<br>
+                  <strong>2.</strong> <strong>"İnteraktif Modu Aç"</strong> butonuna basın.<br>
+                  <strong>3.</strong> Telefon ekranındaki mesaj alanına trigger kelimeyi yazıp gönderin.<br>
+                  <strong>4.</strong> Karakter otomatik cevap verecek.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-tip">
+                  <strong>💡 İpucu:</strong> <code>#default</code> bloğu ile <code>trigger: *</code> kullanın — tanınmayan mesajlara otomatik "anlayamadım" cevabı verir.
+                </div>
+              </div>
+
+            </div>
+          </details>
+
           <div class="form-group">
             <label for="interactiveScriptBox">İnteraktif Senaryo</label>
             <textarea id="interactiveScriptBox" class="script-editor" rows="10" placeholder="#selamlasma
@@ -483,6 +596,49 @@ Destek: Bunu anlayamadım 🤔"></textarea>
 
         <!-- ═══════ TAB 3: BLOK BUILDER ═══════ -->
         <div class="script-tab-panel" id="tabBuilder">
+
+          <!-- Rehber -->
+          <details class="accordion tutorial-guide" id="tutorialBuilder">
+            <summary class="accordion-header">
+              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              📖 Nasıl Kullanılır?
+            </summary>
+            <div class="accordion-body">
+
+              <div class="guide-section">
+                <div class="guide-title">Blok Builder Nedir?</div>
+                <div class="guide-text">
+                  Senaryo kodunu elle yazmadan, <strong>formdan seçerek</strong> satır satır oluşturmanızı sağlar. 16 mesaj tipi desteklenir.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Adım Adım</div>
+                <div class="guide-text">
+                  <strong>1.</strong> Mesaj tipini seçin (💬 Mesaj, 📷 Fotoğraf, ⏳ Yazıyor vb.)<br>
+                  <strong>2.</strong> Formu doldurup <strong>"Satır Ekle"</strong> basın — satır listeye eklenir.<br>
+                  <strong>3.</strong> Satırları sürükleyerek sıralayın.<br>
+                  <strong>4.</strong> <strong>"Metne Aktar"</strong> ile senaryoyu oluşturun.<br>
+                  <strong>5.</strong> <strong>"Normal Oynat"</strong> veya <strong>"İnteraktif Oynat"</strong> ile çalıştırın.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-title">Araya Ekleme & Hızlı Menü</div>
+                <div class="guide-text">
+                  Satır listesindeki <strong>"+"</strong> butonuna basarak araya yeni satır ekleyebilirsiniz.
+                  Satır özetine tıklayınca <strong>hızlı komut menüsü</strong> açılır — doğrudan mesaj tipi seçip araya eklersiniz.
+                </div>
+              </div>
+
+              <div class="guide-section">
+                <div class="guide-tip">
+                  <strong>💡 Trigger:</strong> Blok adı ve trigger kelimeler opsiyoneldir. Boş bırakırsanız normal senaryo satırı üretilir. Doldurursanız interaktif blok oluşur.
+                </div>
+              </div>
+
+            </div>
+          </details>
 
           <!-- Hazır Şablonlar -->
           <div class="form-grid" style="align-items: end; margin-bottom: 12px;">
