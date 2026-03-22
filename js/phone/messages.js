@@ -192,7 +192,6 @@ const VOICE_PLAY_ICON  = `<svg width="18" height="18" viewBox="0 0 24 24" fill="
 const VOICE_PAUSE_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
 
 const VOICE_WAVEFORM_BARS = 26;
-const VOICE_TICK_MS = 80;
 const VOICE_DEFAULT_DURATION = 12;
 
 const DOC_EXT_COLORS = {

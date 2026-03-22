@@ -238,6 +238,7 @@ export class StateManager {
         src: m.src || null,
         durationSec: (typeof m.durationSec === 'number') ? m.durationSec : (m.durationSec ?? null),
         tickStatus: m.tickStatus || null,
+        reactions: Array.isArray(m.reactions) ? m.reactions : [],
       }));
     }
 
