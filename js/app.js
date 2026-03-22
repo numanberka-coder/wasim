@@ -55,27 +55,27 @@ function init() {
   initInteractive();
 
   // Initialize phone modules
-  initStatusBar();
-  applyWallpaper();
-  applyAllTypography();
+  try { initStatusBar(); } catch (e) { Logger.error('initStatusBar hatası:', e); }
+  try { applyWallpaper(); } catch (e) { Logger.error('applyWallpaper hatası:', e); }
+  try { applyAllTypography(); } catch (e) { Logger.error('applyAllTypography hatası:', e); }
 
   // Render initial state
-  renderPeopleList();
-  syncHeader();
-  rebuildChat();
+  try { renderPeopleList(); } catch (e) { Logger.error('renderPeopleList hatası:', e); }
+  try { syncHeader(); } catch (e) { Logger.error('syncHeader hatası:', e); }
+  try { rebuildChat(); } catch (e) { Logger.error('rebuildChat hatası:', e); }
 
   // Populate form fields
-  populateFormFields();
+  try { populateFormFields(); } catch (e) { Logger.error('populateFormFields hatası:', e); }
 
   // Init script helpers after forms are ready
-  initScriptTools();
+  try { initScriptTools(); } catch (e) { Logger.error('initScriptTools hatası:', e); }
 
   // Apply saved theme
   const savedTheme = state.get('settings.theme') || 'dark';
-  applyTheme(savedTheme);
+  try { applyTheme(savedTheme); } catch (e) { Logger.error('applyTheme hatası:', e); }
   updateThemeButtons(savedTheme);
 
-  // Bind event handlers
+  // Bind event handlers — KRİTİK: bu satıra ulaşılmazsa hiçbir buton çalışmaz
   bindEventHandlers();
 
   // Render scene list + event delegation

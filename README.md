@@ -22,7 +22,7 @@ Faz 24: Performans — Message virtualization, rAF animasyon, CSS modülleme, la
 - `js/ui/highlight.js` — Syntax highlighting overlay motoru
 - `js/ui/` — Header, mesaj render, status bar vb.
 - `js/ui/virtual-scroller.js` — Message virtualization (IntersectionObserver)
-- `css/phone.css` — Telefon simülatörü stilleri (7 modüler dosya + barrel import)
+- `css/phone.css` — Telefon simülatörü stilleri (pixel-perfect)
 - `css/variables.css` — Tüm CSS değişkenleri
 - `css/responsive.css` — Mobil layout
 - `css/components.css` — UI bileşenleri
