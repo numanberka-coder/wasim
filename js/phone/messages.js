@@ -5,13 +5,6 @@
 import { $, escapeHtml, timeToMinutes, minutesToTime, nowTime, Logger } from '../utils.js';
 import { showToast } from '../ui/toast.js';
 import { state } from '../state.js';
-import {
-  initVirtualScroller,
-  shouldVirtualize,
-  createPlaceholderRow,
-  estimateRowHeight,
-  materializeAll,
-} from '../ui/virtual-scroller.js';
 
 
 
@@ -1000,7 +993,7 @@ function clearChat() {
 }
 
 /**
- * Rebuild chat from messages state (DocumentFragment + virtualization)
+ * Rebuild chat from messages state (DocumentFragment batch insert)
  */
 function rebuildChat() {
   clearChat();
@@ -1008,24 +1001,11 @@ function rebuildChat() {
   if (!chatBody) return;
 
   const messages = state.get('messages');
-  const useVirtual = shouldVirtualize(messages.length);
-
-  if (useVirtual) {
-    initVirtualScroller(chatBody, buildMessageRow, () => state.get('messages') || []);
-  }
-
   const fragment = document.createDocumentFragment();
-  // Son 30 mesaj her zaman render edilir — kullanıcının gördüğü alan
-  const renderStart = useVirtual ? Math.max(0, messages.length - 30) : 0;
 
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
+  for (const msg of messages) {
     try {
-      if (useVirtual && i < renderStart) {
-        fragment.appendChild(createPlaceholderRow(msg, estimateRowHeight(msg)));
-      } else {
-        fragment.appendChild(buildMessageRow(msg));
-      }
+      fragment.appendChild(buildMessageRow(msg));
     } catch (err) {
       Logger.error('Mesaj rebuild hatası:', msg.id, err);
     }
@@ -1039,11 +1019,10 @@ function rebuildChat() {
 }
 
 /**
- * Materialize all virtual placeholders (PNG export öncesi çağır)
+ * No-op — virtualization devre dışı
  */
 function materializeAllMessages() {
-  const chatBody = $('chatBody');
-  if (chatBody) materializeAll(chatBody);
+  // Virtualization kaldırıldı, tüm mesajlar zaten DOM'da
 }
 
 /**
