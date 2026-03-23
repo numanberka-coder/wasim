@@ -302,7 +302,7 @@ function openMobileOverlay(panelKey) {
   if (titleEl) titleEl.textContent = PANEL_TITLES[panelKey] || panelKey;
 
   // Body temizle (önceki overlay kalıntısı)
-  body.innerHTML = '';
+  body.replaceChildren();
 
   // Referansları sakla — geri taşımak için
   mobileState._movedPanel = sourcePanel;
@@ -390,7 +390,7 @@ function closeMobileOverlay() {
   if (backdrop) backdrop.classList.remove('is-open');
 
   const body = $('mobileOverlayBody');
-  if (body) body.innerHTML = '';
+  if (body) body.replaceChildren();
 }
 
 /** Masaüstündeki tab sistemi aktif paneli restore eder */

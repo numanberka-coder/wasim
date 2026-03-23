@@ -207,6 +207,16 @@ export function safeJsonParse(str, fallback = null) {
 }
 
 /**
+ * Parse SVG string into DOM element
+ * Güvenli innerHTML alternatifi — sadece hardcoded SVG sabitleri için
+ */
+export function parseSVG(svgString) {
+  const template = document.createElement('template');
+  template.innerHTML = svgString.trim();
+  return template.content.firstChild;
+}
+
+/**
  * Yapısal loglama utility
  * Production'da sessiz, ?debug=true ile verbose
  */

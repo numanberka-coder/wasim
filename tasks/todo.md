@@ -1,84 +1,59 @@
-# Faz 25 — Erişilebilirlik (a11y)
+# Faz 26 — innerHTML Temizliği & DOM API Geçişi
 
 > **Tarih:** 2026-03-23
-> **Kapsam:** WCAG AA uyumu — aria-label, heading hiyerarşisi, form a11y, kontrast, keyboard nav, screen reader, reduced motion
-> **Durum:** 📋 Plan Onayı Bekleniyor
-
----
-
-## Mevcut Durum Analizi
-
-**İyi durumda olanlar:**
-- ✅ `:focus-visible` stili mevcut (base.css:71-75)
-- ✅ `prefers-reduced-motion` desteği mevcut (responsive.css:511-532)
-- ✅ `prefers-contrast: high` desteği mevcut (responsive.css:534-544)
-- ✅ Composer butonlarında 4 adet `aria-label` mevcut
-- ✅ Syntax overlay'de `aria-hidden="true"` doğru kullanılmış
-- ✅ Form inputların ~%95'inde proper `<label for="">` mevcut
-- ✅ Autocomplete'te ok tuşu + Enter + Escape desteği mevcut
-
-**Düzeltilmesi gerekenler:**
-- ❌ 14+ icon buton `aria-label` eksik (sadece `title` var)
-- ❌ Tüm dokümanda h1-h6 heading YOK
-- ❌ 3 SVG ikon buton olarak kullanılıyor ama `role="button"` yok
-- ❌ 5 label elementinde `for` attribute eksik
-- ❌ `aria-live` bölgesi yok (dinamik içerik değişiklikleri)
-- ❌ `.composer-input:focus` tüm focus göstergelerini kaldırıyor
-- ❌ Placeholder text kontrast çok düşük (opacity 0.35)
-- ❌ Tab navigasyonu için `tabindex` yönetimi yok
-- ❌ Div tabanlı tab'larda `role="tab"` semantiği yok
+> **Kapsam:** 27 innerHTML kullanımını güvenli DOM API'ye dönüştür
+> **Durum:** ✅ Tamamlandı
 
 ---
 
 ## Görevler
 
-### 25.1 — Icon Button aria-label 🔴
-- [ ] Action bar butonları: `#phoneOnlyBtn`, `#screenshotBtn`, `#actionThemeToggleBtn`, `#saveAllBtn`, `#loadAllBtn`, `#clearAllBtn` (6 buton)
-- [ ] Phone-only toolbar: `#phoneOnlyExitBtn`, scale butonları, `#potThemeToggleBtn`, `#potScreenshotBtn` (5 buton)
-- [ ] Header SVG ikonları: video call, voice call, `#headerMenuBtn` — `role="button"` + `aria-label` (3 ikon)
-- [ ] Mobile overlay: `#moPlayBtn`, `#moResetBtn` (2 buton)
+### 26.6 — DOM Helper Utility (önce) 🟢
+- [x] `parseSVG()` fonksiyonu utils.js'e eklendi — SVG string'den DOM element oluşturur
+- [x] Mevcut `createElement()` helper yeterli — yeni dosya gerekmedi
 
-### 25.2 — Heading Hiyerarşisi 🔴
-- [ ] Marka/logo text → `<h1>` (sayfa başlığı)
-- [ ] Panel sekmeleri: Grup, Kişiler, Senaryo, Ayarlar bölüm başlıkları
-- [ ] Accordion başlıklarında uygun heading seviyesi (summary içinde)
-- [ ] `.tab` div elementlerine `role="tab"` + `role="tablist"` + `role="tabpanel"` semantiği
+### 26.1 — messages.js innerHTML Geçişi 🔴
+- [x] SVG icon innerHTML'leri (10 adet): `parseSVG()` ile DOM element'e dönüştürüldü
+- [x] `addSystemMessage()`: `textContent` ile DOM API
+- [x] `addTypingBubble()`: DOM API ile 3 dot oluşturma
+- [x] `_setHeaderTyping()`: DOM API — `textContent` + `createElement`
+- [x] `clearChat()`: `replaceChildren()` + `createElement`
+- [x] Testler geçti (191/191)
 
-### 25.3 — Form Erişilebilirliği 🟡
-- [ ] Orphan label düzeltmeleri: 5 adet `<label>` elementine `for` attribute ekle (satır 105, 178, 281, 415, 244)
-- [ ] `aria-describedby` ile karmaşık inputlara açıklama bağla
-- [ ] Zorunlu alanlara `aria-required="true"` ekle
+### 26.2 — script-builder.js innerHTML Geçişi 🔴
+- [x] Empty clear'lar (5 adet): `replaceChildren()`
+- [x] Insert mode indicator: DOM API + shortLabel artık textContent ile güvenli (XSS fix)
+- [x] Success pill: `createElement` ile DOM API
+- [x] Empty state: `createElement` ile DOM API
 
-### 25.4 — Renk Kontrast Kontrolü 🟡
-- [ ] `--wa-composer-placeholder` opacity 0.35 → en az 0.5 (WCAG AA 4.5:1)
-- [ ] `.composer-input:focus` focus göstergesi geri ekle (components.css:101-106)
-- [ ] `--wa-text-secondary` kontrast doğrulaması
+### 26.3 — people.js innerHTML Geçişi 🟡
+- [x] Empty clear'lar (2 adet): `replaceChildren()`
+- [x] Person card: DOM API + `onerror` inline handler → `addEventListener('error')`
 
-### 25.5 — Keyboard Navigasyonu 🟡
-- [ ] Ana tab'lara `tabindex="0"` + `role="tab"` + ok tuşu navigasyonu
-- [ ] Accordion header'lara focus stili
-- [ ] Scene/people list item'larına keyboard erişimi
-- [ ] Modal/overlay'lerde focus trap (mobile overlay)
+### 26.4 — autocomplete.js innerHTML Geçişi 🟡
+- [x] Dropdown render: DOM API — `replaceChildren()` + `createElement`
+- [x] `escapeHtml` helper: dokunulmadı (doğru kullanım)
 
-### 25.6 — Screen Reader Desteği 🟢
-- [ ] Validation hataları için `aria-live="polite"` bölgesi
-- [ ] Script yükleme/parse durumu için `aria-live` bölgesi
-- [ ] Sahne kaydetme/yükleme bildirimleri için `aria-live`
-- [ ] Telefon simülatöründe `role="log"` ile chat alanı işaretleme
+### 26.5 — Diğer Dosyalar 🟡
+- [x] `app.js` — sahne listesi: `createElement` ile DOM API
+- [x] `player.js` — icon toggle: `replaceChildren(parseSVG(...))`
+- [x] `mobile.js` — empty clear'lar (2 adet): `replaceChildren()`
 
-### 25.7 — Reduced Motion Desteği 🟢
-- [ ] ✅ Zaten mevcut (responsive.css:511-532) — doğrulama yeterli
-- [ ] JS animasyonlarında `matchMedia('prefers-reduced-motion: reduce')` kontrolü
+### 26.7 — innerHTML Lint Kuralı 🟢
+- [x] ESLint kurulu değil (Faz 22.8 yapılmamış) — kural eklenemedi, not bırakıldı
 
 ---
 
-## Etkilenen Dosyalar
-- `index.html` — aria-label, heading, role, tabindex eklemeleri
-- `css/variables.css` — kontrast düzeltmeleri
-- `css/components.css` — focus stili düzeltmesi
-- `css/base.css` — keyboard focus stilleri
-- `js/app.js` — tab navigasyon mantığı, aria-live güncellemeleri
-- `js/ui/mobile.js` — focus trap
+## Sonuç
 
-## Tahmini Kapsam
-Orta — çoğu HTML attribute ekleme, CSS küçük düzeltmeler, minimal JS değişiklikleri
+**Dönüştürülen:** 25 innerHTML kullanımı → DOM API
+**Kalan (kabul edilebilir):** 3 innerHTML
+- `utils.js:215` — `parseSVG` template helper (güvenli)
+- `autocomplete.js:373` — `escapeHtml` helper (innerHTML'in doğru kullanımı)
+- `highlight.js:139` — syntax overlay (performans kritik, pre-escaped)
+
+**Güvenlik düzeltmeleri:**
+- `script-builder.js` shortLabel artık `textContent` ile render (XSS riski giderildi)
+- `people.js` `onerror="this.remove()"` inline handler → `addEventListener` geçişi
+
+**Test:** 191/191 geçti | **Build:** başarılı

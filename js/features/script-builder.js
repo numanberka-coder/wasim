@@ -3,7 +3,7 @@
    validation, inner tabs, interactive demo
    ======================================== */
 
-import { $, createElement, readFileAsDataURL, Logger } from '../utils.js';
+import { $, createElement, readFileAsDataURL, Logger, escapeHtml } from '../utils.js';
 import { SCRIPT_TEMPLATES, CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { showSuccess, showError } from '../ui/toast.js';
@@ -136,7 +136,7 @@ function setupInteractiveDemo() {
 function populateTemplateOptions() {
   const select = $('scriptTemplateSelect');
   if (!select) return;
-  select.innerHTML = '';
+  select.replaceChildren();
   SCRIPT_TEMPLATES.forEach(tpl => {
     const option = document.createElement('option');
     option.value = tpl.id;
@@ -165,7 +165,7 @@ function setupTemplateActions() {
 function renderBuilderTypeChips() {
   const container = $('builderTypeChips');
   if (!container) return;
-  container.innerHTML = '';
+  container.replaceChildren();
   BUILDER_TYPES.forEach(t => {
     const chip = document.createElement('button');
     chip.className = 'builder-type-chip' + (t.id === activeBuilderType ? ' active' : '');
@@ -200,7 +200,7 @@ function updateBuilderSenderOptions() {
   const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
   const list = ['Me', ...names.filter(n => n !== 'Me')];
   const current = sel.value || 'Me';
-  sel.innerHTML = '';
+  sel.replaceChildren();
   list.forEach(n => {
     const opt = document.createElement('option');
     opt.value = n;
@@ -453,12 +453,18 @@ function renderInsertIndicator() {
       }
     }
     if (indicator) {
-      indicator.innerHTML = `<span>📍 ${insertAfterIndex + 1}. satırın altına eklenecek: <strong>${shortLabel}</strong></span><button type="button" class="builder-insert-cancel" title="İptal">✕</button>`;
+      const span = createElement('span', {}, [
+        `📍 ${insertAfterIndex + 1}. satırın altına eklenecek: `,
+        createElement('strong', {}, [shortLabel])
+      ]);
+      const cancelBtn = createElement('button', {
+        type: 'button',
+        className: 'builder-insert-cancel',
+        title: 'İptal',
+        onClick: () => { clearInsertMode(); renderBlocks(); }
+      }, ['✕']);
+      indicator.replaceChildren(span, cancelBtn);
       indicator.style.display = '';
-      indicator.querySelector('.builder-insert-cancel')?.addEventListener('click', () => {
-        clearInsertMode();
-        renderBlocks();
-      });
     }
   } else {
     if (indicator) indicator.style.display = 'none';
@@ -484,9 +490,9 @@ function setupValidation() {
 
 function renderValidation(errors, target) {
   if (!target) return;
-  target.innerHTML = '';
+  target.replaceChildren();
   if (!errors.length) {
-    target.innerHTML = '<div class="pill pill-success">✅ Senaryo temiz görünüyor</div>';
+    target.appendChild(createElement('div', { className: 'pill pill-success' }, ['✅ Senaryo temiz görünüyor']));
     return;
   }
   const list = document.createElement('ul');
@@ -704,10 +710,10 @@ function setupMediaInsertTool() {
 function renderBlocks() {
   const list = $('builderList');
   if (!list) return;
-  list.innerHTML = '';
+  list.replaceChildren();
 
   if (!blocks.length) {
-    list.innerHTML = '<div class="empty">Henüz blok eklenmedi. Yukarıdaki formdan ekleyin.</div>';
+    list.appendChild(createElement('div', { className: 'empty' }, ['Henüz blok eklenmedi. Yukarıdaki formdan ekleyin.']));
     return;
   }
 
