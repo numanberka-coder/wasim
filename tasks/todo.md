@@ -1,72 +1,84 @@
-# Faz 24 — Performans Optimizasyonu
+# Faz 25 — Erişilebilirlik (a11y)
 
-> **Tarih:** 2026-03-21
-> **Kapsam:** Message virtualization, rebuildChat optimizasyonu, CSS bölme, lazy loading, rAF geçişi, timer temizleme
-> **Durum:** ✅ Tamamlandı
+> **Tarih:** 2026-03-23
+> **Kapsam:** WCAG AA uyumu — aria-label, heading hiyerarşisi, form a11y, kontrast, keyboard nav, screen reader, reduced motion
+> **Durum:** 📋 Plan Onayı Bekleniyor
+
+---
+
+## Mevcut Durum Analizi
+
+**İyi durumda olanlar:**
+- ✅ `:focus-visible` stili mevcut (base.css:71-75)
+- ✅ `prefers-reduced-motion` desteği mevcut (responsive.css:511-532)
+- ✅ `prefers-contrast: high` desteği mevcut (responsive.css:534-544)
+- ✅ Composer butonlarında 4 adet `aria-label` mevcut
+- ✅ Syntax overlay'de `aria-hidden="true"` doğru kullanılmış
+- ✅ Form inputların ~%95'inde proper `<label for="">` mevcut
+- ✅ Autocomplete'te ok tuşu + Enter + Escape desteği mevcut
+
+**Düzeltilmesi gerekenler:**
+- ❌ 14+ icon buton `aria-label` eksik (sadece `title` var)
+- ❌ Tüm dokümanda h1-h6 heading YOK
+- ❌ 3 SVG ikon buton olarak kullanılıyor ama `role="button"` yok
+- ❌ 5 label elementinde `for` attribute eksik
+- ❌ `aria-live` bölgesi yok (dinamik içerik değişiklikleri)
+- ❌ `.composer-input:focus` tüm focus göstergelerini kaldırıyor
+- ❌ Placeholder text kontrast çok düşük (opacity 0.35)
+- ❌ Tab navigasyonu için `tabindex` yönetimi yok
+- ❌ Div tabanlı tab'larda `role="tab"` semantiği yok
 
 ---
 
 ## Görevler
 
-### 24.1 — Message Virtualization ✅
-- [x] `js/ui/virtual-scroller.js` modülü — IntersectionObserver tabanlı
-- [x] 50+ mesajda otomatik aktif (VIRTUAL_THRESHOLD)
-- [x] Viewport dışı mesajlar placeholder div ile değiştirilir (yükseklik korunur)
-- [x] Scroll ile viewport'a giren placeholderlar otomatik materialize edilir
-- [x] Son 30 mesaj her zaman render edilir (kullanıcının gördüğü alan)
-- [x] PNG export öncesi `materializeAllMessages()` ile tüm mesajlar render edilir
-- [x] `estimateRowHeight()` — mesaj tipine göre yükseklik tahmini
+### 25.1 — Icon Button aria-label 🔴
+- [ ] Action bar butonları: `#phoneOnlyBtn`, `#screenshotBtn`, `#actionThemeToggleBtn`, `#saveAllBtn`, `#loadAllBtn`, `#clearAllBtn` (6 buton)
+- [ ] Phone-only toolbar: `#phoneOnlyExitBtn`, scale butonları, `#potThemeToggleBtn`, `#potScreenshotBtn` (5 buton)
+- [ ] Header SVG ikonları: video call, voice call, `#headerMenuBtn` — `role="button"` + `aria-label` (3 ikon)
+- [ ] Mobile overlay: `#moPlayBtn`, `#moResetBtn` (2 buton)
 
-### 24.2 — rebuildChat() Optimizasyonu ✅
-- [x] DocumentFragment ile batch DOM insert (tek reflow)
-- [x] Tick status değişikliğinde `updateAllTicks()` — full rebuild yerine sadece tick SVG güncelleme
-- [x] `rebuildChat()` çağrı noktaları optimize edildi (app.js:423)
+### 25.2 — Heading Hiyerarşisi 🔴
+- [ ] Marka/logo text → `<h1>` (sayfa başlığı)
+- [ ] Panel sekmeleri: Grup, Kişiler, Senaryo, Ayarlar bölüm başlıkları
+- [ ] Accordion başlıklarında uygun heading seviyesi (summary içinde)
+- [ ] `.tab` div elementlerine `role="tab"` + `role="tablist"` + `role="tabpanel"` semantiği
 
-### 24.3 — phone.css Bölme ✅
-- [x] `css/phone-container.css` — Phone çerçeve + cam yansıması + yan tuşlar (~145 satır)
-- [x] `css/phone-statusbar.css` — Status bar (~155 satır)
-- [x] `css/phone-header.css` — Chat header (~102 satır)
-- [x] `css/phone-messages.css` — Mesaj balonları + voice (~587 satır)
-- [x] `css/phone-typing.css` — Typing indicator (~80 satır)
-- [x] `css/phone-composer.css` — Chat input (~111 satır)
-- [x] `css/phone-media.css` — Medya tipleri (~297 satır)
-- [x] `css/phone-light.css` — Light tema override'ları (~228 satır)
-- [x] `css/phone.css` → barrel import (8 @import)
-- [x] Vite build doğrulandı — tek CSS bundle
+### 25.3 — Form Erişilebilirliği 🟡
+- [ ] Orphan label düzeltmeleri: 5 adet `<label>` elementine `for` attribute ekle (satır 105, 178, 281, 415, 244)
+- [ ] `aria-describedby` ile karmaşık inputlara açıklama bağla
+- [ ] Zorunlu alanlara `aria-required="true"` ekle
 
-### 24.4 — Avatar Lazy Loading ✅
-- [x] Header avatar'da `loading="lazy"` (header.js)
-- [x] Header avatar innerHTML → createElement geçişi (XSS riski azaltma)
-- [x] Mesaj avatarlarında `loading="lazy"` (messages.js:createAvatarNode)
+### 25.4 — Renk Kontrast Kontrolü 🟡
+- [ ] `--wa-composer-placeholder` opacity 0.35 → en az 0.5 (WCAG AA 4.5:1)
+- [ ] `.composer-input:focus` focus göstergesi geri ekle (components.css:101-106)
+- [ ] `--wa-text-secondary` kontrast doğrulaması
 
-### 24.5 — Wallpaper Lazy Loading ✅
-- [x] Custom image wallpaper preload pattern (`preloadImage()`)
-- [x] Default wallpaper gösterilir, custom image arka planda yüklenir
-- [x] Preset değişikliği kontrolü (yükleme sırasında preset değişirse güncelleme iptal)
+### 25.5 — Keyboard Navigasyonu 🟡
+- [ ] Ana tab'lara `tabindex="0"` + `role="tab"` + ok tuşu navigasyonu
+- [ ] Accordion header'lara focus stili
+- [ ] Scene/people list item'larına keyboard erişimi
+- [ ] Modal/overlay'lerde focus trap (mobile overlay)
 
-### 24.6 — requestAnimationFrame Geçişi ✅
-- [x] Voice playback `setInterval(fn, 80ms)` → `requestAnimationFrame` loop
-- [x] Bar index değişmediğinde DOM güncelleme atlanır (reflow azaltma)
-- [x] Timestamp tabanlı ilerleme — frame rate bağımsız
+### 25.6 — Screen Reader Desteği 🟢
+- [ ] Validation hataları için `aria-live="polite"` bölgesi
+- [ ] Script yükleme/parse durumu için `aria-live` bölgesi
+- [ ] Sahne kaydetme/yükleme bildirimleri için `aria-live`
+- [ ] Telefon simülatöründe `role="log"` ile chat alanı işaretleme
 
-### 24.7 — Timer Temizleme Sistemi ✅
-- [x] `clearVoiceTimers()` — clearChat() öncesi tüm voice animasyon timer'ları temizlenir
-- [x] `cancelAnimationFrame` kullanımı (rAF geçişi ile uyumlu)
-- [x] Orphan timer sorunu çözüldü
+### 25.7 — Reduced Motion Desteği 🟢
+- [ ] ✅ Zaten mevcut (responsive.css:511-532) — doğrulama yeterli
+- [ ] JS animasyonlarında `matchMedia('prefers-reduced-motion: reduce')` kontrolü
 
 ---
 
-## Sonuç Özeti
+## Etkilenen Dosyalar
+- `index.html` — aria-label, heading, role, tabindex eklemeleri
+- `css/variables.css` — kontrast düzeltmeleri
+- `css/components.css` — focus stili düzeltmesi
+- `css/base.css` — keyboard focus stilleri
+- `js/app.js` — tab navigasyon mantığı, aria-live güncellemeleri
+- `js/ui/mobile.js` — focus trap
 
-| Metrik | Önce | Sonra |
-|--------|------|-------|
-| Tick status değişikliği | Full DOM rebuild | Sadece SVG güncelleme |
-| rebuildChat() DOM insert | Tek tek appendChild | DocumentFragment batch |
-| Voice animasyon | setInterval 80ms | requestAnimationFrame |
-| phone.css | 1712 satır tek dosya | 8 modüler dosya |
-| Avatar loading | Eager | Lazy |
-| Wallpaper loading | Senkron | Preload + async |
-| 100+ mesaj rebuild | Tüm mesajlar render | Son 30 render + placeholder |
-| Voice timer temizleme | Yok (orphan risk) | clearChat() öncesi cleanup |
-| Test | 191 PASS | 191 PASS |
-| Build | 34 modül | 35 modül |
+## Tahmini Kapsam
+Orta — çoğu HTML attribute ekleme, CSS küçük düzeltmeler, minimal JS değişiklikleri
