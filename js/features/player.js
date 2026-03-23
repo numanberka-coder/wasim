@@ -2,7 +2,7 @@
    PLAYER - Script Player
    ======================================== */
 
-import { $, readFileAsDataURL, Logger } from '../utils.js';
+import { $, readFileAsDataURL, Logger, prefersReducedMotion } from '../utils.js';
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { showToast, showError } from '../ui/toast.js';
@@ -35,9 +35,10 @@ function getBaseDelay() {
  * Calculate typing duration based on text length
  */
 function getTypingDuration(text) {
+  if (prefersReducedMotion()) return 0;
   const len = String(text || '').length;
-  const ms = CONFIG.TYPING_BASE_MS + 
-    Math.min(2000, len * CONFIG.TYPING_CHAR_MS) + 
+  const ms = CONFIG.TYPING_BASE_MS +
+    Math.min(2000, len * CONFIG.TYPING_CHAR_MS) +
     Math.random() * CONFIG.TYPING_RANDOM_MS;
   return Math.max(CONFIG.TYPING_BASE_MS, ms);
 }

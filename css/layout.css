@@ -46,6 +46,7 @@
   color: var(--wa-text);
   letter-spacing: -0.2px;
   opacity: 0.85;
+  margin: 0;
 }
 
 .action-bar-actions {

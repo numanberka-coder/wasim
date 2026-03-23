@@ -91,7 +91,7 @@
   --wa-composer-bg: rgba(42, 47, 50, 0.92);
   --wa-composer-border: rgba(255, 255, 255, 0.03);
   --wa-composer-icon: rgba(255, 255, 255, 0.55);
-  --wa-composer-placeholder: rgba(255, 255, 255, 0.35);
+  --wa-composer-placeholder: rgba(255, 255, 255, 0.5);
 
   /* Location info */
   --wa-location-info-bg: rgba(31, 44, 51, 0.95);

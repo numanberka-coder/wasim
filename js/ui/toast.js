@@ -13,6 +13,9 @@ function ensureContainer() {
   if (!toastContainer) {
     toastContainer = document.createElement('div');
     toastContainer.id = 'toast-container';
+    toastContainer.setAttribute('role', 'status');
+    toastContainer.setAttribute('aria-live', 'polite');
+    toastContainer.setAttribute('aria-atomic', 'false');
     toastContainer.style.cssText = `
       position: fixed;
       bottom: 24px;

@@ -1150,6 +1150,9 @@
   box-shadow: none;
   background: transparent;
 }
+.composer-input:focus-visible {
+  box-shadow: 0 0 0 1px var(--wa-green);
+}
 
 .composer-input::placeholder {
   color: var(--wa-composer-placeholder);
@@ -1538,7 +1541,7 @@
   --wa-composer-bg: #ffffff;
   --wa-composer-border: rgba(0, 0, 0, 0.08);
   --wa-composer-icon: rgba(17, 27, 33, 0.45);
-  --wa-composer-placeholder: rgba(17, 27, 33, 0.35);
+  --wa-composer-placeholder: rgba(17, 27, 33, 0.5);
 
   /* Location / Link */
   --wa-location-info-bg: rgba(255, 255, 255, 0.95);

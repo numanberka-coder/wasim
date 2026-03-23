@@ -150,6 +150,19 @@ function bindMobileEvents() {
     }
   }, 250));
 
+  // Escape tuşu — overlay ve dropdown kapatma
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (mobileState.overlayOpen) {
+        closeMobileOverlay();
+      } else if (mobileState.menuOpen) {
+        closeMobileMenu();
+        const menuBtn = $('headerMenuBtn');
+        if (menuBtn) menuBtn.focus();
+      }
+    }
+  });
+
   // Android geri tuşu
   window.addEventListener('popstate', (e) => {
     if (mobileState.overlayOpen) {
@@ -325,6 +338,11 @@ function openMobileOverlay(panelKey) {
   overlay.classList.add('is-open');
   if (backdrop) backdrop.classList.add('is-open');
 
+  // Focus trap — overlay'e odaklan
+  const backBtn = $('mobileOverlayBack');
+  if (backBtn) backBtn.focus();
+  setupFocusTrap(overlay);
+
   // History push — geri tuşu desteği
   history.pushState({ mobileOverlay: true }, '');
 }
@@ -388,6 +406,7 @@ function closeMobileOverlay() {
 
   overlay.classList.remove('is-open');
   if (backdrop) backdrop.classList.remove('is-open');
+  removeFocusTrap();
 
   const body = $('mobileOverlayBody');
   if (body) body.innerHTML = '';
@@ -407,6 +426,44 @@ function restoreDesktopActiveTab() {
 
   const panel = $(tabId);
   if (panel) panel.classList.add('active');
+}
+
+/* ========================================
+   FOCUS TRAP
+   ======================================== */
+
+let _focusTrapHandler = null;
+
+function setupFocusTrap(container) {
+  removeFocusTrap();
+  _focusTrapHandler = (e) => {
+    if (e.key !== 'Tab') return;
+    const focusable = container.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+  document.addEventListener('keydown', _focusTrapHandler);
+}
+
+function removeFocusTrap() {
+  if (_focusTrapHandler) {
+    document.removeEventListener('keydown', _focusTrapHandler);
+    _focusTrapHandler = null;
+  }
 }
 
 /* ========================================
