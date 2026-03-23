@@ -22,61 +22,61 @@
 <body>
   <div class="app-container">
     <!-- ==================== LEFT PANEL ==================== -->
-    <section class="panel-left">
+    <section class="panel-left" aria-label="Ayar paneli">
       <!-- Action Bar -->
       <div class="action-bar">
         <div class="action-bar-brand">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l5.12-1.34A9.93 9.93 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" fill="#25d366"/><path d="M17 14.5c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.41-1.5-.89-.8-1.49-1.78-1.67-2.08-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.63-.93-2.24-.24-.58-.49-.5-.68-.51-.17 0-.37-.02-.57-.02-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.47 0 1.46 1.07 2.86 1.22 3.06.14.2 2.1 3.2 5.08 4.36.71.31 1.26.49 1.69.62.71.23 1.35.2 1.86.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35z" fill="#fff"/></svg>
-          <span class="brand-text">WA Simülatör</span>
+          <h1 class="brand-text">WA Simülatör</h1>
         </div>
         <div class="action-bar-actions">
-          <button id="phoneOnlyBtn" class="action-btn action-btn-icon" title="Sadece Telefon">
+          <button id="phoneOnlyBtn" class="action-btn action-btn-icon" title="Sadece Telefon" aria-label="Sadece Telefon">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           </button>
-          <button id="screenshotBtn" class="action-btn action-btn-icon" title="Ekran Al">
+          <button id="screenshotBtn" class="action-btn action-btn-icon" title="Ekran Al" aria-label="Ekran Al">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </button>
-          <button id="actionThemeToggleBtn" class="action-btn action-btn-icon" title="Tema Değiştir">🌗</button>
+          <button id="actionThemeToggleBtn" class="action-btn action-btn-icon" title="Tema Değiştir" aria-label="Tema Değiştir">🌗</button>
           <div class="scale-controls" id="scaleControls" style="display:none;">
             <button class="action-btn scale-btn" data-scale="0.75" title="%75">75%</button>
             <button class="action-btn scale-btn active" data-scale="1" title="%100">100%</button>
             <button class="action-btn scale-btn" data-scale="1.25" title="%125">125%</button>
           </div>
           <span class="action-bar-sep"></span>
-          <button id="saveAllBtn" class="action-btn action-btn-icon" title="Kaydet">
+          <button id="saveAllBtn" class="action-btn action-btn-icon" title="Kaydet" aria-label="Kaydet">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           </button>
-          <button id="loadAllBtn" class="action-btn action-btn-icon" title="Yükle">
+          <button id="loadAllBtn" class="action-btn action-btn-icon" title="Yükle" aria-label="Yükle">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </button>
-          <button id="clearAllBtn" class="action-btn action-btn-icon action-btn-danger" title="Sıfırla">
+          <button id="clearAllBtn" class="action-btn action-btn-icon action-btn-danger" title="Sıfırla" aria-label="Tüm veriyi sıfırla">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
           </button>
         </div>
       </div>
 
       <!-- Tabs -->
-      <div class="tabs">
-        <div class="tab active" data-tab="group">
-          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      <div class="tabs" role="tablist" aria-label="Panel sekmeleri">
+        <div class="tab active" id="tab-group" data-tab="group" role="tab" tabindex="0" aria-selected="true" aria-controls="group">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           <span>Grup</span>
         </div>
-        <div class="tab" data-tab="people">
-          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <div class="tab" id="tab-people" data-tab="people" role="tab" tabindex="-1" aria-selected="false" aria-controls="people">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
           <span>Kişiler</span>
         </div>
-        <div class="tab" data-tab="script">
-          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <div class="tab" id="tab-script" data-tab="script" role="tab" tabindex="-1" aria-selected="false" aria-controls="script">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
           <span>Senaryo</span>
         </div>
-        <div class="tab" data-tab="settings">
-          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        <div class="tab" id="tab-settings" data-tab="settings" role="tab" tabindex="-1" aria-selected="false" aria-controls="settings">
+          <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
           <span>Ayarlar</span>
         </div>
       </div>
 
       <!-- ===== PANEL: GROUP ===== -->
-      <div class="panel active" id="group">
+      <div class="panel active" id="group" role="tabpanel" aria-labelledby="tab-group">
         <!-- Group Info -->
         <details class="accordion" open>
           <summary class="accordion-header">
@@ -102,7 +102,7 @@
               <input type="url" id="groupPhotoUrl" placeholder="https://...">
             </div>
             <div class="form-group">
-              <label>veya Dosya Yükle</label>
+              <label for="groupPhotoFile">veya Dosya Yükle</label>
               <div class="file-input">
                 <input type="file" id="groupPhotoFile" accept="image/*">
                 <button type="button" class="file-btn secondary btn-sm">📁 Dosya Seç</button>
@@ -175,7 +175,7 @@
               <input type="color" id="wallpaperColor" value="#0b141a">
             </div>
             <div class="form-group">
-              <label>Özel Görsel</label>
+              <label for="wallpaperImageFile">Özel Görsel</label>
               <div class="file-input">
                 <input type="file" id="wallpaperImageFile" accept="image/*">
                 <button type="button" class="file-btn secondary btn-sm">📁 Görsel Seç</button>
@@ -241,8 +241,8 @@
             ✅ Tik Durumu
           </summary>
           <div class="accordion-body">
-            <label style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
-            <div class="tick-status-group" style="display: flex; gap: 6px;">
+            <label id="tickStatusLabel" style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
+            <div class="tick-status-group" style="display: flex; gap: 6px;" role="group" aria-labelledby="tickStatusLabel">
               <button id="tickSentBtn" type="button" class="tick-btn secondary btn-sm" data-tick="sent">
                 <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
                 Gönderildi
@@ -261,7 +261,7 @@
       </div>
 
       <!-- ===== PANEL: PEOPLE ===== -->
-      <div class="panel" id="people">
+      <div class="panel" id="people" role="tabpanel" aria-labelledby="tab-people">
         <!-- Person Form -->
         <details class="accordion" open>
           <summary class="accordion-header">
@@ -271,14 +271,14 @@
           <div class="accordion-body">
             <div class="form-group">
               <label for="pName">İsim</label>
-              <input type="text" id="pName" placeholder="Kişi adı">
+              <input type="text" id="pName" placeholder="Kişi adı" aria-required="true">
             </div>
             <div class="form-group">
               <label for="pAvatar">Avatar URL</label>
               <input type="url" id="pAvatar" placeholder="https://...">
             </div>
             <div class="form-group">
-              <label>veya Dosya Yükle</label>
+              <label for="pAvatarFile">veya Dosya Yükle</label>
               <div class="file-input">
                 <input type="file" id="pAvatarFile" accept="image/*">
                 <button type="button" class="file-btn secondary btn-sm">📁 Avatar Seç</button>
@@ -326,7 +326,7 @@
       </div>
 
       <!-- ===== PANEL: SCRIPT ===== -->
-      <div class="panel" id="script">
+      <div class="panel" id="script" role="tabpanel" aria-labelledby="tab-script">
 
         <!-- İç Tab Sistemi -->
         <div class="script-tabs">
@@ -412,7 +412,7 @@
           <!-- Medya komutu yardımcıları -->
           <div class="divider" style="margin: 12px 0;"></div>
           <div class="form-group">
-            <label>Medya ekle (senaryoya satır ekler)</label>
+            <label id="mediaHelperLabel">Medya ekle (senaryoya satır ekler)</label>
             <div class="form-grid">
               <div class="form-group">
                 <label for="mediaSenderSelect">Gönderen</label>
@@ -846,7 +846,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
       </div>
 
       <!-- ===== PANEL: SETTINGS ===== -->
-      <div class="panel" id="settings">
+      <div class="panel" id="settings" role="tabpanel" aria-labelledby="tab-settings">
         <!-- Typography -->
         <details class="accordion" open>
           <summary class="accordion-header">
@@ -933,20 +933,20 @@ Destek: Bunu anlayamadım 🤔"></textarea>
     </section>
 
     <!-- ==================== PHONE PREVIEW ==================== -->
-    <main class="stage">
+    <main class="stage" aria-label="Telefon önizleme">
       <!-- Phone-only mod floating toolbar -->
       <div class="phone-only-toolbar" id="phoneOnlyToolbar">
-        <button class="pot-btn" id="phoneOnlyExitBtn" title="Paneli Göster">
+        <button class="pot-btn" id="phoneOnlyExitBtn" title="Paneli Göster" aria-label="Paneli Göster">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         </button>
         <span class="pot-sep"></span>
-        <button class="pot-btn pot-scale" data-scale="0.75" title="%75">75</button>
-        <button class="pot-btn pot-scale active" data-scale="1" title="%100">100</button>
-        <button class="pot-btn pot-scale" data-scale="1.25" title="%125">125</button>
+        <button class="pot-btn pot-scale" data-scale="0.75" title="%75" aria-label="Ölçek %75">75</button>
+        <button class="pot-btn pot-scale active" data-scale="1" title="%100" aria-label="Ölçek %100">100</button>
+        <button class="pot-btn pot-scale" data-scale="1.25" title="%125" aria-label="Ölçek %125">125</button>
         <span class="pot-sep"></span>
-        <button class="pot-btn" id="potThemeToggleBtn" title="Tema Değiştir">🌗</button>
+        <button class="pot-btn" id="potThemeToggleBtn" title="Tema Değiştir" aria-label="Tema Değiştir">🌗</button>
         <span class="pot-sep"></span>
-        <button class="pot-btn" id="potScreenshotBtn" title="Ekran Al">
+        <button class="pot-btn" id="potScreenshotBtn" title="Ekran Al" aria-label="Ekran Al">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </button>
       </div>
@@ -1001,41 +1001,41 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           </div>
           <div class="header-actions">
             <!-- Video Call -->
-            <svg class="header-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg class="header-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" role="img" aria-label="Görüntülü arama">
               <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <!-- Voice Call -->
-            <svg class="header-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg class="header-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" role="img" aria-label="Sesli arama">
               <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C9.39 21 3 14.61 3 6.5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1.02l-2.2 2.2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <!-- Three dots menu -->
-            <svg class="header-icon header-menu-trigger" id="headerMenuBtn" width="24" height="24" viewBox="0 0 24 24" fill="none" style="cursor:pointer; position:relative;">
+            <svg class="header-icon header-menu-trigger" id="headerMenuBtn" width="24" height="24" viewBox="0 0 24 24" fill="none" role="button" aria-label="Menü" tabindex="0" style="cursor:pointer; position:relative;">
               <circle cx="12" cy="6" r="1.5" fill="currentColor"/>
               <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
               <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
             </svg>
             <!-- Header Dropdown Menu (mobilde görünür) -->
-            <div class="header-dropdown" id="headerDropdown">
-              <button class="hd-item" data-action="scriptEditor">📜 Senaryo Editörü</button>
-              <button class="hd-item" data-action="people">👥 Kişi Yönetimi</button>
-              <button class="hd-item" data-action="group">📱 Grup Ayarları</button>
-              <button class="hd-item" data-action="settings">⚙️ Ayarlar</button>
+            <div class="header-dropdown" id="headerDropdown" role="menu" aria-label="İşlemler">
+              <button class="hd-item" role="menuitem" data-action="scriptEditor">📜 Senaryo Editörü</button>
+              <button class="hd-item" role="menuitem" data-action="people">👥 Kişi Yönetimi</button>
+              <button class="hd-item" role="menuitem" data-action="group">📱 Grup Ayarları</button>
+              <button class="hd-item" role="menuitem" data-action="settings">⚙️ Ayarlar</button>
               <div class="hd-divider"></div>
-              <button class="hd-item" data-action="play">▶️ Oynat</button>
-              <button class="hd-item" data-action="pause">⏸️ Duraklat</button>
-              <button class="hd-item" data-action="reset">🔄 Sıfırla</button>
+              <button class="hd-item" role="menuitem" data-action="play">▶️ Oynat</button>
+              <button class="hd-item" role="menuitem" data-action="pause">⏸️ Duraklat</button>
+              <button class="hd-item" role="menuitem" data-action="reset">🔄 Sıfırla</button>
               <div class="hd-divider"></div>
-              <button class="hd-item" data-action="screenshot">📷 Ekran Al</button>
+              <button class="hd-item" role="menuitem" data-action="screenshot">📷 Ekran Al</button>
               <div class="hd-divider"></div>
-              <button class="hd-item" data-action="save">💾 Kaydet</button>
-              <button class="hd-item" data-action="load">📂 Yükle</button>
-              <button class="hd-item hd-item-danger" data-action="clear">🗑️ Tüm Veriyi Sil</button>
+              <button class="hd-item" role="menuitem" data-action="save">💾 Kaydet</button>
+              <button class="hd-item" role="menuitem" data-action="load">📂 Yükle</button>
+              <button class="hd-item hd-item-danger" role="menuitem" data-action="clear">🗑️ Tüm Veriyi Sil</button>
             </div>
           </div>
         </div>
 
         <!-- Chat Body -->
-        <div class="chat-body" id="chatBody">
+        <div class="chat-body" id="chatBody" role="log" aria-label="Sohbet mesajları" aria-live="polite">
           <div class="day-divider"><span id="dayDivider">Bugün</span></div>
         </div>
 
@@ -1091,13 +1091,13 @@ Destek: Bunu anlayamadım 🤔"></textarea>
     <!-- Mobile Panel Overlay -->
     <div class="mobile-overlay" id="mobileOverlay">
       <div class="mobile-overlay-header">
-        <button class="mobile-overlay-back" id="mobileOverlayBack" type="button">
+        <button class="mobile-overlay-back" id="mobileOverlayBack" type="button" aria-label="Geri">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <span class="mobile-overlay-title" id="mobileOverlayTitle">Senaryo Editörü</span>
         <div class="mobile-overlay-actions" id="mobileOverlayActions">
-          <button class="mo-action-btn" id="moPlayBtn" type="button" title="Oynat">▶️</button>
-          <button class="mo-action-btn" id="moResetBtn" type="button" title="Sıfırla">🔄</button>
+          <button class="mo-action-btn" id="moPlayBtn" type="button" title="Oynat" aria-label="Oynat">▶️</button>
+          <button class="mo-action-btn" id="moResetBtn" type="button" title="Sıfırla" aria-label="Sıfırla">🔄</button>
         </div>
       </div>
       <div class="mobile-overlay-body" id="mobileOverlayBody">

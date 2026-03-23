@@ -207,6 +207,14 @@ export function safeJsonParse(str, fallback = null) {
 }
 
 /**
+ * Kullanıcının reduced motion tercihini kontrol et
+ */
+export function prefersReducedMotion() {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
  * Yapısal loglama utility
  * Production'da sessiz, ?debug=true ile verbose
  */

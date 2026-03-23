@@ -14,24 +14,62 @@ export function initTabs() {
   const tabs = $$('.tab');
   const panels = $$('.panel');
 
+  function activateTab(tab) {
+    const tabId = tab.dataset.tab;
+    if (!tabId) return;
+
+    // Update active states
+    tabs.forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      t.setAttribute('tabindex', '-1');
+    });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    tab.setAttribute('tabindex', '0');
+
+    panels.forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById(tabId);
+    if (panel) {
+      panel.classList.add('active');
+    }
+
+    // Update state and notify
+    activeTab = tabId;
+    notifyTabChange(tabId);
+  }
+
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const tabId = tab.dataset.tab;
-      if (!tabId) return;
+    tab.addEventListener('click', () => activateTab(tab));
 
-      // Update active states
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+    // Keyboard: ok tuşları ile tab geçişi, Enter/Space ile aktivasyon
+    tab.addEventListener('keydown', (e) => {
+      const tabArr = Array.from(tabs);
+      const idx = tabArr.indexOf(tab);
+      let target = null;
 
-      panels.forEach(p => p.classList.remove('active'));
-      const panel = document.getElementById(tabId);
-      if (panel) {
-        panel.classList.add('active');
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        target = tabArr[(idx + 1) % tabArr.length];
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        target = tabArr[(idx - 1 + tabArr.length) % tabArr.length];
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        target = tabArr[0];
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        target = tabArr[tabArr.length - 1];
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activateTab(tab);
+        return;
       }
 
-      // Update state and notify
-      activeTab = tabId;
-      notifyTabChange(tabId);
+      if (target) {
+        target.focus();
+        activateTab(target);
+      }
     });
   });
 
