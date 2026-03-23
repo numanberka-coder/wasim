@@ -244,15 +244,29 @@ export const Autocomplete = (() => {
   function renderItems() {
     if (!dropdown) return;
 
-    dropdown.innerHTML = items.map((item, i) => {
+    dropdown.replaceChildren();
+    items.forEach((item, i) => {
       const cls = i === selectedIndex ? 'ac-item selected' : 'ac-item';
       const icon = mode === 'command' ? '⚡' : '👤';
-      return `<div class="${cls}" data-index="${i}">
-        <span class="ac-icon">${icon}</span>
-        <span class="ac-name">${escapeHtml(item.name)}</span>
-        <span class="ac-desc">${escapeHtml(item.desc)}</span>
-      </div>`;
-    }).join('');
+      const div = document.createElement('div');
+      div.className = cls;
+      div.dataset.index = i;
+
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'ac-icon';
+      iconSpan.textContent = icon;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'ac-name';
+      nameSpan.textContent = item.name;
+
+      const descSpan = document.createElement('span');
+      descSpan.className = 'ac-desc';
+      descSpan.textContent = item.desc;
+
+      div.append(iconSpan, nameSpan, descSpan);
+      dropdown.appendChild(div);
+    });
   }
 
   /**

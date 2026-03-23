@@ -3,7 +3,7 @@
    ======================================== */
 
 // Utils & Config
-import { $, escapeHtml, isValidUrl, nowTime, readFileAsDataURL, clamp, Logger } from './utils.js';
+import { $, escapeHtml, isValidUrl, nowTime, readFileAsDataURL, clamp, Logger, createElement } from './utils.js';
 import { CONFIG, THEME_DEFAULTS, DEFAULT_PEOPLE, DEFAULT_SCRIPT, SCRIPT_TEMPLATES } from './config.js';
 import { state } from './state.js';
 import { storage, sceneManager, initAutoSave } from './storage.js';
@@ -723,25 +723,27 @@ function renderSceneList() {
   const scenes = sceneManager.getAll();
 
   if (scenes.length === 0) {
-    container.innerHTML = '<p class="hint">Henüz kaydedilmiş sahne yok.</p>';
+    container.replaceChildren(createElement('p', { className: 'hint' }, ['Henüz kaydedilmiş sahne yok.']));
     return;
   }
 
-  container.innerHTML = scenes.map(scene => {
+  container.replaceChildren();
+  for (const scene of scenes) {
     const date = new Date(scene.timestamp);
     const dateStr = date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const timeStr = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    return `<div class="scene-item" data-scene-id="${scene.id}">
-      <div class="scene-info">
-        <span class="scene-name">${escapeHtml(scene.name)}</span>
-        <span class="scene-date">${dateStr} ${timeStr}</span>
-      </div>
-      <div class="scene-actions">
-        <button type="button" class="btn-sm scene-load-btn" data-scene-id="${scene.id}">Yükle</button>
-        <button type="button" class="btn-sm danger scene-delete-btn" data-scene-id="${scene.id}">Sil</button>
-      </div>
-    </div>`;
-  }).join('');
+
+    container.appendChild(createElement('div', { className: 'scene-item', dataset: { sceneId: scene.id } }, [
+      createElement('div', { className: 'scene-info' }, [
+        createElement('span', { className: 'scene-name' }, [scene.name]),
+        createElement('span', { className: 'scene-date' }, [`${dateStr} ${timeStr}`])
+      ]),
+      createElement('div', { className: 'scene-actions' }, [
+        createElement('button', { type: 'button', className: 'btn-sm scene-load-btn', dataset: { sceneId: scene.id } }, ['Yükle']),
+        createElement('button', { type: 'button', className: 'btn-sm danger scene-delete-btn', dataset: { sceneId: scene.id } }, ['Sil'])
+      ])
+    ]));
+  }
 }
 
 /** Scene list event delegation — tek listener, her render'da yeniden eklenmez */

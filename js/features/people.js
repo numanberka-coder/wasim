@@ -2,7 +2,7 @@
    PEOPLE - People Management
    ======================================== */
 
-import { $, escapeHtml, isValidUrl } from '../utils.js';
+import { $, escapeHtml, isValidUrl, createElement } from '../utils.js';
 import { state } from '../state.js';
 import { showError, showSuccess } from '../ui/toast.js';
 import { markInvalid, clearInvalid } from '../ui/validation.js';
@@ -23,29 +23,34 @@ function renderPeopleList() {
   const active = state.get('active');
   const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
 
-  listEl.innerHTML = '';
+  listEl.replaceChildren();
 
   for (const name of names) {
     const avatar = (people[name]?.avatar || '').trim();
     const isOnline = active.has(name);
 
-    const div = document.createElement('div');
-    div.className = 'person-item';
-    div.innerHTML = `
-      <div class="person-avatar ${isOnline ? 'online' : ''}">
-        ${avatar 
-          ? `<img src="${escapeHtml(avatar)}" onerror="this.remove()">` 
-          : `<span>${escapeHtml((name[0] || '?').toUpperCase())}</span>`
-        }
-      </div>
-      <div class="person-info">
-        <div class="person-name">${escapeHtml(name)}</div>
-        <div class="person-url">${avatar ? escapeHtml(avatar.slice(0, 40) + (avatar.length > 40 ? '...' : '')) : 'avatar yok'}</div>
-      </div>
-      <div class="person-actions">
-        <button class="secondary btn-sm" data-edit="${escapeHtml(name)}" type="button">✏️ Düzenle</button>
-      </div>
-    `;
+    const avatarDiv = createElement('div', { className: `person-avatar${isOnline ? ' online' : ''}` });
+    if (avatar) {
+      const img = document.createElement('img');
+      img.src = avatar;
+      img.addEventListener('error', () => img.remove());
+      avatarDiv.appendChild(img);
+    } else {
+      avatarDiv.appendChild(createElement('span', {}, [(name[0] || '?').toUpperCase()]));
+    }
+
+    const div = createElement('div', { className: 'person-item' }, [
+      avatarDiv,
+      createElement('div', { className: 'person-info' }, [
+        createElement('div', { className: 'person-name' }, [name]),
+        createElement('div', { className: 'person-url' }, [
+          avatar ? avatar.slice(0, 40) + (avatar.length > 40 ? '...' : '') : 'avatar yok'
+        ])
+      ]),
+      createElement('div', { className: 'person-actions' }, [
+        createElement('button', { className: 'secondary btn-sm', type: 'button', dataset: { edit: name } }, ['✏️ Düzenle'])
+      ])
+    ]);
 
     listEl.appendChild(div);
   }
@@ -240,7 +245,7 @@ function refreshManualSenderOptions() {
 
   const fill = (selectEl, currentValue = 'Me') => {
     if (!selectEl) return;
-    selectEl.innerHTML = '';
+    selectEl.replaceChildren();
     for (const n of list) {
       const opt = document.createElement('option');
       opt.value = n;

@@ -2,7 +2,7 @@
    PLAYER - Script Player
    ======================================== */
 
-import { $, readFileAsDataURL, Logger } from '../utils.js';
+import { $, readFileAsDataURL, Logger, parseSVG } from '../utils.js';
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { showToast, showError } from '../ui/toast.js';
@@ -361,7 +361,7 @@ function updateMainActionButton() {
 
   btn.dataset.mode = mode;
   btn.setAttribute('aria-label', hasText ? 'Gönder' : 'Sesli mesaj');
-  btn.innerHTML = hasText ? MAIN_ACTION_ICON_SEND : MAIN_ACTION_ICON_MIC;
+  btn.replaceChildren(parseSVG(hasText ? MAIN_ACTION_ICON_SEND : MAIN_ACTION_ICON_MIC));
 }
 
 /**

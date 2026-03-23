@@ -2,7 +2,7 @@
    MESSAGES - Message Management & Rendering
    ======================================== */
 
-import { $, escapeHtml, timeToMinutes, minutesToTime, nowTime, Logger } from '../utils.js';
+import { $, escapeHtml, timeToMinutes, minutesToTime, nowTime, Logger, parseSVG, createElement } from '../utils.js';
 import { showToast } from '../ui/toast.js';
 import { state } from '../state.js';
 
@@ -255,7 +255,7 @@ function renderVoiceContent(msg, bubble) {
 
   const play = document.createElement('div');
   play.className = 'msg-voice-play';
-  play.innerHTML = VOICE_PLAY_ICON;
+  play.replaceChildren(parseSVG(VOICE_PLAY_ICON));
 
   const body = document.createElement('div');
   body.className = 'msg-voice-body';
@@ -279,7 +279,7 @@ function renderVoiceContent(msg, bubble) {
 
   const mic = document.createElement('div');
   mic.className = 'msg-voice-mic';
-  mic.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`;
+  mic.appendChild(parseSVG(`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`));
 
   footer.appendChild(dur);
   footer.appendChild(mic);
@@ -295,12 +295,12 @@ function renderVoiceContent(msg, bubble) {
       voice.classList.remove('playing');
       Array.from(wave.querySelectorAll('span')).forEach(b => b.classList.remove('played', 'current'));
       dur.textContent = formatVoiceDuration(duration);
-      play.innerHTML = VOICE_PLAY_ICON;
+      play.replaceChildren(parseSVG(VOICE_PLAY_ICON));
       return;
     }
 
     voice.classList.add('playing');
-    play.innerHTML = VOICE_PAUSE_ICON;
+    play.replaceChildren(parseSVG(VOICE_PAUSE_ICON));
 
     const totalSec   = Math.max(1, duration);
     const allBars    = Array.from(wave.querySelectorAll('span'));
@@ -331,7 +331,7 @@ function renderVoiceContent(msg, bubble) {
       } else {
         voice._playTimer = null;
         voice.classList.remove('playing');
-        play.innerHTML = VOICE_PLAY_ICON;
+        play.replaceChildren(parseSVG(VOICE_PLAY_ICON));
         setTimeout(() => {
           allBars.forEach(b => b.classList.remove('played', 'current'));
           dur.textContent = formatVoiceDuration(duration);
@@ -354,12 +354,7 @@ function renderLocationContent(msg, bubble) {
 
   const map = document.createElement('div');
   map.className = 'msg-location-map';
-  map.innerHTML = `
-    <svg class="msg-location-pin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ea4335" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
-      <circle cx="12" cy="9" r="2.5" fill="white"/>
-    </svg>
-  `;
+  map.appendChild(parseSVG(`<svg class="msg-location-pin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ea4335" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>`));
 
   const info = document.createElement('div');
   info.className = 'msg-location-info';
@@ -391,13 +386,7 @@ function renderDocumentContent(msg, bubble) {
   const ext = (filename.split('.').pop() || 'pdf').toLowerCase();
   const iconColor = DOC_EXT_COLORS[ext] || '#607d8b';
 
-  iconWrap.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" fill="${iconColor}" opacity="0.9"/>
-      <path d="M14 2v6h6" fill="rgba(0,0,0,0.2)"/>
-      <text x="12" y="17" text-anchor="middle" fill="white" font-size="5" font-weight="700" font-family="Roboto,sans-serif">${ext.toUpperCase().slice(0,4)}</text>
-    </svg>
-  `;
+  iconWrap.appendChild(parseSVG(`<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" fill="${iconColor}" opacity="0.9"/><path d="M14 2v6h6" fill="rgba(0,0,0,0.2)"/><text x="12" y="17" text-anchor="middle" fill="white" font-size="5" font-weight="700" font-family="Roboto,sans-serif">${ext.toUpperCase().slice(0,4)}</text></svg>`));
 
   const docMeta = document.createElement('div');
   docMeta.className = 'msg-document-meta';
@@ -415,7 +404,7 @@ function renderDocumentContent(msg, bubble) {
 
   const dlIcon = document.createElement('div');
   dlIcon.className = 'msg-document-dl';
-  dlIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M12 2v12m0 0l-4-4m4 4l4-4M3 20h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  dlIcon.appendChild(parseSVG(`<svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M12 2v12m0 0l-4-4m4 4l4-4M3 20h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`));
 
   doc.appendChild(iconWrap);
   doc.appendChild(docMeta);
@@ -469,7 +458,7 @@ function renderLinkContent(msg, bubble) {
   } else {
     const thumbPlaceholder = document.createElement('div');
     thumbPlaceholder.className = 'msg-link-thumb msg-link-thumb-placeholder';
-    thumbPlaceholder.innerHTML = `<svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+    thumbPlaceholder.appendChild(parseSVG(`<svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`));
     link.appendChild(thumbPlaceholder);
   }
 
@@ -504,7 +493,7 @@ function renderViewOnceContent(msg, bubble) {
 
   const voIcon = document.createElement('div');
   voIcon.className = 'msg-viewonce-icon';
-  voIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>`;
+  voIcon.appendChild(parseSVG(`<svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>`));
 
   const voLabel = document.createElement('div');
   voLabel.className = 'msg-viewonce-label';
@@ -884,7 +873,9 @@ function addSystemMessage(text) {
 
   const div = document.createElement('div');
   div.className = 'system-msg';
-  div.innerHTML = `<span>${escapeHtml(text)}</span>`;
+  const span = document.createElement('span');
+  span.textContent = text;
+  div.appendChild(span);
   
   chatBody.appendChild(div);
   chatBody.scrollTop = chatBody.scrollHeight;
@@ -910,11 +901,11 @@ function addTypingBubble(speaker) {
 
   const bubble = document.createElement('div');
   bubble.className = 'typing-bubble';
-  bubble.innerHTML = `
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-  `;
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'typing-dot';
+    bubble.appendChild(dot);
+  }
 
   row.appendChild(bubble);
   chatBody.appendChild(row);
@@ -949,9 +940,12 @@ function _setHeaderTyping(speaker) {
   const name = isMe ? '' : speaker;
 
   statusEl.classList.add('is-typing');
-  statusEl.innerHTML = name
-    ? `${escapeHtml(name)} yazıyor<span class="header-typing-dots"><span></span><span></span><span></span></span>`
-    : `Yazıyor<span class="header-typing-dots"><span></span><span></span><span></span></span>`;
+  statusEl.textContent = '';
+  statusEl.appendChild(document.createTextNode(name ? `${name} yazıyor` : 'Yazıyor'));
+  const dots = document.createElement('span');
+  dots.className = 'header-typing-dots';
+  for (let i = 0; i < 3; i++) dots.appendChild(document.createElement('span'));
+  statusEl.appendChild(dots);
 }
 
 /** Restore header status */
@@ -989,7 +983,10 @@ function clearChat() {
   if (!chatBody) return;
 
   const dayLabel = state.get('group.dayLabel') || 'Bugün';
-  chatBody.innerHTML = `<div class="day-divider"><span id="dayDivider">${escapeHtml(dayLabel)}</span></div>`;
+  const divider = createElement('div', { className: 'day-divider' }, [
+    createElement('span', { id: 'dayDivider' }, [dayLabel])
+  ]);
+  chatBody.replaceChildren(divider);
 }
 
 /**
