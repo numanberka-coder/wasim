@@ -1483,6 +1483,7 @@
    ======================================== */
 .phone.light {
   /* Ana renkler */
+  color: var(--wa-text);
   --wa-bg: #efeae2;
   --wa-header: #008069;
   --wa-panel: #ffffff;
