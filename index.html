@@ -116,148 +116,6 @@
           </div>
         </details>
 
-        <!-- Status Bar -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🕐 Durum Çubuğu
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="operatorNameInput">Operatör Adı</label>
-              <input type="text" id="operatorNameInput" value="Turkcell" placeholder="örn: Turkcell, Vodafone, Türk Telekom">
-            </div>
-            <div class="divider"></div>
-            <div class="form-group">
-              <label for="statusTimeInput">Saat (boş bırak = gerçek saat)</label>
-              <input type="time" id="statusTimeInput" step="60">
-            </div>
-            <div class="divider"></div>
-            <label class="checkbox-row">
-              <input type="checkbox" id="batteryVisible" checked>
-              <span class="checkbox-label">Batarya Göster</span>
-            </label>
-            <div class="form-grid" style="margin-top: 12px;">
-              <div class="form-group">
-                <label for="batteryPercentInput">Batarya %</label>
-                <input type="number" id="batteryPercentInput" min="0" max="100" value="95">
-              </div>
-              <div class="form-group">
-                <label for="batteryHealthInput">Sağlık %</label>
-                <input type="number" id="batteryHealthInput" min="0" max="100" value="100">
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Wallpaper -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎨 Duvar Kağıdı
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="wallpaperPreset">Hazır Tema</label>
-              <select id="wallpaperPreset">
-                <option value="default">Varsayılan</option>
-                <option value="velvet">Kadife</option>
-                <option value="graph">Izgara</option>
-                <option value="plain">Düz</option>
-                <option value="light-default">Light Varsayılan</option>
-                <option value="light-plain">Light Düz</option>
-                <option value="custom-color">Özel Renk</option>
-                <option value="custom-image">Özel Görsel</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="wallpaperColor">Özel Renk</label>
-              <input type="color" id="wallpaperColor" value="#0b141a">
-            </div>
-            <div class="form-group">
-              <label>Özel Görsel</label>
-              <div class="file-input">
-                <input type="file" id="wallpaperImageFile" accept="image/*">
-                <button type="button" class="file-btn secondary btn-sm">📁 Görsel Seç</button>
-                <span class="file-name">Seçilmedi</span>
-              </div>
-            </div>
-            <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
-          </div>
-        </details>
-
-        <!-- Theme Toggle -->
-        <details class="accordion" open>
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🌗 Tema
-          </summary>
-          <div class="accordion-body">
-            <div class="form-row" style="gap: 8px;">
-              <button id="themeDarkBtn" type="button" style="flex:1;">🌙 Dark</button>
-              <button id="themeLightBtn" type="button" class="secondary" style="flex:1;">☀️ Light</button>
-            </div>
-          </div>
-        </details>
-
-        <!-- Header Color -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎨 Header Rengi
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="headerColorInput">Renk Seçin</label>
-              <input type="color" id="headerColorInput" value="#1f2c33">
-            </div>
-            <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
-          </div>
-        </details>
-
-        <!-- Bubble Colors -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎨 Balon Renkleri
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="bubbleOutColorInput">Giden Balon Rengi</label>
-              <input type="color" id="bubbleOutColorInput" value="#005c4b">
-            </div>
-            <div class="form-group" style="margin-top: 8px;">
-              <label for="bubbleInColorInput">Gelen Balon Rengi</label>
-              <input type="color" id="bubbleInColorInput" value="#1f2c33">
-            </div>
-            <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
-          </div>
-        </details>
-
-        <!-- Tick Status -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            ✅ Tik Durumu
-          </summary>
-          <div class="accordion-body">
-            <label style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
-            <div class="tick-status-group" style="display: flex; gap: 6px;">
-              <button id="tickSentBtn" type="button" class="tick-btn secondary btn-sm" data-tick="sent">
-                <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-                Gönderildi
-              </button>
-              <button id="tickDeliveredBtn" type="button" class="tick-btn secondary btn-sm" data-tick="delivered">
-                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-                İletildi
-              </button>
-              <button id="tickReadBtn" type="button" class="tick-btn secondary btn-sm active" data-tick="read">
-                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-                Okundu
-              </button>
-            </div>
-          </div>
-        </details>
       </div>
 
       <!-- ===== PANEL: PEOPLE ===== -->
@@ -927,6 +785,157 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               </div>
             </div>
             <div id="sceneList" class="scene-list"></div>
+          </div>
+        </details>
+
+        <!-- Theme Toggle -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🌗 Tema
+          </summary>
+          <div class="accordion-body">
+            <div class="form-row" style="gap: 8px;">
+              <button id="themeDarkBtn" type="button" style="flex:1;">🌙 Dark</button>
+              <button id="themeLightBtn" type="button" class="secondary" style="flex:1;">☀️ Light</button>
+            </div>
+          </div>
+        </details>
+
+        <!-- Status Bar -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🕐 Durum Çubuğu
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="operatorNameInput">Operatör Adı</label>
+              <input type="text" id="operatorNameInput" value="Turkcell" placeholder="örn: Turkcell, Vodafone, Türk Telekom">
+            </div>
+            <div class="divider"></div>
+            <div class="form-group">
+              <label for="statusTimeInput">Saat (boş bırak = gerçek saat)</label>
+              <input type="time" id="statusTimeInput" step="60">
+            </div>
+            <div class="divider"></div>
+            <label class="checkbox-row">
+              <input type="checkbox" id="batteryVisible" checked>
+              <span class="checkbox-label">Batarya Göster</span>
+            </label>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="form-group">
+                <label for="batteryPercentInput">Batarya %</label>
+                <input type="number" id="batteryPercentInput" min="0" max="100" value="95">
+              </div>
+              <div class="form-group">
+                <label for="batteryHealthInput">Sağlık %</label>
+                <input type="number" id="batteryHealthInput" min="0" max="100" value="100">
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Wallpaper -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🎨 Duvar Kağıdı
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="wallpaperPreset">Hazır Tema</label>
+              <select id="wallpaperPreset">
+                <option value="default">Varsayılan</option>
+                <option value="velvet">Kadife</option>
+                <option value="graph">Izgara</option>
+                <option value="plain">Düz</option>
+                <option value="light-default">Light Varsayılan</option>
+                <option value="light-plain">Light Düz</option>
+                <option value="custom-color">Özel Renk</option>
+                <option value="custom-image">Özel Görsel</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="wallpaperColor">Özel Renk</label>
+              <input type="color" id="wallpaperColor" value="#0b141a">
+            </div>
+            <div class="form-group">
+              <label>Özel Görsel</label>
+              <div class="file-input">
+                <input type="file" id="wallpaperImageFile" accept="image/*">
+                <button type="button" class="file-btn secondary btn-sm">📁 Görsel Seç</button>
+                <span class="file-name">Seçilmedi</span>
+              </div>
+            </div>
+            <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+          </div>
+        </details>
+
+        <!-- Header Color -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🎨 Header Rengi
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="headerColorInput">Arka Plan Rengi</label>
+              <input type="color" id="headerColorInput" value="#1f2c33">
+            </div>
+            <div class="form-group" style="margin-top: 8px;">
+              <label for="headerTextColorInput">Yazı Rengi</label>
+              <input type="color" id="headerTextColorInput" value="#e9edef">
+            </div>
+            <div class="form-group" style="margin-top: 8px;">
+              <label for="headerIconColorInput">İkon Rengi</label>
+              <input type="color" id="headerIconColorInput" value="#aebac1">
+            </div>
+            <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+          </div>
+        </details>
+
+        <!-- Bubble Colors -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🎨 Balon Renkleri
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="bubbleOutColorInput">Giden Balon Rengi</label>
+              <input type="color" id="bubbleOutColorInput" value="#005c4b">
+            </div>
+            <div class="form-group" style="margin-top: 8px;">
+              <label for="bubbleInColorInput">Gelen Balon Rengi</label>
+              <input type="color" id="bubbleInColorInput" value="#1f2c33">
+            </div>
+            <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+          </div>
+        </details>
+
+        <!-- Tick Status -->
+        <details class="accordion">
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            ✅ Tik Durumu
+          </summary>
+          <div class="accordion-body">
+            <label style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
+            <div class="tick-status-group" style="display: flex; gap: 6px;">
+              <button id="tickSentBtn" type="button" class="tick-btn secondary btn-sm" data-tick="sent">
+                <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                Gönderildi
+              </button>
+              <button id="tickDeliveredBtn" type="button" class="tick-btn secondary btn-sm" data-tick="delivered">
+                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                İletildi
+              </button>
+              <button id="tickReadBtn" type="button" class="tick-btn secondary btn-sm active" data-tick="read">
+                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                Okundu
+              </button>
+            </div>
           </div>
         </details>
       </div>

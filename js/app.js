@@ -19,7 +19,7 @@ import { initMobile, registerMobileCallback } from './ui/mobile.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 
 // Phone Modules
-import { syncHeader, applyTheme, setTheme, setHeaderColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
+import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
 import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible } from './phone/statusbar.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
@@ -134,6 +134,12 @@ function populateFormFields() {
     // Header color
     setInputValue('headerColorInput', settings.headerColor || THEME_DEFAULTS.dark.headerColor);
 
+    // Header text & icon colors
+    const currentTheme = settings.theme || 'dark';
+    const currentThemeColors = THEME_DEFAULTS[currentTheme] || THEME_DEFAULTS.dark;
+    setInputValue('headerTextColorInput', settings.headerTextColor || currentThemeColors.headerTextColor);
+    setInputValue('headerIconColorInput', settings.headerIconColor || currentThemeColors.headerIconColor);
+
     // Bubble colors
     const theme = settings.theme || 'dark';
     const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
@@ -204,6 +210,11 @@ function resetThemeColors(theme) {
   const themeColors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
   setHeaderColor(themeColors.headerColor);
   setInputValue('headerColorInput', themeColors.headerColor);
+  // Reset header text & icon colors
+  setHeaderTextColor(null);
+  setHeaderIconColor(null);
+  setInputValue('headerTextColorInput', themeColors.headerTextColor);
+  setInputValue('headerIconColorInput', themeColors.headerIconColor);
   updateBubbleColorInputDefaults(theme);
 }
 
@@ -281,10 +292,12 @@ const CLICK_MAP = [
  * Color picker eşleştirmeleri — input + change aynı handler'ı tetikler
  */
 const COLOR_PICKER_MAP = [
-  ['wallpaperColor',      setWallpaperColor],
-  ['headerColorInput',    setHeaderColor],
-  ['bubbleOutColorInput',  setBubbleOutColor],
-  ['bubbleInColorInput',   setBubbleInColor],
+  ['wallpaperColor',        setWallpaperColor],
+  ['headerColorInput',      setHeaderColor],
+  ['headerTextColorInput',  setHeaderTextColor],
+  ['headerIconColorInput',  setHeaderIconColor],
+  ['bubbleOutColorInput',   setBubbleOutColor],
+  ['bubbleInColorInput',    setBubbleInColor],
 ];
 
 /**

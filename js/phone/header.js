@@ -37,6 +37,10 @@ export function syncHeader() {
   // Apply header color
   applyHeaderColor(settings.headerColor || THEME_DEFAULTS.dark.headerColor);
 
+  // Apply header text & icon colors
+  applyHeaderTextColor(settings.headerTextColor);
+  applyHeaderIconColor(settings.headerIconColor);
+
   // Apply bubble colors
   applyBubbleColors(settings.bubbleOutColor, settings.bubbleInColor);
 
@@ -55,7 +59,7 @@ export function renderHeaderAvatar() {
   const title = group.title || 'Grup';
   
   // Reset classes
-  avatarEl.className = 'header-avatar online';
+  avatarEl.className = 'header-avatar';
 
   // File data URL takes priority
   if (group.avatarDataUrl) {
@@ -152,6 +156,48 @@ export function applyHeaderColor(color) {
 export function setHeaderColor(color) {
   state.set('settings.headerColor', color);
   applyHeaderColor(color);
+}
+
+/**
+ * Apply header text color via CSS variable
+ */
+export function applyHeaderTextColor(color) {
+  const phone = document.querySelector('.phone');
+  if (!phone) return;
+  if (color) {
+    phone.style.setProperty('--wa-header-text-color', color);
+  } else {
+    phone.style.removeProperty('--wa-header-text-color');
+  }
+}
+
+/**
+ * Set header text color — updates state + applies
+ */
+export function setHeaderTextColor(color) {
+  state.set('settings.headerTextColor', color);
+  applyHeaderTextColor(color);
+}
+
+/**
+ * Apply header icon color via CSS variable
+ */
+export function applyHeaderIconColor(color) {
+  const phone = document.querySelector('.phone');
+  if (!phone) return;
+  if (color) {
+    phone.style.setProperty('--wa-header-icon-color', color);
+  } else {
+    phone.style.removeProperty('--wa-header-icon-color');
+  }
+}
+
+/**
+ * Set header icon color — updates state + applies
+ */
+export function setHeaderIconColor(color) {
+  state.set('settings.headerIconColor', color);
+  applyHeaderIconColor(color);
 }
 
 /**

@@ -5,6 +5,8 @@
 export const THEME_DEFAULTS = {
   dark: {
     headerColor: '#1f2c33',
+    headerTextColor: '#e9edef',
+    headerIconColor: '#aebac1',
     bubbleOutColor: '#005c4b',
     bubbleInColor: '#1f2c33',
     wallpaperColor: '#0b141a',
@@ -12,6 +14,8 @@ export const THEME_DEFAULTS = {
   },
   light: {
     headerColor: '#008069',
+    headerTextColor: '#ffffff',
+    headerIconColor: 'rgba(255, 255, 255, 0.92)',
     bubbleOutColor: '#d9fdd3',
     bubbleInColor: '#ffffff',
     wallpaperColor: '#efeae2',
@@ -269,6 +273,8 @@ export const DEFAULT_STATE = {
   bubbleSize: 78,
   bubblePaddingY: 10,
   headerColor: THEME_DEFAULTS.dark.headerColor,
+  headerTextColor: null,
+  headerIconColor: null,
   bubbleOutColor: null,
   bubbleInColor: null,
   tickStatus: 'read',
