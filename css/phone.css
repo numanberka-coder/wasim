@@ -1130,7 +1130,7 @@
   color: var(--wa-text);
   font-size: var(--chat-font-size);
   padding: 0 6px;
-  caret-color: #25d366;
+  caret-color: var(--wa-green);
   min-width: 40px;
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: none;
@@ -1491,21 +1491,21 @@
   --wa-text-secondary: #667781;
   --wa-icon: #54656f;
   --wa-divider: #e9edef;
-  --wa-green: #25d366;
+  --wa-green: #00a884;
   --wa-green-dim: #008069;
   --wa-check-blue: #53bdeb;
 
   /* Balonlar */
-  --wa-bubble-out: #d9fdd3;
+  --wa-bubble-out: #d4f5e2;
   --wa-bubble-in: #ffffff;
   --wa-bubble-meta: #667781;
   --wa-bubble-in-bg: #ffffff;
   --wa-bubble-in-solid: #ffffff;
-  --wa-bubble-out-bg: #d9fdd3;
-  --wa-bubble-out-solid: #d9fdd3;
-  --wa-bubble-in-border: rgba(0, 0, 0, 0.08);
+  --wa-bubble-out-bg: #d4f5e2;
+  --wa-bubble-out-solid: #d4f5e2;
+  --wa-bubble-in-border: rgba(0, 0, 0, 0.13);
   --wa-bubble-out-border: rgba(0, 0, 0, 0.06);
-  --wa-bubble-shadow: rgba(0, 0, 0, 0.08);
+  --wa-bubble-shadow: rgba(0, 0, 0, 0.06);
 
   /* Overlay / meta */
   --wa-overlay-bg: rgba(255, 255, 255, 0.92);
@@ -1518,7 +1518,7 @@
 
   /* Reaction */
   --wa-reaction-bg: #ffffff;
-  --wa-reaction-out-bg: #e7ffdb;
+  --wa-reaction-out-bg: #c8eed6;
   --wa-reaction-border: rgba(0, 0, 0, 0.1);
   --wa-reaction-count: rgba(17, 27, 33, 0.7);
 
@@ -1647,9 +1647,11 @@
   caret-color: #008069;
 }
 
-/* Light modda main action button text */
+/* Light modda gönder butonu — header ile aynı teal ailesinden */
 .phone.light .main-action-btn {
+  background: linear-gradient(180deg, #00a884 0%, #008069 100%);
   color: #ffffff;
+  box-shadow: 0 10px 20px rgba(0, 128, 105, 0.25);
 }
 
 /* Light modda composer icon hover */
