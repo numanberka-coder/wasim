@@ -16,7 +16,7 @@ export const THEME_DEFAULTS = {
     headerColor: '#008069',
     headerTextColor: '#ffffff',
     headerIconColor: 'rgba(255, 255, 255, 0.92)',
-    bubbleOutColor: '#d9fdd3',
+    bubbleOutColor: '#d4f5e2',
     bubbleInColor: '#ffffff',
     wallpaperColor: '#efeae2',
     wallpaperPreset: 'light-default',
