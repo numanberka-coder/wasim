@@ -193,23 +193,28 @@
   letter-spacing: 0.3px;
 }
 
-/* Signal Icon — Android 13+ triangle style */
+/* Signal Bars — Android style */
 .signal-icon {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 12px;
-  height: 12px;
-  color: var(--wa-text);
+  align-items: flex-end;
+  gap: 1.2px;
+  height: 10px;
 }
 
-.signal-icon svg {
-  width: 12px;
-  height: 12px;
+.signal-icon span {
+  background: var(--wa-text);
+  width: 2.5px;
+  border-radius: 0.8px;
+  flex-shrink: 0;
 }
 
-.signal-fill {
-  /* Full signal by default — clip to show partial */
+.signal-icon span:nth-child(1) { height: 3px; }
+.signal-icon span:nth-child(2) { height: 5px; }
+.signal-icon span:nth-child(3) { height: 7px; }
+.signal-icon span:nth-child(4) { height: 10px; }
+
+.signal-icon span.faded {
+  opacity: 0.3;
 }
 
 /* WiFi icon — Android 13+ filled fan */
@@ -243,8 +248,8 @@
 
 .battery-icon {
   position: relative;
-  width: 22px;
-  height: 11px;
+  width: 20px;
+  height: 10px;
   display: flex;
   align-items: center;
 }
@@ -252,36 +257,35 @@
 .battery-frame {
   position: absolute;
   inset: 0;
-  right: 2px;
-  border: 1.5px solid var(--wa-text);
-  border-radius: 2.5px;
+  border: 1.4px solid var(--wa-text);
+  border-radius: 2px;
   opacity: 0.9;
 }
 
 .battery-tip {
   position: absolute;
-  right: -1px;
-  top: 3px;
-  width: 2.5px;
+  right: -3px;
+  top: 2.5px;
+  width: 2px;
   height: 5px;
   background: var(--wa-text);
-  border-radius: 0 1.5px 1.5px 0;
+  border-radius: 0 1px 1px 0;
   opacity: 0.9;
 }
 
 .battery-fill {
   position: absolute;
   left: 2px;
-  right: 4px;
-  top: 2.5px;
-  height: calc(100% - 5px);
+  right: 2px;
+  top: 2px;
+  height: calc(100% - 4px);
   width: auto;
   background: var(--wa-text);
-  border-radius: 1.5px;
+  border-radius: 1px;
   transform-origin: left;
   transform: scaleX(var(--battery-level, 0));
   transition: transform 0.25s ease, background 0.2s ease;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .battery.low .battery-fill {
@@ -1576,8 +1580,8 @@
   color: #ffffff;
 }
 
-.phone.light .signal-icon {
-  color: #ffffff;
+.phone.light .signal-icon span {
+  background: #ffffff;
 }
 
 .phone.light .wifi-icon {
