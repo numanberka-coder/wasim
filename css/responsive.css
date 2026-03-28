@@ -542,3 +542,208 @@
     border-width: 2px;
   }
 }
+
+/* ========================================
+   LIGHT THEME — Dropdown & Mobile Overlay
+   body.theme-light olduğunda panel UI'ları
+   light moda geçer.
+   ======================================== */
+
+/* Dropdown menü — light */
+body.theme-light .header-dropdown {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .hd-item {
+  color: #111b21;
+}
+
+body.theme-light .hd-item:hover,
+body.theme-light .hd-item:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .hd-item-danger {
+  color: #dc2626;
+}
+
+body.theme-light .hd-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Mobile Overlay — light */
+body.theme-light .mobile-overlay {
+  background: #f0f2f5;
+}
+
+body.theme-light .mobile-overlay-header {
+  background: #008069;
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .mobile-overlay-title {
+  color: #ffffff;
+}
+
+body.theme-light .mobile-overlay-back {
+  color: #ffffff;
+}
+
+body.theme-light .mobile-overlay-back:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+body.theme-light .mo-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+body.theme-light .mo-action-btn:active {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Overlay body — panel içerikleri light */
+body.theme-light .mobile-overlay-body {
+  background: #f0f2f5;
+}
+
+body.theme-light .mobile-overlay-body .accordion-header {
+  color: #111b21;
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .mobile-overlay-body .accordion-body {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .mobile-overlay-body label {
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body input,
+body.theme-light .mobile-overlay-body textarea,
+body.theme-light .mobile-overlay-body select {
+  background: #f0f2f5;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body input:focus,
+body.theme-light .mobile-overlay-body textarea:focus,
+body.theme-light .mobile-overlay-body select:focus {
+  border-color: #00a884;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.1);
+}
+
+body.theme-light .mobile-overlay-body input::placeholder,
+body.theme-light .mobile-overlay-body textarea::placeholder {
+  color: #667781;
+}
+
+body.theme-light .mobile-overlay-body button {
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body button.secondary {
+  background: #e9edef;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body button.danger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+body.theme-light .mobile-overlay-body .hint {
+  color: #667781;
+}
+
+body.theme-light .mobile-overlay-body .person-item {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .mobile-overlay-body .person-name {
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body .person-url {
+  color: #667781;
+}
+
+body.theme-light .mobile-overlay-body .divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .mobile-overlay-body .script-tab {
+  color: #667781;
+  border-bottom-color: transparent;
+}
+
+body.theme-light .mobile-overlay-body .script-tab.active {
+  color: #008069;
+  border-bottom-color: #008069;
+  background: rgba(0, 168, 132, 0.06);
+}
+
+body.theme-light .mobile-overlay-body .script-tab:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body .script-tabs {
+  background: #ffffff;
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light .mobile-overlay-body .guide-section {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .mobile-overlay-body .guide-title {
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body .guide-text {
+  color: #3b4a54;
+}
+
+body.theme-light .mobile-overlay-body .guide-code {
+  background: #f0f2f5;
+  color: #3b4a54;
+}
+
+body.theme-light .mobile-overlay-body .guide-tip {
+  background: rgba(0, 168, 132, 0.06);
+  border-color: rgba(0, 168, 132, 0.2);
+  color: #3b4a54;
+}
+
+body.theme-light .mobile-overlay-body .guide-table {
+  color: #3b4a54;
+}
+
+body.theme-light .mobile-overlay-body .guide-table th {
+  background: #f0f2f5;
+  color: #111b21;
+}
+
+body.theme-light .mobile-overlay-body .guide-table td {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .mobile-overlay-body .file-name {
+  color: #667781;
+}
+
+body.theme-light .mobile-overlay-body .badge {
+  color: #ffffff;
+}

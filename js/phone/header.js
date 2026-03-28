@@ -263,6 +263,7 @@ export function applyTheme(theme) {
 
   if (theme === 'light') {
     phone.classList.add('light');
+    document.body.classList.add('theme-light');
     // Light modda header rengi yeşil olmalı (kullanıcı özelleştirmemişse)
     const currentHeaderColor = state.get('settings.headerColor');
     if (currentHeaderColor === THEME_DEFAULTS.dark.headerColor) {
@@ -278,6 +279,7 @@ export function applyTheme(theme) {
     }
   } else {
     phone.classList.remove('light');
+    document.body.classList.remove('theme-light');
     // Dark moda geri dön
     const currentHeaderColor = state.get('settings.headerColor');
     if (currentHeaderColor === THEME_DEFAULTS.dark.headerColor || currentHeaderColor === THEME_DEFAULTS.light.headerColor) {
