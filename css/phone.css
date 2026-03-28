@@ -1566,7 +1566,7 @@
   border-bottom: 1px solid rgba(0,0,0,.08);
 }
 
-/* Light modda status bar text koyu olmalı */
+/* Light modda status bar text/icons beyaz olmalı (yeşil header üzerinde) */
 .phone.light .status-bar {
   color: #ffffff;
 }
@@ -1576,8 +1576,8 @@
   color: #ffffff;
 }
 
-.phone.light .signal-icon span {
-  background: #ffffff;
+.phone.light .signal-icon {
+  color: #ffffff;
 }
 
 .phone.light .wifi-icon {
@@ -1593,6 +1593,10 @@
 }
 
 .phone.light .battery-tip {
+  background: #ffffff;
+}
+
+.phone.light .battery-fill {
   background: #ffffff;
 }
 
