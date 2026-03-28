@@ -544,7 +544,7 @@
   position: absolute;
   width: 0;
   height: 0;
-  top: -1px;
+  top: 0px;
   left: -8px;
   border-top: 6px solid var(--wa-bubble-in-solid);
   border-right: 6px solid var(--wa-bubble-in-solid);
@@ -564,7 +564,7 @@
   position: absolute;
   width: 0;
   height: 0;
-  top: -1px;
+  top: 0px;
   right: -8px;
   border-top: 6px solid var(--wa-bubble-out-solid);
   border-left: 6px solid var(--wa-bubble-out-solid);
