@@ -332,11 +332,8 @@ function sendLiveMessage() {
  * Main action button icons (mic / send)
  */
 const MAIN_ACTION_ICON_MIC = `
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 4a3 3 0 00-3 3v4a3 3 0 006 0V7a3 3 0 00-3-3z"/>
-    <path d="M6 11.5a6 6 0 0012 0"/>
-    <path d="M12 17.5V21"/>
-    <path d="M9.5 21h5"/>
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
   </svg>
 `;
 
