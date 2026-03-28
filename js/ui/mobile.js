@@ -45,16 +45,14 @@ const mobileState = {
 /** Panel key → real panel ID eşleştirmesi */
 const PANEL_MAP = {
   scriptEditor: 'script',
-  people: 'people',
   group: 'group',
   settings: 'settings',
 };
 
 /** Panel key → overlay başlık */
 const PANEL_TITLES = {
-  scriptEditor: 'Senaryo Editörü',
-  people: 'Kişi Yönetimi',
-  group: 'Grup Ayarları',
+  scriptEditor: 'Senaryo',
+  group: 'Grup & Kişiler',
   settings: 'Ayarlar',
 };
 
