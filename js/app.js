@@ -685,7 +685,7 @@ async function takeScreenshot() {
     // Virtualize edilmiş mesajları materialize et
     materializeAllMessages();
 
-    const { default: html2canvas } = await import('html2canvas');
+    const html2canvas = window.html2canvas;
 
     // Geçici olarak ölçeği sıfırla — export temiz olsun
     const currentScale = phone.style.transform;
