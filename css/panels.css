@@ -295,3 +295,109 @@
   padding: 6px 8px;
   font-size: var(--font-size-sm);
 }
+
+/* ===== PERSON CARD WRAPPER & INLINE BUILDER ===== */
+.person-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.person-item.expanded {
+  border-color: var(--wa-green);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.person-item.expanded::before {
+  opacity: 1;
+}
+
+.inline-builder-panel {
+  background: rgba(30, 42, 50, 0.9);
+  border: 1px solid var(--wa-green);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  animation: inlineExpand 0.2s ease-out;
+}
+
+@keyframes inlineExpand {
+  from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
+  to { opacity: 1; max-height: 600px; }
+}
+
+.inline-chips {
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.inline-form-group {
+  margin-bottom: 4px;
+}
+
+.inline-form-group label {
+  font-size: var(--font-size-xs);
+  color: var(--wa-text-secondary);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.inline-field {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--wa-input-bg);
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-sm);
+  color: var(--wa-text);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+}
+
+.inline-field:focus {
+  border-color: var(--wa-green);
+  outline: none;
+}
+
+.inline-add-btn {
+  margin-top: var(--space-sm);
+  padding: 8px 16px;
+  background: var(--wa-green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  align-self: flex-start;
+}
+
+.inline-add-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ===== SCENARIO HINT BANNER ===== */
+.scenario-hint {
+  margin-top: var(--space-md);
+  padding: 8px 12px;
+  font-size: var(--font-size-xs);
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.scenario-hint:hover {
+  color: var(--wa-green);
+  background: rgba(37, 211, 102, 0.06);
+}
+
+.scenario-hint strong {
+  color: var(--wa-green);
+}

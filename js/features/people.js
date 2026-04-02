@@ -6,10 +6,17 @@ import { $, escapeHtml, isValidUrl, createElement } from '../utils.js';
 import { state } from '../state.js';
 import { showError, showSuccess } from '../ui/toast.js';
 import { markInvalid, clearInvalid } from '../ui/validation.js';
+import { BUILDER_TYPES, BUILDER_FIELDS, buildLineFromValues, addLine } from './script-builder.js';
 
 
 
 
+
+/** Şu an açık olan inline builder panelinin kişi adı */
+let expandedPerson = null;
+
+/** Inline builder'daki aktif mesaj tipi */
+let inlineActiveType = 'message';
 
 /**
  * Render people list in panel
@@ -39,7 +46,10 @@ function renderPeopleList() {
       avatarDiv.appendChild(createElement('span', {}, [(name[0] || '?').toUpperCase()]));
     }
 
-    const div = createElement('div', { className: 'person-item' }, [
+    const wrapper = document.createElement('div');
+    wrapper.className = 'person-card-wrapper';
+
+    const div = createElement('div', { className: 'person-item' + (expandedPerson === name ? ' expanded' : '') }, [
       avatarDiv,
       createElement('div', { className: 'person-info' }, [
         createElement('div', { className: 'person-name' }, [name]),
@@ -48,18 +58,36 @@ function renderPeopleList() {
         ])
       ]),
       createElement('div', { className: 'person-actions' }, [
-        createElement('button', { className: 'secondary btn-sm', type: 'button', dataset: { edit: name } }, ['✏️ Düzenle'])
+        createElement('button', { className: 'secondary btn-sm', type: 'button', dataset: { edit: name } }, ['✏️']),
+        createElement('button', { className: 'btn-sm', type: 'button', dataset: { addline: name } }, ['➕ Satır'])
       ])
     ]);
 
-    listEl.appendChild(div);
+    wrapper.appendChild(div);
+
+    // Inline expand panel
+    if (expandedPerson === name) {
+      const panel = createInlineBuilderPanel(name);
+      wrapper.appendChild(panel);
+    }
+
+    listEl.appendChild(wrapper);
   }
 
   // Add click handlers
   listEl.querySelectorAll('button[data-edit]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const name = btn.getAttribute('data-edit');
       startEditPerson(name);
+    });
+  });
+
+  listEl.querySelectorAll('button[data-addline]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = btn.getAttribute('data-addline');
+      toggleInlineBuilder(name);
     });
   });
 
@@ -70,6 +98,354 @@ function renderPeopleList() {
 
   // Refresh sender options
   refreshManualSenderOptions();
+}
+
+/**
+ * Toggle inline builder for a person
+ */
+function toggleInlineBuilder(name) {
+  if (expandedPerson === name) {
+    expandedPerson = null;
+  } else {
+    expandedPerson = name;
+    inlineActiveType = 'message';
+  }
+  renderPeopleList();
+}
+
+/**
+ * Create inline builder panel for a person
+ */
+function createInlineBuilderPanel(defaultName) {
+  const panel = createElement('div', { className: 'inline-builder-panel' });
+
+  // Chip grubu — mesaj tipi seçimi
+  const chipsContainer = createElement('div', { className: 'builder-type-chips inline-chips' });
+  BUILDER_TYPES.forEach(t => {
+    const chip = document.createElement('button');
+    chip.className = 'builder-type-chip' + (t.id === inlineActiveType ? ' active' : '');
+    chip.textContent = t.label;
+    chip.type = 'button';
+    chip.addEventListener('click', () => {
+      inlineActiveType = t.id;
+      renderPeopleList();
+    });
+    chipsContainer.appendChild(chip);
+  });
+  panel.appendChild(chipsContainer);
+
+  // Dinamik alanlar
+  const fields = BUILDER_FIELDS[inlineActiveType] || [];
+  const fieldValues = {};
+
+  // "Kim" alanı
+  if (fields.includes('who')) {
+    const people = state.get('people') || {};
+    const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
+    const list = ['Me', ...names.filter(n => n !== 'Me')];
+
+    const select = document.createElement('select');
+    select.className = 'inline-field';
+    list.forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = n;
+      if (n === defaultName) opt.selected = true;
+      select.appendChild(opt);
+    });
+    // Eğer defaultName listede yoksa Me olsun
+    if (!list.includes(defaultName)) select.value = 'Me';
+
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Kim']),
+      select
+    ]);
+    panel.appendChild(group);
+    fieldValues.who = () => select.value;
+  }
+
+  // Metin alanı
+  if (fields.includes('text')) {
+    const textarea = document.createElement('textarea');
+    textarea.className = 'inline-field';
+    textarea.rows = 2;
+    textarea.placeholder = inlineActiveType === 'message' ? 'Mesaj yazın...' : 'Metin girin...';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Metin']),
+      textarea
+    ]);
+    panel.appendChild(group);
+    fieldValues.text = () => textarea.value;
+  }
+
+  // Yanıtlanan
+  if (fields.includes('replyTo')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'Kimi yanıtlıyor?';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Yanıtlanan']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.replyTo = () => input.value;
+  }
+
+  // URL
+  if (fields.includes('url')) {
+    const input = document.createElement('input');
+    input.type = 'url';
+    input.className = 'inline-field';
+    input.placeholder = 'https://...';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['URL']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.url = () => input.value;
+  }
+
+  // Açıklama / Caption
+  if (fields.includes('caption')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'Açıklama (opsiyonel)';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Açıklama']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.caption = () => input.value;
+  }
+
+  // Süre (voice)
+  if (fields.includes('duration')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = '12s / 00:18 / 8000';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Süre']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.duration = () => input.value;
+  }
+
+  // Yer adı
+  if (fields.includes('placeName')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'İstanbul Havalimanı';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Yer Adı']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.placeName = () => input.value;
+  }
+
+  // Alt bilgi (location)
+  if (fields.includes('placeInfo')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'Terminal 1, Arnavutköy';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Alt Bilgi']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.placeInfo = () => input.value;
+  }
+
+  // Dosya adı
+  if (fields.includes('fileName')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'rapor.pdf';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Dosya Adı']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.fileName = () => input.value;
+  }
+
+  // Dosya boyutu
+  if (fields.includes('fileSize')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = '2.4 MB · PDF';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Boyut / Tip']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.fileSize = () => input.value;
+  }
+
+  // Sticker
+  if (fields.includes('stickerVal')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = '🙂 veya https://...';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Sticker']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.stickerVal = () => input.value;
+  }
+
+  // Link başlığı
+  if (fields.includes('linkTitle')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'Harika bir makale';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Başlık']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.linkTitle = () => input.value;
+  }
+
+  // Link URL
+  if (fields.includes('linkUrl')) {
+    const input = document.createElement('input');
+    input.type = 'url';
+    input.className = 'inline-field';
+    input.placeholder = 'https://ornek.com';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['URL']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.linkUrl = () => input.value;
+  }
+
+  // View once medya tipi
+  if (fields.includes('voMediaType')) {
+    const select = document.createElement('select');
+    select.className = 'inline-field';
+    ['photo', 'video'].forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v === 'photo' ? 'Fotoğraf' : 'Video';
+      select.appendChild(opt);
+    });
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Medya Tipi']),
+      select
+    ]);
+    panel.appendChild(group);
+    fieldValues.voMediaType = () => select.value;
+  }
+
+  // Typing ms
+  if (fields.includes('typingMs')) {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'inline-field';
+    input.min = '200';
+    input.max = '5000';
+    input.value = '800';
+    input.placeholder = '800';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Süre (ms)']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.typingMs = () => input.value;
+  }
+
+  // Emoji
+  if (fields.includes('emoji')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = '😂 👍 ❤️';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Emoji']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.emoji = () => input.value;
+  }
+
+  // React target
+  if (fields.includes('reactTarget')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'Kimin mesajına?';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Hedef Kişi']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.reactTarget = () => input.value;
+  }
+
+  // Sistem mesajı
+  if (fields.includes('systemText')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.placeholder = 'Sistem mesajı';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Sistem Mesajı']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.systemText = () => input.value;
+  }
+
+  // Kişi adı (add/leave)
+  if (fields.includes('personName')) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'inline-field';
+    input.value = defaultName;
+    input.placeholder = 'Kişi adı';
+    const group = createElement('div', { className: 'form-group inline-form-group' }, [
+      createElement('label', {}, ['Kişi Adı']),
+      input
+    ]);
+    panel.appendChild(group);
+    fieldValues.personName = () => input.value;
+  }
+
+  // Satır Ekle butonu
+  const addBtn = createElement('button', {
+    type: 'button',
+    className: 'inline-add-btn'
+  }, ['➕ Satır Ekle']);
+
+  addBtn.addEventListener('click', () => {
+    const values = {};
+    for (const [key, getter] of Object.entries(fieldValues)) {
+      values[key] = getter();
+    }
+    const raw = buildLineFromValues(inlineActiveType, values);
+    if (raw) {
+      addLine(raw);
+      expandedPerson = null;
+      renderPeopleList();
+    }
+  });
+
+  panel.appendChild(addBtn);
+
+  return panel;
 }
 
 /**

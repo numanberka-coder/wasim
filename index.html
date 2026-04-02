@@ -179,6 +179,25 @@
           </div>
         </details>
 
+        <!-- Satır Sırası -->
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            Satır Sırası
+          </summary>
+          <div class="accordion-body">
+            <div id="groupBuilderList" class="builder-list"></div>
+            <div class="builder-actions" style="margin-top: 10px;">
+              <button id="groupBuilderPushBtn" type="button" class="secondary">⬇️ Senaryoya Aktar</button>
+              <button id="groupBuilderPlayBtn" type="button">▶️ Oynat</button>
+              <button id="groupBuilderClearBtn" type="button" class="danger">🗑️ Temizle</button>
+            </div>
+            <div class="scenario-hint" id="scenarioHint">
+              💡 Daha fazla kontrol için → <strong>Senaryo Editörü</strong>
+            </div>
+          </div>
+        </details>
+
       </div>
 
       <!-- ===== PANEL: PEOPLE (hidden, kept for compatibility) ===== -->
@@ -191,7 +210,6 @@
         <div class="script-tabs">
           <button class="script-tab active" data-stab="tabSenaryo">Senaryo</button>
           <button class="script-tab" data-stab="tabInteractive">İnteraktif</button>
-          <button class="script-tab" data-stab="tabBuilder">Blok Builder</button>
         </div>
 
         <!-- ═══════ TAB 1: SENARYO ═══════ -->
@@ -453,209 +471,6 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               </div>
             </div>
           </details>
-        </div>
-
-        <!-- ═══════ TAB 3: BLOK BUILDER ═══════ -->
-        <div class="script-tab-panel" id="tabBuilder">
-
-          <!-- Rehber -->
-          <details class="accordion tutorial-guide" id="tutorialBuilder">
-            <summary class="accordion-header">
-              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              📖 Nasıl Kullanılır?
-            </summary>
-            <div class="accordion-body">
-
-              <div class="guide-section">
-                <div class="guide-title">Blok Builder Nedir?</div>
-                <div class="guide-text">
-                  Senaryo kodunu elle yazmadan, <strong>formdan seçerek</strong> satır satır oluşturmanızı sağlar. 16 mesaj tipi desteklenir.
-                </div>
-              </div>
-
-              <div class="guide-section">
-                <div class="guide-title">Adım Adım</div>
-                <div class="guide-text">
-                  <strong>1.</strong> Mesaj tipini seçin (💬 Mesaj, 📷 Fotoğraf, ⏳ Yazıyor vb.)<br>
-                  <strong>2.</strong> Formu doldurup <strong>"Satır Ekle"</strong> basın — satır listeye eklenir.<br>
-                  <strong>3.</strong> Satırları sürükleyerek sıralayın.<br>
-                  <strong>4.</strong> <strong>"Metne Aktar"</strong> ile senaryoyu oluşturun.<br>
-                  <strong>5.</strong> <strong>"Normal Oynat"</strong> veya <strong>"İnteraktif Oynat"</strong> ile çalıştırın.
-                </div>
-              </div>
-
-              <div class="guide-section">
-                <div class="guide-title">Araya Ekleme & Hızlı Menü</div>
-                <div class="guide-text">
-                  Satır listesindeki <strong>"+"</strong> butonuna basarak araya yeni satır ekleyebilirsiniz.
-                  Satır özetine tıklayınca <strong>hızlı komut menüsü</strong> açılır — doğrudan mesaj tipi seçip araya eklersiniz.
-                </div>
-              </div>
-
-              <div class="guide-section">
-                <div class="guide-tip">
-                  <strong>💡 Trigger:</strong> Blok adı ve trigger kelimeler opsiyoneldir. Boş bırakırsanız normal senaryo satırı üretilir. Doldurursanız interaktif blok oluşur.
-                </div>
-              </div>
-
-            </div>
-          </details>
-
-          <!-- Hazır Şablonlar -->
-          <div class="form-grid" style="align-items: end; margin-bottom: 12px;">
-            <div class="form-group">
-              <label for="scriptTemplateSelect">Hazır Şablonlar</label>
-              <select id="scriptTemplateSelect"></select>
-              <p class="hint">Tek tıkla başlangıç, tanışma veya soru-cevap akışlarını yükleyin.</p>
-            </div>
-            <button id="applyTemplateBtn" type="button">✨ Şablonu Yükle</button>
-          </div>
-
-          <div class="divider" style="margin: 8px 0 14px;"></div>
-
-          <!-- Trigger Bilgileri -->
-          <div class="builder-card" style="margin-bottom: 12px;">
-            <div class="builder-header">
-              <span>🎯 Trigger Ayarları</span>
-              <span class="hint" style="font-weight:400; font-size:11px;">(opsiyonel — boş bırakırsan normal satır üretir)</span>
-            </div>
-            <div class="builder-grid">
-              <div class="form-group">
-                <label for="builderBlockName">Blok Adı</label>
-                <input id="builderBlockName" type="text" placeholder="selamlasma">
-              </div>
-              <div class="form-group">
-                <label for="builderTrigger">Trigger Kelimeleri</label>
-                <input id="builderTrigger" type="text" placeholder="merhaba, selam, hey">
-                <p class="hint">Virgülle ayır. Varsayılan blok için * yaz.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Blok Ekleme Formu -->
-          <div class="builder-card">
-            <div class="builder-header">
-              <span>🧩 Satır Ekle</span>
-            </div>
-
-            <!-- Tip Seçici: Chip'ler -->
-            <div class="builder-type-chips" id="builderTypeChips"></div>
-
-            <!-- Dinamik Form Alanları -->
-            <div class="builder-grid" id="builderDynamicFields">
-              <div class="form-group" id="bfGroup_who">
-                <label for="builderWho">Kim</label>
-                <select id="builderWho"></select>
-              </div>
-              <div class="form-group" id="bfGroup_text" style="display:none;">
-                <label for="builderText">Metin</label>
-                <textarea id="builderText" rows="3" placeholder="Mesaj ya da sistem notu"></textarea>
-              </div>
-              <div class="form-group" id="bfGroup_replyTo" style="display:none;">
-                <label for="builderReplyTo">Yanıtlanan</label>
-                <input id="builderReplyTo" type="text" placeholder="Kimi yanıtlıyor?">
-              </div>
-              <div class="form-group" id="bfGroup_url" style="display:none;">
-                <label for="builderUrl">URL</label>
-                <input id="builderUrl" type="url" placeholder="https://...">
-              </div>
-              <div class="form-group" id="bfGroup_caption" style="display:none;">
-                <label for="builderCaption">Açıklama</label>
-                <input id="builderCaption" type="text" placeholder="İsteğe bağlı">
-              </div>
-              <div class="form-group" id="bfGroup_duration" style="display:none;">
-                <label for="builderDuration">Süre</label>
-                <input id="builderDuration" type="text" placeholder="12s / 00:18 / 8000">
-              </div>
-              <div class="form-group" id="bfGroup_placeName" style="display:none;">
-                <label for="builderPlaceName">Yer Adı</label>
-                <input id="builderPlaceName" type="text" placeholder="İstanbul Havalimanı">
-              </div>
-              <div class="form-group" id="bfGroup_placeInfo" style="display:none;">
-                <label for="builderPlaceInfo">Alt Bilgi</label>
-                <input id="builderPlaceInfo" type="text" placeholder="Terminal 1, Arnavutköy">
-              </div>
-              <div class="form-group" id="bfGroup_fileName" style="display:none;">
-                <label for="builderFileName">Dosya Adı</label>
-                <input id="builderFileName" type="text" placeholder="rapor.pdf">
-              </div>
-              <div class="form-group" id="bfGroup_fileSize" style="display:none;">
-                <label for="builderFileSize">Boyut / Tip</label>
-                <input id="builderFileSize" type="text" placeholder="2.4 MB · PDF">
-              </div>
-              <div class="form-group" id="bfGroup_stickerVal" style="display:none;">
-                <label for="builderStickerVal">Sticker (URL veya Emoji)</label>
-                <input id="builderStickerVal" type="text" placeholder="🙂 veya https://...">
-              </div>
-              <div class="form-group" id="bfGroup_linkTitle" style="display:none;">
-                <label for="builderLinkTitle">Başlık</label>
-                <input id="builderLinkTitle" type="text" placeholder="Harika bir makale">
-              </div>
-              <div class="form-group" id="bfGroup_linkUrl" style="display:none;">
-                <label for="builderLinkUrl">URL</label>
-                <input id="builderLinkUrl" type="url" placeholder="https://ornek.com">
-              </div>
-              <div class="form-group" id="bfGroup_voMediaType" style="display:none;">
-                <label for="builderVoMediaType">Medya Tipi</label>
-                <select id="builderVoMediaType">
-                  <option value="photo">Fotoğraf</option>
-                  <option value="video">Video</option>
-                </select>
-              </div>
-              <div class="form-group" id="bfGroup_typingMs" style="display:none;">
-                <label for="builderTypingMs">Süre (ms)</label>
-                <input id="builderTypingMs" type="number" min="200" max="5000" value="800" placeholder="800">
-              </div>
-              <div class="form-group" id="bfGroup_emoji" style="display:none;">
-                <label for="builderEmoji">Emoji</label>
-                <input id="builderEmoji" type="text" placeholder="😂 👍 ❤️">
-              </div>
-              <div class="form-group" id="bfGroup_reactTarget" style="display:none;">
-                <label for="builderTarget">Hedef Kişi</label>
-                <input id="builderTarget" type="text" placeholder="Kimin mesajına?">
-              </div>
-              <div class="form-group" id="bfGroup_systemText" style="display:none;">
-                <label for="builderSystemText">Sistem Mesajı</label>
-                <input id="builderSystemText" type="text" placeholder="X mesajını sildi">
-              </div>
-              <div class="form-group" id="bfGroup_personName" style="display:none;">
-                <label for="builderPersonName">Kişi Adı</label>
-                <input id="builderPersonName" type="text" placeholder="Ahmet">
-              </div>
-            </div>
-
-            <div class="builder-actions">
-              <button id="builderAddBtn" type="button">➕ Satır Ekle</button>
-              <button id="builderClearBtn" type="button" class="danger">🗑️ Satırları Temizle</button>
-            </div>
-          </div>
-
-          <!-- Blok Sırası -->
-          <div class="builder-card">
-            <div class="builder-header">
-              <span>🎬 Satır Sırası</span>
-            </div>
-            <div id="builderList" class="builder-list"></div>
-          </div>
-
-          <div class="builder-actions" style="margin-top: 12px;">
-            <button id="builderPushBtn" type="button">⬇️ Metne Aktar</button>
-            <button id="builderNewBlockBtn" type="button" class="secondary">📦 Yeni Blok</button>
-          </div>
-
-          <div class="divider" style="margin: 14px 0;"></div>
-
-          <!-- Builder kendi textarea'sı -->
-          <div class="form-group">
-            <label for="builderScriptBox">Oluşturulan Senaryo</label>
-            <textarea id="builderScriptBox" class="script-editor" rows="8" placeholder="Yukarıdan satır ekleyip 'Metne Aktar' butonuna basın..."></textarea>
-          </div>
-
-          <div class="form-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <button id="builderPlayNormalBtn" type="button">▶️ Normal Oynat</button>
-            <button id="builderPlayInteractiveBtn" type="button">🎮 İnteraktif Oynat</button>
-            <button id="builderResetBtn" type="button" class="danger">🔄 Sıfırla</button>
-          </div>
         </div>
 
         <!-- Manuel Gönderim (tab'ların altında accordion olarak kalır) -->
