@@ -1,6 +1,7 @@
 /* ========================================
-   SCRIPT TOOLS - Builder (16 tip), templates,
-   validation, inner tabs, interactive demo
+   SCRIPT TOOLS - Line builder (16 tip), templates,
+   validation, inner tabs, interactive demo,
+   group tab line list
    ======================================== */
 
 import { $, createElement, readFileAsDataURL, Logger, escapeHtml } from '../utils.js';
@@ -13,11 +14,9 @@ import { clearChat } from '../phone/messages.js';
 import { syncHeader } from '../phone/header.js';
 import { enableInteractiveMode, disableInteractiveMode, interactive } from './interactive-engine.js';
 import { loadScript, play } from './player.js';
+import { switchTab } from '../ui/tabs.js';
 
 let blocks = [];
-
-/** Aktif builder tip */
-let activeBuilderType = 'message';
 
 /** Araya ekleme modu: null = sonuna ekle, sayı = o index'in altına ekle */
 let insertAfterIndex = null;
@@ -62,14 +61,6 @@ const BUILDER_FIELDS = {
   leave:    ['personName'],
 };
 
-/** Tüm dinamik alan ID'leri */
-const ALL_BUILDER_FIELDS = [
-  'who', 'text', 'replyTo', 'url', 'caption', 'duration',
-  'placeName', 'placeInfo', 'fileName', 'fileSize',
-  'stickerVal', 'linkTitle', 'linkUrl', 'voMediaType',
-  'typingMs', 'emoji', 'reactTarget', 'systemText', 'personName'
-];
-
 function makeId() {
   const hasCrypto = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function';
   return hasCrypto ? crypto.randomUUID() : String(Date.now()) + Math.random();
@@ -80,13 +71,11 @@ function makeId() {
    ======================================== */
 
 function initScriptTools() {
-  populateTemplateOptions();
-  setupTemplateActions();
-  setupBuilder();
   setupValidation();
   setupMediaInsertTool();
   setupScriptInnerTabs();
   setupInteractiveDemo();
+  setupGroupBuilderList();
 }
 
 /* ========================================
@@ -130,186 +119,116 @@ function setupInteractiveDemo() {
 }
 
 /* ========================================
-   TEMPLATES
+   LINE GENERATION (16 tip) — parametre bazlı
    ======================================== */
 
-function populateTemplateOptions() {
-  const select = $('scriptTemplateSelect');
-  if (!select) return;
-  select.replaceChildren();
-  SCRIPT_TEMPLATES.forEach(tpl => {
-    const option = document.createElement('option');
-    option.value = tpl.id;
-    option.textContent = `${tpl.title} — ${tpl.description}`;
-    select.appendChild(option);
-  });
+function quoteToken(s) {
+  const v = String(s ?? '').trim();
+  if (!v) return '';
+  if (/[\s"]/.test(v)) return '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+  return v;
 }
 
-function setupTemplateActions() {
-  const select = $('scriptTemplateSelect');
-  const btn = $('applyTemplateBtn');
-  if (!select || !btn) return;
-  btn.addEventListener('click', () => {
-    const tpl = SCRIPT_TEMPLATES.find(t => t.id === select.value) || SCRIPT_TEMPLATES[0];
-    if (!tpl) return;
-    setBuilderScriptBox(tpl.script.trim());
-    syncBlocksFromScript(tpl.script);
-    showSuccess('Şablon yüklendi!');
-  });
+function quoteForce(s) {
+  return '"' + String(s ?? '').trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
 }
 
-/* ========================================
-   BUILDER — TYPE CHIPS
-   ======================================== */
+/**
+ * Verilen tip ve değerlerden senaryo satırı üretir.
+ * @param {string} type - Mesaj tipi (message, reply, photo, vb.)
+ * @param {Object} values - Alan değerleri ({ who, text, replyTo, url, ... })
+ * @returns {string|null} Üretilen satır veya hata durumunda null
+ */
+function buildLineFromValues(type, values) {
+  const v = (key) => (values[key] ?? '').trim();
+  const sender = quoteToken(v('who') || 'Me');
 
-function renderBuilderTypeChips() {
-  const container = $('builderTypeChips');
-  if (!container) return;
-  container.replaceChildren();
-  BUILDER_TYPES.forEach(t => {
-    const chip = document.createElement('button');
-    chip.className = 'builder-type-chip' + (t.id === activeBuilderType ? ' active' : '');
-    chip.textContent = t.label;
-    chip.type = 'button';
-    chip.addEventListener('click', () => {
-      activeBuilderType = t.id;
-      renderBuilderTypeChips();
-      updateBuilderFields();
-    });
-    container.appendChild(chip);
-  });
-}
-
-/* ========================================
-   BUILDER — DYNAMIC FIELDS
-   ======================================== */
-
-function updateBuilderFields() {
-  const visible = new Set(BUILDER_FIELDS[activeBuilderType] || []);
-  ALL_BUILDER_FIELDS.forEach(fid => {
-    const group = $(`bfGroup_${fid}`);
-    if (group) group.style.display = visible.has(fid) ? '' : 'none';
-  });
-  updateBuilderSenderOptions();
-}
-
-function updateBuilderSenderOptions() {
-  const sel = $('builderWho');
-  if (!sel) return;
-  const people = state.get('people') || {};
-  const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
-  const list = ['Me', ...names.filter(n => n !== 'Me')];
-  const current = sel.value || 'Me';
-  sel.replaceChildren();
-  list.forEach(n => {
-    const opt = document.createElement('option');
-    opt.value = n;
-    opt.textContent = n;
-    sel.appendChild(opt);
-  });
-  sel.value = list.includes(current) ? current : 'Me';
-}
-
-/* ========================================
-   BUILDER — LINE GENERATION (16 tip)
-   ======================================== */
-
-function buildLineFromForm() {
-  const q = (s) => {
-    const v = String(s ?? '').trim();
-    if (!v) return '';
-    if (/[\s"]/.test(v)) return '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-    return v;
-  };
-  const qForce = (s) => '"' + String(s ?? '').trim().replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-  const sender = q($('builderWho')?.value || 'Me');
-
-  switch (activeBuilderType) {
+  switch (type) {
     case 'message': {
-      const text = $('builderText')?.value?.trim();
+      const text = v('text');
       if (!text) { showError('Mesaj boş olamaz'); return null; }
-      const who = $('builderWho')?.value?.trim() || 'Me';
+      const who = v('who') || 'Me';
       return `${who}: ${text}`;
     }
     case 'reply': {
-      const text = $('builderText')?.value?.trim();
-      const replyTo = $('builderReplyTo')?.value?.trim();
+      const text = v('text');
+      const replyTo = v('replyTo');
       if (!text) { showError('Mesaj boş olamaz'); return null; }
       if (!replyTo) { showError('Yanıtlanan kişi gerekli'); return null; }
-      const who = $('builderWho')?.value?.trim() || 'Me';
+      const who = v('who') || 'Me';
       return `${who} > ${replyTo}: ${text}`;
     }
     case 'photo': {
-      const url = $('builderUrl')?.value?.trim();
+      const url = v('url');
       if (!url) { showError('URL gerekli'); return null; }
-      const cap = $('builderCaption')?.value?.trim();
-      return `@photo ${sender} ${qForce(url)}${cap ? ' ' + qForce(cap) : ''}`;
+      const cap = v('caption');
+      return `@photo ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'gif': {
-      const url = $('builderUrl')?.value?.trim();
+      const url = v('url');
       if (!url) { showError('URL gerekli'); return null; }
-      const cap = $('builderCaption')?.value?.trim();
-      return `@gif ${sender} ${qForce(url)}${cap ? ' ' + qForce(cap) : ''}`;
+      const cap = v('caption');
+      return `@gif ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'video': {
-      const url = $('builderUrl')?.value?.trim();
+      const url = v('url');
       if (!url) { showError('URL gerekli'); return null; }
-      const cap = $('builderCaption')?.value?.trim();
-      return `@video ${sender} ${qForce(url)}${cap ? ' ' + qForce(cap) : ''}`;
+      const cap = v('caption');
+      return `@video ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'voice': {
-      const dur = $('builderDuration')?.value?.trim() || '12s';
-      const cap = $('builderCaption')?.value?.trim();
-      return `@voice ${sender} ${dur}${cap ? ' ' + qForce(cap) : ''}`;
+      const dur = v('duration') || '12s';
+      const cap = v('caption');
+      return `@voice ${sender} ${dur}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'location': {
-      const name = $('builderPlaceName')?.value?.trim();
+      const name = v('placeName');
       if (!name) { showError('Yer adı gerekli'); return null; }
-      const info = $('builderPlaceInfo')?.value?.trim();
-      return `@location ${sender} ${qForce(name)}${info ? ' ' + qForce(info) : ''}`;
+      const info = v('placeInfo');
+      return `@location ${sender} ${quoteForce(name)}${info ? ' ' + quoteForce(info) : ''}`;
     }
     case 'document': {
-      const fname = $('builderFileName')?.value?.trim() || 'dosya.pdf';
-      const fsize = $('builderFileSize')?.value?.trim();
-      return `@document ${sender} ${qForce(fname)}${fsize ? ' ' + qForce(fsize) : ''}`;
+      const fname = v('fileName') || 'dosya.pdf';
+      const fsize = v('fileSize');
+      return `@document ${sender} ${quoteForce(fname)}${fsize ? ' ' + quoteForce(fsize) : ''}`;
     }
     case 'sticker': {
-      const val = $('builderStickerVal')?.value?.trim() || '🙂';
-      return `@sticker ${sender} ${qForce(val)}`;
+      const val = v('stickerVal') || '🙂';
+      return `@sticker ${sender} ${quoteForce(val)}`;
     }
     case 'link': {
-      const title = $('builderLinkTitle')?.value?.trim();
+      const title = v('linkTitle');
       if (!title) { showError('Başlık gerekli'); return null; }
-      const url = $('builderLinkUrl')?.value?.trim();
-      return `@link ${sender} ${qForce(title)}${url ? ' ' + qForce(url) : ''}`;
+      const url = v('linkUrl');
+      return `@link ${sender} ${quoteForce(title)}${url ? ' ' + quoteForce(url) : ''}`;
     }
     case 'viewonce': {
-      const mt = $('builderVoMediaType')?.value || 'photo';
+      const mt = v('voMediaType') || 'photo';
       return `@viewonce ${sender} ${mt}`;
     }
     case 'typing': {
-      const ms = $('builderTypingMs')?.value?.trim() || '800';
+      const ms = v('typingMs') || '800';
       return `@typing ${sender} ${ms}`;
     }
     case 'reaction': {
-      const emoji = $('builderEmoji')?.value?.trim();
-      const target = $('builderTarget')?.value?.trim();
+      const emoji = v('emoji');
+      const target = v('reactTarget');
       if (!emoji) { showError('Emoji gerekli'); return null; }
       if (!target) { showError('Hedef gerekli'); return null; }
       return `@reaction ${sender} ${emoji} ${target}`;
     }
     case 'system': {
-      const text = $('builderSystemText')?.value?.trim();
+      const text = v('systemText');
       if (!text) { showError('Sistem mesajı boş olamaz'); return null; }
       return `@system ${text}`;
     }
     case 'add': {
-      const name = $('builderPersonName')?.value?.trim();
+      const name = v('personName');
       if (!name) { showError('Kişi adı gerekli'); return null; }
       return `@add ${name}`;
     }
     case 'leave': {
-      const name = $('builderPersonName')?.value?.trim();
+      const name = v('personName');
       if (!name) { showError('Kişi adı gerekli'); return null; }
       return `@leave ${name}`;
     }
@@ -318,91 +237,45 @@ function buildLineFromForm() {
   }
 }
 
-function clearBuilderForm() {
-  const ids = [
-    'builderText', 'builderReplyTo', 'builderUrl', 'builderCaption',
-    'builderDuration', 'builderPlaceName', 'builderPlaceInfo',
-    'builderFileName', 'builderFileSize', 'builderStickerVal',
-    'builderLinkTitle', 'builderLinkUrl', 'builderTypingMs',
-    'builderEmoji', 'builderTarget', 'builderSystemText', 'builderPersonName'
-  ];
-  ids.forEach(id => {
-    const el = $(id);
-    if (el) el.value = '';
-  });
-}
-
 /* ========================================
-   BUILDER — SETUP & EVENTS
+   GROUP BUILDER LIST — Satır Sırası (Grup tabı)
    ======================================== */
 
-function setupBuilder() {
-  const addBtn = $('builderAddBtn');
-  const pushBtn = $('builderPushBtn');
-  const clearBtn = $('builderClearBtn');
-  const newBlockBtn = $('builderNewBlockBtn');
-
-  // Builder'ın kendi textarea'sından başlangıç bloklarını yükle
-  blocks = parseToBlocks($('builderScriptBox')?.value || '');
+function setupGroupBuilderList() {
+  blocks = [];
   renderBlocks();
 
-  addBtn?.addEventListener('click', addBlockFromForm);
-  pushBtn?.addEventListener('click', pushBlocksToBuilderTextarea);
+  const pushBtn = $('groupBuilderPushBtn');
+  const playBtn = $('groupBuilderPlayBtn');
+  const clearBtn = $('groupBuilderClearBtn');
+
+  pushBtn?.addEventListener('click', pushBlocksToScriptBox);
+
+  playBtn?.addEventListener('click', () => {
+    if (!blocks.length) { showError('Satır listesi boş'); return; }
+    const text = blocks.map(b => b.raw).join('\n');
+    setScriptBox(text);
+    loadScript();
+    play();
+  });
+
   clearBtn?.addEventListener('click', () => {
     blocks = [];
     clearInsertMode();
     renderBlocks();
   });
 
-  // Yeni Blok — mevcut satırları aktar + trigger alanlarını temizle
-  newBlockBtn?.addEventListener('click', () => {
-    pushBlocksToBuilderTextarea();
-    blocks = [];
-    renderBlocks();
-    const nameEl = $('builderBlockName');
-    const triggerEl = $('builderTrigger');
-    if (nameEl) nameEl.value = '';
-    if (triggerEl) triggerEl.value = '';
-    showSuccess('Yeni blok hazır — ad ve trigger belirle, satır ekle.');
-  });
-
-  // Builder oynat butonları
-  const playNormalBtn = $('builderPlayNormalBtn');
-  if (playNormalBtn) playNormalBtn.addEventListener('click', () => {
-    const text = $('builderScriptBox')?.value || '';
-    if (!text.trim()) { showError('Senaryo boş'); return; }
-    setScriptBox(text);
-    loadScript();
-    play();
-  });
-
-  const playInteractiveBtn = $('builderPlayInteractiveBtn');
-  if (playInteractiveBtn) playInteractiveBtn.addEventListener('click', () => {
-    const text = $('builderScriptBox')?.value || '';
-    if (!text.trim()) { showError('Senaryo boş'); return; }
-    enableInteractiveMode(text);
-  });
-
-  const resetBtn = $('builderResetBtn');
-  if (resetBtn) resetBtn.addEventListener('click', () => {
-    if (interactive.enabled) {
-      disableInteractiveMode();
-    }
-    state.clearActive();
-    state.clearMessages();
-    clearChat();
-    syncHeader();
-    showSuccess('Sıfırlandı!');
-  });
-
-  renderBuilderTypeChips();
-  updateBuilderFields();
+  // Senaryo yönlendirme banner'ı
+  const hint = $('scenarioHint');
+  if (hint) {
+    hint.addEventListener('click', () => switchTab('script'));
+  }
 }
 
-function addBlockFromForm() {
-  const raw = buildLineFromForm();
-  if (!raw) return;
-
+/**
+ * Dışarıdan satır ekleme (inline builder'dan çağrılır)
+ */
+function addLine(raw) {
   const newBlock = { id: makeId(), raw };
 
   if (insertAfterIndex !== null && insertAfterIndex >= 0 && insertAfterIndex < blocks.length) {
@@ -415,60 +288,17 @@ function addBlockFromForm() {
 
   clearInsertMode();
   renderBlocks();
-  clearBuilderForm();
 }
 
 /** Araya ekleme modunu aktifle */
 function setInsertMode(index) {
   insertAfterIndex = index;
   renderBlocks();
-  renderInsertIndicator();
-
-  // Forma scroll
-  const form = $('builderDynamicFields');
-  if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 /** Araya ekleme modunu iptal et */
 function clearInsertMode() {
   insertAfterIndex = null;
-  renderInsertIndicator();
-}
-
-/** Insert modu göstergesini güncelle */
-function renderInsertIndicator() {
-  let indicator = $('builderInsertIndicator');
-  if (insertAfterIndex !== null && insertAfterIndex >= 0) {
-    const block = blocks[insertAfterIndex];
-    const label = block ? summaryText(block) : '';
-    const shortLabel = label.length > 30 ? label.slice(0, 30) + '…' : label;
-    if (!indicator) {
-      // Indicator'ı builder-actions'ın hemen önüne ekle
-      const actions = $('builderAddBtn')?.closest('.builder-actions');
-      if (actions) {
-        indicator = document.createElement('div');
-        indicator.id = 'builderInsertIndicator';
-        indicator.className = 'builder-insert-indicator';
-        actions.parentElement.insertBefore(indicator, actions);
-      }
-    }
-    if (indicator) {
-      const span = createElement('span', {}, [
-        `📍 ${insertAfterIndex + 1}. satırın altına eklenecek: `,
-        createElement('strong', {}, [shortLabel])
-      ]);
-      const cancelBtn = createElement('button', {
-        type: 'button',
-        className: 'builder-insert-cancel',
-        title: 'İptal',
-        onClick: () => { clearInsertMode(); renderBlocks(); }
-      }, ['✕']);
-      indicator.replaceChildren(span, cancelBtn);
-      indicator.style.display = '';
-    }
-  } else {
-    if (indicator) indicator.style.display = 'none';
-  }
 }
 
 /* ========================================
@@ -506,7 +336,7 @@ function renderValidation(errors, target) {
 }
 
 /* ========================================
-   MEDIA INSERT TOOL (Tab 1)
+   MEDIA INSERT TOOL (Senaryo Tab)
    ======================================== */
 
 function setupMediaInsertTool() {
@@ -525,15 +355,6 @@ function setupMediaInsertTool() {
   const captionLabel = $('mediaCaptionLabel');
 
   refreshManualSenderOptions();
-
-  const quoteToken = (token) => {
-    const s = String(token ?? '').trim();
-    if (!s) return '"Me"';
-    if (/[\s"]/g.test(s)) return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-    return s;
-  };
-
-  const quoteArg = (arg) => '"' + String(arg ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
 
   const insertLineIntoScript = (line) => {
     const box = $('scriptBox');
@@ -634,13 +455,13 @@ function setupMediaInsertTool() {
 
       if (type === 'location') {
         if (!url) throw new Error('Yer adı gerekiyor');
-        const line = `@location ${sender} ${quoteArg(url)}${caption ? ' ' + quoteArg(caption) : ''}`;
+        const line = `@location ${sender} ${quoteForce(url)}${caption ? ' ' + quoteForce(caption) : ''}`;
         insertLineIntoScript(line);
         showSuccess('Konum komutu eklendi');
         resetInputs(); return;
       }
       if (type === 'document') {
-        const line = `@document ${sender} ${quoteArg(url || 'dosya.pdf')}${caption ? ' ' + quoteArg(caption) : ''}`;
+        const line = `@document ${sender} ${quoteForce(url || 'dosya.pdf')}${caption ? ' ' + quoteForce(caption) : ''}`;
         insertLineIntoScript(line);
         showSuccess('Döküman komutu eklendi');
         resetInputs(); return;
@@ -650,12 +471,12 @@ function setupMediaInsertTool() {
         if (file) src = await readFileAsDataURL(file);
         else if (url) src = url;
         else src = caption || '🙂';
-        insertLineIntoScript(`@sticker ${sender} ${quoteArg(src)}`);
+        insertLineIntoScript(`@sticker ${sender} ${quoteForce(src)}`);
         showSuccess('Sticker komutu eklendi');
         resetInputs(); return;
       }
       if (type === 'link') {
-        const line = `@link ${sender} ${quoteArg(url || 'Bağlantı')}${caption ? ' ' + quoteArg(caption) : ''}`;
+        const line = `@link ${sender} ${quoteForce(url || 'Bağlantı')}${caption ? ' ' + quoteForce(caption) : ''}`;
         insertLineIntoScript(line);
         showSuccess('Link önizleme komutu eklendi');
         resetInputs(); return;
@@ -668,14 +489,14 @@ function setupMediaInsertTool() {
       }
       if (type === 'voice') {
         const dur = caption || '12s';
-        const line = `@voice ${sender} ${dur}${url ? ' ' + quoteArg(url) : ''}`;
+        const line = `@voice ${sender} ${dur}${url ? ' ' + quoteForce(url) : ''}`;
         insertLineIntoScript(line);
         showSuccess('Sesli mesaj komutu eklendi');
         resetInputs(); return;
       }
       if (type === 'video') {
         if (!url) throw new Error('Video için URL gerekiyor');
-        const line = `@video ${sender} ${quoteArg(url)}${caption ? ' ' + quoteArg(caption) : ''}`;
+        const line = `@video ${sender} ${quoteForce(url)}${caption ? ' ' + quoteForce(caption) : ''}`;
         insertLineIntoScript(line);
         showSuccess('Video komutu eklendi');
         resetInputs(); return;
@@ -686,7 +507,7 @@ function setupMediaInsertTool() {
       else if (url) src = url;
       else throw new Error('Foto/GIF için dosya seçin veya URL girin');
       const cmd = type === 'gif' ? '@gif' : '@photo';
-      const line = `${cmd} ${sender} ${quoteArg(src)}${caption ? ' ' + quoteArg(caption) : ''}`;
+      const line = `${cmd} ${sender} ${quoteForce(src)}${caption ? ' ' + quoteForce(caption) : ''}`;
       insertLineIntoScript(line);
       showSuccess((type === 'gif' ? 'GIF' : 'Fotoğraf') + ' komutu eklendi');
       resetInputs();
@@ -708,12 +529,12 @@ function setupMediaInsertTool() {
    ======================================== */
 
 function renderBlocks() {
-  const list = $('builderList');
+  const list = $('groupBuilderList');
   if (!list) return;
   list.replaceChildren();
 
   if (!blocks.length) {
-    list.appendChild(createElement('div', { className: 'empty' }, ['Henüz blok eklenmedi. Yukarıdaki formdan ekleyin.']));
+    list.appendChild(createElement('div', { className: 'empty' }, ['Henüz satır eklenmedi. Kişi kartına tıklayarak ekleyin.']));
     return;
   }
 
@@ -775,9 +596,6 @@ function showContextMenu(event, index) {
     btn.textContent = item.label;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      activeBuilderType = item.type;
-      renderBuilderTypeChips();
-      updateBuilderFields();
       setInsertMode(index);
       closeContextMenu();
     });
@@ -872,7 +690,6 @@ function moveBlock(from, to) {
   blocks.splice(to, 0, item);
   clearInsertMode();
   renderBlocks();
-  syncScriptFromBlocks();
 }
 
 function removeBlock(id) {
@@ -892,55 +709,25 @@ function removeBlock(id) {
 }
 
 /* ========================================
-   SCRIPT ↔ BLOCKS SYNC
+   SCRIPT SYNC
    ======================================== */
 
-function syncBlocksFromScript(text) {
-  blocks = parseToBlocks(text || '');
-  renderBlocks();
-}
-
-function parseToBlocks(text) {
-  const lines = (text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  return lines.map(raw => ({ id: makeId(), raw }));
-}
-
-/** Satır listesini builder textarea'ya aktar (trigger syntax'ıyla sarmalayarak) */
-function pushBlocksToBuilderTextarea() {
+/** Satır listesini Senaryo textarea'sına aktar */
+function pushBlocksToScriptBox() {
   if (blocks.length === 0) {
     showError('Eklenecek satır yok');
     return;
   }
 
   const lines = blocks.map(b => b.raw).join('\n');
-  const blockName = $('builderBlockName')?.value?.trim() || '';
-  const trigger = $('builderTrigger')?.value?.trim() || '';
 
-  let output;
-  if (blockName && trigger) {
-    // İnteraktif blok formatı
-    output = `#${blockName}\ntrigger: ${trigger}\n---\n${lines}`;
-  } else {
-    // Normal satırlar
-    output = lines;
-  }
-
-  // Mevcut textarea'ya APPEND et (yeni bloklar öncekinin altına eklenir)
-  const box = $('builderScriptBox');
+  // Senaryo textarea'sına APPEND et
+  const box = $('scriptBox');
   if (!box) return;
   const existing = box.value.trim();
-  box.value = existing ? existing + '\n\n' + output : output;
-  showSuccess('Metne aktarıldı!');
-}
-
-function syncScriptFromBlocks() {
-  const script = blocks.map(b => b.raw).join('\n');
-  setBuilderScriptBox(script);
-}
-
-function setBuilderScriptBox(value) {
-  const box = $('builderScriptBox');
-  if (box) box.value = value;
+  box.value = existing ? existing + '\n\n' + lines : lines;
+  box.dispatchEvent(new Event('input', { bubbles: true }));
+  showSuccess('Senaryoya aktarıldı!');
 }
 
 function setScriptBox(value) {
@@ -951,4 +738,11 @@ function setScriptBox(value) {
   box.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-export { initScriptTools };
+export {
+  initScriptTools,
+  BUILDER_TYPES,
+  BUILDER_FIELDS,
+  buildLineFromValues,
+  addLine,
+  renderBlocks
+};
