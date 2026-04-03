@@ -35,6 +35,7 @@ function renderPeopleList() {
   for (const name of names) {
     const avatar = (people[name]?.avatar || '').trim();
     const isOnline = active.has(name);
+    const isMe = String(name).toLowerCase() === 'me';
 
     const avatarDiv = createElement('div', { className: `person-avatar${isOnline ? ' online' : ''}` });
     if (avatar) {
@@ -46,14 +47,21 @@ function renderPeopleList() {
       avatarDiv.appendChild(createElement('span', {}, [(name[0] || '?').toUpperCase()]));
     }
 
+    // "Me" kişisi için isim + "(Sen)" etiketi
+    const nameChildren = [name];
+    if (isMe) {
+      nameChildren.push(createElement('span', { className: 'person-me-badge' }, ['Sen']));
+    }
+
     const wrapper = document.createElement('div');
     wrapper.className = 'person-card-wrapper';
 
     const div = createElement('div', { className: 'person-item' + (expandedPerson === name ? ' expanded' : '') }, [
       avatarDiv,
       createElement('div', { className: 'person-info' }, [
-        createElement('div', { className: 'person-name' }, [name]),
+        createElement('div', { className: 'person-name' }, nameChildren),
         createElement('div', { className: 'person-url' }, [
+          isMe ? 'Sizin mesajlarınız (sağ taraf)' :
           avatar ? avatar.slice(0, 40) + (avatar.length > 40 ? '...' : '') : 'avatar yok'
         ])
       ]),
@@ -149,7 +157,7 @@ function createInlineBuilderPanel(defaultName) {
     list.forEach(n => {
       const opt = document.createElement('option');
       opt.value = n;
-      opt.textContent = n;
+      opt.textContent = String(n).toLowerCase() === 'me' ? 'Me (Sen)' : n;
       if (n === defaultName) opt.selected = true;
       select.appendChild(opt);
     });
@@ -625,7 +633,7 @@ function refreshManualSenderOptions() {
     for (const n of list) {
       const opt = document.createElement('option');
       opt.value = n;
-      opt.textContent = n;
+      opt.textContent = String(n).toLowerCase() === 'me' ? 'Me (Sen)' : n;
       selectEl.appendChild(opt);
     }
     selectEl.value = list.includes(currentValue) ? currentValue : 'Me';

@@ -159,6 +159,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--wa-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.person-me-badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: #00a884;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
 }
 
 .person-url {
