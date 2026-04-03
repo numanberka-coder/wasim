@@ -118,6 +118,21 @@ function loadScript() {
   state.clearMessages();
   clearChat();
   syncHeader();
+
+  // Senaryodaki tüm kişileri otomatik aktive et
+  if (player.queue && player.queue.length) {
+    const allPeople = new Set();
+    for (const event of player.queue) {
+      if (event.who && String(event.who).toLowerCase() !== 'me') {
+        allPeople.add(event.who);
+      }
+    }
+    for (const person of allPeople) {
+      state.addActive(person);
+    }
+    refreshManualSenderOptions();
+    renderPeopleList();
+  }
 }
 
 /**
