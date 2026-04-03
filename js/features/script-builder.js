@@ -4,15 +4,11 @@
    group tab line list
    ======================================== */
 
-import { $, createElement, readFileAsDataURL, Logger, escapeHtml } from '../utils.js';
-import { SCRIPT_TEMPLATES, CONFIG } from '../config.js';
+import { $, createElement, readFileAsDataURL, Logger } from '../utils.js';
+import { SCRIPT_TEMPLATES } from '../config.js';
 import { state } from '../state.js';
 import { showSuccess, showError } from '../ui/toast.js';
 import { tokenizeCommand, validateScript } from './script-parser.js';
-import { refreshManualSenderOptions } from './people.js';
-import { clearChat } from '../phone/messages.js';
-import { syncHeader } from '../phone/header.js';
-import { enableInteractiveMode, disableInteractiveMode, interactive } from './interactive-engine.js';
 import { loadScript, play } from './player.js';
 import { switchTab } from '../ui/tabs.js';
 
@@ -353,8 +349,6 @@ function setupMediaInsertTool() {
   const fileLabel = $('mediaFileLabel');
   const urlLabel = $('mediaUrlLabel');
   const captionLabel = $('mediaCaptionLabel');
-
-  refreshManualSenderOptions();
 
   const insertLineIntoScript = (line) => {
     const box = $('scriptBox');
