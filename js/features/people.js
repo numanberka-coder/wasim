@@ -2,7 +2,7 @@
    PEOPLE - People Management
    ======================================== */
 
-import { $, escapeHtml, isValidUrl, createElement } from '../utils.js';
+import { $, isValidUrl, createElement } from '../utils.js';
 import { state } from '../state.js';
 import { showError, showSuccess } from '../ui/toast.js';
 import { markInvalid, clearInvalid } from '../ui/validation.js';
