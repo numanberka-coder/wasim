@@ -266,6 +266,12 @@ function handleTypingEvent(event, onComplete) {
     return;
   }
 
+  // Gerçek WhatsApp'ta kendi typing göstergenizi görmezsiniz
+  if (isMe) {
+    onComplete();
+    return;
+  }
+
   const row = addTypingBubble(who);
 
   player.typingTimer = setTimeout(() => {
@@ -287,12 +293,7 @@ function handleMessageEvent(event, onComplete) {
     return;
   }
 
-  const typingSeedText = event.text || (event.kind ? `[${event.kind}]` : '');
-  const typingMs = event.kind === 'voice' ? 650 : getTypingDuration(typingSeedText);
-  const row = addTypingBubble(who);
-
-  player.typingTimer = setTimeout(() => {
-    removeTypingBubble(row);
+  const addMsg = () => {
     addMessage({
       speaker: who,
       text: event.text || '',
@@ -303,6 +304,22 @@ function handleMessageEvent(event, onComplete) {
       tickStatus: activeTickStatus
     });
     onComplete();
+  };
+
+  // Gerçek WhatsApp'ta kendi typing göstergenizi görmezsiniz
+  if (isMe) {
+    const shortDelay = 80 + Math.random() * 120;
+    player.typingTimer = setTimeout(addMsg, shortDelay);
+    return;
+  }
+
+  const typingSeedText = event.text || (event.kind ? `[${event.kind}]` : '');
+  const typingMs = event.kind === 'voice' ? 650 : getTypingDuration(typingSeedText);
+  const row = addTypingBubble(who);
+
+  player.typingTimer = setTimeout(() => {
+    removeTypingBubble(row);
+    addMsg();
   }, typingMs);
 }
 
