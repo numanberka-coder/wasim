@@ -1,47 +1,36 @@
-# Faz 27 — Grup Tabı Yeniden Yapılandırma
+# "Me" Kavramını Kaldır — Dinamik "Sen" İşaretleme
 
-> **Tarih:** 2026-04-02
-> **Kapsam:** Blok Builder'ı kişi bazlı sezgisel arayüze dönüştür
-> **Durum:** 🔄 Devam ediyor
+> **Tarih:** 2026-04-03
+> **Kapsam:** Hardcoded "Me" yerine herhangi bir kişiyi "Sen" olarak işaretleme
+> **Durum:** 🔄 Planlama
+
+---
+
+## Mimari Karar
+
+**Mevcut:** `'Me'` hardcoded keyword, 35+ yerde string karşılaştırma
+**Hedef:** Herhangi bir kişi "Sen" olarak işaretlenebilir, toggle ile
+
+### Yaklaşım
+- State'e `selfName` alanı ekle (varsayılan: `'Me'`)
+- Tüm `toLowerCase() === 'me'` kontrollerini `isSelf(name)` helper'ına çevir
+- Kişi formuna "Bu benim" toggle ekle
+- Senaryo syntax'ında `Me:` keyword'ü `selfName`'e map edilir (geriye uyumluluk)
+- Aynı anda sadece 1 kişi "Sen" olabilir
 
 ---
 
 ## Görevler
 
-### 27.4 — Eski Blok Builder Temizliği 🔴
-- [ ] `#tabBuilder` paneli HTML'den silinir
-- [ ] Blok Builder iç tab butonu silinir
-- [ ] `setupBuilder()` Builder-only event listener'lar temizlenir
-- [ ] `#builderScriptBox` referansları kaldırılır
-- [ ] `pushBlocksToBuilderTextarea()` → `#scriptBox`'a yazar
-
-### 27.1 — Tab Doğrulama 🔴
-- [ ] Senaryo + İnteraktif olarak 2 iç tab kaldığı doğrulanır
-- [ ] Ana tablar (Grup / Senaryo / Ayarlar) değişmez
-
-### 27.3 — Satır Listesi Taşıma 🔴
-- [ ] `#group` paneline "Satır Sırası" accordion eklenir
-- [ ] `blocks[]`, `renderBlocks()`, drag-drop mantığı korunur
-- [ ] Hedef element `builderList` → `groupBuilderList` güncellenir
-- [ ] "Metne Aktar" + "Oynat" butonları eklenir
-
-### 27.2 — Kişi Bazlı Inline Satır Ekleme 🔴
-- [ ] Kişi kartı tıklama → inline expand panel
-- [ ] 16 tip chip grubu
-- [ ] "Kim" alanı (otomatik dolu)
-- [ ] "Metin" alanı (tipe göre değişen)
-- [ ] Dinamik alanlar (URL, süre, emoji vb.)
-- [ ] "Satır Ekle" butonu
-
-### 27.5 — Senaryo Yönlendirme Banner'ı 🟢
-- [ ] Banner HTML eklenir
-- [ ] `switchTab('script')` bağlanır
-- [ ] Muted stil uygulanır
-
----
-
-## Test
-- [ ] Mevcut testler geçer (191/191)
-- [ ] Satır ekleme → Senaryo formatı doğru
-- [ ] Drag-drop çalışır
-- [ ] Oynatma çalışır
+- [ ] 1. State'e `selfName` alanı + `isSelf()` helper (`state.js`, `config.js`)
+- [ ] 2. `people.js` — Kişi formuna "Bu benim" toggle ekle + toggle mantığı
+- [ ] 3. `people.js` — renderPeopleList & dropdown'larda `isSelf()` kullan
+- [ ] 4. `player.js` — 6 yerdeki `=== 'me'` → `isSelf()`
+- [ ] 5. `messages.js` — 3 yerdeki `=== 'me'` → `isSelf()`
+- [ ] 6. `state.js` — recomputeColors'da `isSelf()` kullan
+- [ ] 7. `script-builder.js` — default sender'da `selfName` kullan
+- [ ] 8. `interactive-engine.js` — 3 yerdeki referanslar
+- [ ] 9. `script-parser.js` / player — `Me:` keyword geriye uyumluluk
+- [ ] 10. `index.html` + `css/panels.css` — toggle UI stili
+- [ ] 11. Test — 191 mevcut test geçmeli
+- [ ] 12. Commit & push
