@@ -35,7 +35,7 @@ function renderPeopleList() {
   for (const name of names) {
     const avatar = (people[name]?.avatar || '').trim();
     const isOnline = active.has(name);
-    const isMe = String(name).toLowerCase() === 'me';
+    const isSelf = state.isSelf(name);
 
     const avatarDiv = createElement('div', { className: `person-avatar${isOnline ? ' online' : ''}` });
     if (avatar) {
@@ -47,9 +47,8 @@ function renderPeopleList() {
       avatarDiv.appendChild(createElement('span', {}, [(name[0] || '?').toUpperCase()]));
     }
 
-    // "Me" kişisi için isim + "(Sen)" etiketi
     const nameChildren = [name];
-    if (isMe) {
+    if (isSelf) {
       nameChildren.push(createElement('span', { className: 'person-me-badge' }, ['Sen']));
     }
 
@@ -61,7 +60,7 @@ function renderPeopleList() {
       createElement('div', { className: 'person-info' }, [
         createElement('div', { className: 'person-name' }, nameChildren),
         createElement('div', { className: 'person-url' }, [
-          isMe ? 'Sizin mesajlarınız (sağ taraf)' :
+          isSelf ? 'Sizin mesajlarınız (sağ taraf)' :
           avatar ? avatar.slice(0, 40) + (avatar.length > 40 ? '...' : '') : 'avatar yok'
         ])
       ]),
@@ -149,20 +148,20 @@ function createInlineBuilderPanel(defaultName) {
   // "Kim" alanı
   if (fields.includes('who')) {
     const people = state.get('people') || {};
+    const selfName = state.get('selfName');
     const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
-    const list = ['Me', ...names.filter(n => n !== 'Me')];
+    const list = [selfName, ...names.filter(n => n !== selfName)];
 
     const select = document.createElement('select');
     select.className = 'inline-field';
     list.forEach(n => {
       const opt = document.createElement('option');
       opt.value = n;
-      opt.textContent = String(n).toLowerCase() === 'me' ? 'Me (Sen)' : n;
+      opt.textContent = state.isSelf(n) ? `${n} (Sen)` : n;
       if (n === defaultName) opt.selected = true;
       select.appendChild(opt);
     });
-    // Eğer defaultName listede yoksa Me olsun
-    if (!list.includes(defaultName)) select.value = 'Me';
+    if (!list.includes(defaultName)) select.value = selfName;
 
     const group = createElement('div', { className: 'form-group inline-form-group' }, [
       createElement('label', {}, ['Kim']),
@@ -461,17 +460,19 @@ function createInlineBuilderPanel(defaultName) {
  */
 function startEditPerson(name) {
   const people = state.get('people');
-  
+
   state.data.editingName = name;
   state.data.pendingPersonAvatarDataUrl = null;
 
   const nameInput = $('pName');
   const avatarInput = $('pAvatar');
   const fileInput = $('pAvatarFile');
+  const selfCheckbox = $('pIsSelf');
 
   if (nameInput) nameInput.value = name;
   if (avatarInput) avatarInput.value = people[name]?.avatar || '';
   if (fileInput) fileInput.value = '';
+  if (selfCheckbox) selfCheckbox.checked = state.isSelf(name);
 }
 
 /**
@@ -484,10 +485,12 @@ function clearPersonForm() {
   const nameInput = $('pName');
   const avatarInput = $('pAvatar');
   const fileInput = $('pAvatarFile');
+  const selfCheckbox = $('pIsSelf');
 
   if (nameInput) nameInput.value = '';
   if (avatarInput) avatarInput.value = '';
   if (fileInput) fileInput.value = '';
+  if (selfCheckbox) selfCheckbox.checked = false;
   clearInvalid('pName');
   clearInvalid('pAvatar');
 }
@@ -518,6 +521,8 @@ function savePerson() {
   const editingName = state.data.editingName;
   const people = state.get('people');
   const active = state.get('active');
+  const selfCheckbox = $('pIsSelf');
+  const wantsSelf = selfCheckbox?.checked || false;
 
   // Handle rename
   if (editingName && editingName !== name) {
@@ -527,10 +532,24 @@ function savePerson() {
       active.add(name);
       state.recomputeColors();
     }
+    // Rename sonrası selfName güncelle
+    if (state.isSelf(editingName)) {
+      state.data.selfName = name;
+    }
   }
 
   people[name] = { avatar };
   state.set('people', people);
+
+  // "Bu benim" toggle
+  if (wantsSelf) {
+    state.data.selfName = name;
+  } else if (state.isSelf(name)) {
+    // Checkbox kaldırıldıysa selfName'i boşalt — ancak biri "self" olmalı
+    // Kullanıcı isterse kaldırabilir, başka birini atayabilir
+    state.data.selfName = '';
+  }
+  state.recomputeColors();
 
   clearPersonForm();
   renderPeopleList();
@@ -548,8 +567,10 @@ function deletePerson() {
   if (!name || !people[name]) return;
   if (!confirm(`"${name}" kişisini silmek istediğinizden emin misiniz?`)) return;
 
+  const wasSelf = state.isSelf(name);
   delete people[name];
   state.get('active').delete(name);
+  if (wasSelf) state.data.selfName = '';
   state.recomputeColors();
   state.set('people', people);
 
@@ -620,27 +641,32 @@ function refreshManualSenderOptions() {
   const manualEl = $('manualSender');
   const mediaEl = $('mediaSenderSelect');
 
-  // If neither select exists, nothing to do
   if (!manualEl && !mediaEl) return;
 
   const people = state.get('people');
+  const selfName = state.get('selfName');
   const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
-  const list = ['Me', ...names.filter(n => n !== 'Me')];
+  // Self kişiyi en başa koy
+  const list = selfName && names.includes(selfName)
+    ? [selfName, ...names.filter(n => n !== selfName)]
+    : names;
 
-  const fill = (selectEl, currentValue = 'Me') => {
+  const fallback = selfName || (names[0] || '');
+
+  const fill = (selectEl, currentValue) => {
     if (!selectEl) return;
     selectEl.replaceChildren();
     for (const n of list) {
       const opt = document.createElement('option');
       opt.value = n;
-      opt.textContent = String(n).toLowerCase() === 'me' ? 'Me (Sen)' : n;
+      opt.textContent = state.isSelf(n) ? `${n} (Sen)` : n;
       selectEl.appendChild(opt);
     }
-    selectEl.value = list.includes(currentValue) ? currentValue : 'Me';
+    selectEl.value = list.includes(currentValue) ? currentValue : fallback;
   };
 
-  if (manualEl) fill(manualEl, manualEl.value || 'Me');
-  if (mediaEl) fill(mediaEl, mediaEl.value || (manualEl?.value || 'Me'));
+  if (manualEl) fill(manualEl, manualEl.value || fallback);
+  if (mediaEl) fill(mediaEl, mediaEl.value || (manualEl?.value || fallback));
 }
 
 /**
@@ -648,7 +674,7 @@ function refreshManualSenderOptions() {
  */
 function getCurrentSender() {
   const senderEl = $('manualSender');
-  return senderEl?.value || 'Me';
+  return senderEl?.value || state.get('selfName') || 'Me';
 }
 
 export {

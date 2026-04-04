@@ -71,11 +71,21 @@ export class StateManager {
         script: '',
       },
 
+      // Self (which person represents the user)
+      selfName: DEFAULT_STATE.selfName,
+
       // Colors cache
       colorBySpeaker: new Map(),
     };
 
     this.listeners = new Set();
+  }
+
+  /**
+   * Check if a speaker name is the "self" user
+   */
+  isSelf(name) {
+    return String(name).toLowerCase() === String(this.data.selfName).toLowerCase();
   }
 
   /**
@@ -123,7 +133,7 @@ export class StateManager {
   recomputeColors() {
     this.data.colorBySpeaker.clear();
     const activeNames = Array.from(this.data.active)
-      .filter(n => String(n).toLowerCase() !== 'me')
+      .filter(n => !this.isSelf(n))
       .sort((a, b) => a.localeCompare(b, 'tr'));
 
     activeNames.forEach((name, idx) => {
@@ -198,6 +208,7 @@ export class StateManager {
   export() {
     return {
       people: this.data.people,
+      selfName: this.data.selfName,
       group: this.data.group,
       settings: this.data.settings,
       messageTimes: this.data.messageTimes,
@@ -216,6 +227,7 @@ export class StateManager {
    */
   import(data) {
     if (data.people) this.data.people = data.people;
+    if (data.selfName) this.data.selfName = data.selfName;
 
     if (data.group) {
       Object.assign(this.data.group, data.group);
@@ -265,6 +277,7 @@ export class StateManager {
    */
   reset() {
     this.data.people = deepClone(DEFAULT_PEOPLE);
+    this.data.selfName = DEFAULT_STATE.selfName;
     this.data.active.clear();
     this.data.editingName = null;
     this.data.pendingPersonAvatarDataUrl = null;
