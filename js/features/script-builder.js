@@ -137,13 +137,13 @@ function quoteForce(s) {
  */
 function buildLineFromValues(type, values) {
   const v = (key) => (values[key] ?? '').trim();
-  const sender = quoteToken(v('who') || 'Me');
+  const sender = quoteToken(v('who') || state.get('selfName') || 'Me');
 
   switch (type) {
     case 'message': {
       const text = v('text');
       if (!text) { showError('Mesaj boş olamaz'); return null; }
-      const who = v('who') || 'Me';
+      const who = v('who') || state.get('selfName') || 'Me';
       return `${who}: ${text}`;
     }
     case 'reply': {
@@ -151,7 +151,7 @@ function buildLineFromValues(type, values) {
       const replyTo = v('replyTo');
       if (!text) { showError('Mesaj boş olamaz'); return null; }
       if (!replyTo) { showError('Yanıtlanan kişi gerekli'); return null; }
-      const who = v('who') || 'Me';
+      const who = v('who') || state.get('selfName') || 'Me';
       return `${who} > ${replyTo}: ${text}`;
     }
     case 'photo': {

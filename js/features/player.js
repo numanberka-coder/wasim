@@ -123,7 +123,7 @@ function loadScript() {
   if (player.queue && player.queue.length) {
     const allPeople = new Set();
     for (const event of player.queue) {
-      if (event.who && String(event.who).toLowerCase() !== 'me') {
+      if (event.who && !state.isSelf(event.who)) {
         allPeople.add(event.who);
       }
     }
@@ -259,15 +259,15 @@ function handleEvent(event, onComplete = () => {}) {
 function handleTypingEvent(event, onComplete) {
   const player = state.get('player');
   const who = event.who || '?';
-  const isMe = String(who).toLowerCase() === 'me';
+  const isSelf = state.isSelf(who);
 
-  if (!isMe && !state.isActive(who)) {
+  if (!isSelf && !state.isActive(who)) {
     onComplete();
     return;
   }
 
   // Gerçek WhatsApp'ta kendi typing göstergenizi görmezsiniz
-  if (isMe) {
+  if (isSelf) {
     onComplete();
     return;
   }
@@ -286,9 +286,9 @@ function handleTypingEvent(event, onComplete) {
 function handleMessageEvent(event, onComplete) {
   const player = state.get('player');
   const who = event.who || '?';
-  const isMe = String(who).toLowerCase() === 'me';
+  const isSelf = state.isSelf(who);
 
-  if (!isMe && !state.isActive(who)) {
+  if (!isSelf && !state.isActive(who)) {
     onComplete();
     return;
   }
@@ -307,7 +307,7 @@ function handleMessageEvent(event, onComplete) {
   };
 
   // Gerçek WhatsApp'ta kendi typing göstergenizi görmezsiniz
-  if (isMe) {
+  if (isSelf) {
     const shortDelay = 80 + Math.random() * 120;
     player.typingTimer = setTimeout(addMsg, shortDelay);
     return;
@@ -332,7 +332,7 @@ function sendLiveMessage() {
 
   if (!inputEl) return;
 
-  const who = senderEl?.value || 'Me';
+  const who = senderEl?.value || state.get('selfName') || 'Me';
   const text = inputEl.value.trim();
 
   if (!text) return;
@@ -346,8 +346,8 @@ function sendLiveMessage() {
     return;
   }
 
-  const isMe = String(who).toLowerCase() === 'me';
-  if (!isMe && !state.isActive(who)) {
+  const isSelf = state.isSelf(who);
+  if (!isSelf && !state.isActive(who)) {
     addSystemMessage(`${who} şu an grupta değil`);
     inputEl.value = '';
     updateMainActionButton();
@@ -400,10 +400,10 @@ function sendLiveVoiceMessage() {
   const senderEl = $('manualSender');
   const inputEl = $('liveInput');
 
-  const who = senderEl?.value || 'Me';
-  const isMe = String(who).toLowerCase() === 'me';
+  const who = senderEl?.value || state.get('selfName') || 'Me';
+  const isSelf = state.isSelf(who);
 
-  if (!isMe && !state.isActive(who)) {
+  if (!isSelf && !state.isActive(who)) {
     addSystemMessage(`${who} şu an grupta değil`);
     if (inputEl) inputEl.focus();
     return;
@@ -422,10 +422,10 @@ async function sendLiveMediaFile(file) {
   const senderEl = $('manualSender');
   const inputEl = $('liveInput');
 
-  const who = senderEl?.value || 'Me';
-  const isMe = String(who).toLowerCase() === 'me';
+  const who = senderEl?.value || state.get('selfName') || 'Me';
+  const isSelf = state.isSelf(who);
 
-  if (!isMe && !state.isActive(who)) {
+  if (!isSelf && !state.isActive(who)) {
     addSystemMessage(`${who} şu an grupta değil`);
     if (inputEl) inputEl.focus();
     return;

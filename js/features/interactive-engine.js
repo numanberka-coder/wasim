@@ -230,7 +230,7 @@ function enableInteractiveMode(sourceText) {
   const allPeople = new Set();
   for (const block of blocks) {
     for (const event of block.events) {
-      if (event.who && String(event.who).toLowerCase() !== 'me') {
+      if (event.who && !state.isSelf(event.who)) {
         allPeople.add(event.who);
       }
     }
@@ -301,12 +301,12 @@ function handleInteractiveInput(userText) {
 
   if (!block) {
     // No match and no default — just show user message, no response
-    addMessage({ speaker: 'Me', text: userText });
+    addMessage({ speaker: state.get('selfName') || 'Me', text: userText });
     return;
   }
 
   // Show user's message first
-  addMessage({ speaker: 'Me', text: userText });
+  addMessage({ speaker: state.get('selfName') || 'Me', text: userText });
 
   // Play the matched block's events
   playBlockEvents(block);

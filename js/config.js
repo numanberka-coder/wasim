@@ -287,5 +287,8 @@ export const DEFAULT_STATE = {
   // Player
   speed: 900,
   jitter: 250,
-  script: ''
+  script: '',
+
+  // Self
+  selfName: 'Me',
 };

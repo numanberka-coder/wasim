@@ -668,7 +668,7 @@ function renderReactionChip(msg, row, bubble) {
  * Build message row element
  */
 function buildMessageRow(msg) {
-  const isMe = String(msg.speaker).toLowerCase() === 'me';
+  const isMe = state.isSelf(msg.speaker);
   const group = getGroupContext(msg);
 
   const row = document.createElement('div');
@@ -888,7 +888,7 @@ function addTypingBubble(speaker) {
   const chatBody = $('chatBody');
   if (!chatBody) return null;
 
-  const isMe = String(speaker).toLowerCase() === 'me';
+  const isMe = state.isSelf(speaker);
   
   const row = document.createElement('div');
   row.className = 'typing-row';
@@ -936,7 +936,7 @@ function _setHeaderTyping(speaker) {
   const statusEl = $('headerStatus');
   if (!statusEl) return;
 
-  const isMe = String(speaker).toLowerCase() === 'me';
+  const isMe = state.isSelf(speaker);
   const name = isMe ? '' : speaker;
 
   statusEl.classList.add('is-typing');
