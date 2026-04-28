@@ -68,10 +68,102 @@ function makeId() {
 
 function initScriptTools() {
   setupValidation();
+  setupTemplateGallery();
   setupMediaInsertTool();
   setupScriptInnerTabs();
   setupInteractiveDemo();
   setupGroupBuilderList();
+}
+
+const TEMPLATE_FAVORITES_KEY = 'wa_sim_template_favorites_v1';
+
+function getTemplateFavorites() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TEMPLATE_FAVORITES_KEY) || '[]');
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveTemplateFavorites(favorites) {
+  try {
+    localStorage.setItem(TEMPLATE_FAVORITES_KEY, JSON.stringify(Array.from(favorites)));
+  } catch {
+    // no-op
+  }
+}
+
+function setupTemplateGallery() {
+  const listEl = $('templateGalleryList');
+  const onlyFavEl = $('templateFavoritesOnly');
+  if (!listEl) return;
+
+  let favorites = getTemplateFavorites();
+
+  const render = () => {
+    const onlyFav = Boolean(onlyFavEl?.checked);
+    const templates = SCRIPT_TEMPLATES.filter((tpl) => !onlyFav || favorites.has(tpl.id));
+
+    listEl.replaceChildren();
+    if (!templates.length) {
+      listEl.appendChild(createElement('div', { className: 'template-gallery-empty' }, ['Favori şablon yok. Kartlardaki ⭐ butonuyla favori ekleyin.']));
+      return;
+    }
+
+    templates.forEach((tpl) => {
+      const difficulty = tpl.difficulty || 'Kolay';
+      const category = tpl.category || 'Genel';
+      const isFav = favorites.has(tpl.id);
+
+      const favoriteBtn = createElement('button', {
+        type: 'button',
+        className: 'template-fav-btn' + (isFav ? ' is-fav' : ''),
+        title: isFav ? 'Favoriden çıkar' : 'Favoriye ekle',
+        onClick: () => {
+          if (favorites.has(tpl.id)) favorites.delete(tpl.id);
+          else favorites.add(tpl.id);
+          saveTemplateFavorites(favorites);
+          render();
+        }
+      }, [isFav ? '⭐' : '☆']);
+
+      const loadBtn = createElement('button', {
+        type: 'button',
+        className: 'secondary btn-sm',
+        onClick: () => {
+          setScriptBox((tpl.script || '').trim());
+          showSuccess(`"${tpl.title}" şablonu yüklendi`);
+        }
+      }, ['Yükle']);
+
+      const demoBtn = createElement('button', {
+        type: 'button',
+        className: 'btn-sm',
+        onClick: () => {
+          setScriptBox((tpl.script || '').trim());
+          loadScript();
+          play();
+          switchTab('script');
+          showSuccess(`"${tpl.title}" tek tık demo başlatıldı`);
+        }
+      }, ['▶ Tek Tık Demo']);
+
+      listEl.appendChild(createElement('article', { className: 'template-card' }, [
+        createElement('div', { className: 'template-card-top' }, [
+          createElement('span', { className: 'pill template-category' }, [category]),
+          createElement('span', { className: 'pill template-difficulty' }, [difficulty]),
+          favoriteBtn,
+        ]),
+        createElement('h5', { className: 'template-title' }, [tpl.title]),
+        createElement('p', { className: 'template-description' }, [tpl.description || '']),
+        createElement('div', { className: 'template-card-actions' }, [loadBtn, demoBtn]),
+      ]));
+    });
+  };
+
+  onlyFavEl?.addEventListener('change', render);
+  render();
 }
 
 /* ========================================
