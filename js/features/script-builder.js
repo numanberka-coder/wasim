@@ -242,10 +242,12 @@ function setupGroupBuilderList() {
   renderBlocks();
 
   const pushBtn = $('groupBuilderPushBtn');
+  const pushPlayBtn = $('groupBuilderPushPlayBtn');
   const playBtn = $('groupBuilderPlayBtn');
   const clearBtn = $('groupBuilderClearBtn');
 
   pushBtn?.addEventListener('click', pushBlocksToScriptBox);
+  pushPlayBtn?.addEventListener('click', pushBlocksToScriptAndPlay);
 
   playBtn?.addEventListener('click', () => {
     if (!blocks.length) { showError('Satır listesi boş'); return; }
@@ -253,12 +255,14 @@ function setupGroupBuilderList() {
     setScriptBox(text);
     loadScript();
     play();
+    showLiveHint('▶️ Satırlar doğrudan oynatıldı. Telefon ekranını canlı kontrol edin.');
   });
 
   clearBtn?.addEventListener('click', () => {
     blocks = [];
     clearInsertMode();
     renderBlocks();
+    showLiveHint('🧹 Satır sırası temizlendi. Yeni satır ekleyerek devam edebilirsiniz.');
   });
 
   // Senaryo yönlendirme banner'ı
@@ -284,6 +288,7 @@ function addLine(raw) {
 
   clearInsertMode();
   renderBlocks();
+  showLiveHint(`✨ Eklendi: ${summaryText(newBlock)} — telefonda bu içerik görünecek.`);
 }
 
 /** Araya ekleme modunu aktifle */
@@ -722,6 +727,24 @@ function pushBlocksToScriptBox() {
   box.value = existing ? existing + '\n\n' + lines : lines;
   box.dispatchEvent(new Event('input', { bubbles: true }));
   showSuccess('Senaryoya aktarıldı!');
+  showLiveHint('⬇️ Satırlar senaryoya aktarıldı. İsterseniz şimdi oynatabilirsiniz.');
+}
+
+function pushBlocksToScriptAndPlay() {
+  if (blocks.length === 0) {
+    showError('Eklenecek satır yok');
+    return;
+  }
+  pushBlocksToScriptBox();
+  loadScript();
+  play();
+  showLiveHint('⚡ Satırlar aktarıldı ve oynatma başlatıldı.');
+}
+
+function showLiveHint(text) {
+  const hint = $('groupBuilderLiveHint');
+  if (!hint) return;
+  hint.textContent = text;
 }
 
 function setScriptBox(value) {

@@ -156,6 +156,32 @@
           </div>
         </details>
 
+        <!-- Satır Sırası -->
+        <details class="accordion accordion-featured" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            Satır Sırası
+          </summary>
+          <div class="accordion-body">
+            <div class="section-lead">
+              Script yazmadan üretmek için satırları buraya ekleyin, sıralayın ve tek adımda oynatın.
+            </div>
+            <div id="groupBuilderList" class="builder-list"></div>
+            <div class="builder-actions" style="margin-top: 10px;">
+              <button id="groupBuilderPushBtn" type="button" class="secondary">⬇️ Senaryoya Aktar</button>
+              <button id="groupBuilderPushPlayBtn" type="button">⚡ Aktar + Oynat</button>
+              <button id="groupBuilderPlayBtn" type="button">▶️ Oynat</button>
+              <button id="groupBuilderClearBtn" type="button" class="danger">🗑️ Temizle</button>
+            </div>
+            <div class="builder-live-hint" id="groupBuilderLiveHint" aria-live="polite">
+              👀 Satır eklediğinizde burada telefondaki etkisini göreceksiniz.
+            </div>
+            <div class="scenario-hint" id="scenarioHint">
+              💡 Daha fazla kontrol için → <strong>Senaryo Editörü</strong>
+            </div>
+          </div>
+        </details>
+
         <!-- People List -->
         <details class="accordion" open>
           <summary class="accordion-header">
@@ -182,25 +208,6 @@
             <div class="form-row">
               <button id="applyJsonBtn" type="button">✓ JSON Uygula</button>
               <button id="refreshJsonBtn" type="button" class="secondary">🔄 Yenile</button>
-            </div>
-          </div>
-        </details>
-
-        <!-- Satır Sırası -->
-        <details class="accordion" open>
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            Satır Sırası
-          </summary>
-          <div class="accordion-body">
-            <div id="groupBuilderList" class="builder-list"></div>
-            <div class="builder-actions" style="margin-top: 10px;">
-              <button id="groupBuilderPushBtn" type="button" class="secondary">⬇️ Senaryoya Aktar</button>
-              <button id="groupBuilderPlayBtn" type="button">▶️ Oynat</button>
-              <button id="groupBuilderClearBtn" type="button" class="danger">🗑️ Temizle</button>
-            </div>
-            <div class="scenario-hint" id="scenarioHint">
-              💡 Daha fazla kontrol için → <strong>Senaryo Editörü</strong>
             </div>
           </div>
         </details>

@@ -67,6 +67,11 @@ function renderPeopleList() {
       createElement('div', { className: 'person-actions' }, [
         createElement('button', { className: 'secondary btn-sm', type: 'button', dataset: { edit: name } }, ['✏️']),
         createElement('button', { className: 'btn-sm', type: 'button', dataset: { addline: name } }, ['➕ Satır'])
+      ]),
+      createElement('div', { className: 'person-quick-actions' }, [
+        createElement('button', { className: 'btn-sm secondary', type: 'button', dataset: { quickline: 'message', name } }, ['💬 Hızlı Mesaj']),
+        createElement('button', { className: 'btn-sm secondary', type: 'button', dataset: { quickline: 'typing', name } }, ['⏳ Yazıyor']),
+        createElement('button', { className: 'btn-sm secondary', type: 'button', dataset: { quickline: 'sticker', name } }, ['🏷️ Sticker'])
       ])
     ]);
 
@@ -98,6 +103,15 @@ function renderPeopleList() {
     });
   });
 
+  listEl.querySelectorAll('button[data-quickline]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const type = btn.getAttribute('data-quickline');
+      const name = btn.getAttribute('data-name');
+      quickAddLine(name, type);
+    });
+  });
+
   // Update JSON textarea
   if (jsonEl) {
     jsonEl.value = JSON.stringify(people, null, 2);
@@ -105,6 +119,23 @@ function renderPeopleList() {
 
   // Refresh sender options
   refreshManualSenderOptions();
+}
+
+/**
+ * Add a line directly from person card shortcuts
+ */
+function quickAddLine(name, type) {
+  const values = { who: name };
+
+  if (type === 'message') {
+    const text = prompt(`${name} için mesaj metni girin:`);
+    if (!text || !text.trim()) return;
+    values.text = text.trim();
+  }
+
+  const raw = buildLineFromValues(type, values);
+  if (!raw) return;
+  addLine(raw);
 }
 
 /**
