@@ -318,6 +318,93 @@ label {
   margin-bottom: 0;
 }
 
+/* ===== ONBOARDING & APP MODE (Faz 29) ===== */
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37, 211, 102, 0.14);
+  border: 1px solid rgba(37, 211, 102, 0.4);
+  color: var(--wa-green);
+  font-size: 11px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.simple-mode [data-mode="pro"] {
+  display: none !important;
+}
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 14, 18, 0.78);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  padding: 16px;
+}
+
+.onboarding-overlay.open {
+  display: flex;
+}
+
+.onboarding-card {
+  width: min(460px, 96vw);
+  background: var(--wa-panel);
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.onboarding-step {
+  color: var(--wa-text-secondary);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.onboarding-card h3 {
+  margin: 0 0 8px;
+}
+
+.onboarding-card p {
+  margin: 0;
+  color: var(--wa-text-secondary);
+}
+
+.onboarding-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.onboarding-goals-mini,
+.onboarding-goals {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.goal-chip,
+.goal-item {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--wa-text-secondary);
+  background: rgba(11,20,26,0.45);
+}
+
+.goal-chip.done,
+.goal-item.done {
+  border-color: rgba(37, 211, 102, 0.45);
+  color: var(--wa-green);
+  background: rgba(37, 211, 102, 0.08);
+}
+
 .guide-title {
   font-size: 11px;
   font-weight: 600;

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,20 +19,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Detect coverage-relevant changes
-        id: changes
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            code:
-              - 'js/**/*.js'
-              - 'tests/**/*.test.js'
-              - 'package.json'
-              - 'package-lock.json'
-              - 'vitest.config.js'
-              - 'vite.config.js'
-              - '.github/workflows/test.yml'
 
       - name: Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -41,11 +31,11 @@ jobs:
       - run: npm test
 
       - name: Coverage raporu
-        if: matrix.node-version == '22.x' && steps.changes.outputs.code == 'true'
+        if: matrix.node-version == '22.x'
         run: npm run test:coverage
 
       - name: Coverage artifact
-        if: matrix.node-version == '22.x' && steps.changes.outputs.code == 'true'
+        if: matrix.node-version == '22.x'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
