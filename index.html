@@ -33,6 +33,7 @@
           <span class="brand-text">WA Simülatör</span>
         </div>
         <div class="action-bar-actions">
+          <span id="modeBadge" class="mode-badge" title="Arayüz modu">✨ Basit Mod</span>
           <button id="phoneOnlyBtn" class="action-btn action-btn-icon" title="Sadece Telefon">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           </button>
@@ -169,7 +170,7 @@
         </details>
 
         <!-- JSON Editor -->
-        <details class="accordion">
+        <details class="accordion pro-only" data-mode="pro">
           <summary class="accordion-header">
             <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             JSON Düzenle
@@ -215,7 +216,7 @@
         <!-- İç Tab Sistemi -->
         <div class="script-tabs">
           <button class="script-tab active" data-stab="tabSenaryo">Senaryo</button>
-          <button class="script-tab" data-stab="tabInteractive">İnteraktif</button>
+          <button class="script-tab pro-only" data-stab="tabInteractive" data-mode="pro">İnteraktif</button>
         </div>
 
         <!-- ═══════ TAB 1: SENARYO ═══════ -->
@@ -480,7 +481,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </div>
 
         <!-- Manuel Gönderim (tab'ların altında accordion olarak kalır) -->
-        <details class="accordion">
+        <details class="accordion pro-only" data-mode="pro">
           <summary class="accordion-header">
             <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             ✉️ Manuel Gönderim
@@ -527,6 +528,29 @@ Destek: Bunu anlayamadım 🤔"></textarea>
 
       <!-- ===== PANEL: SETTINGS ===== -->
       <div class="panel" id="settings">
+        <details class="accordion" open>
+          <summary class="accordion-header">
+            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            🧭 Başlangıç Rehberi & Mod
+          </summary>
+          <div class="accordion-body">
+            <div class="form-group">
+              <label for="appModeToggle">Arayüz Modu</label>
+              <select id="appModeToggle">
+                <option value="simple">Basit Mod (önerilen)</option>
+                <option value="pro">Pro Mod (tüm kontroller)</option>
+              </select>
+              <p class="hint">Basit mod yeni kullanıcılar için sadeleştirilmiş ekran gösterir.</p>
+            </div>
+            <div class="form-row">
+              <button id="reopenOnboardingBtn" type="button" class="secondary">📖 Rehberi Tekrar Göster</button>
+            </div>
+            <div class="onboarding-goals-mini">
+              <div class="goal-chip" id="goalPlayChip">▶️ İlk mesajı oynat</div>
+              <div class="goal-chip" id="goalShotChip">📸 İlk ekran görüntüsünü al</div>
+            </div>
+          </div>
+        </details>
         <!-- Typography -->
         <details class="accordion" open>
           <summary class="accordion-header">
@@ -558,7 +582,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </details>
 
         <!-- Message Times -->
-        <details class="accordion">
+        <details class="accordion pro-only" data-mode="pro">
           <summary class="accordion-header">
             <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             ⏱️ Mesaj Saatleri
@@ -593,7 +617,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </details>
 
         <!-- Scene Management -->
-        <details class="accordion">
+        <details class="accordion pro-only" data-mode="pro">
           <summary class="accordion-header">
             <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             🎬 Sahne Yönetimi
@@ -625,7 +649,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </details>
 
         <!-- Status Bar -->
-        <details class="accordion">
+        <details class="accordion pro-only" data-mode="pro">
           <summary class="accordion-header">
             <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             🕐 Durum Çubuğu
@@ -937,6 +961,23 @@ Destek: Bunu anlayamadım 🤔"></textarea>
   <!-- Autocomplete Dropdown -->
   <div id="autocompleteDropdown" class="autocomplete-dropdown" style="display:none;"></div>
   <div id="autocompleteHint" class="autocomplete-hint" style="display:none;"></div>
+
+  <!-- Onboarding Overlay -->
+  <div id="onboardingOverlay" class="onboarding-overlay" aria-hidden="true">
+    <div class="onboarding-card">
+      <div class="onboarding-step">Adım <span id="onboardingStepNo">1</span>/3</div>
+      <h3 id="onboardingTitle">Hoş geldin 👋</h3>
+      <p id="onboardingDesc">Bu kısa rehber ile 1-2 dakikada ilk senaryonu çalıştırabilirsin.</p>
+      <div class="onboarding-goals">
+        <div class="goal-item" id="goalPlayItem">▶️ İlk mesajı oynat</div>
+        <div class="goal-item" id="goalShotItem">📸 İlk ekran görüntüsünü al</div>
+      </div>
+      <div class="onboarding-actions">
+        <button type="button" id="onboardingSkipBtn" class="secondary">Geç</button>
+        <button type="button" id="onboardingNextBtn">İleri</button>
+      </div>
+    </div>
+  </div>
 
   <!-- JavaScript — ES Module Entry Point -->
   <script type="module" src="js/app.js"></script>

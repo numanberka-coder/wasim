@@ -33,6 +33,35 @@ import { initInteractive } from './features/interactive-engine.js';
 import { initScriptTools } from './features/script-builder.js';
 import { initAutocomplete } from './features/autocomplete.js';
 
+const APP_MODE_KEY = 'wa_sim_app_mode';
+const ONBOARDING_KEY = 'wa_sim_onboarding_seen_v1';
+const GOAL_KEY = 'wa_sim_onboarding_goals_v1';
+
+function safeStorageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function safeStorageRemove(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // no-op
+  }
+}
+
 /**
  * Initialize application
  */
@@ -96,6 +125,9 @@ function init() {
 
   // Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
   initTutorials();
+
+  // Onboarding + Basit/Pro mod (Faz 29)
+  initOnboardingAndMode();
 
   Logger.info('✅ WhatsApp Simulator ready!');
 }
@@ -274,7 +306,7 @@ const CLICK_MAP = [
   // Player
   ['loadBtn',           loadScript],
   ['stepBtn',           step],
-  ['playBtn',           play],
+  ['playBtn',           playWithGoal],
   ['pauseBtn',          pause],
   ['resetBtn',          reset],
   // Phone-only mode
@@ -708,6 +740,7 @@ async function takeScreenshot() {
     link.href = canvas.toDataURL('image/png');
     link.click();
 
+    markOnboardingGoal('firstScreenshot');
     showSuccess('Ekran görüntüsü indirildi!');
   } catch (err) {
     console.error('Screenshot error:', err);
@@ -809,14 +842,144 @@ function setPhoneScale(scale) {
  */
 function initTutorials() {
   const TUTORIAL_KEY = 'wa_sim_tutorials_seen';
-  const seen = localStorage.getItem(TUTORIAL_KEY);
+  const seen = safeStorageGet(TUTORIAL_KEY);
   const tutorials = document.querySelectorAll('.tutorial-guide');
 
   if (!seen) {
     // İlk ziyaret — rehberleri açık göster
     tutorials.forEach(t => t.setAttribute('open', ''));
-    localStorage.setItem(TUTORIAL_KEY, '1');
+    safeStorageSet(TUTORIAL_KEY, '1');
   }
+}
+
+function playWithGoal() {
+  markOnboardingGoal('firstPlay');
+  play();
+}
+
+function initOnboardingAndMode() {
+  const savedMode = safeStorageGet(APP_MODE_KEY) || 'simple';
+  applyAppMode(savedMode);
+
+  bindChange('appModeToggle', (e) => applyAppMode(e.target.value));
+  bindClick('reopenOnboardingBtn', () => openOnboarding(true));
+
+  refreshGoalUI();
+
+  const hasSeenOnboarding = safeStorageGet(ONBOARDING_KEY) === '1';
+  if (!hasSeenOnboarding) {
+    // İlk yüklemede web önizleme ekranını tamamen kapatmamak için otomatik açma yerine
+    // ayarlardan tekrar açılabilen rehbere yönlendiriyoruz.
+    showToast('📖 Başlangıç rehberi hazır: Ayarlar > Başlangıç Rehberi & Mod', 3200);
+  }
+}
+
+function applyAppMode(mode) {
+  const safeMode = mode === 'pro' ? 'pro' : 'simple';
+  safeStorageSet(APP_MODE_KEY, safeMode);
+  document.body.classList.toggle('simple-mode', safeMode === 'simple');
+  setInputValue('appModeToggle', safeMode);
+  setTextContent('modeBadge', safeMode === 'simple' ? '✨ Basit Mod' : '🛠️ Pro Mod');
+
+  const activeTab = document.querySelector('.tab.active');
+  if (safeMode === 'simple' && activeTab?.dataset.tab === 'script') {
+    document.querySelector('.tab[data-tab="group"]')?.click();
+  }
+}
+
+function getOnboardingGoals() {
+  try {
+    const parsed = JSON.parse(safeStorageGet(GOAL_KEY) || '{}');
+    return {
+      firstPlay: Boolean(parsed.firstPlay),
+      firstScreenshot: Boolean(parsed.firstScreenshot),
+    };
+  } catch {
+    return { firstPlay: false, firstScreenshot: false };
+  }
+}
+
+function markOnboardingGoal(goal) {
+  const goals = getOnboardingGoals();
+  if (!Object.prototype.hasOwnProperty.call(goals, goal)) return;
+  goals[goal] = true;
+  safeStorageSet(GOAL_KEY, JSON.stringify(goals));
+  refreshGoalUI();
+}
+
+function refreshGoalUI() {
+  const goals = getOnboardingGoals();
+  const goalMap = [
+    ['goalPlayItem', goals.firstPlay],
+    ['goalPlayChip', goals.firstPlay],
+    ['goalShotItem', goals.firstScreenshot],
+    ['goalShotChip', goals.firstScreenshot],
+  ];
+  goalMap.forEach(([id, done]) => {
+    const el = $(id);
+    if (el) el.classList.toggle('done', done);
+  });
+}
+
+function openOnboarding(force = false) {
+  const overlay = $('onboardingOverlay');
+  const titleEl = $('onboardingTitle');
+  const descEl = $('onboardingDesc');
+  const stepEl = $('onboardingStepNo');
+  const nextBtn = $('onboardingNextBtn');
+  const skipBtn = $('onboardingSkipBtn');
+  if (!overlay || !titleEl || !descEl || !stepEl || !nextBtn || !skipBtn) return;
+
+  const steps = [
+    {
+      title: 'Hoş geldin 👋',
+      description: 'Kısa rehber ile ilk 5 dakikada senaryonu çalıştırıp ekran görüntüsü alabilirsin.',
+      nextLabel: 'İleri'
+    },
+    {
+      title: '1) Kişi ekle → Satır ekle',
+      description: 'Grup sekmesinde kişi kaydet, ardından Satır Sırası bölümünden satır ekleyip "Senaryoya Aktar" ile gönder.',
+      nextLabel: 'Devam'
+    },
+    {
+      title: '2) Yükle → Oynat → Ekran Al',
+      description: 'Senaryo sekmesinde önce "Yükle", sonra "Oynat". Hazır olunca üst bardan "Ekran Al" ile çıktını indir.',
+      nextLabel: 'Başla'
+    }
+  ];
+
+  let currentStep = 0;
+  const renderStep = () => {
+    const step = steps[currentStep];
+    titleEl.textContent = step.title;
+    descEl.textContent = step.description;
+    stepEl.textContent = String(currentStep + 1);
+    nextBtn.textContent = step.nextLabel;
+    refreshGoalUI();
+  };
+
+  const close = () => {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    safeStorageSet(ONBOARDING_KEY, '1');
+    nextBtn.onclick = null;
+    skipBtn.onclick = null;
+  };
+
+  nextBtn.onclick = () => {
+    if (currentStep >= steps.length - 1) {
+      close();
+      return;
+    }
+    currentStep += 1;
+    renderStep();
+  };
+  skipBtn.onclick = close;
+
+  if (force) safeStorageRemove(ONBOARDING_KEY);
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  renderStep();
 }
 
 // Register mobile callbacks for app-level functions
