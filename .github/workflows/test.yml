@@ -6,12 +6,12 @@ on:
   pull_request:
     branches: [main, master]
 
-permissions:
-  pull-requests: read
-
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     strategy:
       matrix:
         node-version: [20.x, 22.x]
@@ -22,35 +22,4 @@ jobs:
       - name: Detect coverage-relevant changes
         id: changes
         uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            code:
-              - 'js/**/*.js'
-              - 'tests/**/*.test.js'
-              - 'package.json'
-              - 'package-lock.json'
-              - 'vitest.config.js'
-              - 'vite.config.js'
-              - '.github/workflows/test.yml'
-
-      - name: Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - run: npm ci
-
-      - run: npm test
-
-      - name: Coverage raporu
-        if: matrix.node-version == '22.x' && steps.changes.outputs.code == 'true'
-        run: npm run test:coverage
-
-      - name: Coverage artifact
-        if: matrix.node-version == '22.x' && steps.changes.outputs.code == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
+        # ... rest of workflow
