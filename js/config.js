@@ -75,12 +75,88 @@ export const SCRIPT_TEMPLATES = [
     id: 'default',
     title: 'Felsefe Sohbeti',
     description: 'Varsayılan giriş senaryosu',
+    category: 'Sohbet',
+    difficulty: 'Kolay',
     script: DEFAULT_SCRIPT,
+  },
+  {
+    id: 'ecommerce-campaign',
+    title: '🛍️ E-ticaret Kampanya Duyurusu',
+    description: 'Yeni sezon indirimi, kupon kodu ve hızlı CTA içeren satış odaklı akış.',
+    category: 'E-ticaret',
+    difficulty: 'Kolay',
+    script: `@add Marka
+@add Elif
+@system İlkbahar kampanyası başlatıldı
+@typing Marka 700
+Marka: 🌸 Yeni sezon açıldı! Tüm ürünlerde %25 indirim var.
+@typing Marka 500
+Marka: Kupon kodu: BAHAR25 (bu gece 23:59'a kadar)
+@typing Elif 900
+Elif: Harika! Kargo ücretsiz mi?
+@typing Marka 700
+Marka: 750 TL üzeri siparişlerde ücretsiz 🚚`,
+  },
+  {
+    id: 'support-ticket',
+    title: '🛟 Müşteri Destek Talebi',
+    description: 'Sipariş gecikmesi yaşayan müşteriye adım adım çözüm sunan destek diyalogu.',
+    category: 'Destek',
+    difficulty: 'Orta',
+    script: `@add Destek
+@add Müşteri
+Müşteri: Merhaba, siparişim hâlâ teslim edilmedi.
+@typing Destek 900
+Destek: Merhaba 👋 Sipariş numaranızı paylaşabilir misiniz?
+@typing Müşteri 800
+Müşteri: #48291
+@typing Destek 1200
+Destek: Kontrol ettim, kargonuz dağıtım merkezinde görünüyor.
+@typing Destek 700
+@location Destek "İstanbul Dağıtım Merkezi" "Bağcılar"
+@typing Destek 700
+Destek: Yarın 10:00-14:00 arasında teslim edilmesi bekleniyor.`,
+  },
+  {
+    id: 'education-lesson',
+    title: '📚 Eğitim Dersi Hatırlatma',
+    description: 'Eğitmen, öğrencilere ders linki ve ödev bilgisi paylaşıyor.',
+    category: 'Eğitim',
+    difficulty: 'Kolay',
+    script: `@add Eğitmen
+@add Öğrenci
+@system Canlı ders 15 dakika sonra başlayacak
+@typing Eğitmen 700
+Eğitmen: Herkese merhaba, ders 20:30'da başlıyor.
+@typing Eğitmen 600
+@link Eğitmen "Canlı Ders Bağlantısı" "https://meet.example.com/ders"
+@typing Öğrenci 900
+Öğrenci: Hocam ödev teslim tarihi ne zamandı?
+@typing Eğitmen 900
+Eğitmen: Cuma 23:59. Ödevi PDF olarak yükleyebilirsiniz.`,
+  },
+  {
+    id: 'community-event',
+    title: '👥 Topluluk Etkinlik Planı',
+    description: 'Gönüllülerle etkinlik tarihi belirleme ve görev dağılımı.',
+    category: 'Topluluk',
+    difficulty: 'Orta',
+    script: `@add Koordinatör
+@add Gönüllü
+@system Mahalle etkinliği planlama grubu güncellendi
+Koordinatör: Cumartesi etkinliği için buluşma saatini netleştirelim mi?
+@reaction Gönüllü 👍 Koordinatör
+@typing Gönüllü 700
+Gönüllü: 10:00 uygundur. Ben kayıt masasını alabilirim.
+@typing Koordinatör 800
+Koordinatör: Süper! Ben de afişleri yazdırıp getireceğim.`,
   },
   {
     id: 'welcome',
     title: 'Yeni Üye Karşılama',
     description: 'Hoş geldin mesajı ve kuralları paylaş',
+    category: 'Topluluk',
+    difficulty: 'Kolay',
     script: `@add Yeni Üye
 @system Yeni Üye gruba katıldı
 @typing Me 800
@@ -94,6 +170,8 @@ Me: Harika, ilk tanışma turuyla başlayalım.`,
     id: 'poll',
     title: 'Hızlı Oylama',
     description: 'Kısa soru-cevap akışı',
+    category: 'Sohbet',
+    difficulty: 'Kolay',
     script: `@add Sunucu
 @add Katılımcı
 @system Haftalık buluşma oylaması başlatıldı
@@ -106,6 +184,8 @@ Katılımcı: Cumartesi bana uyar, saat kaç olsun?`,
     id: 'qa',
     title: 'Soru-Cevap',
     description: 'Uzun metin içeren cevap akışı',
+    category: 'Eğitim',
+    difficulty: 'Orta',
     script: `@add Mentor
 @add Öğrenci
 @system Soru-Cevap oturumu başladı
@@ -119,6 +199,8 @@ Mentor > Öğrenci: Önce kısa notlar çıkar, sonra örneklerle pekiştir. Gü
     id: 'faz4-demo',
     title: 'Faz 4 — Medya Tipleri',
     description: 'Konum, döküman, sticker, link ve view-once örnekleri',
+    category: 'Sohbet',
+    difficulty: 'İleri',
     script: `@add Ayşe
 @add Mehmet
 @typing Me 600
@@ -141,6 +223,8 @@ Ayşe: Havalimanından güzel bir selfie 📸`,
     id: 'interactive-demo',
     title: '🎮 İnteraktif — Müşteri Destek',
     description: 'Koşullu mesajlaşma demo senaryosu (Faz 7)',
+    category: 'Destek',
+    difficulty: 'İleri',
     script: `#selamlasma
 trigger: merhaba, selam, hey, naber
 ---
