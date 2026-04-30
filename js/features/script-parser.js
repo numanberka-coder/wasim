@@ -17,6 +17,365 @@ export const EventType = {
   TICK_STATUS: 'tick_status',
 };
 
+const COMMAND_HELP_TARGET = 'commandHelpAccordion';
+
+export const COMMAND_DEFINITIONS = Object.freeze({
+  '@add': {
+    example: '@add Ahmet',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@leave': {
+    example: '@leave Ahmet',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@system': {
+    example: '@system Grup adı değişti',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@reaction': {
+    example: '@reaction Ahmet 😂 Mehmet',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@typing': {
+    example: '@typing Ahmet 800',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@photo': {
+    example: '@photo Ahmet "https://example.com/foto.jpg" "Açıklama"',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@gif': {
+    example: '@gif Ahmet "https://example.com/animasyon.gif"',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@video': {
+    example: '@video Ahmet "https://example.com/video.mp4" "Açıklama"',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@voice': {
+    example: '@voice Ahmet 12s',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@location': {
+    example: '@location Ahmet "İstanbul" "Konum notu"',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@document': {
+    example: '@document Ahmet "rapor.pdf" "1.2 MB · PDF"',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@sticker': {
+    example: '@sticker Ahmet 🙂',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@link': {
+    example: '@link Ahmet "Başlık" "https://example.com"',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@viewonce': {
+    example: '@viewonce Ahmet photo',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@sent': {
+    example: '@sent',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@delivered': {
+    example: '@delivered',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+  '@read': {
+    example: '@read',
+    helpTarget: COMMAND_HELP_TARGET,
+  },
+});
+
+const VALID_COMMANDS = Object.keys(COMMAND_DEFINITIONS);
+
+function createIssue({
+  line,
+  raw,
+  code,
+  command,
+  severity = 'error',
+  message,
+  suggestion,
+  example,
+  helpTarget = COMMAND_HELP_TARGET,
+}) {
+  return {
+    line,
+    raw,
+    code,
+    command,
+    severity,
+    message,
+    suggestion,
+    example,
+    helpTarget,
+  };
+}
+
+function hasErrors(issues) {
+  return issues.some(issue => issue.severity === 'error');
+}
+
+function buildDetailedResult(events, issues, totalLines) {
+  const errorCount = issues.filter(issue => issue.severity === 'error').length;
+  const warningCount = issues.filter(issue => issue.severity === 'warning').length;
+  return {
+    events,
+    issues,
+    hasErrors: errorCount > 0,
+    hasWarnings: warningCount > 0,
+    summary: {
+      totalLines,
+      eventCount: events.length,
+      errors: errorCount,
+      warnings: warningCount,
+    },
+  };
+}
+
+function isInteractiveSyntaxLine(line) {
+  return line.startsWith('#') || line === '---' || /^trigger\s*:/i.test(line);
+}
+
+function pushMissingArgumentIssue(issues, line, raw, command, message, suggestion) {
+  const def = COMMAND_DEFINITIONS[command] || {};
+  issues.push(createIssue({
+    line,
+    raw,
+    code: 'missing_argument',
+    command,
+    message,
+    suggestion,
+    example: def.example,
+    helpTarget: def.helpTarget,
+  }));
+}
+
+function validateCommandLine(trimmed, lineNo, raw) {
+  const issues = [];
+  const parts = tokenizeCommand(trimmed);
+  const command = parts[0] || trimmed.split(/\s+/)[0] || '';
+  const def = COMMAND_DEFINITIONS[command];
+
+  if (!def) {
+    issues.push(createIssue({
+      line: lineNo,
+      raw,
+      code: 'invalid_command',
+      command,
+      message: `Geçersiz komut: ${command || trimmed}`,
+      suggestion: 'Komut adını kontrol edin veya Komut Yardımı bölümündeki formatlardan birini kullanın.',
+      example: '@typing Ahmet 800',
+    }));
+    return { issues, event: null };
+  }
+
+  const requireName = () => {
+    if (!parts[1]) {
+      pushMissingArgumentIssue(
+        issues,
+        lineNo,
+        raw,
+        command,
+        `${command} komutu için kişi adı gerekli.`,
+        `Önce komutu, sonra kişi adını yazın: ${def.example}`
+      );
+    }
+  };
+
+  switch (command) {
+    case '@add':
+    case '@leave':
+      requireName();
+      break;
+
+    case '@system':
+      if (!trimmed.replace('@system', '').trim()) {
+        pushMissingArgumentIssue(
+          issues,
+          lineNo,
+          raw,
+          command,
+          '@system komutu için mesaj metni gerekli.',
+          `Sistem mesajını komuttan sonra yazın: ${def.example}`
+        );
+      }
+      break;
+
+    case '@reaction':
+      requireName();
+      if (!parts[2]) {
+        pushMissingArgumentIssue(issues, lineNo, raw, command, '@reaction için emoji gerekli.', `Örnek format: ${def.example}`);
+      }
+      if (!parts[3]) {
+        pushMissingArgumentIssue(issues, lineNo, raw, command, '@reaction için hedef mesaj gerekli.', `Tepki verilecek mesajı sona ekleyin: ${def.example}`);
+      }
+      break;
+
+    case '@typing': {
+      requireName();
+      if (parts[2]) {
+        const ms = Number(parts[2]);
+        if (!Number.isFinite(ms) || ms < 80) {
+          issues.push(createIssue({
+            line: lineNo,
+            raw,
+            code: 'soft_default',
+            command,
+            severity: 'warning',
+            message: '@typing süresi sayı olmalı; bu satır 800ms ile oynatılacak.',
+            suggestion: `Milisaniye cinsinden sayı yazın: ${def.example}`,
+            example: def.example,
+            helpTarget: def.helpTarget,
+          }));
+          if (!hasErrors(issues)) {
+            return {
+              issues,
+              event: {
+                type: EventType.TYPING,
+                who: parts[1],
+                ms: 800,
+              },
+            };
+          }
+        }
+      }
+      break;
+    }
+
+    case '@photo':
+    case '@gif':
+    case '@video':
+      requireName();
+      if (!parts[2]) {
+        pushMissingArgumentIssue(
+          issues,
+          lineNo,
+          raw,
+          command,
+          `${command} komutu için medya bağlantısı veya data değeri gerekli.`,
+          `Gönderen adından sonra medya kaynağını ekleyin: ${def.example}`
+        );
+      }
+      break;
+
+    case '@voice':
+      requireName();
+      if (parts[2]) {
+        const duration = parseVoiceDurationToSeconds(parts[2]);
+        if (!Number.isFinite(duration) || duration <= 0) {
+          issues.push(createIssue({
+            line: lineNo,
+            raw,
+            code: 'soft_default',
+            command,
+            severity: 'warning',
+            message: '@voice süresi okunamadı; bu satır 12s ile oynatılacak.',
+            suggestion: `Süreyi 12s, 0:12 veya 12000 olarak yazın: ${def.example}`,
+            example: def.example,
+            helpTarget: def.helpTarget,
+          }));
+        }
+      }
+      break;
+
+    case '@location':
+    case '@document':
+    case '@link':
+      requireName();
+      if (!parts[2]) {
+        pushMissingArgumentIssue(
+          issues,
+          lineNo,
+          raw,
+          command,
+          `${command} komutu için ikinci alan gerekli.`,
+          `Eksik alanı tırnak içinde yazabilirsiniz: ${def.example}`
+        );
+      }
+      break;
+
+    case '@sticker':
+      requireName();
+      break;
+
+    case '@viewonce': {
+      requireName();
+      const kind = String(parts[2] || 'photo').toLowerCase();
+      if (parts[2] && !['photo', 'video'].includes(kind)) {
+        issues.push(createIssue({
+          line: lineNo,
+          raw,
+          code: 'soft_default',
+          command,
+          severity: 'warning',
+          message: '@viewonce türü photo veya video olmalı; bu satır photo olarak oynatılacak.',
+          suggestion: `Türü photo veya video seçin: ${def.example}`,
+          example: def.example,
+          helpTarget: def.helpTarget,
+        }));
+        if (!hasErrors(issues)) {
+          return {
+            issues,
+            event: {
+              type: EventType.MESSAGE,
+              who: parts[1],
+              kind: 'viewonce',
+              src: 'photo',
+              text: '',
+            },
+          };
+        }
+      }
+      break;
+    }
+
+    case '@sent':
+    case '@delivered':
+    case '@read':
+      break;
+
+    default:
+      break;
+  }
+
+  return { issues, event: null };
+}
+
+function validateMessageLine(trimmed, lineNo, raw) {
+  const missingReplyText = trimmed.match(/^(.+?)\s*>\s*(.+?)\s*:\s*$/);
+  if (missingReplyText) {
+    return [createIssue({
+      line: lineNo,
+      raw,
+      code: 'missing_message',
+      message: 'Yanıt satırında mesaj metni eksik.',
+      suggestion: 'İki nokta üst üste işaretinden sonra mesajı yazın.',
+      example: 'Ahmet > Mehmet: Katılıyorum',
+      helpTarget: 'tutorialSenaryo',
+    })];
+  }
+
+  const missingMessageText = trimmed.match(/^(.+?)\s*:\s*$/);
+  if (missingMessageText) {
+    return [createIssue({
+      line: lineNo,
+      raw,
+      code: 'missing_message',
+      message: 'Mesaj satırında metin eksik.',
+      suggestion: 'İki nokta üst üste işaretinden sonra mesajı yazın.',
+      example: 'Ahmet: Merhaba!',
+      helpTarget: 'tutorialSenaryo',
+    })];
+  }
+
+  return [];
+}
+
 /**
  * Parse script text into events
  */
@@ -42,6 +401,47 @@ export function parseScript(text) {
   }
 
   return events;
+}
+
+/**
+ * Parse script text and return line-level issues with safe events.
+ */
+export function parseScriptDetailed(text) {
+  if (!text || typeof text !== 'string') {
+    return buildDetailedResult([], [], 0);
+  }
+
+  const events = [];
+  const issues = [];
+  const lines = text.split(/\r?\n/);
+
+  lines.forEach((line, index) => {
+    const raw = line;
+    const trimmed = line.trim();
+    const lineNo = index + 1;
+
+    if (!trimmed || isInteractiveSyntaxLine(trimmed)) return;
+
+    let overrideEvent = null;
+
+    if (trimmed.startsWith('@')) {
+      const result = validateCommandLine(trimmed, lineNo, raw);
+      issues.push(...result.issues);
+      overrideEvent = result.event;
+      if (hasErrors(result.issues)) return;
+    } else {
+      const messageIssues = validateMessageLine(trimmed, lineNo, raw);
+      issues.push(...messageIssues);
+      if (hasErrors(messageIssues)) return;
+    }
+
+    const event = overrideEvent || parseLine(trimmed);
+    if (event) {
+      events.push(event);
+    }
+  });
+
+  return buildDetailedResult(events, issues, lines.length);
 }
 
 /**
@@ -314,50 +714,15 @@ export function parseLine(line) {
  * Validate script and return errors
  */
 export function validateScript(text) {
-  const errors = [];
-  const lines = text.split(/\r?\n/);
-
-  lines.forEach((line, index) => {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-
-    // Skip interactive mode syntax lines
-    if (trimmed.startsWith('#') || trimmed.startsWith('trigger:') || trimmed === '---') return;
-
-    // Check for common errors
-    if (trimmed.startsWith('@') && !isValidCommand(trimmed)) {
-      errors.push({
-        line: index + 1,
-        message: `Geçersiz komut: ${trimmed.split(' ')[0]}`
-      });
-    }
-
-    // Check for empty names
-    if (trimmed.startsWith('@add ') && !trimmed.slice(5).trim()) {
-      errors.push({
-        line: index + 1,
-        message: '@add komutu için isim gerekli'
-      });
-    }
-
-    if (trimmed.startsWith('@leave ') && !trimmed.slice(7).trim()) {
-      errors.push({
-        line: index + 1,
-        message: '@leave komutu için isim gerekli'
-      });
-    }
-  });
-
-  return errors;
+  return parseScriptDetailed(text).issues;
 }
 
 /**
  * Check if command is valid
  */
 export function isValidCommand(line) {
-  const validCommands = ['@add', '@leave', '@system', '@reaction', '@typing', '@photo', '@video', '@voice', '@gif', '@location', '@document', '@sticker', '@link', '@viewonce', '@sent', '@delivered', '@read'];
   const cmd = line.split(' ')[0];
-  return validCommands.includes(cmd);
+  return VALID_COMMANDS.includes(cmd);
 }
 
 /**

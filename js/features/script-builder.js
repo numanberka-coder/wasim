@@ -8,6 +8,7 @@ import { $, createElement, readFileAsDataURL, Logger } from '../utils.js';
 import { SCRIPT_TEMPLATES } from '../config.js';
 import { state } from '../state.js';
 import { showSuccess, showError } from '../ui/toast.js';
+import { SyntaxHighlight } from '../ui/highlight.js';
 import { tokenizeCommand, validateScript } from './script-parser.js';
 import { loadScript, play } from './player.js';
 import { switchTab } from '../ui/tabs.js';
@@ -306,29 +307,90 @@ function setupValidation() {
   if (!scriptBox) return;
   const validationBox = $('scriptValidation');
   const run = () => {
-    const errors = validateScript(scriptBox.value || '');
-    renderValidation(errors, validationBox);
+    const issues = validateScript(scriptBox.value || '');
+    SyntaxHighlight.setIssues('scriptBox', issues);
+    renderValidationPanel(issues, validationBox);
     state.set('player.script', scriptBox.value || '');
   };
   scriptBox.addEventListener('input', run);
   run();
 }
 
-function renderValidation(errors, target) {
+function renderValidationPanel(issues, target) {
   if (!target) return;
   target.replaceChildren();
-  if (!errors.length) {
-    target.appendChild(createElement('div', { className: 'pill pill-success' }, ['✅ Senaryo temiz görünüyor']));
+
+  if (!issues.length) {
+    target.appendChild(createElement('div', { className: 'pill pill-success' }, ['✓ Senaryo temiz görünüyor']));
     return;
   }
-  const list = document.createElement('ul');
-  list.className = 'error-list';
-  errors.forEach(err => {
-    const li = document.createElement('li');
-    li.textContent = `Satır ${err.line}: ${err.message}`;
-    list.appendChild(li);
+
+  const errors = issues.filter(issue => issue.severity === 'error');
+  const warnings = issues.filter(issue => issue.severity === 'warning');
+  const summaryParts = [];
+
+  if (errors.length) summaryParts.push(`${errors.length} hata`);
+  if (warnings.length) summaryParts.push(`${warnings.length} uyarı`);
+
+  const panel = createElement('div', { className: 'script-feedback' });
+  panel.appendChild(createElement('div', { className: 'script-feedback-header' }, [
+    createElement('strong', {}, [summaryParts.join(' · ')]),
+    createElement('button', {
+      type: 'button',
+      className: 'secondary btn-sm',
+      onClick: () => focusHelpTarget('commandHelpAccordion'),
+    }, ['Komut Yardımı']),
+  ]));
+
+  const list = createElement('div', { className: 'script-feedback-list' });
+  issues.slice(0, 6).forEach(issue => {
+    list.appendChild(renderIssueCard(issue));
   });
-  target.appendChild(list);
+
+  if (issues.length > 6) {
+    list.appendChild(createElement('div', { className: 'script-feedback-more' }, [
+      `${issues.length - 6} geri bildirim daha var. Önce üstteki satırları düzeltin.`
+    ]));
+  }
+
+  panel.appendChild(list);
+  target.appendChild(panel);
+}
+
+function renderIssueCard(issue) {
+  const severityClass = issue.severity === 'warning' ? 'warning' : 'error';
+  const label = issue.severity === 'warning' ? 'Uyarı' : 'Hata';
+  const card = createElement('div', { className: `script-issue ${severityClass}` });
+
+  card.appendChild(createElement('div', { className: 'script-issue-title' }, [
+    createElement('span', { className: 'script-issue-line' }, [`Satır ${issue.line}`]),
+    createElement('span', { className: 'script-issue-severity' }, [label]),
+  ]));
+
+  card.appendChild(createElement('div', { className: 'script-issue-message' }, [issue.message]));
+
+  if (issue.suggestion) {
+    card.appendChild(createElement('div', { className: 'script-issue-suggestion' }, [issue.suggestion]));
+  }
+
+  if (issue.example) {
+    card.appendChild(createElement('code', { className: 'script-issue-example' }, [issue.example]));
+  }
+
+  return card;
+}
+
+function focusHelpTarget(targetId) {
+  const target = $(targetId);
+  if (!target) return;
+
+  if (target.tagName === 'DETAILS') {
+    target.open = true;
+  }
+
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  target.classList.add('focus-flash');
+  window.setTimeout(() => target.classList.remove('focus-flash'), 1200);
 }
 
 /* ========================================

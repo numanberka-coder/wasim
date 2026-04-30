@@ -853,8 +853,9 @@ function initTutorials() {
 }
 
 function playWithGoal() {
-  markOnboardingGoal('firstPlay');
-  play();
+  if (play()) {
+    markOnboardingGoal('firstPlay');
+  }
 }
 
 function initOnboardingAndMode() {
