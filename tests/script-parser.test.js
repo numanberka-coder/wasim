@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   parseLine,
   parseScript,
+  parseScriptDetailed,
   tokenizeCommand,
   unquoteWrappedToken,
   parseVoiceDurationToSeconds,
@@ -409,6 +410,51 @@ Ali: Selam!`;
 });
 
 // ========================================
+//   parseScriptDetailed
+// ========================================
+describe('parseScriptDetailed', () => {
+  it('returns events and line-level issues together', () => {
+    const result = parseScriptDetailed(`@add Ali
+@invalid value
+Ali: Merhaba!`);
+
+    expect(result.events).toHaveLength(2);
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0]).toMatchObject({
+      line: 2,
+      severity: 'error',
+      code: 'invalid_command',
+    });
+    expect(result.summary.errors).toBe(1);
+  });
+
+  it('uses a soft default for invalid @typing duration', () => {
+    const result = parseScriptDetailed('@typing Ali abc');
+
+    expect(result.events).toEqual([
+      { type: EventType.TYPING, who: 'Ali', ms: 800 },
+    ]);
+    expect(result.issues[0]).toMatchObject({
+      line: 1,
+      severity: 'warning',
+      code: 'soft_default',
+    });
+  });
+
+  it('does not create an event for missing message text', () => {
+    const result = parseScriptDetailed('Ali: ');
+
+    expect(result.events).toEqual([]);
+    expect(result.issues[0]).toMatchObject({
+      line: 1,
+      severity: 'error',
+      code: 'missing_message',
+    });
+    expect(result.issues[0].example).toBe('Ahmet: Merhaba!');
+  });
+});
+
+// ========================================
 //   validateScript
 // ========================================
 describe('validateScript', () => {
@@ -425,11 +471,9 @@ Ali: Merhaba!
     expect(errors[0].message).toContain('Geçersiz komut');
   });
 
-  it('does not flag trimmed @add/@leave as error (trim removes trailing space)', () => {
-    // '@add ' trimmed → '@add' which passes isValidCommand check
-    // (empty name detection requires space after @add)
-    expect(validateScript('@add ')).toEqual([]);
-    expect(validateScript('@leave ')).toEqual([]);
+  it('detects missing names for @add/@leave', () => {
+    expect(validateScript('@add ')[0].message).toContain('kişi adı gerekli');
+    expect(validateScript('@leave ')[0].message).toContain('kişi adı gerekli');
   });
 
   it('skips interactive mode lines', () => {

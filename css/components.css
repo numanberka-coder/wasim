@@ -912,6 +912,101 @@ label {
   font-size: var(--font-size-sm);
 }
 
+.script-feedback {
+  border: 1px solid rgba(235, 57, 72, 0.35);
+  border-radius: var(--radius-md);
+  background: rgba(235, 57, 72, 0.07);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.script-feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  color: var(--wa-text);
+}
+
+.script-feedback-list {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.script-issue {
+  border: 1px solid rgba(235, 57, 72, 0.26);
+  border-radius: var(--radius-sm);
+  background: rgba(17, 27, 33, 0.45);
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.script-issue.warning {
+  border-color: rgba(251, 191, 36, 0.32);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.script-issue-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--wa-text-secondary);
+}
+
+.script-issue-line {
+  color: var(--wa-text);
+  font-weight: 600;
+}
+
+.script-issue-severity {
+  color: var(--wa-danger);
+  font-weight: 600;
+}
+
+.script-issue.warning .script-issue-severity {
+  color: #fbbf24;
+}
+
+.script-issue-message {
+  color: var(--wa-text);
+  font-size: var(--font-size-sm);
+}
+
+.script-issue-suggestion {
+  color: var(--wa-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+}
+
+.script-issue-example {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: var(--radius-sm);
+  color: var(--wa-green);
+  padding: 7px 9px;
+  font-size: var(--font-size-xs);
+}
+
+.script-feedback-more {
+  color: var(--wa-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.focus-flash {
+  animation: focusFlash 1.2s ease;
+}
+
+@keyframes focusFlash {
+  0%, 100% { box-shadow: none; }
+  30% { box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.22); }
+}
+
 .callout {
   border: 1px dashed var(--wa-divider);
   border-radius: var(--radius-lg);
@@ -1099,4 +1194,33 @@ label {
 .sh-meta {
   color: #8696a0;
   font-style: italic;
+}
+
+.sh-line {
+  display: inline-block;
+  min-width: 100%;
+  margin: 0 -4px;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.sh-line-error {
+  background: rgba(235, 57, 72, 0.16);
+  box-shadow: inset 3px 0 0 var(--wa-danger);
+}
+
+.sh-line-warning {
+  background: rgba(251, 191, 36, 0.14);
+  box-shadow: inset 3px 0 0 #fbbf24;
+}
+
+@media (max-width: 560px) {
+  .script-feedback-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .script-feedback-header button {
+    width: 100%;
+  }
 }

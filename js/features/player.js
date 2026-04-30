@@ -6,7 +6,7 @@ import { $, readFileAsDataURL, Logger, parseSVG } from '../utils.js';
 import { CONFIG } from '../config.js';
 import { state } from '../state.js';
 import { showToast, showError } from '../ui/toast.js';
-import { EventType, parseScript } from './script-parser.js';
+import { EventType, parseScriptDetailed } from './script-parser.js';
 import { addMessage, addSystemMessage, addTypingBubble, removeTypingBubble, clearChat, findMessageByTarget, applyReactionToMessage } from '../phone/messages.js';
 import { renderPeopleList, refreshManualSenderOptions } from './people.js';
 import { syncHeader } from '../phone/header.js';
@@ -14,6 +14,25 @@ import { interactive, disableInteractiveMode, handleInteractiveInput } from './i
 
 // Aktif tik durumu — senaryo içinde @sent/@delivered/@read ile değişir
 let activeTickStatus = null;
+
+function notifyScriptIssues(result) {
+  const summary = result?.summary;
+  if (!summary) return;
+
+  if (summary.errors > 0 && summary.eventCount > 0) {
+    showError(`${summary.errors} hatalı satır atlandı; geçerli satırlar yüklendi.`);
+    return;
+  }
+
+  if (summary.errors > 0) {
+    showError(`${summary.errors} hata bulundu. Senaryoda oynatılacak geçerli satır yok.`);
+    return;
+  }
+
+  if (summary.warnings > 0) {
+    showToast(`${summary.warnings} uyarı düzeltildi; senaryo yüklendi.`);
+  }
+}
 
 
 
@@ -99,7 +118,10 @@ function loadScript() {
 
   if (scriptBox) {
     player.script = scriptBox.value;
-    player.queue = parseScript(scriptBox.value);
+    const parseResult = parseScriptDetailed(scriptBox.value);
+    player.queue = parseResult.events;
+    player.lastParseIssues = parseResult.issues;
+    notifyScriptIssues(parseResult);
   }
 
   if (speedInput) {
@@ -133,6 +155,16 @@ function loadScript() {
     refreshManualSenderOptions();
     renderPeopleList();
   }
+
+  return {
+    events: player.queue || [],
+    issues: player.lastParseIssues || [],
+    summary: {
+      eventCount: (player.queue || []).length,
+      errors: (player.lastParseIssues || []).filter(issue => issue.severity === 'error').length,
+      warnings: (player.lastParseIssues || []).filter(issue => issue.severity === 'warning').length,
+    },
+  };
 }
 
 /**
@@ -145,12 +177,13 @@ function step() {
     loadScript();
   }
 
-  if (player.cursor >= player.queue.length) return;
+  if (player.cursor >= player.queue.length) return false;
 
   const event = player.queue[player.cursor];
   player.cursor++;
 
   handleEvent(event);
+  return true;
 }
 
 /**
@@ -162,6 +195,8 @@ function play() {
   if (!player.queue.length) {
     loadScript();
   }
+
+  if (!player.queue.length) return false;
 
   player.paused = false;
 
@@ -182,6 +217,7 @@ function play() {
   };
 
   tick();
+  return true;
 }
 
 /**

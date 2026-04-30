@@ -139,6 +139,32 @@ describe('Player', () => {
     });
   });
 
+  describe('loadScript', () => {
+    it('keeps valid lines and reports parser issues', () => {
+      document.getElementById('scriptBox').value = `@add Ali
+@typing Ali abc
+@bad nope
+Ali: Merhaba!
+Veli: `;
+
+      const result = player.loadScript();
+      const queue = state.get('player').queue;
+
+      expect(queue).toHaveLength(3);
+      expect(queue[1]).toEqual({
+        type: EventType.TYPING,
+        who: 'Ali',
+        ms: 800,
+      });
+      expect(result.summary).toMatchObject({
+        eventCount: 3,
+        errors: 2,
+        warnings: 1,
+      });
+      expect(result.issues.map(issue => issue.line)).toEqual([2, 3, 5]);
+    });
+  });
+
   describe('pause', () => {
     it('sets paused state', () => {
       player.pause();

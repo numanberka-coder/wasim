@@ -9,6 +9,7 @@ const SyntaxHighlight = (() => {
 
   // Bağlı textarea → overlay eşleşmeleri
   const pairs = [];
+  const issueLinesByTextarea = new Map();
   let debounceTimer = null;
 
   /**
@@ -123,19 +124,31 @@ const SyntaxHighlight = (() => {
       .replace(/>/g, '&gt;');
   }
 
+  function markIssueLine(html, lineNo, issueLines) {
+    const issue = issueLines?.get(lineNo);
+    if (!issue) return html;
+
+    const content = html.endsWith('\n') ? html.slice(0, -1) : html;
+    const cls = issue.severity === 'warning' ? 'sh-line-warning' : 'sh-line-error';
+    return '<span class="sh-line ' + cls + '">' + content + '</span>\n';
+  }
+
   /**
    * Tüm metni renklendir
    */
-  function render(text) {
+  function render(text, issueLines = new Map()) {
     const lines = text.split('\n');
-    return lines.map(highlightLine).join('');
+    return lines
+      .map((line, index) => markIssueLine(highlightLine(line), index + 1, issueLines))
+      .join('');
   }
 
   /**
    * Overlay'i güncelle
    */
   function updateOverlay(textarea, overlay) {
-    const html = render(textarea.value);
+    const issueLines = issueLinesByTextarea.get(textarea.id) || new Map();
+    const html = render(textarea.value, issueLines);
     overlay.innerHTML = html;
 
     // Scroll senkronu
@@ -204,6 +217,26 @@ const SyntaxHighlight = (() => {
     pairs.forEach(p => updateOverlay(p.textarea, p.overlay));
   }
 
+  function setIssues(textareaId, issues) {
+    let targetId = textareaId;
+    let targetIssues = issues;
+
+    if (Array.isArray(textareaId)) {
+      targetId = 'scriptBox';
+      targetIssues = textareaId;
+    }
+
+    const issueLines = new Map();
+    (targetIssues || []).forEach(issue => {
+      if (Number.isFinite(issue.line)) {
+        issueLines.set(issue.line, issue);
+      }
+    });
+
+    issueLinesByTextarea.set(targetId || 'scriptBox', issueLines);
+    refresh();
+  }
+
   /**
    * Başlat
    */
@@ -213,7 +246,7 @@ const SyntaxHighlight = (() => {
   }
 
   // Public API
-  return { init, refresh };
+  return { init, refresh, setIssues };
 })();
 
 /**
