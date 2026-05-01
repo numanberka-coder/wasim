@@ -97,11 +97,26 @@ describe('storage', () => {
 describe('sceneManager', () => {
   describe('save / getAll', () => {
     it('saves a scene', () => {
-      const scene = sceneManager.save('Test Sahne');
+      const scene = sceneManager.save('Test Sahne', { category: 'Eğitim' });
       expect(scene.name).toBe('Test Sahne');
+      expect(scene.category).toBe('Eğitim');
       expect(scene).toHaveProperty('id');
       expect(scene).toHaveProperty('timestamp');
+      expect(scene).toHaveProperty('lastAccessedAt');
       expect(scene).toHaveProperty('data');
+    });
+
+    it('uses Genel category for legacy or invalid categories', () => {
+      const scene = sceneManager.save('Test Sahne', { category: 'Bilinmeyen' });
+      expect(scene.category).toBe('Genel');
+
+      localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify([
+        { id: 1, name: 'Eski Sahne', timestamp: '2026-04-01T10:00:00.000Z', data: {} }
+      ]));
+
+      const all = sceneManager.getAll();
+      expect(all[0].category).toBe('Genel');
+      expect(all[0].lastAccessedAt).toBe('2026-04-01T10:00:00.000Z');
     });
 
     it('getAll returns saved scenes', () => {
@@ -131,10 +146,49 @@ describe('sceneManager', () => {
       const result = sceneManager.load(scene.id);
       expect(result).toBe(true);
       expect(state.get('group.title')).toBe('Sahne Grubu');
+      expect(sceneManager.getLastLoaded().id).toBe(scene.id);
     });
 
     it('returns false for non-existent id', () => {
       expect(sceneManager.load(99999)).toBe(false);
+    });
+  });
+
+  describe('recent and metadata', () => {
+    it('returns recent scenes sorted by last access time', () => {
+      localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify([
+        { id: 1, name: 'Eski', timestamp: '2026-04-01T10:00:00.000Z', lastAccessedAt: '2026-04-01T10:00:00.000Z', data: {} },
+        { id: 2, name: 'Yeni', timestamp: '2026-04-01T11:00:00.000Z', lastAccessedAt: '2026-04-03T10:00:00.000Z', data: {} },
+        { id: 3, name: 'Orta', timestamp: '2026-04-01T12:00:00.000Z', lastAccessedAt: '2026-04-02T10:00:00.000Z', data: {} }
+      ]));
+
+      const recent = sceneManager.getRecent(2);
+      expect(recent.map(scene => scene.name)).toEqual(['Yeni', 'Orta']);
+    });
+
+    it('updates scene metadata', () => {
+      const scene = sceneManager.save('Metadata');
+      const updated = sceneManager.updateMetadata(scene.id, {
+        category: 'Müşteri Destek',
+        lastAccessedAt: '2026-04-30T10:00:00.000Z'
+      });
+
+      expect(updated.category).toBe('Müşteri Destek');
+      expect(updated.lastAccessedAt).toBe('2026-04-30T10:00:00.000Z');
+      expect(sceneManager.getAll()[0].category).toBe('Müşteri Destek');
+    });
+
+    it('tracks the last loaded scene', () => {
+      const scene = sceneManager.save('Son Yuklenen');
+      sceneManager.setLastLoaded(scene.id);
+
+      const lastLoaded = sceneManager.getLastLoaded();
+      expect(lastLoaded.id).toBe(scene.id);
+      expect(lastLoaded.name).toBe('Son Yuklenen');
+    });
+
+    it('returns false when updating missing scene metadata', () => {
+      expect(sceneManager.updateMetadata(99999, { category: 'Reklam' })).toBe(false);
     });
   });
 
@@ -143,6 +197,13 @@ describe('sceneManager', () => {
       const scene = sceneManager.save('Silinecek');
       sceneManager.delete(scene.id);
       expect(sceneManager.getAll()).toHaveLength(0);
+    });
+
+    it('clears last loaded scene when it is deleted', () => {
+      const scene = sceneManager.save('Silinecek');
+      sceneManager.setLastLoaded(scene.id);
+      sceneManager.delete(scene.id);
+      expect(sceneManager.getLastLoaded()).toBe(null);
     });
   });
 

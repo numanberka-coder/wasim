@@ -6,7 +6,7 @@
 import { $, escapeHtml, isValidUrl, nowTime, readFileAsDataURL, clamp, Logger, createElement } from './utils.js';
 import { CONFIG, THEME_DEFAULTS, DEFAULT_PEOPLE, DEFAULT_SCRIPT, SCRIPT_TEMPLATES } from './config.js';
 import { state } from './state.js';
-import { storage, sceneManager, initAutoSave } from './storage.js';
+import { storage, sceneManager, initAutoSave, SCENE_CATEGORIES } from './storage.js';
 
 
 // UI Modules
@@ -99,6 +99,8 @@ function init() {
   // Init script helpers after forms are ready
   try { initScriptTools(); } catch (e) { Logger.error('initScriptTools hatası:', e); }
 
+  populateSceneCategoryOptions();
+
   // Apply saved theme
   const savedTheme = state.get('settings.theme') || 'dark';
   try { applyTheme(savedTheme); } catch (e) { Logger.error('applyTheme hatası:', e); }
@@ -109,7 +111,7 @@ function init() {
 
   // Render scene list + event delegation
   initSceneListDelegation();
-  renderSceneList();
+  renderSceneUx();
 
   // Initialize mobile module (Faz 8)
   initMobile();
@@ -565,11 +567,13 @@ function bindEventHandlers() {
       showError('Sahne adı boş bırakılamaz.');
       return;
     }
-    sceneManager.save(name);
+    sceneManager.save(name, { category: $('sceneCategoryInput')?.value });
     input.value = '';
-    renderSceneList();
+    renderSceneUx();
     showSuccess('Sahne kaydedildi!');
   });
+
+  bindInput('sceneSearchInput', renderSceneList);
 
   bindEvent('sceneNameInput', 'keydown', (e) => {
     if (e.key === 'Enter') {
@@ -641,6 +645,14 @@ function updateMessageTimeModeUI() {
 function setInputValue(id, value) {
   const el = $(id);
   if (el) el.value = value ?? '';
+}
+
+function populateSceneCategoryOptions() {
+  const select = $('sceneCategoryInput');
+  if (!select || select.options.length > 0) return;
+  select.replaceChildren(...SCENE_CATEGORIES.map(category => (
+    createElement('option', { value: category }, [category])
+  )));
 }
 
 function setTextContent(id, text) {
@@ -762,19 +774,121 @@ function applyFullState() {
   applyAllTypography();
 }
 
+function renderSceneUx() {
+  renderLastScenePrompt();
+  renderRecentScenes();
+  renderSceneList();
+}
+
+function getSceneSearchQuery() {
+  return ($('sceneSearchInput')?.value || '').trim().toLocaleLowerCase('tr-TR');
+}
+
+function sceneMatchesQuery(scene, query) {
+  if (!query) return true;
+  const haystack = `${scene.name || ''} ${scene.category || ''}`.toLocaleLowerCase('tr-TR');
+  return haystack.includes(query);
+}
+
+function formatSceneTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const dateStr = date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  return `${dateStr} ${timeStr}`;
+}
+
+function createSceneBadge(scene) {
+  return createElement('span', { className: 'scene-category' }, [scene.category || 'Genel']);
+}
+
+function loadSceneById(id) {
+  if (!Number.isFinite(id)) return;
+  if (!confirm('Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.')) return;
+  const ok = sceneManager.load(id);
+  if (ok) {
+    applyFullState();
+    renderSceneUx();
+    showSuccess('Sahne yüklendi!');
+  }
+}
+
+function createQuickSceneButton(scene) {
+  return createElement('button', {
+    type: 'button',
+    className: 'scene-quick-btn',
+    title: `${scene.name} yükle`,
+    onClick: () => loadSceneById(Number(scene.id)),
+  }, [
+    createElement('span', { className: 'scene-quick-name' }, [scene.name]),
+    createElement('span', { className: 'scene-quick-meta' }, [scene.category || 'Genel'])
+  ]);
+}
+
+function renderRecentScenes() {
+  const container = $('recentScenes');
+  if (!container) return;
+
+  const recent = sceneManager.getRecent(5);
+  if (recent.length === 0) {
+    container.hidden = true;
+    container.replaceChildren();
+    return;
+  }
+
+  container.hidden = false;
+  container.replaceChildren(
+    createElement('div', { className: 'scene-section-label' }, ['Son 5 sahne']),
+    createElement('div', { className: 'scene-quick-items' }, recent.map(createQuickSceneButton))
+  );
+}
+
+function renderLastScenePrompt() {
+  const container = $('lastScenePrompt');
+  if (!container) return;
+
+  const scene = sceneManager.getLastLoaded();
+  if (!scene) {
+    container.hidden = true;
+    container.replaceChildren();
+    return;
+  }
+
+  container.hidden = false;
+  container.replaceChildren(
+    createElement('div', { className: 'scene-last-info' }, [
+      createElement('span', { className: 'scene-last-label' }, ['Son yüklenen sahne']),
+      createElement('strong', {}, [scene.name]),
+      createElement('span', { className: 'scene-last-date' }, [formatSceneTimestamp(scene.lastAccessedAt)])
+    ]),
+    createElement('button', {
+      type: 'button',
+      className: 'btn-sm scene-last-load',
+      onClick: () => loadSceneById(Number(scene.id)),
+    }, ['Geri Yükle'])
+  );
+}
+
 function renderSceneList() {
   const container = $('sceneList');
   if (!container) return;
 
   const scenes = sceneManager.getAll();
+  const query = getSceneSearchQuery();
+  const filteredScenes = scenes.filter(scene => sceneMatchesQuery(scene, query));
 
   if (scenes.length === 0) {
     container.replaceChildren(createElement('p', { className: 'hint' }, ['Henüz kaydedilmiş sahne yok.']));
     return;
   }
 
+  if (filteredScenes.length === 0) {
+    container.replaceChildren(createElement('p', { className: 'hint' }, ['Aramayla eşleşen sahne yok.']));
+    return;
+  }
+
   container.replaceChildren();
-  for (const scene of scenes) {
+  for (const scene of filteredScenes) {
     const date = new Date(scene.timestamp);
     const dateStr = date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const timeStr = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
@@ -782,6 +896,7 @@ function renderSceneList() {
     container.appendChild(createElement('div', { className: 'scene-item', dataset: { sceneId: scene.id } }, [
       createElement('div', { className: 'scene-info' }, [
         createElement('span', { className: 'scene-name' }, [scene.name]),
+        createSceneBadge(scene),
         createElement('span', { className: 'scene-date' }, [`${dateStr} ${timeStr}`])
       ]),
       createElement('div', { className: 'scene-actions' }, [
@@ -805,6 +920,7 @@ function initSceneListDelegation() {
       const ok = sceneManager.load(id);
       if (ok) {
         applyFullState();
+        renderSceneUx();
         showSuccess('Sahne yüklendi!');
       }
       return;
@@ -815,7 +931,7 @@ function initSceneListDelegation() {
       const id = Number(deleteBtn.dataset.sceneId);
       if (!confirm('Bu sahneyi silmek istediğinizden emin misiniz?')) return;
       sceneManager.delete(id);
-      renderSceneList();
+      renderSceneUx();
       showSuccess('Sahne silindi!');
     }
   });

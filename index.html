@@ -627,8 +627,15 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <label for="sceneNameInput">Sahne Adı</label>
               <div class="form-row">
                 <input type="text" id="sceneNameInput" placeholder="Sahne adı girin...">
+                <select id="sceneCategoryInput" aria-label="Sahne kategorisi"></select>
                 <button type="button" id="saveSceneBtn" class="btn-sm">💾 Kaydet</button>
               </div>
+            </div>
+            <div id="lastScenePrompt" class="scene-last-prompt" hidden></div>
+            <div id="recentScenes" class="scene-quick-list"></div>
+            <div class="form-group scene-search-group">
+              <label for="sceneSearchInput">Sahne Ara</label>
+              <input type="search" id="sceneSearchInput" placeholder="İsim veya kategori ara...">
             </div>
             <div id="sceneList" class="scene-list"></div>
           </div>
