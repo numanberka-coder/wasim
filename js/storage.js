@@ -6,6 +6,30 @@ import { state } from './state.js';
 import { CONFIG } from './config.js';
 import { debounce, safeJsonParse, downloadFile, Logger } from './utils.js';
 
+export const SCENE_CATEGORIES = ['Genel', 'Reklam', 'Eğitim', 'Müşteri Destek', 'Topluluk'];
+const DEFAULT_SCENE_CATEGORY = SCENE_CATEGORIES[0];
+const LAST_SCENE_KEY = `${CONFIG.SCENES_KEY}_last_loaded`;
+
+function normalizeSceneCategory(category) {
+  const value = String(category || '').trim();
+  return SCENE_CATEGORIES.includes(value) ? value : DEFAULT_SCENE_CATEGORY;
+}
+
+function normalizeScene(scene) {
+  const timestamp = scene?.timestamp || new Date(0).toISOString();
+  return {
+    ...scene,
+    name: String(scene?.name || 'Adsız Sahne').trim() || 'Adsız Sahne',
+    category: normalizeSceneCategory(scene?.category),
+    timestamp,
+    lastAccessedAt: scene?.lastAccessedAt || timestamp,
+  };
+}
+
+function sceneTimeValue(scene, key) {
+  const time = Date.parse(scene?.[key] || '');
+  return Number.isNaN(time) ? 0 : time;
+}
 
 
 
@@ -123,7 +147,8 @@ export const sceneManager = {
   getAll() {
     try {
       const raw = localStorage.getItem(CONFIG.SCENES_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const scenes = raw ? JSON.parse(raw) : [];
+      return Array.isArray(scenes) ? scenes.map(normalizeScene) : [];
     } catch (e) {
       Logger.warn('Scene load error:', e);
       return [];
@@ -135,7 +160,7 @@ export const sceneManager = {
    */
   _save(scenes) {
     try {
-      localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify(scenes));
+      localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify(scenes.map(normalizeScene)));
     } catch (e) {
       Logger.warn('Scene save error:', e);
     }
@@ -144,12 +169,15 @@ export const sceneManager = {
   /**
    * Mevcut state'i isimli sahne olarak kaydet
    */
-  save(name) {
+  save(name, options = {}) {
     const scenes = this.getAll();
+    const now = new Date().toISOString();
     const scene = {
       id: Date.now(),
       name: name.trim(),
-      timestamp: new Date().toISOString(),
+      category: normalizeSceneCategory(options.category),
+      timestamp: now,
+      lastAccessedAt: now,
       data: state.export()
     };
     scenes.unshift(scene);
@@ -166,9 +194,66 @@ export const sceneManager = {
     const scene = scenes.find(s => s.id === id);
     if (!scene) return false;
     state.import(scene.data);
+    this.setLastLoaded(id);
     storage.save();
     Logger.info('🎬 Scene loaded:', scene.name);
     return true;
+  },
+
+  /**
+   * Hizli erisim icin son kullanilan sahneleri getir
+   */
+  getRecent(limit = 5) {
+    return this.getAll()
+      .sort((a, b) => {
+        const accessedDiff = sceneTimeValue(b, 'lastAccessedAt') - sceneTimeValue(a, 'lastAccessedAt');
+        if (accessedDiff !== 0) return accessedDiff;
+        return sceneTimeValue(b, 'timestamp') - sceneTimeValue(a, 'timestamp');
+      })
+      .slice(0, limit);
+  },
+
+  getLastLoaded() {
+    try {
+      const id = Number(localStorage.getItem(LAST_SCENE_KEY));
+      if (!id) return null;
+      const scene = this.getAll().find(s => s.id === id);
+      if (!scene) {
+        localStorage.removeItem(LAST_SCENE_KEY);
+        return null;
+      }
+      return scene;
+    } catch (e) {
+      Logger.warn('Last scene load error:', e);
+      return null;
+    }
+  },
+
+  setLastLoaded(id) {
+    const scene = this.updateMetadata(id, { lastAccessedAt: new Date().toISOString() });
+    if (!scene) return false;
+    try {
+      localStorage.setItem(LAST_SCENE_KEY, String(id));
+    } catch (e) {
+      Logger.warn('Last scene save error:', e);
+    }
+    return true;
+  },
+
+  updateMetadata(id, patch = {}) {
+    const scenes = this.getAll();
+    const scene = scenes.find(s => s.id === id);
+    if (!scene) return false;
+
+    if (Object.prototype.hasOwnProperty.call(patch, 'category')) {
+      scene.category = normalizeSceneCategory(patch.category);
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'lastAccessedAt')) {
+      scene.lastAccessedAt = patch.lastAccessedAt || scene.lastAccessedAt;
+    }
+
+    this._save(scenes);
+    return scene;
   },
 
   /**
@@ -178,6 +263,13 @@ export const sceneManager = {
     const scenes = this.getAll();
     const filtered = scenes.filter(s => s.id !== id);
     this._save(filtered);
+    if (this.getLastLoaded()?.id === id) {
+      try {
+        localStorage.removeItem(LAST_SCENE_KEY);
+      } catch {
+        // no-op
+      }
+    }
     Logger.info('🎬 Scene deleted');
     return true;
   },

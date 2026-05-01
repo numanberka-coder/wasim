@@ -1,93 +1,143 @@
-# Faz 32 - Hata Mesajlari & Yardimci Geri Bildirim
+# Faz 33 - Sahne Yonetimi UX Iyilestirmeleri
 
 > Tarih: 2026-04-30
-> Branch: codex/faz-32
-> Kaynak: ROADMAP4.md / Faz 32
+> Branch: codex/faz-33
+> Kaynak: ROADMAP.md / Faz 14, ROADMAP4.md / Faz 33
 > Durum: Tamamlandi
 
 ---
 
 ## Roadmap Ozeti
 
-Faz 32'nin hedefi senaryo hatalarini sadece "gecersiz" diye gostermek degil,
-kullanicinin hatali satiri, nedeni, duzeltme yolunu ve ornek dogru formati
-tek bakista gorebilmesini saglamak.
+Faz 33, mevcut sahne kaydet/yukle/sil temelini daha hizli kullanilir hale
+getirir. Hedef yeni bir veri modeli icat etmek degil; kayitli sahnelere daha
+hizli donmek, son calisilan sahneyi istege bagli geri yuklemek, sahneleri
+kategoriyle ayirmak ve liste buyudugunde arama ile filtrelemektir.
 
 Kapsam:
-- 32.1 Satir bazli parse hatasi gosterimi
-- 32.2 Ornek duzeltme onerisi
-- 32.3 Yumusak dogrulama
-- 32.4 Yardim paneli baglantisi
+- 33.1 Son 5 sahne kisa erisim
+- 33.2 Son sahneyi geri yukle onerisi
+- 33.3 Sahne etiketi/kategori
+- 33.4 Sahne arama
 
 Etkilenen dosyalar:
-- `js/features/script-parser.js`
-- `js/ui/highlight.js`
-- `js/features/player.js`
+- `js/storage.js`
 - `js/app.js`
 - `index.html`
 - `css/components.css`
-- `tests/script-parser.test.js`
+- `tests/storage.test.js`
+
+---
+
+## Mevcut Durum
+
+- `sceneManager.save(name)` sahneyi `CONFIG.SCENES_KEY` altinda localStorage'a
+  en basa ekliyor.
+- `sceneManager.load(id)` state'i yukluyor ancak son yuklenen sahneyi veya
+  erisim zamanini kaydetmiyor.
+- `renderSceneList()` tum sahneleri tek liste halinde gosteriyor.
+- Sahne panelinde yalnizca isim girisi, Kaydet, Yukle ve Sil aksiyonlari var.
+- ROADMAP.md Faz 14 sahne yonetimi temelini tamamlanmis kabul ediyor; Faz 33 bu
+  temelin UX hizlandirmasi olacak.
 
 ---
 
 ## Mimari Karar
 
-- Parser tarafinda mevcut `parseScript(text)` davranisi korunacak, ancak ayni
-  kaynaktan detayli sonuc almak icin yeni bir `parseScriptDetailed(text)` API'si
-  eklenecek.
-- Hatalar "fatal" ve "warning" olarak ayrilacak. Fatal satirlar kuyruga alinmaz;
-  warning satirlarda guvenli varsayilan ile oynatma devam eder.
-- Syntax highlight overlay, satir numarasina gore hata/warning satirlarini
-  isaretleyebilecek sekilde genisletilecek.
-- Senaryo editorunun altina kompakt bir geri bildirim paneli eklenecek.
-  Panel; satir, neden, onerilen format ve Komut Yardimi'na kisa gecis sunacak.
-- Mevcut buton akisi korunacak: `Yukle`, `Adim`, `Oynat` ayni kalacak; sadece
-  yukleme sirasinda daha iyi geri bildirim uretilecek.
+- Sahne kayit formatini geriye uyumlu genislet:
+  - `category`: kullanici secimi veya bos kategori.
+  - `lastAccessedAt`: kaydetme/yukleme sirasinda guncellenen hizli erisim sirasi.
+- `sceneManager` icine kucuk yardimci API'ler ekle:
+  - `getRecent(limit = 5)`
+  - `getLastLoaded()`
+  - `setLastLoaded(id)`
+  - `updateMetadata(id, patch)`
+- Mevcut `load(id)` davranisini koru; basarili yuklemede son sahne bilgisini ve
+  erisim zamanini kaydet.
+- UI state'i global state'e karistirma; arama metni sadece DOM uzerinden
+  filtrelensin.
+- Kategori icin sabit, sade secenekler kullan:
+  - Genel
+  - Reklam
+  - Eğitim
+  - Müşteri Destek
+  - Topluluk
+- Son sahne onerisi, mevcut state'i otomatik ezmesin. Kullanici acikca "Geri
+  Yukle" derse sahne yuklensin.
 
 ---
 
 ## Gorevler
 
-- [x] 1. `script-parser.js` icinde komut tanimlarini merkezi hale getir.
-- [x] 2. `parseScriptDetailed(text)` ekle: events + issues + summary donsun.
-- [x] 3. Satir bazli fatal hatalari yakala: gecersiz komut, eksik isim, eksik URL/dosya, eksik mesaj metni.
-- [x] 4. Yumusak dogrulama ekle: `@typing` sure gecersizse 800ms ile warning verip devam et.
-- [x] 5. Hatalara ornek duzeltme onerisi ve yardim hedefi ekle.
-- [x] 6. `player.loadScript()` icinde detayli parser sonucunu kullan.
-- [x] 7. Senaryo editoru altina parse geri bildirim paneli ekle.
-- [x] 8. `highlight.js` overlay'inde hatali satir/warning satiri isaretle.
-- [x] 9. Komut Yardimi'na baglanti/odak aksiyonu ekle.
-- [x] 10. CSS ile hata paneli, satir isaretleri ve mobil gorunumleri duzenle.
-- [x] 11. Parser testlerini Faz 32 davranislariyla genislet.
-- [x] 12. `npm.cmd test` ve `npm.cmd run build` ile dogrula.
+- [x] 1. `storage.js` icinde sahne metadata yardimcilarini ekle ve eski sahne
+      kayitlariyla geriye uyumlulugu koru.
+- [x] 2. `sceneManager.save(name, options)` ile kategori kaydini destekle.
+- [x] 3. Basarili sahne yuklemede son yuklenen sahneyi ve `lastAccessedAt`
+      bilgisini guncelle.
+- [x] 4. Sahne paneline kategori secimi, arama kutusu, son 5 sahne kisa erisim
+      alani ve son sahne geri yukleme onerisi ekle.
+- [x] 5. `app.js` icinde scene render akisini ayir:
+      - tam liste render
+      - son sahneler render
+      - son sahne onerisi render
+      - ortak yukleme yardimcisi
+- [x] 6. Sahne aramasini isim ve kategori uzerinden filtrele.
+- [x] 7. Sahne kartlarinda kategori rozetini ve son erisim/kayit tarihini
+      okunakli goster.
+- [x] 8. CSS ile yeni sahne kontrollerini kompakt, mobil uyumlu ve mevcut panel
+      diline uygun hale getir.
+- [x] 9. `tests/storage.test.js` icinde metadata, son sahne ve son 5 sahne
+      davranislarini kapsa.
+- [x] 10. Dogrulama:
+      - `node --check js/storage.js`
+      - `node --check js/app.js`
+      - `npm.cmd test`
+      - `npm.cmd run build`
 
 ---
 
 ## Kabul Kriterleri
 
-- Gecersiz komut girildiginde kullanici hatali satiri ve dogru ornek formati gorur.
-- Eksik argumanli komutlar sessizce bozuk event uretmez.
-- Kritik olmayan `@typing Ahmet abc` gibi durumlarda oynatma tamamen durmaz;
-  800ms varsayilaniyla devam eder ve warning gosterilir.
-- Hata panelindeki yardim aksiyonu kullaniciyi Komut Yardimi bolumune goturur.
-- Mevcut parser roundtrip testleri bozulmaz.
-- Build ve testler gecmeden Faz 32 tamam sayilmaz.
+- Kullanici son 5 sahneyi tek tikla gorebilir ve yukleyebilir.
+- Uygulama acilisinda son yuklenen sahne varsa otomatik yukleme yapmadan geri
+  yukleme onerisi gosterir.
+- Yeni kaydedilen sahne kategori bilgisiyle saklanir ve listede rozet olarak
+  gorunur.
+- Eski kategori bilgisi olmayan sahneler bozulmadan "Genel" gibi guvenli bir
+  varsayilanla gorunur.
+- Sahne arama isim ve kategori metninde calisir.
+- Sahne silme/yukleme akisi mevcut confirm ve toast davranisini korur.
+- Test ve build gecmeden Faz 33 tamam sayilmaz.
+
+---
+
+## Elegance Check
+
+- En sade cozum, sahne ozelliklerini mevcut `sceneManager` icinde tutmak ve yeni
+  UI kontrol durumlarini global state'e tasimamaktir.
+- Ayrica bir sahne servisi veya framework eklemek gereksiz olur; veri localStorage
+  tabanli ve kapsam kucuk.
+- Geriye uyumluluk icin eski sahneleri migrate etmek yerine okuma sirasinda
+  normalize etmek daha dusuk riskli.
 
 ---
 
 ## Review
 
-- `parseScriptDetailed(text)` eklendi; parser artik events + issues + summary donduruyor.
-- Gecersiz komut, eksik arguman ve eksik mesaj metni satir bazli error olarak yakalaniyor.
-- `@typing Ali abc` gibi kritik olmayan hatalar 800ms varsayilanla warning olarak devam ediyor.
-- Senaryo editoru altindaki geri bildirim paneli satir, hata/uyari tipi, neden, onerilen cozum ve ornek format gosteriyor.
-- Syntax highlight overlay hata satirlarini kirmizi, warning satirlarini sari isaretliyor.
-- `player.loadScript()` detayli parser sonucuyla calisiyor; hatali satirlari kuyruga almadan gecerli satirlari oynatabiliyor.
-- Dogrulama:
-  - `node --check js/features/script-parser.js`
-  - `node --check js/features/player.js`
-  - `node --check js/features/script-builder.js`
-  - `node --check js/ui/highlight.js`
-  - `npm.cmd test` -> 7 test dosyasi, 195 test gecti
+- Uygulama onayi alindi; Faz 33 implementasyonu basladi.
+- Storage metadata API'leri eklendi: kategori, son erisim, son yuklenen sahne ve
+  son 5 sahne siralamasi.
+- `tests/storage.test.js` Faz 33 davranislariyla genisletildi.
+- Sahne paneline kategori secimi, son sahne onerisi, son 5 hizli erisim ve
+  isim/kategori aramasi eklendi.
+- Sahne listesi kartlari kategori rozetiyle genisletildi; yukleme/silme
+  sonrasinda tum sahne UX alanlari tazeleniyor.
+- CSS yeni kontroller icin kompakt ve mobil uyumlu hale getirildi.
+- Hedefli dogrulama:
+  - `node --check js/storage.js`
+  - `node --check js/app.js`
+  - `npm.cmd test -- tests/storage.test.js` -> 24 test gecti
+- Final dogrulama:
+  - `npm.cmd test` -> 7 test dosyasi, 201 test gecti
   - `npm.cmd run build` -> Vite build basarili
-  - Browser DOM kontrolu -> bozuk senaryoda `2 hata · 1 uyari`, 2 error highlight ve 1 warning highlight gorundu; console error yok
+  - Vite dev server -> `http://127.0.0.1:5174/` HTTP 200
