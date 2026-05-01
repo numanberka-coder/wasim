@@ -401,6 +401,7 @@ Ali: Nasılsın?`;
   it('skips interactive mode syntax', () => {
     const script = `#selamlasma
 trigger: merhaba
+alias: selam, yardim
 ---
 Ali: Selam!`;
     const events = parseScript(script);

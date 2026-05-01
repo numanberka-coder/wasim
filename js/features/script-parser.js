@@ -507,7 +507,7 @@ export function parseVoiceDurationToSeconds(token) {
 export function parseLine(line) {
   try {
   // Skip interactive mode syntax lines (#block, trigger:, ---)
-  if (line.startsWith('#') || line === '---' || /^trigger\s*:/i.test(line)) {
+  if (line.startsWith('#') || line === '---' || /^(trigger|alias)\s*:/i.test(line)) {
     return null;
   }
 

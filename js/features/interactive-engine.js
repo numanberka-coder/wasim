@@ -21,7 +21,175 @@ const interactive = {
   blocks: [],       // parsed blocks: { name, triggers, events }
   defaultBlock: null,
   busy: false,      // true while a block is playing
+  matchOptions: {
+    contains: false,
+    scoreFallback: false,
+    debug: false,
+  },
+  lastMatch: null,
 };
+
+const MATCH_TYPE_PRIORITY = {
+  exact: 3,
+  contains: 2,
+  score: 1,
+};
+
+function normalizeMatchText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function parseMatchTerms(raw) {
+  const seen = new Set();
+  const terms = [];
+
+  String(raw || '')
+    .split(',')
+    .map(normalizeMatchText)
+    .filter(Boolean)
+    .forEach((term) => {
+      if (!seen.has(term)) {
+        seen.add(term);
+        terms.push(term);
+      }
+    });
+
+  return terms;
+}
+
+function getBlockMatchTerms(block) {
+  const terms = [];
+
+  for (const trigger of block.triggers || []) {
+    if (trigger !== '*') {
+      terms.push({ term: trigger, source: 'trigger' });
+    }
+  }
+
+  for (const alias of block.aliases || []) {
+    terms.push({ term: alias, source: 'alias' });
+  }
+
+  return terms;
+}
+
+function tokenizeForScore(value) {
+  return normalizeMatchText(value)
+    .split(/\s+/)
+    .map(token => token.trim())
+    .filter(token => token.length > 1);
+}
+
+function calculateTokenScore(input, term) {
+  const inputTokens = tokenizeForScore(input);
+  const termTokens = tokenizeForScore(term);
+
+  if (!inputTokens.length || !termTokens.length) return 0;
+
+  const inputSet = new Set(inputTokens);
+  const termSet = new Set(termTokens);
+  let overlap = 0;
+
+  for (const token of termSet) {
+    if (inputSet.has(token)) overlap++;
+  }
+
+  if (overlap === 0) return 0;
+  return overlap / Math.max(inputSet.size, termSet.size);
+}
+
+function createMatchResult(block, type, termInfo, score, blockIndex, termIndex) {
+  return {
+    block,
+    type,
+    term: termInfo?.term || '',
+    source: termInfo?.source || '',
+    score,
+    blockIndex,
+    termIndex,
+    isDefault: false,
+  };
+}
+
+function compareMatchResults(a, b) {
+  const priorityDiff = MATCH_TYPE_PRIORITY[b.type] - MATCH_TYPE_PRIORITY[a.type];
+  if (priorityDiff !== 0) return priorityDiff;
+
+  const scoreDiff = b.score - a.score;
+  if (scoreDiff !== 0) return scoreDiff;
+
+  const lengthDiff = b.term.length - a.term.length;
+  if (lengthDiff !== 0) return lengthDiff;
+
+  const blockDiff = a.blockIndex - b.blockIndex;
+  if (blockDiff !== 0) return blockDiff;
+
+  return a.termIndex - b.termIndex;
+}
+
+function evaluateInteractiveMatch(userInput, blocks, defaultBlock = null, options = {}) {
+  const input = normalizeMatchText(userInput);
+  if (!input) return null;
+
+  const matchOptions = {
+    contains: false,
+    scoreFallback: false,
+    ...options,
+  };
+
+  const candidates = [];
+
+  blocks.forEach((block, blockIndex) => {
+    if (block.isDefault) return;
+
+    const terms = getBlockMatchTerms(block);
+    terms.forEach((termInfo, termIndex) => {
+      if (termInfo.term === input) {
+        candidates.push(createMatchResult(block, 'exact', termInfo, 1, blockIndex, termIndex));
+        return;
+      }
+
+      if (
+        matchOptions.contains
+        && termInfo.term.length >= 2
+        && (input.includes(termInfo.term) || (input.length >= 3 && termInfo.term.includes(input)))
+      ) {
+        const coverage = Math.min(termInfo.term.length, input.length) / Math.max(termInfo.term.length, input.length);
+        candidates.push(createMatchResult(block, 'contains', termInfo, coverage, blockIndex, termIndex));
+        return;
+      }
+
+      if (matchOptions.scoreFallback) {
+        const score = calculateTokenScore(input, termInfo.term);
+        if (score > 0) {
+          candidates.push(createMatchResult(block, 'score', termInfo, score, blockIndex, termIndex));
+        }
+      }
+    });
+  });
+
+  if (candidates.length > 0) {
+    return candidates.sort(compareMatchResults)[0];
+  }
+
+  if (defaultBlock) {
+    return {
+      block: defaultBlock,
+      type: 'default',
+      term: '*',
+      source: 'default',
+      score: 0,
+      blockIndex: blocks.indexOf(defaultBlock),
+      termIndex: -1,
+      isDefault: true,
+    };
+  }
+
+  return null;
+}
 
 /**
  * Parse interactive script into blocks
@@ -84,14 +252,12 @@ function parseBlockBody(name, body) {
   const isDefault = triggerRaw === '*';
 
   // Parse triggers (comma separated, case-insensitive)
-  const triggers = isDefault
-    ? ['*']
-    : triggerRaw
-        .split(',')
-        .map(t => t.trim().toLowerCase())
-        .filter(Boolean);
+  const triggers = isDefault ? ['*'] : parseMatchTerms(triggerRaw);
 
   if (triggers.length === 0) return null;
+
+  const aliasMatch = body.match(/^alias\s*:\s*(.+)$/im);
+  const aliases = isDefault || !aliasMatch ? [] : parseMatchTerms(aliasMatch[1]);
 
   // Find separator ---
   const sepIndex = body.indexOf('---');
@@ -106,6 +272,7 @@ function parseBlockBody(name, body) {
   return {
     name,
     triggers,
+    aliases,
     isDefault,
     events,
   };
@@ -179,7 +346,7 @@ function parsePipeLine(line) {
  * Find matching block for user input
  * Case-insensitive exact match
  */
-function findMatchingBlock(userInput) {
+function findExactMatchingBlock(userInput) {
   const input = String(userInput || '').trim().toLowerCase();
   if (!input) return null;
 
@@ -196,6 +363,26 @@ function findMatchingBlock(userInput) {
 
   // No exact match — return default block if exists
   return interactive.defaultBlock || null;
+}
+
+function findMatchingBlock(userInput) {
+  const result = evaluateInteractiveMatch(
+    userInput,
+    interactive.blocks,
+    interactive.defaultBlock,
+    interactive.matchOptions,
+  );
+  return result?.block || null;
+}
+
+function readMatchOptionsFromUI() {
+  interactive.matchOptions = {
+    contains: !!$('interactiveContainsMatch')?.checked,
+    scoreFallback: !!$('interactiveScoreFallback')?.checked,
+    debug: !!$('interactiveDebugToggle')?.checked,
+  };
+  updateInteractiveDebug();
+  return interactive.matchOptions;
 }
 
 /**
@@ -219,6 +406,8 @@ function enableInteractiveMode(sourceText) {
   interactive.defaultBlock = defaultBlock;
   interactive.enabled = true;
   interactive.busy = false;
+  interactive.lastMatch = null;
+  readMatchOptionsFromUI();
 
   // Reset chat
   state.clearActive();
@@ -261,6 +450,7 @@ function disableInteractiveMode() {
   interactive.blocks = [];
   interactive.defaultBlock = null;
   interactive.busy = false;
+  interactive.lastMatch = null;
 
   updateInteractiveModeUI(false);
   showSuccess('İnteraktif mod kapatıldı.');
@@ -285,9 +475,46 @@ function updateInteractiveModeUI(enabled) {
 
   if (normalControls) normalControls.style.display = enabled ? 'none' : '';
   if (interactiveInfo) interactiveInfo.style.display = enabled ? 'block' : 'none';
+  updateInteractiveDebug();
 
   // Composer placeholder her zaman "Mesaj" kalır — gerçekçilik için
   // (interaktif mod aktifken bile WhatsApp görünümü bozulmamalı)
+}
+
+function updateInteractiveDebug() {
+  const panel = $('interactiveMatchDebug');
+  if (!panel) return;
+
+  const shouldShow = interactive.enabled && interactive.matchOptions.debug;
+  panel.style.display = shouldShow ? 'grid' : 'none';
+
+  if (!shouldShow) return;
+
+  const inputEl = $('interactiveDebugInput');
+  const blockEl = $('interactiveDebugBlock');
+  const typeEl = $('interactiveDebugType');
+  const scoreEl = $('interactiveDebugScore');
+  const match = interactive.lastMatch;
+
+  if (!match) {
+    if (inputEl) inputEl.textContent = '-';
+    if (blockEl) blockEl.textContent = 'Henuz eslesme yok';
+    if (typeEl) typeEl.textContent = '-';
+    if (scoreEl) scoreEl.textContent = '-';
+    return;
+  }
+
+  if (inputEl) inputEl.textContent = match.input || '-';
+  if (blockEl) blockEl.textContent = match.block ? `#${match.block.name}` : 'Eslesme yok';
+  if (typeEl) {
+    const source = match.source && match.source !== 'default' ? ` / ${match.source}` : '';
+    typeEl.textContent = `${match.type}${source}`;
+  }
+  if (scoreEl) {
+    scoreEl.textContent = match.type === 'default'
+      ? 'fallback'
+      : `${match.term || '-'} (${Math.round((match.score || 0) * 100)}%)`;
+  }
 }
 
 /**
@@ -297,7 +524,23 @@ function updateInteractiveModeUI(enabled) {
 function handleInteractiveInput(userText) {
   if (!interactive.enabled || interactive.busy) return;
 
-  const block = findMatchingBlock(userText);
+  readMatchOptionsFromUI();
+  const match = evaluateInteractiveMatch(
+    userText,
+    interactive.blocks,
+    interactive.defaultBlock,
+    interactive.matchOptions,
+  );
+  const block = match?.block || null;
+  interactive.lastMatch = match ? { ...match, input: userText } : {
+    input: userText,
+    block: null,
+    type: 'none',
+    term: '',
+    source: '',
+    score: 0,
+  };
+  updateInteractiveDebug();
 
   if (!block) {
     // No match and no default — just show user message, no response
@@ -352,7 +595,7 @@ function getInteractiveSummary() {
   for (const block of interactive.blocks) {
     const triggers = block.isDefault
       ? '* (varsayılan)'
-      : block.triggers.join(', ');
+      : [...block.triggers, ...(block.aliases || []).map(alias => `~${alias}`)].join(', ');
     lines.push(`<b>#${block.name}</b> → ${triggers}`);
   }
   return lines.join('<br>');
@@ -362,6 +605,11 @@ function getInteractiveSummary() {
  * Initialize interactive engine
  */
 function initInteractive() {
+  ['interactiveContainsMatch', 'interactiveScoreFallback', 'interactiveDebugToggle'].forEach((id) => {
+    const control = $(id);
+    if (control) control.addEventListener('change', readMatchOptionsFromUI);
+  });
+
   // Toggle button (reads from interactiveScriptBox)
   const toggleBtn = $('interactiveToggleBtn');
   if (toggleBtn) toggleBtn.addEventListener('click', () => {
@@ -389,6 +637,12 @@ function initInteractive() {
 
 export {
   interactive,
+  parseInteractiveScript,
+  parseBlockBody,
+  normalizeMatchText,
+  calculateTokenScore,
+  evaluateInteractiveMatch,
+  findMatchingBlock,
   enableInteractiveMode,
   disableInteractiveMode,
   handleInteractiveInput,
