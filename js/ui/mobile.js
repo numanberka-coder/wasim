@@ -52,7 +52,7 @@ const PANEL_MAP = {
 /** Panel key → overlay başlık */
 const PANEL_TITLES = {
   scriptEditor: 'Senaryo',
-  group: 'Grup & Kişiler',
+  group: 'Hazırla',
   settings: 'Ayarlar',
 };
 
@@ -224,7 +224,7 @@ function handleMobileAction(action) {
       triggerMobileFileLoad();
       break;
     case 'clear':
-      if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz?')) return;
+      if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz? Bu işlem senaryo, kişiler ve ayarları temizler.')) return;
       mobileClearAll();
       break;
   }
