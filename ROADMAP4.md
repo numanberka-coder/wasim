@@ -17,8 +17,13 @@
 7. [Faz 33 — Sahne Yönetimi UX İyileştirmeleri](#-faz-33--sahne-yönetimi-ux-iyileştirmeleri)
 8. [Faz 34 — Ölçümleme (Analytics) & Karar Desteği](#-faz-34--ölçümleme-analytics--karar-desteği)
 9. [Faz 35 — İnteraktif Mod Akıllı Eşleştirme (Opsiyonel)](#-faz-35--i̇nteraktif-mod-akıllı-eşleştirme-opsiyonel)
-10. [Öncelik Özeti](#öncelik-özeti)
-11. [Uygulama Sırası](#uygulama-sırası)
+10. [Faz 36 — Menü Mantığı & Sıralama Disiplini](#-faz-36--menü-mantığı--sıralama-disiplini)
+11. [Faz 37 — Masaüstü Menü & Panel Düzeni](#-faz-37--masaüstü-menü--panel-düzeni)
+12. [Faz 38 — Mobil Menü & Overlay Deneyimi](#-faz-38--mobil-menü--overlay-deneyimi)
+13. [Faz 39 — Ortak Menü Modeli & Basit/Pro Kuralları](#-faz-39--ortak-menü-modeli--basitpro-kuralları)
+14. [Faz 40 — Menü Erişilebilirliği, Test & Doğrulama](#-faz-40--menü-erişilebilirliği-test--doğrulama)
+15. [Öncelik Özeti](#öncelik-özeti)
+16. [Uygulama Sırası](#uygulama-sırası)
 
 ---
 
@@ -149,6 +154,76 @@ Proje teknik açıdan olgun: modüler mimari, test altyapısı, performans optim
 
 ---
 
+## 🧭 Faz 36 — Menü Mantığı & Sıralama Disiplini
+> *Menü önce kullanıcının iş akışını anlatmalı, modül yapısını değil*
+
+| # | İyileştirme | Detay | Öncelik |
+|---|---|---|---|
+| 36.1 | **Ana menü sırası standardı** | `Hazırla → Senaryo → Oynat → Çıktı → Ayarlar → Veri İşlemleri` sırası tüm yüzeylerde temel alınır | 🔴 |
+| 36.2 | **Aksiyon ağırlığı ayrımı** | Panel açan öğeler, oynatma aksiyonları, çıktı/kayıt aksiyonları ve veri işlemleri ayrı gruplara alınır | 🔴 |
+| 36.3 | **Veri İşlemleri dili** | “Tehlikeli işlemler” yerine kullanıcı dostu “Veri İşlemleri” veya “Dikkat Gerektirenler” çerçevesi kullanılır | 🟡 |
+| 36.4 | **Sıfırla anlamı netliği** | Oynatma reset'i `Oynat` grubunda kalır; tüm veriyi silen akış ayrı ve onaylı tutulur | 🟡 |
+
+**Etkilenen dosyalar:** `index.html` · `js/ui/mobile.js` · `css/layout.css` · `css/responsive.css`
+
+---
+
+## 🖥️ Faz 37 — Masaüstü Menü & Panel Düzeni
+> *Sol panel ve üst aksiyon bar, kullanıcının üretim sırasını takip etmeli*
+
+| # | İyileştirme | Detay | Öncelik |
+|---|---|---|---|
+| 37.1 | **Görev odaklı ana navigasyon** | Grup/Senaryo/Ayarlar yapısı, kullanıcı dilinde Hazırla/Senaryo/Ayarlar akışına yaklaştırılır | 🔴 |
+| 37.2 | **Üst aksiyon bar sadeleşmesi** | Telefon modu + ölçek, oynatma, çıktı/kayıt ve veri işlemleri görsel olarak gruplanır | 🔴 |
+| 37.3 | **Accordion sırası düzeni** | Grup, senaryo ve ayar panellerinde sık kullanılan bölümler yukarı, gelişmiş/teknik bölümler aşağı alınır | 🟡 |
+| 37.4 | **Gelişmiş öğeleri geriye alma** | JSON düzenleme, manuel gönderim ve teknik ayarlar Pro/ileri kullanıcı bağlamında konumlanır | 🟡 |
+
+**Etkilenen dosyalar:** `index.html` · `css/panels.css` · `css/layout.css` · `js/ui/tabs.js`
+
+---
+
+## 📱 Faz 38 — Mobil Menü & Overlay Deneyimi
+> *Mobil menü dar bir liste değil, hızlı ve dokunmatik dostu bir çalışma kapısı olmalı*
+
+| # | İyileştirme | Detay | Öncelik |
+|---|---|---|---|
+| 38.1 | **Gruplu mobil menü** | Üç nokta menüsü Hazırla, Senaryo, Oynat, Çıktı, Ayarlar ve Veri İşlemleri gruplarına ayrılır | 🔴 |
+| 38.2 | **Dokunmatik dostu sunum** | Uzun dropdown yerine daha rahat taranan gruplu menü veya bottom-sheet yaklaşımı değerlendirilir | 🟡 |
+| 38.3 | **Masaüstüyle aynı zihinsel model** | Mobil sıra ve isimlendirme masaüstüyle uyumlu tutulur | 🔴 |
+| 38.4 | **Overlay taşıma davranışını koruma** | Mevcut panel DOM taşıma yaklaşımı korunur; büyük form yapıları yeniden yazılmaz | 🟢 |
+
+**Etkilenen dosyalar:** `index.html` · `js/ui/mobile.js` · `css/responsive.css`
+
+---
+
+## 🧩 Faz 39 — Ortak Menü Modeli & Basit/Pro Kuralları
+> *Menü dağınıklığı tekrar oluşmasın diye tanımlar tek yerde yaşamalı*
+
+| # | İyileştirme | Detay | Öncelik |
+|---|---|---|---|
+| 39.1 | **Merkezi menü tanımı** | Menü öğeleri id, başlık, grup, aksiyon tipi, hedef ve görünürlük bilgisiyle tek modelden beslenir | 🟡 |
+| 39.2 | **Masaüstü/mobil ortak kaynak** | Mobil ve masaüstü menüler aynı sıralama ve adlandırmayı kullanır | 🟡 |
+| 39.3 | **Basit/Pro görünürlük kuralı** | Basit Mod temel üretim akışını gösterir; Pro öğeler aynı sıranın içinde kontrollü açılır | 🔴 |
+| 39.4 | **Aksiyon handler tekrarını azaltma** | Oynat, duraklat, kaydet, yükle, ekran al gibi aksiyonlar kopyalanmadan çağrılır | 🟡 |
+
+**Etkilenen dosyalar:** `js/ui/menu-model.js` (yeni) · `js/ui/mobile.js` · `js/ui/tabs.js` · `index.html`
+
+---
+
+## ✅ Faz 40 — Menü Erişilebilirliği, Test & Doğrulama
+> *Daha düzenli menü, test ve erişilebilirlik olmadan tamam sayılmaz*
+
+| # | İyileştirme | Detay | Öncelik |
+|---|---|---|---|
+| 40.1 | **Aktif durum ve ARIA** | Menüde aktif öğe, panel ilişkisi, `aria-selected`/`aria-expanded` ve açıklayıcı etiketler netleştirilir | 🟡 |
+| 40.2 | **Klavye ve kapanma davranışı** | Tab/ok gezinmesi, Escape, backdrop ve geri tuşu davranışları doğrulanır | 🟡 |
+| 40.3 | **Menü sırası testleri** | Beklenen grup sırası, Basit/Pro görünürlük ve aksiyon eşleşmeleri unit testlerle korunur | 🔴 |
+| 40.4 | **Tarayıcı sanity check** | Masaüstü ve mobil viewport'ta menü açma, panel geçişi, çıktı ve veri işlemleri elle doğrulanır | 🔴 |
+
+**Etkilenen dosyalar:** `tests/` · `js/ui/menu-model.js` · `js/ui/mobile.js` · `index.html`
+
+---
+
 ## Öncelik Özeti
 
 | Faz | Kapsam | Zorluk | Etki | Bağımlılık |
@@ -161,6 +236,11 @@ Proje teknik açıdan olgun: modüler mimari, test altyapısı, performans optim
 | **Faz 33** | Sahne UX | 🟢/🟡 Küçük-Orta | ⭐⭐⭐ | Faz 29 sonrası |
 | **Faz 34** | Ölçümleme | 🟡 Orta | ⭐⭐⭐⭐ | Faz 29 sonrası |
 | **Faz 35** | İnteraktif Akıllı Eşleşme | 🟡 Orta | ⭐⭐⭐ | Opsiyonel |
+| **Faz 36** | Menü Mantığı & Sıralama | 🟢 Küçük-Orta | ⭐⭐⭐⭐⭐ | Faz 35 sonrası |
+| **Faz 37** | Masaüstü Menü Düzeni | 🟡 Orta | ⭐⭐⭐⭐ | Faz 36 |
+| **Faz 38** | Mobil Menü & Overlay | 🟡 Orta | ⭐⭐⭐⭐ | Faz 36 |
+| **Faz 39** | Ortak Menü Modeli | 🟡 Orta | ⭐⭐⭐⭐ | Faz 37/38 sonrası ideal |
+| **Faz 40** | Menü Test & Erişilebilirlik | 🟡 Orta | ⭐⭐⭐⭐ | Faz 39 |
 
 ---
 
@@ -174,6 +254,11 @@ Proje teknik açıdan olgun: modüler mimari, test altyapısı, performans optim
 6. **Faz 33** — sahne yönetimi UX hızlandırmaları
 7. **Faz 34** — analytics ve karar döngüsü
 8. **Faz 35** — interaktif akıllı eşleştirme (opsiyonel)
+9. **Faz 36** — menü mantığı ve sıralama disiplinini netleştirme
+10. **Faz 37** — masaüstü menü ve panel düzenini toparlama
+11. **Faz 38** — mobil menü ve overlay deneyimini iyileştirme
+12. **Faz 39** — ortak menü modeli ve Basit/Pro kurallarını merkezileştirme
+13. **Faz 40** — menü erişilebilirliği, test ve tarayıcı doğrulaması
 
 ---
 
@@ -184,6 +269,10 @@ Proje teknik açıdan olgun: modüler mimari, test altyapısı, performans optim
 - Onboarding terk oranı ↓
 - Şablon kullanım oranı ↑
 - Hata sonrası başarıya dönüş oranı ↑
+- İlk 5 dakikada doğru menü/panele ulaşma oranı ↑
+- Mobil menüden panel açma başarısı ↑
+- Veri silme gibi geri alınması zor aksiyonlarda yanlış tıklama riski ↓
+- Basit/Pro modda menü keşfedilebilirliği ↑
 
 ---
 
