@@ -40,8 +40,8 @@ placeholder yorumla degistirdigi goruldu.
       - `npm.cmd run build`
 - [x] 8. Git diff'i kontrol et; yalniz hedef dosyalarin staged oldugundan emin
       ol.
-- [ ] 9. Commit at ve branch'i GitHub'a pushla.
-- [ ] 10. Remote branch SHA'sini dogrula.
+- [x] 9. Commit at ve branch'i GitHub'a pushla.
+- [x] 10. Remote branch SHA'sini dogrula.
 
 ---
 
@@ -75,3 +75,6 @@ placeholder yorumla degistirdigi goruldu.
 - `npm.cmd run build` sonucu: Vite build basarili.
 - Staged kapsam yalniz `.github/workflows/test.yml` ve `tasks/todo.md`; untracked
   `AGENTS.md` commit kapsamina alinmadi.
+- `ci: restore test workflow steps` commit'i pushlandi ve remote branch SHA'si
+  `2fbac1e93ad51a7b15074d9cf72e50e863245d3f` olarak dogrulandi.
+- GitHub Actions run `25236967621` tamamlandi ve `success` sonucu verdi.
