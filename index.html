@@ -435,6 +435,7 @@
             <pre class="sh-overlay" aria-hidden="true"></pre>
             <textarea id="interactiveScriptBox" class="script-editor" rows="10" placeholder="#selamlasma
 trigger: merhaba, selam, hey
+alias: destek lazim, yardim eder misin
 ---
 @typing Destek 800
 Destek: Merhaba! 👋 Size nasıl yardımcı olabilirim?
@@ -453,11 +454,44 @@ Destek: Bunu anlayamadım 🤔"></textarea>
             <span id="interactiveBadge" class="badge badge-success" style="display:none;">AKTİF</span>
           </div>
 
+          <div class="interactive-match-options" aria-label="Interaktif eslesme ayarlari">
+            <label class="interactive-match-option">
+              <input id="interactiveContainsMatch" type="checkbox">
+              <span>Contains eslesme</span>
+            </label>
+            <label class="interactive-match-option">
+              <input id="interactiveScoreFallback" type="checkbox">
+              <span>Skor fallback</span>
+            </label>
+            <label class="interactive-match-option">
+              <input id="interactiveDebugToggle" type="checkbox">
+              <span>Debug</span>
+            </label>
+          </div>
+
           <div id="interactiveInfo" style="display:none;">
             <p class="hint" style="margin:6px 0 4px;">
               Telefon ekranındaki mesaj alanına tetikleyici kelimeyi yazıp gönderin.<br>
               Karakter otomatik cevap verecek.
             </p>
+            <div id="interactiveMatchDebug" class="interactive-match-debug" style="display:none;">
+              <div>
+                <span>Girdi</span>
+                <strong id="interactiveDebugInput">-</strong>
+              </div>
+              <div>
+                <span>Blok</span>
+                <strong id="interactiveDebugBlock">-</strong>
+              </div>
+              <div>
+                <span>Tip</span>
+                <strong id="interactiveDebugType">-</strong>
+              </div>
+              <div>
+                <span>Skor</span>
+                <strong id="interactiveDebugScore">-</strong>
+              </div>
+            </div>
           </div>
 
           <details class="accordion" style="margin-top: 12px;">
@@ -469,6 +503,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <div style="background: rgba(20,30,38,0.8); border: 1px solid var(--wa-divider); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; line-height: 1.8; color: var(--wa-text-secondary);">
                 <code style="color: var(--wa-green);">#blok_adi</code><br>
                 <code>trigger: kelime1, kelime2</code><br>
+                <code>alias: benzer ifade, diger soylem</code><br>
                 <code>---</code><br>
                 <code>Ahmet | 14:02 | Merhaba!</code><br><br>
                 <code style="color: var(--wa-green);">#default</code><br>

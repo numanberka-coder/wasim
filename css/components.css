@@ -463,6 +463,67 @@ label {
   margin-top: 10px;
 }
 
+.interactive-match-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.interactive-match-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 6px 9px;
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-sm);
+  background: var(--wa-header);
+  color: var(--wa-text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.interactive-match-option input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--wa-green);
+}
+
+.interactive-match-debug {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.interactive-match-debug > div {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-sm);
+  background: var(--wa-header);
+}
+
+.interactive-match-debug span,
+.interactive-match-debug strong {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.interactive-match-debug span {
+  margin-bottom: 2px;
+  color: var(--wa-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.interactive-match-debug strong {
+  color: var(--wa-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
 .guide-title {
   font-size: 11px;
   font-weight: 600;
