@@ -27,6 +27,9 @@ export const THEME_DEFAULTS = {
 export const CONFIG = {
   STORAGE_KEY: 'whatsapp_simulator_v2',
   SCENES_KEY: 'whatsapp_simulator_scenes',
+  ANALYTICS_KEY: 'whatsapp_simulator_analytics_v1',
+  ANALYTICS_RETENTION_DAYS: 30,
+  ANALYTICS_MAX_EVENTS: 1000,
   AUTO_SAVE_INTERVAL: 30000,
   TYPING_BASE_MS: 400,
   TYPING_CHAR_MS: 30,

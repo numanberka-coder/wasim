@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CONFIG } from '../js/config.js';
 
 // We need to test storage in isolation — re-import fresh instances
-let storage, sceneManager, state;
+let storage, sceneManager, analyticsManager, state;
 
 beforeEach(async () => {
   localStorage.clear();
@@ -15,11 +15,13 @@ beforeEach(async () => {
   const storageModule = await import('../js/storage.js');
   storage = storageModule.storage;
   sceneManager = storageModule.sceneManager;
+  analyticsManager = storageModule.analyticsManager;
   state = stateModule.state;
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 // ========================================
@@ -219,5 +221,98 @@ describe('sceneManager', () => {
     it('returns false for non-existent id', () => {
       expect(sceneManager.rename(99999, 'Test')).toBe(false);
     });
+  });
+});
+
+// ========================================
+//   analyticsManager
+// ========================================
+describe('analyticsManager', () => {
+  it('tracks anonymous events and filters sensitive metadata', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-01T12:00:00.000Z'));
+
+    const event = analyticsManager.track('Play Button!', {
+      source: 'toolbar',
+      eventCount: 3,
+      script: 'Me: hassas metin',
+      messageText: 'gizli mesaj',
+      longLabel: 'x'.repeat(120),
+    });
+
+    expect(event.name).toBe('play_button');
+    const events = analyticsManager.getEvents();
+    expect(events).toHaveLength(1);
+    expect(events[0].metadata.source).toBe('toolbar');
+    expect(events[0].metadata.eventCount).toBe(3);
+    expect(events[0].metadata.script).toBeUndefined();
+    expect(events[0].metadata.messageText).toBeUndefined();
+    expect(events[0].metadata.longLabel).toHaveLength(80);
+  });
+
+  it('returns an empty list for invalid analytics storage', () => {
+    localStorage.setItem(CONFIG.ANALYTICS_KEY, 'not json');
+    expect(analyticsManager.getEvents()).toEqual([]);
+  });
+
+  it('prunes events outside the retention window', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-01T12:00:00.000Z'));
+
+    localStorage.setItem(CONFIG.ANALYTICS_KEY, JSON.stringify([
+      { id: 'old', name: 'play', timestamp: '2026-03-15T12:00:00.000Z', metadata: {} },
+      { id: 'fresh', name: 'screenshot', timestamp: '2026-04-25T12:00:00.000Z', metadata: {} },
+    ]));
+
+    expect(analyticsManager.getEvents().map(event => event.id)).toEqual(['fresh']);
+  });
+
+  it('builds a seven day usage summary', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-01T12:00:00.000Z'));
+
+    analyticsManager.track('play');
+    analyticsManager.track('screenshot');
+    analyticsManager.track('scene_save');
+    analyticsManager.track('template_load');
+
+    const summary = analyticsManager.getSummary(7);
+    expect(summary.totalEvents).toBe(4);
+    expect(summary.actions.play).toBe(1);
+    expect(summary.actions.screenshot).toBe(1);
+    expect(summary.actions.sceneSave).toBe(1);
+    expect(summary.actions.templateLoad).toBe(1);
+    expect(Object.keys(summary.dailyCounts)).toHaveLength(7);
+    expect(summary.dailyCounts['2026-05-01']).toBe(4);
+  });
+
+  it('summarizes onboarding drop-off and completion', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-01T12:00:00.000Z'));
+
+    analyticsManager.recordOnboardingStep(1, 'opened');
+    analyticsManager.recordOnboardingStep(1, 'viewed');
+    analyticsManager.recordOnboardingStep(2, 'advanced');
+
+    const inProgress = analyticsManager.getOnboardingFunnel(7);
+    expect(inProgress.status).toBe('in_progress');
+    expect(inProgress.dropOffStep).toBe(2);
+    expect(inProgress.stepCounts[1]).toBe(2);
+
+    analyticsManager.recordOnboardingStep(3, 'completed');
+    const completed = analyticsManager.getOnboardingFunnel(7);
+    expect(completed.status).toBe('completed');
+    expect(completed.dropOffStep).toBe(null);
+    expect(completed.completed).toBe(1);
+  });
+
+  it('clears only analytics data', () => {
+    localStorage.setItem(CONFIG.STORAGE_KEY, '{"ok":true}');
+    analyticsManager.track('play');
+
+    analyticsManager.clear();
+
+    expect(analyticsManager.getEvents()).toEqual([]);
+    expect(localStorage.getItem(CONFIG.STORAGE_KEY)).toBe('{"ok":true}');
   });
 });

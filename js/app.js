@@ -6,7 +6,7 @@
 import { $, escapeHtml, isValidUrl, nowTime, readFileAsDataURL, clamp, Logger, createElement } from './utils.js';
 import { CONFIG, THEME_DEFAULTS, DEFAULT_PEOPLE, DEFAULT_SCRIPT, SCRIPT_TEMPLATES } from './config.js';
 import { state } from './state.js';
-import { storage, sceneManager, initAutoSave, SCENE_CATEGORIES } from './storage.js';
+import { storage, sceneManager, analyticsManager, initAutoSave, SCENE_CATEGORIES } from './storage.js';
 
 
 // UI Modules
@@ -36,6 +36,13 @@ import { initAutocomplete } from './features/autocomplete.js';
 const APP_MODE_KEY = 'wa_sim_app_mode';
 const ONBOARDING_KEY = 'wa_sim_onboarding_seen_v1';
 const GOAL_KEY = 'wa_sim_onboarding_goals_v1';
+const ANALYTICS_SUMMARY_DAYS = 7;
+const ONBOARDING_STATUS_TEXT = {
+  not_started: 'Başlamadı',
+  in_progress: 'Yarım kaldı',
+  skipped: 'Geçildi',
+  completed: 'Tamamlandı',
+};
 
 function safeStorageGet(key) {
   try {
@@ -130,6 +137,11 @@ function init() {
 
   // Onboarding + Basit/Pro mod (Faz 29)
   initOnboardingAndMode();
+
+  trackUsage('app_open', {
+    hasSavedState: Boolean(hasData),
+    mode: safeStorageGet(APP_MODE_KEY) || 'simple',
+  });
 
   Logger.info('✅ WhatsApp Simulator ready!');
 }
@@ -306,7 +318,7 @@ const CLICK_MAP = [
   ['applyJsonBtn',      applyPeopleFromJson],
   ['refreshJsonBtn',    refreshPeopleJson],
   // Player
-  ['loadBtn',           loadScript],
+  ['loadBtn',           loadScriptWithAnalytics],
   ['stepBtn',           step],
   ['playBtn',           playWithGoal],
   ['pauseBtn',          pause],
@@ -567,13 +579,31 @@ function bindEventHandlers() {
       showError('Sahne adı boş bırakılamaz.');
       return;
     }
-    sceneManager.save(name, { category: $('sceneCategoryInput')?.value });
+    const scene = sceneManager.save(name, { category: $('sceneCategoryInput')?.value });
+    trackUsage('scene_save', { category: scene.category });
     input.value = '';
     renderSceneUx();
     showSuccess('Sahne kaydedildi!');
   });
 
   bindInput('sceneSearchInput', renderSceneList);
+
+  bindClick('loadInteractiveDemoBtn', () => {
+    trackUsage('template_load', { source: 'interactive_demo', templateId: 'interactive-demo' });
+  });
+
+  bindClick('groupBuilderPlayBtn', () => {
+    trackUsage('group_builder_play', { source: 'group_builder' });
+  });
+
+  bindClick('refreshAnalyticsBtn', renderAnalyticsPanel);
+
+  bindClick('clearAnalyticsBtn', () => {
+    if (!confirm('Yerel kullanım özetini temizlemek istediğinizden emin misiniz?')) return;
+    analyticsManager.clear();
+    renderAnalyticsPanel();
+    showSuccess('Kullanım özeti temizlendi!');
+  });
 
   bindEvent('sceneNameInput', 'keydown', (e) => {
     if (e.key === 'Enter') {
@@ -686,6 +716,91 @@ function clampInputValue(input, min, max, fallback, message = '') {
   return clamped;
 }
 
+// === LOCAL ANALYTICS ===
+
+function trackUsage(name, metadata = {}) {
+  try {
+    analyticsManager.track(name, metadata);
+    renderAnalyticsPanel();
+  } catch (e) {
+    Logger.warn('Analytics track error:', e);
+  }
+}
+
+function trackOnboardingStep(step, action) {
+  try {
+    analyticsManager.recordOnboardingStep(step, action);
+    renderAnalyticsPanel();
+  } catch (e) {
+    Logger.warn('Onboarding analytics error:', e);
+  }
+}
+
+function loadScriptWithAnalytics(source = 'button') {
+  const result = loadScript();
+  trackUsage('script_load', {
+    source,
+    eventCount: result?.summary?.eventCount || 0,
+    errors: result?.summary?.errors || 0,
+    warnings: result?.summary?.warnings || 0,
+  });
+  return result;
+}
+
+function createAnalyticsMetric(label, value, detail = '') {
+  return createElement('div', { className: 'analytics-metric' }, [
+    createElement('span', { className: 'analytics-metric-label' }, [label]),
+    createElement('strong', { className: 'analytics-metric-value' }, [String(value)]),
+    ...(detail ? [createElement('span', { className: 'analytics-metric-detail' }, [detail])] : []),
+  ]);
+}
+
+function formatOnboardingDrop(funnel) {
+  if (funnel.status === 'completed') return 'Rehber tamamlandı';
+  if (funnel.status === 'not_started') return 'Henüz rehber sinyali yok';
+  const step = funnel.dropOffStep ? `Adım ${funnel.dropOffStep}` : 'İlk adım';
+  return funnel.status === 'skipped' ? `${step} sonrası geçildi` : `${step} civarında kaldı`;
+}
+
+function renderAnalyticsPanel() {
+  const container = $('analyticsSummary');
+  if (!container) return;
+
+  const summary = analyticsManager.getSummary(ANALYTICS_SUMMARY_DAYS);
+  const sceneActions = summary.actions.sceneSave + summary.actions.sceneLoad + summary.actions.sceneDelete;
+  const dailyTotal = Object.values(summary.dailyCounts).reduce((sum, count) => sum + count, 0);
+  const statusText = ONBOARDING_STATUS_TEXT[summary.onboarding.status] || summary.onboarding.status;
+
+  container.replaceChildren();
+
+  if (summary.totalEvents === 0) {
+    container.appendChild(createElement('div', { className: 'analytics-empty' }, [
+      'Henüz yerel kullanım verisi yok.'
+    ]));
+    return;
+  }
+
+  container.appendChild(createElement('div', { className: 'analytics-metric-grid' }, [
+    createAnalyticsMetric('Toplam', summary.totalEvents, `Son ${summary.days} gün`),
+    createAnalyticsMetric('Oynat', summary.actions.play),
+    createAnalyticsMetric('Ekran', summary.actions.screenshot),
+    createAnalyticsMetric('Sahne', sceneActions),
+    createAnalyticsMetric('Şablon', summary.actions.templateLoad + summary.actions.groupBuilderPlay),
+    createAnalyticsMetric('Rehber', statusText),
+  ]));
+
+  container.appendChild(createElement('div', { className: 'analytics-funnel' }, [
+    createElement('span', { className: 'analytics-funnel-label' }, ['Onboarding']),
+    createElement('strong', {}, [formatOnboardingDrop(summary.onboarding)]),
+    createElement('span', { className: 'analytics-metric-detail' }, [`${dailyTotal} olay / ${summary.days} gün`]),
+  ]));
+
+  container.appendChild(createElement('div', { className: 'analytics-recommendation' }, [
+    createElement('span', { className: 'analytics-funnel-label' }, ['Karar desteği']),
+    createElement('strong', {}, [summary.recommendation]),
+  ]));
+}
+
 // === PHONE-ONLY MODE ===
 
 let phoneOnlyActive = false;
@@ -753,6 +868,7 @@ async function takeScreenshot() {
     link.click();
 
     markOnboardingGoal('firstScreenshot');
+    trackUsage('screenshot', { source: phoneOnlyActive ? 'phone_only' : 'action_bar' });
     showSuccess('Ekran görüntüsü indirildi!');
   } catch (err) {
     console.error('Screenshot error:', err);
@@ -802,13 +918,14 @@ function createSceneBadge(scene) {
   return createElement('span', { className: 'scene-category' }, [scene.category || 'Genel']);
 }
 
-function loadSceneById(id) {
+function loadSceneById(id, source = 'list') {
   if (!Number.isFinite(id)) return;
   if (!confirm('Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.')) return;
   const ok = sceneManager.load(id);
   if (ok) {
     applyFullState();
     renderSceneUx();
+    trackUsage('scene_load', { source });
     showSuccess('Sahne yüklendi!');
   }
 }
@@ -818,7 +935,7 @@ function createQuickSceneButton(scene) {
     type: 'button',
     className: 'scene-quick-btn',
     title: `${scene.name} yükle`,
-    onClick: () => loadSceneById(Number(scene.id)),
+    onClick: () => loadSceneById(Number(scene.id), 'recent'),
   }, [
     createElement('span', { className: 'scene-quick-name' }, [scene.name]),
     createElement('span', { className: 'scene-quick-meta' }, [scene.category || 'Genel'])
@@ -864,7 +981,7 @@ function renderLastScenePrompt() {
     createElement('button', {
       type: 'button',
       className: 'btn-sm scene-last-load',
-      onClick: () => loadSceneById(Number(scene.id)),
+      onClick: () => loadSceneById(Number(scene.id), 'last_prompt'),
     }, ['Geri Yükle'])
   );
 }
@@ -921,6 +1038,7 @@ function initSceneListDelegation() {
       if (ok) {
         applyFullState();
         renderSceneUx();
+        trackUsage('scene_load', { source: 'list' });
         showSuccess('Sahne yüklendi!');
       }
       return;
@@ -931,6 +1049,7 @@ function initSceneListDelegation() {
       const id = Number(deleteBtn.dataset.sceneId);
       if (!confirm('Bu sahneyi silmek istediğinizden emin misiniz?')) return;
       sceneManager.delete(id);
+      trackUsage('scene_delete', { source: 'list' });
       renderSceneUx();
       showSuccess('Sahne silindi!');
     }
@@ -971,6 +1090,8 @@ function initTutorials() {
 function playWithGoal() {
   if (play()) {
     markOnboardingGoal('firstPlay');
+    const player = state.get('player') || {};
+    trackUsage('play', { source: 'main_controls', eventCount: player.queue?.length || 0 });
   }
 }
 
@@ -978,7 +1099,7 @@ function initOnboardingAndMode() {
   const savedMode = safeStorageGet(APP_MODE_KEY) || 'simple';
   applyAppMode(savedMode);
 
-  bindChange('appModeToggle', (e) => applyAppMode(e.target.value));
+  bindChange('appModeToggle', (e) => applyAppMode(e.target.value, true));
   bindClick('reopenOnboardingBtn', () => openOnboarding(true));
 
   refreshGoalUI();
@@ -991,11 +1112,14 @@ function initOnboardingAndMode() {
   }
 }
 
-function applyAppMode(mode) {
+function applyAppMode(mode, shouldTrack = false) {
   const safeMode = mode === 'pro' ? 'pro' : 'simple';
   safeStorageSet(APP_MODE_KEY, safeMode);
   document.body.classList.toggle('simple-mode', safeMode === 'simple');
   setInputValue('appModeToggle', safeMode);
+  if (shouldTrack) {
+    trackUsage('mode_change', { mode: safeMode });
+  }
   setTextContent('modeBadge', safeMode === 'simple' ? '✨ Basit Mod' : '🛠️ Pro Mod');
 
   const activeTab = document.querySelector('.tab.active');
@@ -1021,6 +1145,7 @@ function markOnboardingGoal(goal) {
   if (!Object.prototype.hasOwnProperty.call(goals, goal)) return;
   goals[goal] = true;
   safeStorageSet(GOAL_KEY, JSON.stringify(goals));
+  trackUsage('onboarding_goal', { goal });
   refreshGoalUI();
 }
 
@@ -1073,9 +1198,11 @@ function openOnboarding(force = false) {
     stepEl.textContent = String(currentStep + 1);
     nextBtn.textContent = step.nextLabel;
     refreshGoalUI();
+    trackOnboardingStep(currentStep + 1, 'viewed');
   };
 
-  const close = () => {
+  const close = (action = 'completed') => {
+    trackOnboardingStep(currentStep + 1, action);
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
     safeStorageSet(ONBOARDING_KEY, '1');
@@ -1085,17 +1212,19 @@ function openOnboarding(force = false) {
 
   nextBtn.onclick = () => {
     if (currentStep >= steps.length - 1) {
-      close();
+      close('completed');
       return;
     }
+    trackOnboardingStep(currentStep + 1, 'advanced');
     currentStep += 1;
     renderStep();
   };
-  skipBtn.onclick = close;
+  skipBtn.onclick = () => close('skipped');
 
   if (force) safeStorageRemove(ONBOARDING_KEY);
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
+  trackOnboardingStep(1, 'opened');
   renderStep();
 }
 
