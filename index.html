@@ -55,7 +55,7 @@
           <button id="loadAllBtn" class="action-btn action-btn-icon" title="Yükle">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </button>
-          <button id="clearAllBtn" class="action-btn action-btn-icon action-btn-danger" title="Sıfırla">
+          <button id="clearAllBtn" class="action-btn action-btn-icon action-btn-danger" title="Tüm Veriyi Sil" aria-label="Tüm Veriyi Sil">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
           </button>
         </div>
@@ -65,7 +65,7 @@
       <div class="tabs">
         <div class="tab active" data-tab="group">
           <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          <span>Grup</span>
+          <span>Hazırla</span>
         </div>
         <div class="tab" data-tab="script">
           <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
@@ -928,19 +928,34 @@ Destek: Bunu anlayamadım 🤔"></textarea>
             </svg>
             <!-- Header Dropdown Menu (mobilde görünür) -->
             <div class="header-dropdown" id="headerDropdown">
-              <button class="hd-item" data-action="group">Grup & Kişiler</button>
-              <button class="hd-item" data-action="scriptEditor">Senaryo</button>
-              <button class="hd-item" data-action="settings">Ayarlar</button>
-              <div class="hd-divider"></div>
-              <button class="hd-item" data-action="play">Oynat</button>
-              <button class="hd-item" data-action="pause">Duraklat</button>
-              <button class="hd-item" data-action="reset">Sıfırla</button>
-              <div class="hd-divider"></div>
-              <button class="hd-item" data-action="screenshot">Ekran Görüntüsü</button>
-              <button class="hd-item" data-action="save">Kaydet</button>
-              <button class="hd-item" data-action="load">Yükle</button>
-              <div class="hd-divider"></div>
-              <button class="hd-item hd-item-danger" data-action="clear">Tüm Veriyi Sil</button>
+              <div class="hd-menu-group" data-menu-group="prepare">
+                <div class="hd-group-label">Hazırla</div>
+                <button class="hd-item" data-action="group">Grup & Kişiler</button>
+              </div>
+              <div class="hd-menu-group" data-menu-group="scenario">
+                <div class="hd-group-label">Senaryo</div>
+                <button class="hd-item" data-action="scriptEditor">Senaryo Editörü</button>
+              </div>
+              <div class="hd-menu-group" data-menu-group="playback">
+                <div class="hd-group-label">Oynat</div>
+                <button class="hd-item" data-action="play">Oynat</button>
+                <button class="hd-item" data-action="pause">Duraklat</button>
+                <button class="hd-item" data-action="reset">Oynatmayı Sıfırla</button>
+              </div>
+              <div class="hd-menu-group" data-menu-group="output">
+                <div class="hd-group-label">Çıktı</div>
+                <button class="hd-item" data-action="screenshot">Ekran Görüntüsü</button>
+                <button class="hd-item" data-action="save">Kaydet</button>
+                <button class="hd-item" data-action="load">Yükle</button>
+              </div>
+              <div class="hd-menu-group" data-menu-group="settings">
+                <div class="hd-group-label">Ayarlar</div>
+                <button class="hd-item" data-action="settings">Ayarlar</button>
+              </div>
+              <div class="hd-menu-group" data-menu-group="data">
+                <div class="hd-group-label">Veri İşlemleri</div>
+                <button class="hd-item hd-item-danger" data-action="clear">Tüm Veriyi Sil</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1006,7 +1021,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           <button class="mo-action-btn" id="moPlayBtn" type="button" title="Oynat">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
-          <button class="mo-action-btn" id="moResetBtn" type="button" title="Sıf��rla">
+          <button class="mo-action-btn" id="moResetBtn" type="button" title="Oynatmayı Sıfırla" aria-label="Oynatmayı Sıfırla">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
           </button>
         </div>

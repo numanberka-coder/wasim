@@ -613,7 +613,7 @@ function bindEventHandlers() {
   });
 
   bindClick('clearAllBtn', () => {
-    if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz?')) return;
+    if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz? Bu işlem senaryo, kişiler ve ayarları temizler.')) return;
     storage.clear();
     state.reset();
     state.set('player.script', DEFAULT_SCRIPT);
