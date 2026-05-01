@@ -1,73 +1,77 @@
-# Faz 36-40 - Menu UX Roadmap Devami
+# CI Fix - GitHub Actions test workflow
 
 > Tarih: 2026-05-02
 > Branch: codex/faz-35
-> Kaynak: ROADMAP4.md devami / menu UX sohbeti
+> Kaynak: GitHub Actions job 74004708672
 > Durum: Uygulaniyor
 
 ---
 
 ## Amaç
 
-ROADMAP4.md icine mevcut Faz 28-35'in devami olarak menu deneyimini toparlayan
-Faz 36-40 maddelerini eklemek. Kapsam kod implementasyonu degil; menu sirasini,
-masaustu/mobil hiyerarsiyi, ortak menu modelini ve dogrulama ihtiyacini roadmap
-seviyesinde netlestirmek.
+Pull request icin `Test / test (20.x)` job'inin 4 saniyede `Input required and
+not supplied: filters` hatasiyla dusmesini duzeltmek. Hata
+`dorny/paths-filter@v3` adiminda `filters` input'u olmadigi icin olusuyor.
+Workflow gecmisinde `327810d` commit'inin yalniz `filters` alanini degil,
+`setup-node`, `npm ci`, `npm test`, coverage ve artifact adimlarini da
+placeholder yorumla degistirdigi goruldu.
 
 ---
 
-## Görevler
+## Gorevler
 
 - [x] 1. Mevcut repo durumunu dogrula:
       - `git status --short`
       - `git branch --show-current`
       - `git remote -v`
-- [x] 2. `ROADMAP4.md` mevcut faz, icindekiler, oncelik, uygulama sirasi ve KPI
-      yapisini oku.
-- [x] 3. Yeni fazlari mevcut fazlarin devami olarak tasarla:
-      - Faz 36: Menu Mantigi & Siralama Disiplini
-      - Faz 37: Masaustu Menu & Panel Duzeni
-      - Faz 38: Mobil Menu & Overlay Deneyimi
-      - Faz 39: Ortak Menu Modeli & Basit/Pro Kurallari
-      - Faz 40: Menu Erisilebilirligi, Test & Dogrulama
-- [x] 4. `ROADMAP4.md` icindekiler bolumune Faz 36-40 maddelerini ekle.
-- [x] 5. Faz 35 sonrasina Faz 36-40 detay tablolarini ekle.
-- [x] 6. Oncelik Ozeti ve Uygulama Sirasi bolumlerini Faz 36-40 ile guncelle.
-- [x] 7. Basari Kriterleri (KPI) bolumune menu odakli olcutleri ekle.
-- [x] 8. Roadmap metnini oku ve yapisal tutarliligi dogrula.
-- [x] 9. Git diff'i kontrol et; yalniz hedef dosyalarin degistiginden emin ol.
-- [ ] 10. Degisiklikleri commit et ve branch'i GitHub'a pushla.
+- [x] 2. GitHub Actions job 74004708672 loglarini ve step sonucunu oku.
+- [x] 3. `.github/workflows/test.yml` mevcut durumunu ve workflow gecmisini
+      karsilastir.
+- [x] 4. `dorny/paths-filter@v3` adimina `filters` input'unu geri ekle.
+- [x] 5. Eksik test akislarini geri yukle:
+      - `actions/setup-node@v4`
+      - `npm ci`
+      - `npm test`
+      - Node 22 icin coverage
+      - coverage artifact upload
+- [x] 6. Workflow dosyasini yapisal olarak dogrula.
+- [x] 7. Yerel dogrulama calistir:
+      - `npm.cmd test`
+      - `npm.cmd run build`
+- [x] 8. Git diff'i kontrol et; yalniz hedef dosyalarin staged oldugundan emin
+      ol.
+- [ ] 9. Commit at ve branch'i GitHub'a pushla.
+- [ ] 10. Remote branch SHA'sini dogrula.
 
 ---
 
 ## Kabul Kriterleri
 
-- `ROADMAP4.md` Faz 36-40'i mevcut Faz 28-35 formatina uyumlu sekilde icerir.
-- Menu sirasinda `Hazirla -> Senaryo -> Oynat -> Cikti -> Ayarlar -> Veri
-  Islemleri` mantigi acikca anlatilir.
-- `Tehlikeli islemler` dili yerine kullanici dostu `Veri Islemleri` cercevesi
-  kullanilir.
-- Oncelik Ozeti, Uygulama Sirasi ve KPI bolumleri yeni fazlari kapsar.
-- Commit kapsaminda yalniz roadmap/todo dokumantasyon degisiklikleri yer alir;
-  untracked `AGENTS.md` commit'e dahil edilmez.
+- `dorny/paths-filter@v3` artik `filters` input'u alir.
+- Workflow yeniden `npm ci`, `npm test` ve Node 22 coverage adimlarini calistirir.
+- Job-level `contents: read` ve `pull-requests: read` izinleri korunur.
+- Lokal test/build basarili olur.
+- Commit kapsaminda `.github/workflows/test.yml` ve `tasks/todo.md` disinda
+  dosya yer almaz; untracked `AGENTS.md` commit'e alinmaz.
 
 ---
 
 ## Review
 
-- `ROADMAP4.md` icindekiler bolumu Faz 36-40 ile genisletildi.
-- Faz 35 sonrasina menu UX icin bes yeni roadmap fazi eklendi.
-- Faz 36 menu mantigi ve siralama disiplinini `Hazirla -> Senaryo -> Oynat ->
-  Cikti -> Ayarlar -> Veri Islemleri` akisiyle tanimladi.
-- Faz 37 masaustu sol panel, ust aksiyon bar ve accordion sirasini toparlama
-  hedeflerini kapsiyor.
-- Faz 38 mobil uc nokta menusu, gruplu menu ve overlay deneyimini kapsiyor.
-- Faz 39 ortak menu modeli ve Basit/Pro gorunurluk kurallarini merkezilestirme
-  hedefini ekledi.
-- Faz 40 erisilebilirlik, menu sirasi testleri ve tarayici sanity check
-  gereksinimlerini ekledi.
-- Oncelik Ozeti, Uygulama Sirasi ve KPI bolumleri yeni fazlari kapsayacak
-  sekilde guncellendi.
-- Diff kontrolunde hedef degisikliklerin `ROADMAP4.md` ve `tasks/todo.md` ile
-  sinirli kaldigi, untracked `AGENTS.md` dosyasinin commit kapsamina alinmadigi
-  dogrulandi.
+- GitHub job 74004708672 step loglari okundu; `Detect coverage-relevant changes`
+  adimi `Input required and not supplied: filters` hatasiyla dusuyor.
+- `.github/workflows/test.yml` icinde `dorny/paths-filter@v3` adiminin
+  placeholder yorumla kaldigi ve `filters` input'unun olmadigi dogrulandi.
+- Workflow gecmisinde `327810d` commit'inin test adimlarini da sildigi goruldu;
+  bu nedenle yalniz `filters` eklemek yerine eksik test hatti da geri yuklendi.
+- `filters` altinda `code` grubu geri eklendi; JS, test, package, Vite/Vitest
+  config ve workflow dosyasi coverage-relevant kabul ediliyor.
+- `actions/setup-node@v4`, `npm ci`, `npm test`, Node 22 coverage ve coverage
+  artifact adimlari geri getirildi.
+- Sandbox icinde `npm.cmd test` ve `npm.cmd run build`, esbuild child process
+  baslatirken `spawn EPERM` ile takildi; ayni komutlar izinli calistirmada
+  basarili oldu.
+- `npm.cmd test` sonucu: 8 test dosyasi, 217 test basarili.
+- `npm.cmd run build` sonucu: Vite build basarili.
+- Staged kapsam yalniz `.github/workflows/test.yml` ve `tasks/todo.md`; untracked
+  `AGENTS.md` commit kapsamina alinmadi.
