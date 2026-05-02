@@ -1,134 +1,131 @@
-# Faz 38 - Mobil Menu & Overlay Deneyimi
+# Faz 39 - Ortak Menu Modeli & Basit/Pro Kurallari
 
 > Tarih: 2026-05-02
-> Branch: codex/faz-38
-> Kaynak: ROADMAP4.md Faz 38
+> Branch: codex/faz-39
+> Kaynak: ROADMAP4.md Faz 39
 > Durum: Dogrulandi
 
 ---
 
 ## Amac
 
-Mobil uc nokta menusunu dar bir dropdown listesinden daha rahat taranan,
-dokunmatik dostu bir calisma kapisina yaklastirmak. Faz 36-37'de netlesen
-`Hazirla -> Senaryo -> Oynat -> Cikti -> Ayarlar -> Veri Islemleri` zihinsel
-modeli mobilde korunacak; mevcut panel DOM tasima yaklasimi bozulmayacak.
+Masaustu ve mobil menu tanimlarinin tekrar dagilmasini engellemek icin menu
+ogelerini tek bir merkezi modelden beslemek. Basit Mod temel uretim akisini
+gostermeli; Pro ogeler ayni zihinsel sira icinde kontrollu bicimde acilmali.
 
 ---
 
-## ROADMAP4 Faz 38 Kapsami
+## ROADMAP4 Faz 39 Kapsami
 
-- 38.1 Gruplu mobil menu:
-  - Uc nokta menusu Hazirla, Senaryo, Oynat, Cikti, Ayarlar ve Veri Islemleri
-    gruplarina ayrilir.
-- 38.2 Dokunmatik dostu sunum:
-  - Uzun dropdown yerine daha rahat taranan gruplu menu veya bottom-sheet
-    yaklasimi degerlendirilir.
-- 38.3 Masaustuyle ayni zihinsel model:
-  - Mobil sira ve isimlendirme masaustuyle uyumlu tutulur.
-- 38.4 Overlay tasima davranisini koruma:
-  - Mevcut panel DOM tasima yaklasimi korunur; buyuk form yapilari yeniden
-    yazilmaz.
+- 39.1 Merkezi menu tanimi:
+  - Menu ogeleri `id`, baslik, grup, aksiyon tipi, hedef ve gorunurluk
+    bilgisiyle tek modelden beslenecek.
+- 39.2 Masaustu/mobil ortak kaynak:
+  - Mobil ve masaustu menuler ayni siralama ve adlandirmayi kullanacak.
+- 39.3 Basit/Pro gorunurluk kurali:
+  - Basit Mod temel uretim akisini gosterir.
+  - Pro ogeler ayni siranin icinde kontrollu acilir.
+- 39.4 Aksiyon handler tekrarini azaltma:
+  - Oynat, duraklat, kaydet, yukle, ekran al gibi aksiyonlar kopyalanmadan
+    cagrilacak.
 
-Etkilenen dosyalar: `index.html`, `js/ui/mobile.js`, `css/responsive.css`.
+Etkilenen dosyalar: `js/ui/menu-model.js` (yeni), `js/ui/mobile.js`,
+`js/ui/tabs.js`, `index.html`.
 
 ---
 
 ## Mevcut Tespit
 
-- `#headerDropdown` Faz 36 sonrasinda zaten dogru grup sirasi ve aksiyonlara
-  sahip, ancak halen kucuk, sag ustten acilan klasik dropdown gibi davraniyor.
-- Mobil panel overlay'i `openMobileOverlay()` ile ilgili panel DOM node'unu
-  `#mobileOverlayBody` icine tasiyor ve kapanista eski yerine geri koyuyor.
-  Bu davranis korunmali.
-- `js/ui/mobile.js` menuyu yalniz `is-open` class'i ile acar/kapatir; menu acikken
-  beden/backdrop veya accessibility state'i su an sinirli.
-- `css/responsive.css` menu icin 232px dropdown tasarimi kullaniyor. Faz 38 icin
-  mobil viewport'ta menu, dokunmatik bottom-sheet hissi veren daha genis ve
-  gruplu bir yuzeye donusmeli.
-- `tests/menu-order.test.js` grup sirasi ve aksiyon ayrimini koruyor; Faz 38 icin
-  mobil sunum siniflari/ARIA ve overlay tasima sozlesmesi testle korunabilir.
+- Faz 36-38 sonrasi menu sirasi urun akisini izliyor:
+  `Hazirla -> Senaryo -> Oynat -> Cikti -> Ayarlar -> Veri Islemleri`.
+- `index.html` icindeki `#headerDropdown` mobil menuyu markup uzerinden
+  tanimliyor; `js/ui/mobile.js` bu markup uzerindeki `data-action` degerlerini
+  dinliyor.
+- Masaustu panel gecisleri `js/ui/tabs.js` icinde sabit tab id listesiyle
+  yonetiliyor.
+- Faz 39 icin hedef, buyuk DOM yeniden yazimi degil; mevcut menu yuzeylerini
+  merkezi veri modeliyle uyumlu hale getirip gorunurluk ve aksiyon sozlesmesini
+  test edilebilir yapmak.
 
 ---
 
 ## Gorevler
 
-- [x] 1. Mobil menu yapisini zenginlestir:
-      - `#headerDropdown` icine mobil menu basligi veya taranabilir context
-        ekle.
-      - Mevcut `data-action` degerleri korunur.
-      - Grup sirasi `Hazirla -> Senaryo -> Oynat -> Cikti -> Ayarlar -> Veri
-        Islemleri` olarak kalir.
-- [x] 2. Mobil menu ac/kapat davranisini guclendir:
-      - Menu acikken tetikleyicide `aria-expanded` guncellensin.
-      - Menu acikken dokunmatik kullanimi kolaylastiran state class'lari
-        yonetilsin.
-      - Mevcut disari tiklama ve resize kapanma davranisi bozulmasin.
-- [x] 3. Dokunmatik dostu bottom-sheet sunumu ekle:
-      - Sadece mobil viewport'ta menu sag ust dropdown yerine ekran altindan
-        yukselen genis bir panel gibi gorunsun.
-      - Grup basliklari, item bosluklari ve tehlikeli aksiyon ayrimi daha rahat
-        taranir hale gelsin.
-      - Kucuk ekran ve landscape durumunda tasma olmadan scroll calissin.
-- [x] 4. Overlay DOM tasima sozlesmesini koru:
-      - `PANEL_MAP`, `openMobileOverlay()` ve `closeMobileOverlay()` panel
-        tasima yaklasimi yeniden yazilmayacak.
-      - Gerekirse sadece daha acik state/ARIA ve temizlik adimlari eklenecek.
-- [x] 5. Korumali testleri genislet:
-      - Mobil menu yapisinin Faz 38 siniflari/ARIA isaretleri beklenen sekilde
-        bulundugu test edilsin.
-      - Panel aksiyonlarinin `group`, `scriptEditor`, `settings` olarak DOM
-        tasima modeline bagli kaldigi test edilsin.
-      - Faz 36-37 menu sirasi testleri korunur.
-- [x] 6. Yerel dogrulama calistir:
-      - `node --check js/ui/mobile.js`.
-      - `npm.cmd test -- tests/menu-order.test.js`.
-      - `npm.cmd test`.
-      - `npm.cmd run build`.
-      - Mobil viewport HTTP/browser sanity check.
+- [x] 1. Merkezi menu modelini ekle:
+      - `js/ui/menu-model.js` icinde grup sirasi, panel/action ayrimi,
+        menu item idleri, basliklari, hedefleri ve mode gorunurlugu tanimlanir.
+      - Model, DOM bagimliligi olmadan test edilebilir saf yardimci fonksiyonlar
+        sunar.
+- [x] 2. Mobil menuyu modelden besle:
+      - `js/ui/mobile.js`, mobil menu gruplarini modelden render eder.
+      - Mevcut action degerleri ve overlay DOM tasima sozlesmesi korunur.
+      - Faz 38 bottom-sheet sunumu korunur.
+- [x] 3. Masaustu tab/menu sozlesmesini modele bagla:
+      - `js/ui/tabs.js`, tab sirasini modelden turetir.
+      - Hazirla/Senaryo/Ayarlar ana panel gecisleri mevcut davranisini korur.
+- [x] 4. Basit/Pro gorunurluk kuralini merkezilestir:
+      - Basit modda temel uretim akisi kalir.
+      - Pro ogeler model uzerinden ayristirilir ve ayni siradaki yeri korunur.
+      - Mevcut UI toggle veya state ile uyumlu uygulanir; yoksa model
+        varsayilani Pro seklinde geriye uyumlu kalir.
+- [x] 5. Aksiyon handler tekrarini azalt:
+      - Mobil action dispatch, modeldeki action tipine/target'a gore tek
+        yardimci uzerinden calisir.
+      - Panel acma, oynatma, cikti ve veri islemleri icin mevcut id/handler
+        sozlesmesi bozulmaz.
+- [x] 6. Korumali test ve dogrulama ekle:
+      - Menu modeli sirasi, Basit/Pro filtreleri ve action hedefleri test edilir.
+      - Mevcut menu-order testleri yeni modelle uyumlu hale getirilir.
+      - `node --check` edited JS dosyalari, hedefli test, full test, build ve
+        browser/HTTP sanity calistirilir.
 
 ---
 
 ## Kabul Kriterleri
 
-- Mobil uc nokta menusu, tek kolon dar dropdown yerine dokunmatik dostu gruplu
-  bir panel/bottom-sheet gibi kullanilir.
-- Mobil menu sirasi ve isimleri masaustu zihinsel modeliyle uyumludur.
-- Panel acan menu item'lari mevcut overlay DOM tasima davranisini kullanmaya
-  devam eder.
-- Veri silme gibi riskli aksiyonlar mobilde gorsel olarak ayrik ve net kalir.
+- Mobil ve masaustu menu sirasi tek merkezi kaynaktan dogrulanabilir.
+- Basit/Pro gorunurluk karari kod icinde daginik kosullara yayilmaz.
+- Faz 38 mobil bottom-sheet ve overlay DOM tasima davranisi bozulmaz.
+- Panel/aksiyon handlerlari geriye uyumlu `data-action` sozlesmesini korur.
 - Test ve build basarili olur.
-- Commit kapsaminda yalniz Faz 38 dosyalari yer alir; untracked `AGENTS.md`
+- Commit kapsaminda yalniz Faz 39 dosyalari yer alir; untracked `AGENTS.md`
   commit'e alinmaz.
 
 ---
 
 ## Review
 
-- `index.html` mobil uc nokta tetikleyicisine `role`, `tabindex`,
-  `aria-haspopup`, `aria-expanded` ve `aria-controls` eklendi.
-- `#headerDropdown`, `mobile-action-sheet` roluyle mobil calisma menusu olarak
-  isaretlendi; mevcut grup sirasi ve `data-action` sozlesmesi korundu.
-- `js/ui/mobile.js` menu ac/kapat durumunda `aria-expanded`, tetikleyici etiketi,
-  body state class'i ve menu backdrop state'ini yonetir hale geldi.
-- Backdrop tiklamasi artik aktif mobil yuzeye gore menu veya panel overlay'ini
-  kapatiyor.
-- `openMobileOverlay()` mevcut panel DOM tasima modelini koruyor; yalniz menu
-  backdrop state'ini temizleyerek panel overlay state'ine geciyor.
-- `css/responsive.css` mobil viewport'ta menuyu alt kisimdan yukselen,
-  dokunmatik dostu gruplu bottom-sheet gibi gosteriyor; kucuk ekran ve landscape
-  tasma durumlari icin scroll/grid duzenleri eklendi.
-- Light theme icin yeni menu grup/handle renkleri eklendi.
-- `tests/menu-order.test.js`, Faz 38 mobil action-sheet isaretleri ve panel
-  aksiyonlarinin overlay tasima sozlesmesine bagli kalmasi icin genisletildi.
+- `js/ui/menu-model.js` eklendi; grup sirasi, action/panel hedefleri,
+  Basit/Pro gorunurluk ve desktop action group sozlesmesi merkezi modele
+  tasindi.
+- `index.html` mobil menu item kopyasindan arindirildi; `#headerDropdown`
+  artik runtime'da modelden doldurulan `data-menu-root` tasiyor.
+- `index.html` icinde Pro kabul edilen script tab ve veri islemleri grubu
+  `data-mode="pro"` ile isaretlendi.
+- `js/ui/mobile.js` mobil action sheet'i `getMobileMenuGroups()` ile render
+  ediyor; panel overlay tasima davranisi modeldeki `panelKey`/`target`
+  sozlesmesine baglandi.
+- `js/ui/mobile.js` action dispatch'i once merkezi modelden item buluyor,
+  sonra panel/playback/output/data hedeflerini mevcut handlerlarla calistiriyor.
+- `js/ui/tabs.js` desktop tab metadata, label, order ve Pro mode isaretini
+  `getPanelMenuItems()` uzerinden senkronluyor.
+- `js/app.js` app mode normalize islemini menu modeliyle ortaklastirdi ve mode
+  degisiminde mobil menunun tekrar render edilmesi icin `wa-menu-mode-change`
+  event'i yayinliyor.
+- `tests/menu-order.test.js`, menu sirasi ve aksiyon ayrimini static HTML
+  yerine merkezi modelden dogrular hale geldi; ayrica mobil action sheet'in
+  runtime render davranisi Basit/Pro modda test edildi.
+- `node --check js/ui/menu-model.js`: basarili.
 - `node --check js/ui/mobile.js`: basarili.
-- `git diff --check`: yalniz mevcut CRLF uyarilari, whitespace hatasi yok.
-- Sandbox icinde hedefli Vitest `spawn EPERM` verdi; izinli calistirmada
-  dogrulama tamamlandi.
-- `npm.cmd test -- tests/menu-order.test.js`: 1 test dosyasi, 9 test basarili.
-- `npm.cmd test`: 9 test dosyasi, 226 test basarili.
+- `node --check js/ui/tabs.js`: basarili.
+- `node --check js/app.js`: basarili.
+- `node --check tests/menu-order.test.js`: basarili.
+- Sandbox icinde Vitest `spawn EPERM` verdi; yerel izinle calistirilan
+  hedefli test basarili: `npm.cmd test -- tests/menu-order.test.js` -> 1 dosya,
+  14 test basarili.
+- `npm.cmd test`: 9 test dosyasi, 231 test basarili.
 - `npm.cmd run build`: Vite build basarili.
-- Dev server HTTP sanity: `http://127.0.0.1:5173/` 200 dondu.
-- Browser sanity: menuyu acinca `aria-expanded=true` ve
-  `mobile-action-sheet is-open` geldi; `Hazirla` aksiyonu menuyu kapatip `#group`
-  panelini `#mobileOverlayBody` icine tasidi.
+- HTTP sanity: `http://127.0.0.1:5173/` 200 dondu ve `data-menu-root=True`
+  dogrulandi; dev server kapatildi.
+- `git diff --check`: whitespace hatasi yok; yalniz mevcut CRLF uyarilari
+  goruldu.

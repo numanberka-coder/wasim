@@ -16,6 +16,7 @@ import { initAccordions } from './ui/accordion.js';
 import { initForms } from './ui/forms.js';
 import { markInvalid, clearInvalid } from './ui/validation.js';
 import { initMobile, registerMobileCallback } from './ui/mobile.js';
+import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 
 // Phone Modules
@@ -1113,7 +1114,7 @@ function initOnboardingAndMode() {
 }
 
 function applyAppMode(mode, shouldTrack = false) {
-  const safeMode = mode === 'pro' ? 'pro' : 'simple';
+  const safeMode = normalizeMenuMode(mode);
   safeStorageSet(APP_MODE_KEY, safeMode);
   document.body.classList.toggle('simple-mode', safeMode === 'simple');
   setInputValue('appModeToggle', safeMode);
@@ -1126,6 +1127,8 @@ function applyAppMode(mode, shouldTrack = false) {
   if (safeMode === 'simple' && activeTab?.dataset.tab === 'script') {
     document.querySelector('.tab[data-tab="group"]')?.click();
   }
+
+  window.dispatchEvent(new CustomEvent(MENU_MODE_EVENT, { detail: { mode: safeMode } }));
 }
 
 function getOnboardingGoals() {
