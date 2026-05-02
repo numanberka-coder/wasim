@@ -15,6 +15,7 @@ export function initTabs() {
   const tabs = $$('.tab');
   const panels = $$('.panel');
   syncTabsWithMenuModel(tabs);
+  syncTabAriaState(activeTab, tabs, panels);
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -22,14 +23,7 @@ export function initTabs() {
       if (!tabId) return;
 
       // Update active states
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      panels.forEach(p => p.classList.remove('active'));
-      const panel = document.getElementById(tabId);
-      if (panel) {
-        panel.classList.add('active');
-      }
+      syncTabAriaState(tabId, tabs, panels);
 
       // Update state and notify
       activeTab = tabId;
@@ -52,7 +46,9 @@ function syncTabsWithMenuModel(tabs) {
     tab.dataset.menuGroup = item.group;
     tab.dataset.actionType = item.type;
     tab.style.order = String(index);
+    if (!tab.id) tab.id = `tab-${item.target}`;
     tab.setAttribute('aria-label', `${item.shortLabel || item.label} paneli`);
+    tab.setAttribute('aria-controls', item.target);
 
     if (item.mode === MENU_MODES.PRO) {
       tab.dataset.mode = MENU_MODES.PRO;
@@ -62,6 +58,25 @@ function syncTabsWithMenuModel(tabs) {
 
     const label = tab.querySelector('span');
     if (label) label.textContent = item.shortLabel || item.label;
+  });
+}
+
+function syncTabAriaState(tabId, tabs, panels) {
+  tabs.forEach((tab) => {
+    const isActive = tab.dataset.tab === tabId;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', String(isActive));
+    tab.setAttribute('tabindex', isActive ? '0' : '-1');
+  });
+
+  panels.forEach((panel) => {
+    const isActive = panel.id === tabId;
+    panel.classList.toggle('active', isActive);
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-hidden', String(!isActive));
+
+    const ownerTab = document.querySelector(`.tab[data-tab="${panel.id}"]`);
+    if (ownerTab?.id) panel.setAttribute('aria-labelledby', ownerTab.id);
   });
 }
 

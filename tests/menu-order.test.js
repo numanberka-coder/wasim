@@ -8,7 +8,8 @@ import {
   getMobileMenuGroups,
   getPanelMenuItems,
 } from '../js/ui/menu-model.js';
-import { renderMobileMenu } from '../js/ui/mobile.js';
+import { initMobile, renderMobileMenu } from '../js/ui/mobile.js';
+import { initTabs } from '../js/ui/tabs.js';
 
 function loadIndexDocument() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
@@ -18,6 +19,13 @@ function loadIndexDocument() {
 function mountIndexDocument() {
   const doc = loadIndexDocument();
   document.body.innerHTML = doc.body.innerHTML;
+  if (!window.matchMedia) {
+    window.matchMedia = () => ({
+      matches: false,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
+  }
   return document;
 }
 
@@ -245,5 +253,78 @@ describe('Faz 39 shared menu model and Simple/Pro rules', () => {
       'load',
       'settings',
     ]);
+  });
+});
+
+describe('Faz 40 menu accessibility and keyboard checks', () => {
+  it('syncs desktop tab selection with tabpanel ARIA state', () => {
+    const doc = mountIndexDocument();
+
+    initTabs();
+
+    const groupTab = doc.querySelector('.tabs .tab[data-tab="group"]');
+    const scriptTab = doc.querySelector('.tabs .tab[data-tab="script"]');
+    const groupPanel = doc.querySelector('#group');
+    const scriptPanel = doc.querySelector('#script');
+
+    expect(groupTab?.getAttribute('aria-selected')).toBe('true');
+    expect(groupTab?.getAttribute('tabindex')).toBe('0');
+    expect(groupTab?.getAttribute('aria-controls')).toBe('group');
+    expect(groupPanel?.getAttribute('role')).toBe('tabpanel');
+    expect(groupPanel?.getAttribute('aria-labelledby')).toBe(groupTab?.id);
+    expect(scriptTab?.getAttribute('aria-selected')).toBe('false');
+    expect(scriptTab?.getAttribute('tabindex')).toBe('-1');
+    expect(scriptPanel?.getAttribute('aria-hidden')).toBe('true');
+
+    scriptTab.click();
+
+    expect(groupTab?.getAttribute('aria-selected')).toBe('false');
+    expect(groupPanel?.getAttribute('aria-hidden')).toBe('true');
+    expect(scriptTab?.getAttribute('aria-selected')).toBe('true');
+    expect(scriptPanel?.getAttribute('aria-hidden')).toBe('false');
+  });
+
+  it('renders mobile menu items with grouped labels and panel controls', () => {
+    const doc = mountIndexDocument();
+
+    renderMobileMenu(MENU_MODES.PRO);
+
+    const prepareGroup = doc.querySelector('#headerDropdown [data-menu-group="prepare"]');
+    const groupLabel = prepareGroup?.querySelector('.hd-group-label');
+    const panelItem = doc.querySelector('#headerDropdown [data-action="scriptEditor"]');
+    const clearItem = doc.querySelector('#headerDropdown [data-action="clear"]');
+
+    expect(prepareGroup?.getAttribute('role')).toBe('group');
+    expect(prepareGroup?.getAttribute('aria-labelledby')).toBe(groupLabel?.id);
+    expect(panelItem?.getAttribute('role')).toBe('menuitem');
+    expect(panelItem?.getAttribute('aria-controls')).toBe('script');
+    expect(panelItem?.getAttribute('aria-label')).toContain('panel ac');
+    expect(clearItem?.getAttribute('aria-label')).toContain('aksiyon calistir');
+  });
+
+  it('supports keyboard open, arrow navigation, and Escape close for the mobile menu', () => {
+    const doc = mountIndexDocument();
+    doc.querySelector('#appModeToggle').value = MENU_MODES.PRO;
+    const trigger = doc.querySelector('#headerMenuBtn');
+    const menu = doc.querySelector('#headerDropdown');
+
+    initMobile();
+
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+
+    expect(doc.body.classList.contains('mobile-menu-open')).toBe(true);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(doc.activeElement?.dataset.action).toBe('group');
+
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(doc.activeElement?.dataset.action).toBe('scriptEditor');
+
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(doc.activeElement?.dataset.action).toBe('clear');
+
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(doc.body.classList.contains('mobile-menu-open')).toBe(false);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(doc.activeElement).toBe(trigger);
   });
 });

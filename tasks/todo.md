@@ -1,131 +1,122 @@
-# Faz 39 - Ortak Menu Modeli & Basit/Pro Kurallari
+# Faz 40 - Menu Erisilebilirligi, Test & Dogrulama
 
 > Tarih: 2026-05-02
-> Branch: codex/faz-39
-> Kaynak: ROADMAP4.md Faz 39
+> Branch: codex/faz-40
+> Kaynak: ROADMAP4.md Faz 40
 > Durum: Dogrulandi
 
 ---
 
 ## Amac
 
-Masaustu ve mobil menu tanimlarinin tekrar dagilmasini engellemek icin menu
-ogelerini tek bir merkezi modelden beslemek. Basit Mod temel uretim akisini
-gostermeli; Pro ogeler ayni zihinsel sira icinde kontrollu bicimde acilmali.
+Faz 39 ile merkezi modele baglanan masaustu ve mobil menu davranisini
+erisilebilirlik, klavye kullanimi, kapanma davranislari ve test guvencesiyle
+tamamlamak. Degisiklikler menu yuzeyiyle sinirli kalacak; yeni urun akisi veya
+genis UI yeniden yazimi yapilmayacak.
 
 ---
 
-## ROADMAP4 Faz 39 Kapsami
+## ROADMAP4 Faz 40 Kapsami
 
-- 39.1 Merkezi menu tanimi:
-  - Menu ogeleri `id`, baslik, grup, aksiyon tipi, hedef ve gorunurluk
-    bilgisiyle tek modelden beslenecek.
-- 39.2 Masaustu/mobil ortak kaynak:
-  - Mobil ve masaustu menuler ayni siralama ve adlandirmayi kullanacak.
-- 39.3 Basit/Pro gorunurluk kurali:
-  - Basit Mod temel uretim akisini gosterir.
-  - Pro ogeler ayni siranin icinde kontrollu acilir.
-- 39.4 Aksiyon handler tekrarini azaltma:
-  - Oynat, duraklat, kaydet, yukle, ekran al gibi aksiyonlar kopyalanmadan
-    cagrilacak.
+- 40.1 Aktif durum ve ARIA:
+  - Menude aktif oge, panel iliskisi, `aria-selected`/`aria-expanded` ve
+    aciklayici etiketler netlestirilecek.
+- 40.2 Klavye ve kapanma davranisi:
+  - Tab/ok gezinmesi, Escape, backdrop ve geri tusu davranislari dogrulanacak.
+- 40.3 Menu sirasi testleri:
+  - Beklenen grup sirasi, Basit/Pro gorunurluk ve aksiyon eslesmeleri unit
+    testlerle korunacak.
+- 40.4 Tarayici sanity check:
+  - Masaustu ve mobil viewport'ta menu acma, panel gecisi, cikti ve veri
+    islemleri dogrulanacak.
 
-Etkilenen dosyalar: `js/ui/menu-model.js` (yeni), `js/ui/mobile.js`,
-`js/ui/tabs.js`, `index.html`.
+Etkilenen dosyalar: `tests/`, `js/ui/menu-model.js`, `js/ui/mobile.js`,
+`index.html`.
 
 ---
 
 ## Mevcut Tespit
 
-- Faz 36-38 sonrasi menu sirasi urun akisini izliyor:
-  `Hazirla -> Senaryo -> Oynat -> Cikti -> Ayarlar -> Veri Islemleri`.
-- `index.html` icindeki `#headerDropdown` mobil menuyu markup uzerinden
-  tanimliyor; `js/ui/mobile.js` bu markup uzerindeki `data-action` degerlerini
-  dinliyor.
-- Masaustu panel gecisleri `js/ui/tabs.js` icinde sabit tab id listesiyle
-  yonetiliyor.
-- Faz 39 icin hedef, buyuk DOM yeniden yazimi degil; mevcut menu yuzeylerini
-  merkezi veri modeliyle uyumlu hale getirip gorunurluk ve aksiyon sozlesmesini
-  test edilebilir yapmak.
+- Faz 39 sonunda mobil menu runtime'da `getMobileMenuGroups()` ile merkezi
+  modelden render ediliyor.
+- `#headerMenuBtn` menu tetikleyicisi `aria-haspopup`, `aria-expanded`,
+  `aria-controls` ve ac/kapat etiketlerini tasiyor.
+- `#headerDropdown` `role="menu"` ve `data-menu-root` sozlesmesiyle modelden
+  dolduruluyor.
+- Masaustu tablar `getPanelMenuItems()` ile siralanip tab metadata'sini
+  modelden aliyor.
+- Mevcut test dosyasi `tests/menu-order.test.js`, Faz 36-39 menu sozlesmesini
+  koruyan en dogal genisletme noktasi.
 
 ---
 
 ## Gorevler
 
-- [x] 1. Merkezi menu modelini ekle:
-      - `js/ui/menu-model.js` icinde grup sirasi, panel/action ayrimi,
-        menu item idleri, basliklari, hedefleri ve mode gorunurlugu tanimlanir.
-      - Model, DOM bagimliligi olmadan test edilebilir saf yardimci fonksiyonlar
-        sunar.
-- [x] 2. Mobil menuyu modelden besle:
-      - `js/ui/mobile.js`, mobil menu gruplarini modelden render eder.
-      - Mevcut action degerleri ve overlay DOM tasima sozlesmesi korunur.
-      - Faz 38 bottom-sheet sunumu korunur.
-- [x] 3. Masaustu tab/menu sozlesmesini modele bagla:
-      - `js/ui/tabs.js`, tab sirasini modelden turetir.
-      - Hazirla/Senaryo/Ayarlar ana panel gecisleri mevcut davranisini korur.
-- [x] 4. Basit/Pro gorunurluk kuralini merkezilestir:
-      - Basit modda temel uretim akisi kalir.
-      - Pro ogeler model uzerinden ayristirilir ve ayni siradaki yeri korunur.
-      - Mevcut UI toggle veya state ile uyumlu uygulanir; yoksa model
-        varsayilani Pro seklinde geriye uyumlu kalir.
-- [x] 5. Aksiyon handler tekrarini azalt:
-      - Mobil action dispatch, modeldeki action tipine/target'a gore tek
-        yardimci uzerinden calisir.
-      - Panel acma, oynatma, cikti ve veri islemleri icin mevcut id/handler
-        sozlesmesi bozulmaz.
-- [x] 6. Korumali test ve dogrulama ekle:
-      - Menu modeli sirasi, Basit/Pro filtreleri ve action hedefleri test edilir.
-      - Mevcut menu-order testleri yeni modelle uyumlu hale getirilir.
-      - `node --check` edited JS dosyalari, hedefli test, full test, build ve
-        browser/HTTP sanity calistirilir.
+- [x] 1. Aktif menu/panel ARIA sozlesmesini guclendir:
+      - Masaustu tablarda aktif panel icin `aria-selected` ve gerekirse
+        `aria-controls`/panel id iliskisi netlestirilir.
+      - Mobil menu ogelerinde panel/aksiyon ayrimi aciklayici label ve state
+        ile korunur.
+- [x] 2. Klavye gezinmesini ve kapanma davranislarini toparla:
+      - Mobil menu acikken Escape kapatma davranisi korunur ve test edilir.
+      - Menu trigger uzerinde Enter/Space acma davranisi dogrulanir.
+      - Uygunsa ok tuslariyla menu item odak sirasi eklenir veya mevcut Tab
+        sirasi testle garanti edilir.
+      - Backdrop ve mobil geri tusu davranislari geriye uyumlu kalir.
+- [x] 3. Menu modeli ve render testlerini Faz 40 kapsamina genislet:
+      - Grup sirasi, Basit/Pro gorunurluk ve action hedefleri icin regresyon
+        testleri sikilastirilir.
+      - ARIA state, trigger/menu iliskisi ve mobil runtime render davranisi
+        unit testlerle korunur.
+- [x] 4. Masaustu ve mobil manuel/browser sanity hazirligi yap:
+      - Degisiklikler user-visible oldugu icin desktop ve mobile viewport
+        uzerinden menu acma, panel gecisi, cikti ve veri islemleri kontrol
+        edilecek.
+- [x] 5. Standart dogrulama zincirini calistir:
+      - Edited JS dosyalari icin `node --check`.
+      - Hedefli menu testleri.
+      - Full `npm.cmd test`.
+      - `npm.cmd run build`.
+      - Browser/HTTP sanity.
 
 ---
 
 ## Kabul Kriterleri
 
-- Mobil ve masaustu menu sirasi tek merkezi kaynaktan dogrulanabilir.
-- Basit/Pro gorunurluk karari kod icinde daginik kosullara yayilmaz.
-- Faz 38 mobil bottom-sheet ve overlay DOM tasima davranisi bozulmaz.
-- Panel/aksiyon handlerlari geriye uyumlu `data-action` sozlesmesini korur.
+- Aktif masaustu panel durumu ARIA ile makine tarafindan okunabilir olur.
+- Mobil menu tetikleyici, menu ve menu item iliskileri testlerle korunur.
+- Escape, backdrop ve geri tusu kapanma davranislari bozulmaz.
+- Basit/Pro gorunurluk ve ortak menu sirasi Faz 39 merkezi modelinden sapmaz.
 - Test ve build basarili olur.
-- Commit kapsaminda yalniz Faz 39 dosyalari yer alir; untracked `AGENTS.md`
+- Commit kapsaminda yalniz Faz 40 dosyalari yer alir; untracked `AGENTS.md`
   commit'e alinmaz.
 
 ---
 
 ## Review
 
-- `js/ui/menu-model.js` eklendi; grup sirasi, action/panel hedefleri,
-  Basit/Pro gorunurluk ve desktop action group sozlesmesi merkezi modele
-  tasindi.
-- `index.html` mobil menu item kopyasindan arindirildi; `#headerDropdown`
-  artik runtime'da modelden doldurulan `data-menu-root` tasiyor.
-- `index.html` icinde Pro kabul edilen script tab ve veri islemleri grubu
-  `data-mode="pro"` ile isaretlendi.
-- `js/ui/mobile.js` mobil action sheet'i `getMobileMenuGroups()` ile render
-  ediyor; panel overlay tasima davranisi modeldeki `panelKey`/`target`
-  sozlesmesine baglandi.
-- `js/ui/mobile.js` action dispatch'i once merkezi modelden item buluyor,
-  sonra panel/playback/output/data hedeflerini mevcut handlerlarla calistiriyor.
-- `js/ui/tabs.js` desktop tab metadata, label, order ve Pro mode isaretini
-  `getPanelMenuItems()` uzerinden senkronluyor.
-- `js/app.js` app mode normalize islemini menu modeliyle ortaklastirdi ve mode
-  degisiminde mobil menunun tekrar render edilmesi icin `wa-menu-mode-change`
-  event'i yayinliyor.
-- `tests/menu-order.test.js`, menu sirasi ve aksiyon ayrimini static HTML
-  yerine merkezi modelden dogrular hale geldi; ayrica mobil action sheet'in
-  runtime render davranisi Basit/Pro modda test edildi.
-- `node --check js/ui/menu-model.js`: basarili.
-- `node --check js/ui/mobile.js`: basarili.
+- `js/ui/tabs.js` desktop tab state'ini tek yardimciya topladi; aktif tab
+  artik `aria-selected`, `tabindex`, `aria-controls` ve panel tarafinda
+  `role="tabpanel"`, `aria-hidden`, `aria-labelledby` ile senkronlaniyor.
+- `js/ui/mobile.js` mobil menu gruplarina `role="group"` ve label iliskisi
+  verdi; panel menu item'lari `aria-controls`, tum item'lar aciklayici
+  `aria-label` tasiyor.
+- Mobil menu klavye davranisi genisletildi: trigger uzerinde Enter/Space,
+  menu icinde ok tuslari, Home/End ve Escape destekleniyor; Escape focus'u
+  trigger'a geri tasiyor.
+- `tests/menu-order.test.js` Faz 40 kapsamina genisletildi; desktop tab ARIA
+  state'i, mobil runtime ARIA render'i ve klavye ac/gezin/kapat akisi
+  korunuyor.
 - `node --check js/ui/tabs.js`: basarili.
-- `node --check js/app.js`: basarili.
+- `node --check js/ui/mobile.js`: basarili.
 - `node --check tests/menu-order.test.js`: basarili.
-- Sandbox icinde Vitest `spawn EPERM` verdi; yerel izinle calistirilan
-  hedefli test basarili: `npm.cmd test -- tests/menu-order.test.js` -> 1 dosya,
-  14 test basarili.
-- `npm.cmd test`: 9 test dosyasi, 231 test basarili.
+- Sandbox icinde Vitest yine `spawn EPERM` verdi; yerel izinle calistirilan
+  hedefli test basarili: `npm.cmd test -- tests/menu-order.test.js` -> 1
+  dosya, 17 test basarili.
+- `npm.cmd test`: 9 test dosyasi, 234 test basarili.
 - `npm.cmd run build`: Vite build basarili.
-- HTTP sanity: `http://127.0.0.1:5173/` 200 dondu ve `data-menu-root=True`
-  dogrulandi; dev server kapatildi.
-- `git diff --check`: whitespace hatasi yok; yalniz mevcut CRLF uyarilari
-  goruldu.
+- HTTP sanity: mevcut dev server `http://127.0.0.1:5173/` 200 dondu ve
+  `data-menu-root`, `aria-expanded`, `mobileOverlay` izleri dogrulandi.
+- `playwright` paketi yerelde bulunmadigi icin otomatik viewport screenshot
+  alinmadi; desktop/mobil davranislar unit DOM testleri ve HTTP sanity ile
+  dogrulandi.
