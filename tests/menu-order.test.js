@@ -23,6 +23,12 @@ function getDesktopActionGroups(doc) {
   }));
 }
 
+function getMobilePanelActions(doc) {
+  return [...doc.querySelectorAll('#headerDropdown .hd-item')]
+    .map((item) => item.dataset.action)
+    .filter((action) => ['group', 'scriptEditor', 'settings'].includes(action));
+}
+
 function getPanelAccordionLabels(doc, panelId) {
   return [...doc.querySelectorAll(`#${panelId} > details.accordion > summary`)].map((summary) =>
     summary.textContent.replace(/\s+/g, ' ').trim()
@@ -111,5 +117,30 @@ describe('Faz 37 desktop menu and panel order', () => {
     expect(labels.indexOf('🌗 Tema')).toBeGreaterThan(labels.indexOf('🧭 Başlangıç Rehberi & Mod'));
     expect(labels.indexOf('🌗 Tema')).toBeLessThan(labels.indexOf('⏱️ Mesaj Saatleri'));
     expect(labels.indexOf('🔤 Tipografi')).toBeLessThan(labels.indexOf('⏱️ Mesaj Saatleri'));
+  });
+});
+
+describe('Faz 38 mobile menu and overlay contract', () => {
+  it('marks the header menu as a mobile action sheet with trigger state', () => {
+    const doc = loadIndexDocument();
+    const trigger = doc.querySelector('#headerMenuBtn');
+    const menu = doc.querySelector('#headerDropdown');
+    const header = menu?.querySelector('.hd-menu-header');
+
+    expect(trigger?.getAttribute('role')).toBe('button');
+    expect(trigger?.getAttribute('aria-haspopup')).toBe('menu');
+    expect(trigger?.getAttribute('aria-expanded')).toBe('false');
+    expect(trigger?.getAttribute('aria-controls')).toBe('headerDropdown');
+    expect(menu?.classList.contains('mobile-action-sheet')).toBe(true);
+    expect(menu?.getAttribute('role')).toBe('menu');
+    expect(header?.textContent.replace(/\s+/g, ' ').trim()).toContain('Mobil menu');
+  });
+
+  it('keeps mobile panel actions bound to the overlay panel move model', () => {
+    const doc = loadIndexDocument();
+
+    expect(getMobilePanelActions(doc)).toEqual(['group', 'scriptEditor', 'settings']);
+    expect(doc.querySelector('#mobileOverlayBody')).not.toBeNull();
+    expect(doc.querySelector('#mobileOverlayBackdrop')).not.toBeNull();
   });
 });
