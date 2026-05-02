@@ -16,6 +16,10 @@ function loadIndexDocument() {
   return new DOMParser().parseFromString(html, 'text/html');
 }
 
+function loadResponsiveCss() {
+  return readFileSync(join(process.cwd(), 'css', 'responsive.css'), 'utf8');
+}
+
 function mountIndexDocument() {
   const doc = loadIndexDocument();
   document.body.innerHTML = doc.body.innerHTML;
@@ -326,5 +330,32 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(doc.body.classList.contains('mobile-menu-open')).toBe(false);
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     expect(doc.activeElement).toBe(trigger);
+  });
+
+  it('opens the settings overlay from a mouse click on the mobile bottom sheet', () => {
+    const doc = mountIndexDocument();
+    doc.querySelector('#appModeToggle').value = MENU_MODES.PRO;
+    const trigger = doc.querySelector('#headerMenuBtn');
+
+    initMobile();
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    const settingsItem = doc.querySelector('#headerDropdown [data-action="settings"]');
+    settingsItem.click();
+
+    expect(doc.querySelector('#headerDropdown')?.classList.contains('is-open')).toBe(false);
+    expect(doc.querySelector('#mobileOverlay')?.classList.contains('is-open')).toBe(true);
+    expect(doc.querySelector('#mobileOverlayBody #settings')).not.toBeNull();
+    expect(doc.querySelector('#settings')?.getAttribute('aria-hidden')).toBe('false');
+  });
+
+  it('keeps the mobile sheet clickable above its backdrop and the overlay body scrollable', () => {
+    const css = loadResponsiveCss();
+
+    expect(css).toContain('body.mobile-menu-open .chat-header');
+    expect(css).toContain('z-index: 602');
+    expect(css).toContain('.mobile-overlay-body');
+    expect(css).toContain('min-height: 0');
+    expect(css).toContain('touch-action: pan-y');
   });
 });
