@@ -16,6 +16,19 @@ function getHeaderMenuGroups(doc) {
   }));
 }
 
+function getDesktopActionGroups(doc) {
+  return [...doc.querySelectorAll('.action-bar-actions .action-group')].map((group) => ({
+    key: group.dataset.actionGroup,
+    ids: [...group.querySelectorAll('button, .mode-badge, .scale-controls')].map((item) => item.id).filter(Boolean),
+  }));
+}
+
+function getPanelAccordionLabels(doc, panelId) {
+  return [...doc.querySelectorAll(`#${panelId} > details.accordion > summary`)].map((summary) =>
+    summary.textContent.replace(/\s+/g, ' ').trim()
+  );
+}
+
 describe('Faz 36 menu discipline', () => {
   it('orders header menu groups by the product workflow', () => {
     const doc = loadIndexDocument();
@@ -62,5 +75,41 @@ describe('Faz 36 menu discipline', () => {
     const firstTab = doc.querySelector('.tabs .tab[data-tab="group"] span');
 
     expect(firstTab?.textContent.trim()).toBe('Hazırla');
+  });
+});
+
+describe('Faz 37 desktop menu and panel order', () => {
+  it('groups desktop action bar controls by view, output, settings, and data work', () => {
+    const doc = loadIndexDocument();
+    const groups = getDesktopActionGroups(doc);
+    const groupsByKey = Object.fromEntries(groups.map((group) => [group.key, group.ids]));
+
+    expect(groups.map((group) => group.key)).toEqual(['view', 'output', 'settings', 'data']);
+    expect(groupsByKey.view).toEqual(['modeBadge', 'phoneOnlyBtn', 'scaleControls']);
+    expect(groupsByKey.output).toEqual(['screenshotBtn', 'saveAllBtn', 'loadAllBtn']);
+    expect(groupsByKey.settings).toEqual(['actionThemeToggleBtn']);
+    expect(groupsByKey.data).toEqual(['clearAllBtn']);
+  });
+
+  it('keeps preparation workflow accordions before technical JSON editing', () => {
+    const doc = loadIndexDocument();
+    const labels = getPanelAccordionLabels(doc, 'group');
+
+    expect(labels).toEqual([
+      'Grup Bilgileri',
+      'Kişi Ekle / Düzenle',
+      'Kişi Listesi',
+      'Satır Sırası',
+      'JSON Düzenle',
+    ]);
+  });
+
+  it('keeps common settings before pro and technical settings', () => {
+    const doc = loadIndexDocument();
+    const labels = getPanelAccordionLabels(doc, 'settings');
+
+    expect(labels.indexOf('🌗 Tema')).toBeGreaterThan(labels.indexOf('🧭 Başlangıç Rehberi & Mod'));
+    expect(labels.indexOf('🌗 Tema')).toBeLessThan(labels.indexOf('⏱️ Mesaj Saatleri'));
+    expect(labels.indexOf('🔤 Tipografi')).toBeLessThan(labels.indexOf('⏱️ Mesaj Saatleri'));
   });
 });
