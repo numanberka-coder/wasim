@@ -165,7 +165,7 @@ describe('Faz 38 mobile menu and overlay contract', () => {
     expect(trigger?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(menu?.classList.contains('mobile-action-sheet')).toBe(true);
     expect(menu?.getAttribute('role')).toBe('menu');
-    expect(header?.textContent.replace(/\s+/g, ' ').trim()).toContain('Mobil menu');
+    expect(header?.textContent.replace(/\s+/g, ' ').trim()).toContain('Mobil menü');
     expect(root).not.toBeNull();
     expect(menu?.querySelector('.hd-item')).toBeNull();
   });
@@ -296,13 +296,19 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     const prepareGroup = doc.querySelector('#headerDropdown [data-menu-group="prepare"]');
     const groupLabel = prepareGroup?.querySelector('.hd-group-label');
     const panelItem = doc.querySelector('#headerDropdown [data-action="scriptEditor"]');
+    const playItem = doc.querySelector('#headerDropdown [data-action="play"]');
+    const resetItem = doc.querySelector('#headerDropdown [data-action="reset"]');
     const clearItem = doc.querySelector('#headerDropdown [data-action="clear"]');
 
     expect(prepareGroup?.getAttribute('role')).toBe('group');
     expect(prepareGroup?.getAttribute('aria-labelledby')).toBe(groupLabel?.id);
     expect(panelItem?.getAttribute('role')).toBe('menuitem');
     expect(panelItem?.getAttribute('aria-controls')).toBe('script');
+    expect(panelItem?.querySelector('.hd-item-icon')).not.toBeNull();
+    expect(panelItem?.querySelector('.hd-item-description')?.textContent).toBe('Akış ve mesajlar');
     expect(panelItem?.getAttribute('aria-label')).toContain('panel ac');
+    expect(playItem?.classList.contains('hd-item-primary')).toBe(true);
+    expect(resetItem?.querySelector('.hd-item-label')?.textContent).toBe('Sıfırla');
     expect(clearItem?.getAttribute('aria-label')).toContain('aksiyon calistir');
   });
 
