@@ -86,6 +86,11 @@ function bindMobileEvents() {
       e.stopPropagation();
       toggleMobileMenu();
     });
+    headerMenuBtn.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      toggleMobileMenu();
+    });
   }
 
   // Dropdown item clicks
@@ -98,9 +103,15 @@ function bindMobileEvents() {
     });
   }
 
-  // Backdrop → close overlay
+  // Backdrop → close active mobile surface
   if (backdrop) {
-    backdrop.addEventListener('click', () => closeMobileOverlay());
+    backdrop.addEventListener('click', () => {
+      if (mobileState.menuOpen) {
+        closeMobileMenu();
+        return;
+      }
+      closeMobileOverlay();
+    });
   }
 
   // Back button → close overlay
@@ -171,15 +182,35 @@ function toggleMobileMenu() {
 function openMobileMenu() {
   const dd = $('headerDropdown');
   if (!dd) return;
+  const btn = $('headerMenuBtn');
+  const backdrop = $('mobileOverlayBackdrop');
   mobileState.menuOpen = true;
   dd.classList.add('is-open');
+  document.body.classList.add('mobile-menu-open');
+  if (btn) {
+    btn.setAttribute('aria-expanded', 'true');
+    btn.setAttribute('aria-label', 'Mobil menuyu kapat');
+  }
+  if (isMobileView() && backdrop) {
+    backdrop.classList.add('is-open', 'is-menu-backdrop');
+  }
 }
 
 function closeMobileMenu() {
   const dd = $('headerDropdown');
-  if (!dd) return;
+  const btn = $('headerMenuBtn');
+  const backdrop = $('mobileOverlayBackdrop');
   mobileState.menuOpen = false;
-  dd.classList.remove('is-open');
+  if (dd) dd.classList.remove('is-open');
+  document.body.classList.remove('mobile-menu-open');
+  if (btn) {
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', 'Mobil menuyu ac');
+  }
+  if (backdrop) {
+    backdrop.classList.remove('is-menu-backdrop');
+    if (!mobileState.overlayOpen) backdrop.classList.remove('is-open');
+  }
 }
 
 /* ========================================
@@ -321,7 +352,10 @@ function openMobileOverlay(panelKey) {
 
   // Aç
   overlay.classList.add('is-open');
-  if (backdrop) backdrop.classList.add('is-open');
+  if (backdrop) {
+    backdrop.classList.remove('is-menu-backdrop');
+    backdrop.classList.add('is-open');
+  }
 
   // History push — geri tuşu desteği
   history.pushState({ mobileOverlay: true }, '');
