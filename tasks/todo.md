@@ -113,10 +113,18 @@ Etkilenen dosyalar: `tests/`, `js/ui/menu-model.js`, `js/ui/mobile.js`,
 - Sandbox icinde Vitest yine `spawn EPERM` verdi; yerel izinle calistirilan
   hedefli test basarili: `npm.cmd test -- tests/menu-order.test.js` -> 1
   dosya, 17 test basarili.
-- `npm.cmd test`: 9 test dosyasi, 234 test basarili.
+- `npm.cmd test`: 9 test dosyasi, 236 test basarili.
 - `npm.cmd run build`: Vite build basarili.
 - HTTP sanity: mevcut dev server `http://127.0.0.1:5173/` 200 dondu ve
   `data-menu-root`, `aria-expanded`, `mobileOverlay` izleri dogrulandi.
 - `playwright` paketi yerelde bulunmadigi icin otomatik viewport screenshot
   alinmadi; desktop/mobil davranislar unit DOM testleri ve HTTP sanity ile
   dogrulandi.
+- Kullanici geri bildirimi sonrasinda browser'da mobil bottom sheet test edildi:
+  menu gorunmesine ragmen backdrop pointer event'leri yutuyordu.
+- `css/responsive.css` icinde `body.mobile-menu-open .chat-header` z-index'i
+  backdrop uzerine alindi; `mobile-overlay-body` icin `min-height: 0` ve
+  `touch-action: pan-y` eklenerek settings overlay scroll davranisi guvenceye
+  alindi.
+- Mobil overlay'e tasinan panelin `aria-hidden` degeri acilis sirasinda
+  `false` yapiliyor ve kapanista onceki degerine geri donuyor.

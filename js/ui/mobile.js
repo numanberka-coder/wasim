@@ -48,6 +48,7 @@ const mobileState = {
   _panelParent: null,
   _panelNextSibling: null,
   _panelOriginalDisplay: null,
+  _panelOriginalAriaHidden: null,
 };
 
 /** Panel key → real panel ID eşleştirmesi */
@@ -477,10 +478,12 @@ function openMobileOverlay(panelKey) {
   mobileState._panelParent = sourcePanel.parentNode;
   mobileState._panelNextSibling = sourcePanel.nextSibling;
   mobileState._panelOriginalDisplay = sourcePanel.style.display || '';
+  mobileState._panelOriginalAriaHidden = sourcePanel.getAttribute('aria-hidden');
 
   // Paneli overlay body'ye taşı
   body.appendChild(sourcePanel);
   sourcePanel.classList.add('active');
+  sourcePanel.setAttribute('aria-hidden', 'false');
   sourcePanel.style.display = 'block';
   sourcePanel.style.overflow = 'visible';
   sourcePanel.style.height = 'auto';
@@ -518,6 +521,11 @@ function closeMobileOverlay() {
     // Overlay'de uygulanan stil override'ları geri al
     panel.style.overflow = '';
     panel.style.height = '';
+    if (mobileState._panelOriginalAriaHidden === null) {
+      panel.removeAttribute('aria-hidden');
+    } else {
+      panel.setAttribute('aria-hidden', mobileState._panelOriginalAriaHidden);
+    }
     // Orijinal display değerini geri yükle
     panel.style.display = mobileState._panelOriginalDisplay || '';
     panel.classList.remove('active');
@@ -554,6 +562,7 @@ function closeMobileOverlay() {
   mobileState._panelParent = null;
   mobileState._panelNextSibling = null;
   mobileState._panelOriginalDisplay = null;
+  mobileState._panelOriginalAriaHidden = null;
   mobileState.overlayOpen = false;
   mobileState.currentPanel = null;
 
