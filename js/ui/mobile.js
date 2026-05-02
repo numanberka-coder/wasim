@@ -14,6 +14,14 @@ import { syncHeader } from '../phone/header.js';
 import { rebuildChat } from '../phone/messages.js';
 import { applyWallpaper } from '../phone/wallpaper.js';
 import { applyAllTypography } from '../phone/typography.js';
+import {
+  MENU_MODE_EVENT,
+  MENU_MODES,
+  findMenuItemByAction,
+  getMobileMenuGroups,
+  getPanelMenuItems,
+  normalizeMenuMode,
+} from './menu-model.js';
 
 /**
  * Registry for app-level callbacks that mobile module can invoke.
@@ -43,24 +51,21 @@ const mobileState = {
 };
 
 /** Panel key → real panel ID eşleştirmesi */
-const PANEL_MAP = {
-  scriptEditor: 'script',
-  group: 'group',
-  settings: 'settings',
-};
+const PANEL_MAP = Object.fromEntries(
+  getPanelMenuItems(MENU_MODES.PRO).map((item) => [item.panelKey, item.target])
+);
 
 /** Panel key → overlay başlık */
-const PANEL_TITLES = {
-  scriptEditor: 'Senaryo',
-  group: 'Hazırla',
-  settings: 'Ayarlar',
-};
+const PANEL_TITLES = Object.fromEntries(
+  getPanelMenuItems(MENU_MODES.PRO).map((item) => [item.panelKey, item.shortLabel || item.label])
+);
 
 /* ========================================
    INIT
    ======================================== */
 
 function initMobile() {
+  renderMobileMenu();
   bindMobileEvents();
   initCommandCopy();
   if (isMobileView()) {
@@ -102,6 +107,10 @@ function bindMobileEvents() {
       handleMobileAction(item.dataset.action);
     });
   }
+
+  window.addEventListener(MENU_MODE_EVENT, (e) => {
+    renderMobileMenu(e.detail?.mode);
+  });
 
   // Backdrop → close active mobile surface
   if (backdrop) {
@@ -213,21 +222,80 @@ function closeMobileMenu() {
   }
 }
 
+function getCurrentMenuMode() {
+  const modeSelect = $('appModeToggle');
+  if (modeSelect?.value) return normalizeMenuMode(modeSelect.value);
+  if (document.body.classList.contains('simple-mode')) return MENU_MODES.SIMPLE;
+  return MENU_MODES.SIMPLE;
+}
+
+export function renderMobileMenu(mode = getCurrentMenuMode()) {
+  const menu = $('headerDropdown');
+  if (!menu) return;
+
+  const safeMode = normalizeMenuMode(mode);
+  let root = menu.querySelector('[data-menu-root]');
+  if (!root) {
+    root = document.createElement('div');
+    root.className = 'hd-menu-groups';
+    root.dataset.menuRoot = '';
+    menu.querySelectorAll('.hd-menu-group').forEach((group) => group.remove());
+    menu.appendChild(root);
+  }
+
+  root.replaceChildren(...getMobileMenuGroups(safeMode).map(createMenuGroupElement));
+  menu.dataset.menuMode = safeMode;
+}
+
+function createMenuGroupElement(group) {
+  const groupEl = document.createElement('div');
+  groupEl.className = 'hd-menu-group';
+  groupEl.dataset.menuGroup = group.id;
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'hd-group-label';
+  labelEl.textContent = group.label;
+  groupEl.appendChild(labelEl);
+
+  group.items.forEach((item) => {
+    groupEl.appendChild(createMenuItemElement(item));
+  });
+
+  return groupEl;
+}
+
+function createMenuItemElement(item) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = item.dangerous ? 'hd-item hd-item-danger' : 'hd-item';
+  button.dataset.action = item.action;
+  button.dataset.menuItem = item.id;
+  button.dataset.actionType = item.type;
+  button.dataset.target = item.target;
+  if (item.mode === MENU_MODES.PRO) button.dataset.mode = MENU_MODES.PRO;
+  button.setAttribute('role', 'menuitem');
+  button.textContent = item.label;
+  return button;
+}
+
 /* ========================================
    MENU ACTIONS
    ======================================== */
 
 function handleMobileAction(action) {
+  const menuItem = findMenuItemByAction(action);
+  if (!menuItem) return;
+
   closeMobileMenu();
 
   // Panel overlay açanlar
-  if (PANEL_MAP[action]) {
-    openMobileOverlay(action);
+  if (menuItem.type === 'panel') {
+    openMobileOverlay(menuItem.panelKey || menuItem.action);
     return;
   }
 
   // Direkt aksiyonlar
-  switch (action) {
+  switch (menuItem.target) {
     case 'play':
       if (mobileState.overlayOpen) closeMobileOverlay();
       setTimeout(() => {

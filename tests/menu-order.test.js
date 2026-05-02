@@ -1,18 +1,32 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import {
+  DESKTOP_ACTION_GROUPS,
+  MENU_MODES,
+  findMenuItemByAction,
+  getMobileMenuGroups,
+  getPanelMenuItems,
+} from '../js/ui/menu-model.js';
+import { renderMobileMenu } from '../js/ui/mobile.js';
 
 function loadIndexDocument() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
   return new DOMParser().parseFromString(html, 'text/html');
 }
 
-function getHeaderMenuGroups(doc) {
-  return [...doc.querySelectorAll('#headerDropdown .hd-menu-group')].map((group) => ({
-    key: group.dataset.menuGroup,
-    label: group.querySelector('.hd-group-label')?.textContent.trim(),
-    actions: [...group.querySelectorAll('.hd-item')].map((item) => item.dataset.action),
-    texts: [...group.querySelectorAll('.hd-item')].map((item) => item.textContent.trim()),
+function mountIndexDocument() {
+  const doc = loadIndexDocument();
+  document.body.innerHTML = doc.body.innerHTML;
+  return document;
+}
+
+function getHeaderMenuGroups(mode = MENU_MODES.PRO) {
+  return getMobileMenuGroups(mode).map((group) => ({
+    key: group.id,
+    label: group.label,
+    actions: group.items.map((item) => item.action),
+    texts: group.items.map((item) => item.label),
   }));
 }
 
@@ -20,13 +34,12 @@ function getDesktopActionGroups(doc) {
   return [...doc.querySelectorAll('.action-bar-actions .action-group')].map((group) => ({
     key: group.dataset.actionGroup,
     ids: [...group.querySelectorAll('button, .mode-badge, .scale-controls')].map((item) => item.id).filter(Boolean),
+    mode: group.dataset.mode || MENU_MODES.SIMPLE,
   }));
 }
 
-function getMobilePanelActions(doc) {
-  return [...doc.querySelectorAll('#headerDropdown .hd-item')]
-    .map((item) => item.dataset.action)
-    .filter((action) => ['group', 'scriptEditor', 'settings'].includes(action));
+function getMobilePanelActions(mode = MENU_MODES.PRO) {
+  return getPanelMenuItems(mode).map((item) => item.action);
 }
 
 function getPanelAccordionLabels(doc, panelId) {
@@ -37,8 +50,7 @@ function getPanelAccordionLabels(doc, panelId) {
 
 describe('Faz 36 menu discipline', () => {
   it('orders header menu groups by the product workflow', () => {
-    const doc = loadIndexDocument();
-    const groups = getHeaderMenuGroups(doc);
+    const groups = getHeaderMenuGroups();
 
     expect(groups.map((group) => group.label)).toEqual([
       'Hazırla',
@@ -51,8 +63,7 @@ describe('Faz 36 menu discipline', () => {
   });
 
   it('keeps panel, playback, output, settings, and data actions separated', () => {
-    const doc = loadIndexDocument();
-    const groups = getHeaderMenuGroups(doc);
+    const groups = getHeaderMenuGroups();
     const actionsByKey = Object.fromEntries(groups.map((group) => [group.key, group.actions]));
 
     expect(actionsByKey.prepare).toEqual(['group']);
@@ -65,13 +76,13 @@ describe('Faz 36 menu discipline', () => {
 
   it('keeps playback reset distinct from destructive data deletion', () => {
     const doc = loadIndexDocument();
-    const resetAction = doc.querySelector('#headerDropdown [data-action="reset"]');
-    const clearAction = doc.querySelector('#headerDropdown [data-action="clear"]');
+    const resetAction = findMenuItemByAction('reset');
+    const clearAction = findMenuItemByAction('clear');
     const clearAllButton = doc.querySelector('#clearAllBtn');
     const overlayResetButton = doc.querySelector('#moResetBtn');
 
-    expect(resetAction?.textContent.trim()).toBe('Oynatmayı Sıfırla');
-    expect(clearAction?.textContent.trim()).toBe('Tüm Veriyi Sil');
+    expect(resetAction?.label).toBe('Oynatmayı Sıfırla');
+    expect(clearAction?.label).toBe('Tüm Veriyi Sil');
     expect(clearAllButton?.getAttribute('title')).toBe('Tüm Veriyi Sil');
     expect(overlayResetButton?.getAttribute('title')).toBe('Oynatmayı Sıfırla');
   });
@@ -88,13 +99,21 @@ describe('Faz 37 desktop menu and panel order', () => {
   it('groups desktop action bar controls by view, output, settings, and data work', () => {
     const doc = loadIndexDocument();
     const groups = getDesktopActionGroups(doc);
-    const groupsByKey = Object.fromEntries(groups.map((group) => [group.key, group.ids]));
+    const expectedGroups = DESKTOP_ACTION_GROUPS.map((group) => ({
+      key: group.id,
+      ids: group.itemIds,
+      mode: group.mode || MENU_MODES.SIMPLE,
+    }));
 
-    expect(groups.map((group) => group.key)).toEqual(['view', 'output', 'settings', 'data']);
-    expect(groupsByKey.view).toEqual(['modeBadge', 'phoneOnlyBtn', 'scaleControls']);
-    expect(groupsByKey.output).toEqual(['screenshotBtn', 'saveAllBtn', 'loadAllBtn']);
-    expect(groupsByKey.settings).toEqual(['actionThemeToggleBtn']);
-    expect(groupsByKey.data).toEqual(['clearAllBtn']);
+    expect(groups).toEqual(expectedGroups);
+  });
+
+  it('keeps desktop panel tabs in the shared model order', () => {
+    const doc = loadIndexDocument();
+    const tabIds = [...doc.querySelectorAll('.tabs .tab')].map((tab) => tab.dataset.tab);
+    const modelPanelIds = getPanelMenuItems(MENU_MODES.PRO).map((item) => item.target);
+
+    expect(tabIds).toEqual(modelPanelIds);
   });
 
   it('keeps preparation workflow accordions before technical JSON editing', () => {
@@ -121,11 +140,12 @@ describe('Faz 37 desktop menu and panel order', () => {
 });
 
 describe('Faz 38 mobile menu and overlay contract', () => {
-  it('marks the header menu as a mobile action sheet with trigger state', () => {
+  it('marks the header menu as a model-rendered mobile action sheet with trigger state', () => {
     const doc = loadIndexDocument();
     const trigger = doc.querySelector('#headerMenuBtn');
     const menu = doc.querySelector('#headerDropdown');
     const header = menu?.querySelector('.hd-menu-header');
+    const root = menu?.querySelector('[data-menu-root]');
 
     expect(trigger?.getAttribute('role')).toBe('button');
     expect(trigger?.getAttribute('aria-haspopup')).toBe('menu');
@@ -134,13 +154,96 @@ describe('Faz 38 mobile menu and overlay contract', () => {
     expect(menu?.classList.contains('mobile-action-sheet')).toBe(true);
     expect(menu?.getAttribute('role')).toBe('menu');
     expect(header?.textContent.replace(/\s+/g, ' ').trim()).toContain('Mobil menu');
+    expect(root).not.toBeNull();
+    expect(menu?.querySelector('.hd-item')).toBeNull();
   });
 
   it('keeps mobile panel actions bound to the overlay panel move model', () => {
     const doc = loadIndexDocument();
 
-    expect(getMobilePanelActions(doc)).toEqual(['group', 'scriptEditor', 'settings']);
+    expect(getMobilePanelActions()).toEqual(['group', 'scriptEditor', 'settings']);
     expect(doc.querySelector('#mobileOverlayBody')).not.toBeNull();
     expect(doc.querySelector('#mobileOverlayBackdrop')).not.toBeNull();
+  });
+});
+
+describe('Faz 39 shared menu model and Simple/Pro rules', () => {
+  it('filters mobile menu items through the shared Simple/Pro rule', () => {
+    const simpleActions = getHeaderMenuGroups(MENU_MODES.SIMPLE).flatMap((group) => group.actions);
+    const proActions = getHeaderMenuGroups(MENU_MODES.PRO).flatMap((group) => group.actions);
+
+    expect(simpleActions).toEqual(['group', 'play', 'pause', 'reset', 'screenshot', 'save', 'load', 'settings']);
+    expect(simpleActions).not.toContain('scriptEditor');
+    expect(simpleActions).not.toContain('clear');
+    expect(proActions).toEqual([
+      'group',
+      'scriptEditor',
+      'play',
+      'pause',
+      'reset',
+      'screenshot',
+      'save',
+      'load',
+      'settings',
+      'clear',
+    ]);
+  });
+
+  it('centralizes panel targets and action metadata', () => {
+    expect(findMenuItemByAction('scriptEditor')).toMatchObject({
+      type: 'panel',
+      target: 'script',
+      panelKey: 'scriptEditor',
+      mode: MENU_MODES.PRO,
+    });
+    expect(findMenuItemByAction('clear')).toMatchObject({
+      type: 'data',
+      target: 'clear',
+      dangerous: true,
+      mode: MENU_MODES.PRO,
+    });
+  });
+
+  it('keeps desktop Simple/Pro visibility aligned with the model', () => {
+    const doc = loadIndexDocument();
+    const simplePanels = getPanelMenuItems(MENU_MODES.SIMPLE).map((item) => item.target);
+    const proPanels = getPanelMenuItems(MENU_MODES.PRO).map((item) => item.target);
+
+    expect(simplePanels).toEqual(['group', 'settings']);
+    expect(proPanels).toEqual(['group', 'script', 'settings']);
+    expect(doc.querySelector('.tabs .tab[data-tab="script"]')?.dataset.mode).toBe(MENU_MODES.PRO);
+    expect(doc.querySelector('.action-group[data-action-group="data"]')?.dataset.mode).toBe(MENU_MODES.PRO);
+  });
+
+  it('renders the mobile action sheet from the shared model at runtime', () => {
+    const doc = mountIndexDocument();
+
+    renderMobileMenu(MENU_MODES.PRO);
+    expect([...doc.querySelectorAll('#headerDropdown .hd-item')].map((item) => item.dataset.action)).toEqual([
+      'group',
+      'scriptEditor',
+      'play',
+      'pause',
+      'reset',
+      'screenshot',
+      'save',
+      'load',
+      'settings',
+      'clear',
+    ]);
+    expect(doc.querySelector('#headerDropdown [data-action="scriptEditor"]')?.dataset.actionType).toBe('panel');
+    expect(doc.querySelector('#headerDropdown [data-action="clear"]')?.classList.contains('hd-item-danger')).toBe(true);
+
+    renderMobileMenu(MENU_MODES.SIMPLE);
+    expect([...doc.querySelectorAll('#headerDropdown .hd-item')].map((item) => item.dataset.action)).toEqual([
+      'group',
+      'play',
+      'pause',
+      'reset',
+      'screenshot',
+      'save',
+      'load',
+      'settings',
+    ]);
   });
 });

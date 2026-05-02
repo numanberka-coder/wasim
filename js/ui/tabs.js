@@ -3,6 +3,7 @@
    ======================================== */
 
 import { $$, Logger } from '../utils.js';
+import { MENU_MODES, getPanelMenuItems } from './menu-model.js';
 
 export let activeTab = 'group';
 const tabListeners = new Set();
@@ -13,6 +14,7 @@ const tabListeners = new Set();
 export function initTabs() {
   const tabs = $$('.tab');
   const panels = $$('.panel');
+  syncTabsWithMenuModel(tabs);
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -36,6 +38,31 @@ export function initTabs() {
   });
 
   Logger.info('📑 Tabs initialized');
+}
+
+function syncTabsWithMenuModel(tabs) {
+  const tabList = [...tabs];
+  const panelItems = getPanelMenuItems(MENU_MODES.PRO);
+
+  panelItems.forEach((item, index) => {
+    const tab = tabList.find((candidate) => candidate.dataset.tab === item.target);
+    if (!tab) return;
+
+    tab.dataset.menuItem = item.id;
+    tab.dataset.menuGroup = item.group;
+    tab.dataset.actionType = item.type;
+    tab.style.order = String(index);
+    tab.setAttribute('aria-label', `${item.shortLabel || item.label} paneli`);
+
+    if (item.mode === MENU_MODES.PRO) {
+      tab.dataset.mode = MENU_MODES.PRO;
+    } else {
+      delete tab.dataset.mode;
+    }
+
+    const label = tab.querySelector('span');
+    if (label) label.textContent = item.shortLabel || item.label;
+  });
 }
 
 /**
