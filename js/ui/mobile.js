@@ -94,7 +94,12 @@ function bindMobileEvents() {
     headerMenuBtn.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       e.preventDefault();
-      toggleMobileMenu();
+      e.stopPropagation();
+      if (mobileState.menuOpen) {
+        closeMobileMenu({ restoreFocus: true });
+      } else {
+        openMobileMenu({ focusFirst: true });
+      }
     });
   }
 
@@ -105,6 +110,9 @@ function bindMobileEvents() {
       if (!item) return;
       e.stopPropagation();
       handleMobileAction(item.dataset.action);
+    });
+    headerDropdown.addEventListener('keydown', (e) => {
+      if (handleMobileMenuKeydown(e, headerDropdown)) e.stopPropagation();
     });
   }
 
@@ -188,7 +196,7 @@ function toggleMobileMenu() {
   mobileState.menuOpen ? closeMobileMenu() : openMobileMenu();
 }
 
-function openMobileMenu() {
+function openMobileMenu(options = {}) {
   const dd = $('headerDropdown');
   if (!dd) return;
   const btn = $('headerMenuBtn');
@@ -203,9 +211,10 @@ function openMobileMenu() {
   if (isMobileView() && backdrop) {
     backdrop.classList.add('is-open', 'is-menu-backdrop');
   }
+  if (options.focusFirst) focusFirstMobileMenuItem(dd);
 }
 
-function closeMobileMenu() {
+function closeMobileMenu(options = {}) {
   const dd = $('headerDropdown');
   const btn = $('headerMenuBtn');
   const backdrop = $('mobileOverlayBackdrop');
@@ -220,6 +229,7 @@ function closeMobileMenu() {
     backdrop.classList.remove('is-menu-backdrop');
     if (!mobileState.overlayOpen) backdrop.classList.remove('is-open');
   }
+  if (options.restoreFocus && btn) btn.focus();
 }
 
 function getCurrentMenuMode() {
@@ -251,10 +261,14 @@ function createMenuGroupElement(group) {
   const groupEl = document.createElement('div');
   groupEl.className = 'hd-menu-group';
   groupEl.dataset.menuGroup = group.id;
+  groupEl.setAttribute('role', 'group');
 
   const labelEl = document.createElement('div');
+  const labelId = `mobile-menu-group-${group.id}`;
+  labelEl.id = labelId;
   labelEl.className = 'hd-group-label';
   labelEl.textContent = group.label;
+  groupEl.setAttribute('aria-labelledby', labelId);
   groupEl.appendChild(labelEl);
 
   group.items.forEach((item) => {
@@ -274,8 +288,65 @@ function createMenuItemElement(item) {
   button.dataset.target = item.target;
   if (item.mode === MENU_MODES.PRO) button.dataset.mode = MENU_MODES.PRO;
   button.setAttribute('role', 'menuitem');
+  button.setAttribute('aria-label', `${item.label} - ${item.type === 'panel' ? 'panel ac' : 'aksiyon calistir'}`);
+  if (item.type === 'panel') button.setAttribute('aria-controls', item.target);
   button.textContent = item.label;
   return button;
+}
+
+function getFocusableMenuItems(menu = $('headerDropdown')) {
+  if (!menu) return [];
+  return [...menu.querySelectorAll('.hd-item:not([disabled])')];
+}
+
+function focusFirstMobileMenuItem(menu) {
+  const firstItem = getFocusableMenuItems(menu)[0];
+  if (firstItem) firstItem.focus();
+}
+
+function focusMobileMenuItem(menu, offset) {
+  const items = getFocusableMenuItems(menu);
+  if (!items.length) return;
+
+  const currentIndex = items.indexOf(document.activeElement);
+  const safeIndex = currentIndex === -1 ? 0 : currentIndex;
+  const nextIndex = (safeIndex + offset + items.length) % items.length;
+  items[nextIndex].focus();
+}
+
+function handleMobileMenuKeydown(e, menu) {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    closeMobileMenu({ restoreFocus: true });
+    return true;
+  }
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    focusMobileMenuItem(menu, 1);
+    return true;
+  }
+
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    focusMobileMenuItem(menu, -1);
+    return true;
+  }
+
+  if (e.key === 'Home') {
+    e.preventDefault();
+    focusFirstMobileMenuItem(menu);
+    return true;
+  }
+
+  if (e.key === 'End') {
+    e.preventDefault();
+    const items = getFocusableMenuItems(menu);
+    if (items.length) items[items.length - 1].focus();
+    return true;
+  }
+
+  return false;
 }
 
 /* ========================================
