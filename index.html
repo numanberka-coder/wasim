@@ -84,6 +84,8 @@
         </div>
       </div>
 
+      <div class="desktop-workflow-menu" data-desktop-menu-root role="navigation" aria-label="Masaüstü çalışma menüsü"></div>
+
       <!-- ===== PANEL: GROUP ===== -->
       <div class="panel active" id="group">
         <!-- Group Info -->
@@ -934,10 +936,15 @@ Destek: Bunu anlayamadım 🤔"></textarea>
             </svg>
             <!-- Header Dropdown Menu (mobilde görünür) -->
             <div class="header-dropdown mobile-action-sheet" id="headerDropdown" role="menu" aria-label="Mobil calisma menusu">
-              <div class="hd-menu-header" aria-hidden="true">
-                <span class="hd-sheet-handle"></span>
-                <strong>Mobil menü</strong>
-                <span>Hazırla, oynat, çıktı al</span>
+              <div class="hd-menu-header">
+                <span class="hd-sheet-handle" aria-hidden="true"></span>
+                <span class="hd-menu-title">
+                  <strong>Mobil menü</strong>
+                  <span>Hazırla, oynat, çıktı al</span>
+                </span>
+                <button id="headerMenuCloseBtn" class="hd-menu-close" type="button" aria-label="Mobil menüyü kapat">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                </button>
               </div>
               <div class="hd-menu-groups" data-menu-root></div>
             </div>

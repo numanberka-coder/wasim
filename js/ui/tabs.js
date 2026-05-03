@@ -3,10 +3,19 @@
    ======================================== */
 
 import { $$, Logger } from '../utils.js';
-import { MENU_MODES, getPanelMenuItems } from './menu-model.js';
+import { MENU_ICON_SVG, MENU_MODES, getMenuGroups, getPanelMenuItems } from './menu-model.js';
 
 export let activeTab = 'group';
 const tabListeners = new Set();
+const DESKTOP_ACTION_TARGETS = Object.freeze({
+  play: 'playBtn',
+  pause: 'pauseBtn',
+  reset: 'resetBtn',
+  screenshot: 'screenshotBtn',
+  save: 'saveAllBtn',
+  load: 'loadAllBtn',
+  clear: 'clearAllBtn',
+});
 
 /**
  * Initialize tab system
@@ -15,6 +24,7 @@ export function initTabs() {
   const tabs = $$('.tab');
   const panels = $$('.panel');
   syncTabsWithMenuModel(tabs);
+  renderDesktopWorkflowMenu();
   syncTabAriaState(activeTab, tabs, panels);
 
   tabs.forEach(tab => {
@@ -77,6 +87,97 @@ function syncTabAriaState(tabId, tabs, panels) {
 
     const ownerTab = document.querySelector(`.tab[data-tab="${panel.id}"]`);
     if (ownerTab?.id) panel.setAttribute('aria-labelledby', ownerTab.id);
+  });
+
+  syncDesktopWorkflowState(tabId);
+}
+
+function renderDesktopWorkflowMenu() {
+  const root = document.querySelector('[data-desktop-menu-root]');
+  if (!root) return;
+
+  root.replaceChildren(...getMenuGroups(MENU_MODES.PRO).map(createDesktopMenuGroup));
+}
+
+function createDesktopMenuGroup(group) {
+  const groupEl = document.createElement('section');
+  groupEl.className = `desktop-menu-group desktop-menu-group-${group.id}`;
+  groupEl.dataset.menuGroup = group.id;
+  if (group.items.every((item) => item.mode === MENU_MODES.PRO)) {
+    groupEl.dataset.mode = MENU_MODES.PRO;
+  }
+
+  const label = document.createElement('div');
+  label.className = 'desktop-menu-group-label';
+  label.textContent = group.label;
+  groupEl.appendChild(label);
+
+  const items = document.createElement('div');
+  items.className = 'desktop-menu-items';
+
+  group.items.forEach((item) => {
+    items.appendChild(createDesktopMenuItem(item));
+  });
+
+  groupEl.appendChild(items);
+  return groupEl;
+}
+
+function createDesktopMenuItem(item) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  const classes = ['desktop-menu-item', `desktop-menu-item-${item.type}`];
+  if (item.variant) classes.push(`desktop-menu-item-${item.variant}`);
+  if (item.dangerous) classes.push('desktop-menu-item-danger');
+  button.className = classes.join(' ');
+  button.dataset.action = item.action;
+  button.dataset.menuItem = item.id;
+  button.dataset.actionType = item.type;
+  button.dataset.target = item.target;
+  button.setAttribute('aria-label', item.description ? `${item.label}: ${item.description}` : item.label);
+  if (item.mode === MENU_MODES.PRO) button.dataset.mode = MENU_MODES.PRO;
+  if (item.type === 'panel') button.dataset.targetPanel = item.target;
+
+  const icon = document.createElement('span');
+  icon.className = 'desktop-menu-icon';
+  icon.innerHTML = MENU_ICON_SVG[item.icon] || MENU_ICON_SVG.settings;
+
+  const copy = document.createElement('span');
+  copy.className = 'desktop-menu-copy';
+
+  const text = document.createElement('span');
+  text.className = 'desktop-menu-label';
+  text.textContent = item.mobileLabel || item.shortLabel || item.label;
+  copy.appendChild(text);
+
+  if (item.description) {
+    const description = document.createElement('span');
+    description.className = 'desktop-menu-description';
+    description.textContent = item.description;
+    copy.appendChild(description);
+  }
+
+  button.append(icon, copy);
+  button.addEventListener('click', () => handleDesktopMenuAction(item));
+  return button;
+}
+
+function handleDesktopMenuAction(item) {
+  if (item.type === 'panel') {
+    switchTab(item.target);
+    return;
+  }
+
+  const targetId = DESKTOP_ACTION_TARGETS[item.action];
+  const target = targetId ? document.getElementById(targetId) : null;
+  if (target) target.click();
+}
+
+function syncDesktopWorkflowState(tabId) {
+  document.querySelectorAll('[data-desktop-menu-root] .desktop-menu-item').forEach((item) => {
+    const isActive = item.dataset.targetPanel === tabId;
+    item.classList.toggle('is-active', isActive);
+    item.setAttribute('aria-current', isActive ? 'page' : 'false');
   });
 }
 
