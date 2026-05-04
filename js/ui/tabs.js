@@ -85,8 +85,13 @@ function syncTabAriaState(tabId, tabs, panels) {
     panel.setAttribute('role', 'tabpanel');
     panel.setAttribute('aria-hidden', String(!isActive));
 
+    const ownerDesktopItem = document.querySelector(`[data-desktop-menu-root] [data-target-panel="${panel.id}"]`);
     const ownerTab = document.querySelector(`.tab[data-tab="${panel.id}"]`);
-    if (ownerTab?.id) panel.setAttribute('aria-labelledby', ownerTab.id);
+    if (ownerDesktopItem?.id) {
+      panel.setAttribute('aria-labelledby', ownerDesktopItem.id);
+    } else if (ownerTab?.id) {
+      panel.setAttribute('aria-labelledby', ownerTab.id);
+    }
   });
 
   syncDesktopWorkflowState(tabId);
@@ -136,7 +141,11 @@ function createDesktopMenuItem(item) {
   button.dataset.target = item.target;
   button.setAttribute('aria-label', item.description ? `${item.label}: ${item.description}` : item.label);
   if (item.mode === MENU_MODES.PRO) button.dataset.mode = MENU_MODES.PRO;
-  if (item.type === 'panel') button.dataset.targetPanel = item.target;
+  if (item.type === 'panel') {
+    button.id = `desktop-menu-${item.target}`;
+    button.dataset.targetPanel = item.target;
+    button.setAttribute('aria-controls', item.target);
+  }
 
   const icon = document.createElement('span');
   icon.className = 'desktop-menu-icon';

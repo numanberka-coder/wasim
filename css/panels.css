@@ -60,6 +60,10 @@
   stroke: var(--wa-green);
 }
 
+.tab-bridge {
+  display: none;
+}
+
 /* ===== DESKTOP WORKFLOW MENU ===== */
 .desktop-workflow-menu {
   display: grid;

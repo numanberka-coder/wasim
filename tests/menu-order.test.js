@@ -122,9 +122,11 @@ describe('Faz 37 desktop menu and panel order', () => {
 
   it('keeps desktop panel tabs in the shared model order', () => {
     const doc = loadIndexDocument();
+    const tabBridge = doc.querySelector('.tabs');
     const tabIds = [...doc.querySelectorAll('.tabs .tab')].map((tab) => tab.dataset.tab);
     const modelPanelIds = getPanelMenuItems(MENU_MODES.PRO).map((item) => item.target);
 
+    expect(tabBridge?.classList.contains('tab-bridge')).toBe(true);
     expect(tabIds).toEqual(modelPanelIds);
   });
 
@@ -281,10 +283,12 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(groupTab?.getAttribute('tabindex')).toBe('0');
     expect(groupTab?.getAttribute('aria-controls')).toBe('group');
     expect(groupPanel?.getAttribute('role')).toBe('tabpanel');
-    expect(groupPanel?.getAttribute('aria-labelledby')).toBe(groupTab?.id);
+    expect(groupPanel?.getAttribute('aria-labelledby')).toBe(desktopGroupItem?.id);
     expect(scriptTab?.getAttribute('aria-selected')).toBe('false');
     expect(scriptTab?.getAttribute('tabindex')).toBe('-1');
     expect(scriptPanel?.getAttribute('aria-hidden')).toBe('true');
+    expect(desktopGroupItem?.getAttribute('aria-controls')).toBe('group');
+    expect(desktopScriptItem?.getAttribute('aria-controls')).toBe('script');
     expect(desktopRoot?.querySelector('[data-action="play"]')?.classList.contains('desktop-menu-item-primary')).toBe(true);
     expect(desktopPlayItems?.length).toBe(3);
     expect(desktopGroupItem?.getAttribute('aria-current')).toBe('page');
