@@ -67,8 +67,9 @@
 /* ===== DESKTOP WORKFLOW MENU ===== */
 .desktop-workflow-menu {
   display: grid;
-  gap: 10px;
-  padding: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(145, 170, 182, 0.12);
   background: linear-gradient(180deg, rgba(13, 23, 32, 0.96) 0%, rgba(10, 18, 25, 0.92) 100%);
 }
@@ -101,8 +102,8 @@
   justify-content: flex-start;
   width: 100%;
   min-width: 0;
-  min-height: 42px;
-  padding: 8px 10px;
+  min-height: 54px;
+  padding: 9px 10px;
   border: 1px solid rgba(145, 170, 182, 0.13);
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.04);
@@ -162,13 +163,13 @@
 }
 
 .desktop-menu-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .desktop-menu-description {
   color: var(--wa-text-secondary);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 500;
 }
 

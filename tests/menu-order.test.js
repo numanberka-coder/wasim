@@ -277,7 +277,7 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     const desktopRoot = doc.querySelector('[data-desktop-menu-root]');
     const desktopGroupItem = desktopRoot?.querySelector('[data-action="group"]');
     const desktopScriptItem = desktopRoot?.querySelector('[data-action="scriptEditor"]');
-    const desktopPlayItems = desktopRoot?.querySelectorAll('[data-menu-group="playback"] .desktop-menu-item');
+    const desktopItems = [...(desktopRoot?.querySelectorAll('.desktop-menu-item') || [])];
 
     expect(groupTab?.getAttribute('aria-selected')).toBe('true');
     expect(groupTab?.getAttribute('tabindex')).toBe('0');
@@ -289,8 +289,9 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(scriptPanel?.getAttribute('aria-hidden')).toBe('true');
     expect(desktopGroupItem?.getAttribute('aria-controls')).toBe('group');
     expect(desktopScriptItem?.getAttribute('aria-controls')).toBe('script');
-    expect(desktopRoot?.querySelector('[data-action="play"]')?.classList.contains('desktop-menu-item-primary')).toBe(true);
-    expect(desktopPlayItems?.length).toBe(3);
+    expect(desktopItems.map((item) => item.dataset.action)).toEqual(['group', 'scriptEditor', 'settings']);
+    expect(desktopRoot?.querySelector('[data-menu-group="playback"]')).toBeNull();
+    expect(desktopRoot?.querySelector('[data-action="play"]')).toBeNull();
     expect(desktopGroupItem?.getAttribute('aria-current')).toBe('page');
     expect(desktopScriptItem?.getAttribute('aria-current')).toBe('false');
 

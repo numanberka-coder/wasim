@@ -3,19 +3,10 @@
    ======================================== */
 
 import { $$, Logger } from '../utils.js';
-import { MENU_ICON_SVG, MENU_MODES, getMenuGroups, getPanelMenuItems } from './menu-model.js';
+import { MENU_ICON_SVG, MENU_MODES, getPanelMenuItems } from './menu-model.js';
 
 export let activeTab = 'group';
 const tabListeners = new Set();
-const DESKTOP_ACTION_TARGETS = Object.freeze({
-  play: 'playBtn',
-  pause: 'pauseBtn',
-  reset: 'resetBtn',
-  screenshot: 'screenshotBtn',
-  save: 'saveAllBtn',
-  load: 'loadAllBtn',
-  clear: 'clearAllBtn',
-});
 
 /**
  * Initialize tab system
@@ -101,31 +92,7 @@ function renderDesktopWorkflowMenu() {
   const root = document.querySelector('[data-desktop-menu-root]');
   if (!root) return;
 
-  root.replaceChildren(...getMenuGroups(MENU_MODES.PRO).map(createDesktopMenuGroup));
-}
-
-function createDesktopMenuGroup(group) {
-  const groupEl = document.createElement('section');
-  groupEl.className = `desktop-menu-group desktop-menu-group-${group.id}`;
-  groupEl.dataset.menuGroup = group.id;
-  if (group.items.every((item) => item.mode === MENU_MODES.PRO)) {
-    groupEl.dataset.mode = MENU_MODES.PRO;
-  }
-
-  const label = document.createElement('div');
-  label.className = 'desktop-menu-group-label';
-  label.textContent = group.label;
-  groupEl.appendChild(label);
-
-  const items = document.createElement('div');
-  items.className = 'desktop-menu-items';
-
-  group.items.forEach((item) => {
-    items.appendChild(createDesktopMenuItem(item));
-  });
-
-  groupEl.appendChild(items);
-  return groupEl;
+  root.replaceChildren(...getPanelMenuItems(MENU_MODES.PRO).map(createDesktopMenuItem));
 }
 
 function createDesktopMenuItem(item) {
@@ -137,6 +104,7 @@ function createDesktopMenuItem(item) {
   button.className = classes.join(' ');
   button.dataset.action = item.action;
   button.dataset.menuItem = item.id;
+  button.dataset.menuGroup = item.group;
   button.dataset.actionType = item.type;
   button.dataset.target = item.target;
   button.setAttribute('aria-label', item.description ? `${item.label}: ${item.description}` : item.label);
@@ -174,12 +142,7 @@ function createDesktopMenuItem(item) {
 function handleDesktopMenuAction(item) {
   if (item.type === 'panel') {
     switchTab(item.target);
-    return;
   }
-
-  const targetId = DESKTOP_ACTION_TARGETS[item.action];
-  const target = targetId ? document.getElementById(targetId) : null;
-  if (target) target.click();
 }
 
 function syncDesktopWorkflowState(tabId) {
