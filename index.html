@@ -68,8 +68,8 @@
         </div>
       </div>
 
-      <!-- Tabs — 3 tabs (Kişiler merged into Grup) -->
-      <div class="tabs" role="tablist" aria-label="Masaustu panel navigasyonu">
+      <!-- Legacy tab bridge: desktop navigation is rendered from the shared workflow menu -->
+      <div class="tabs tab-bridge" data-tab-bridge role="tablist" aria-label="Masaustu panel navigasyonu">
         <div class="tab active" data-tab="group" role="tab" aria-label="Hazirla paneli">
           <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
           <span>Hazırla</span>
@@ -83,6 +83,8 @@
           <span>Ayarlar</span>
         </div>
       </div>
+
+      <div class="desktop-workflow-menu" data-desktop-menu-root role="navigation" aria-label="Masaüstü çalışma menüsü"></div>
 
       <!-- ===== PANEL: GROUP ===== -->
       <div class="panel active" id="group">
@@ -934,10 +936,15 @@ Destek: Bunu anlayamadım 🤔"></textarea>
             </svg>
             <!-- Header Dropdown Menu (mobilde görünür) -->
             <div class="header-dropdown mobile-action-sheet" id="headerDropdown" role="menu" aria-label="Mobil calisma menusu">
-              <div class="hd-menu-header" aria-hidden="true">
-                <span class="hd-sheet-handle"></span>
-                <strong>Mobil menü</strong>
-                <span>Hazırla, oynat, çıktı al</span>
+              <div class="hd-menu-header">
+                <span class="hd-sheet-handle" aria-hidden="true"></span>
+                <span class="hd-menu-title">
+                  <strong>Mobil menü</strong>
+                  <span>Hazırla, oynat, çıktı al</span>
+                </span>
+                <button id="headerMenuCloseBtn" class="hd-menu-close" type="button" aria-label="Mobil menüyü kapat">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                </button>
               </div>
               <div class="hd-menu-groups" data-menu-root></div>
             </div>
