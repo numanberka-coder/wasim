@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/panels.css">
   <link rel="stylesheet" href="css/phone.css">
+  <link rel="stylesheet" href="css/phone-shell.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -872,7 +873,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         </button>
       </div>
-      <div class="phone">
+      <div class="phone" data-phone-view="home">
         <!-- Cam yansıması (Glass Glare Overlay) -->
         <div class="phone-screen-glare"></div>
         <!-- Yan tuşlar -->
@@ -906,14 +907,72 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           </div>
         </div>
 
+        <!-- Phone Home Shell -->
+        <section class="phone-view phone-app-shell" id="phoneHomeShell" data-phone-view="home" data-active-tab="chats" aria-label="WhatsApp ana ekran">
+          <header class="phone-home-header">
+            <div class="phone-home-title">WhatsApp</div>
+            <div class="phone-home-actions">
+              <button class="phone-home-icon-btn" type="button" aria-label="Kamera">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+              </button>
+              <button class="phone-home-icon-btn header-menu-trigger" id="phoneShellMenuBtn" type="button" data-mobile-menu-trigger aria-haspopup="menu" aria-expanded="false" aria-controls="headerDropdown" aria-label="Mobil menuyu ac">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></svg>
+              </button>
+            </div>
+          </header>
+
+          <div class="phone-tab-panels">
+            <section class="phone-tab-panel is-active" id="phoneTabChats" data-phone-tab-panel="chats" role="tabpanel" aria-labelledby="phoneTabBtnChats">
+              <button class="phone-chat-entry" type="button" data-phone-open-chat aria-label="Sohbet detayini ac">
+                <span class="phone-chat-entry-avatar" id="homeChatAvatar">G</span>
+                <span class="phone-chat-entry-copy">
+                  <span class="phone-chat-entry-title" id="homeChatTitle">Grup</span>
+                  <span class="phone-chat-entry-meta" id="homeChatSubtitle">Sohbet detayini ac</span>
+                </span>
+                <span class="phone-chat-entry-time" id="homeChatTime">12:00</span>
+              </button>
+            </section>
+            <section class="phone-tab-panel" id="phoneTabUpdates" data-phone-tab-panel="updates" role="tabpanel" aria-labelledby="phoneTabBtnUpdates" hidden>
+              <div class="phone-tab-placeholder">Guncellemeler</div>
+            </section>
+            <section class="phone-tab-panel" id="phoneTabCommunities" data-phone-tab-panel="communities" role="tabpanel" aria-labelledby="phoneTabBtnCommunities" hidden>
+              <div class="phone-tab-placeholder">Topluluklar</div>
+            </section>
+            <section class="phone-tab-panel" id="phoneTabCalls" data-phone-tab-panel="calls" role="tabpanel" aria-labelledby="phoneTabBtnCalls" hidden>
+              <div class="phone-tab-placeholder">Aramalar</div>
+            </section>
+          </div>
+
+          <nav class="phone-bottom-nav" aria-label="WhatsApp sekmeleri" role="tablist">
+            <button class="phone-bottom-nav-item is-active" id="phoneTabBtnChats" type="button" role="tab" data-phone-tab="chats" aria-selected="true" aria-controls="phoneTabChats">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg>
+              <span>Sohbetler</span>
+            </button>
+            <button class="phone-bottom-nav-item" id="phoneTabBtnUpdates" type="button" role="tab" data-phone-tab="updates" aria-selected="false" aria-controls="phoneTabUpdates" tabindex="-1">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1010 10h-2a8 8 0 11-8-8V2zm1 1v10h8A9 9 0 0013 3z"/></svg>
+              <span>Guncellemeler</span>
+            </button>
+            <button class="phone-bottom-nav-item" id="phoneTabBtnCommunities" type="button" role="tab" data-phone-tab="communities" aria-selected="false" aria-controls="phoneTabCommunities" tabindex="-1">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 10-3.46-6A4 4 0 1016 11zM2 20a6 6 0 0112 0v1H2v-1zm12.5 1v-1a7.5 7.5 0 00-2.1-5.2A6 6 0 0122 20v1h-7.5z"/></svg>
+              <span>Topluluklar</span>
+            </button>
+            <button class="phone-bottom-nav-item" id="phoneTabBtnCalls" type="button" role="tab" data-phone-tab="calls" aria-selected="false" aria-controls="phoneTabCalls" tabindex="-1">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.36 11.36 0 003.57.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.57 3.57 1 1 0 01-.25 1.02l-2.2 2.2z"/></svg>
+              <span>Aramalar</span>
+            </button>
+          </nav>
+        </section>
+
+        <!-- Chat Detail -->
+        <section class="phone-view phone-chat-detail" id="phoneChatDetail" data-phone-view="chat" aria-label="Sohbet detayi">
         <!-- Chat Header -->
         <div class="chat-header">
-          <div class="back-btn">
+          <button class="back-btn" id="phoneChatBackBtn" type="button" aria-label="Ana ekrana don">
             <!-- WhatsApp Android back arrow -->
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
             </svg>
-          </div>
+          </button>
           <div class="header-avatar online" id="headerAvatar">G</div>
           <div class="header-info">
             <div class="header-title" id="headerTitle">Grup</div>
@@ -929,7 +988,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
             </svg>
             <!-- Three dots menu — WhatsApp Android -->
-            <svg class="header-icon header-menu-trigger" id="headerMenuBtn" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="cursor:pointer; position:relative;" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-controls="headerDropdown" aria-label="Mobil menuyu ac">
+            <svg class="header-icon header-menu-trigger" id="headerMenuBtn" data-mobile-menu-trigger width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="cursor:pointer; position:relative;" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false" aria-controls="headerDropdown" aria-label="Mobil menuyu ac">
               <circle cx="12" cy="5.5" r="1.8"/>
               <circle cx="12" cy="12" r="1.8"/>
               <circle cx="12" cy="18.5" r="1.8"/>
@@ -993,6 +1052,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
             </svg>
           </button>
         </div>
+        </section>
       </div>
     </main>
 

@@ -83,18 +83,19 @@ function initMobile() {
 
 function bindMobileEvents() {
   const headerMenuBtn = $('headerMenuBtn');
+  const menuTriggers = getMobileMenuTriggers();
   const headerDropdown = $('headerDropdown');
   const backdrop = $('mobileOverlayBackdrop');
   const backBtn = $('mobileOverlayBack');
   const menuCloseBtn = $('headerMenuCloseBtn');
 
-  // Header 3 nokta toggle
-  if (headerMenuBtn) {
-    headerMenuBtn.addEventListener('click', (e) => {
+  // Header/shell 3 nokta toggle
+  menuTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleMobileMenu();
     });
-    headerMenuBtn.addEventListener('keydown', (e) => {
+    trigger.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       e.preventDefault();
       e.stopPropagation();
@@ -104,7 +105,7 @@ function bindMobileEvents() {
         openMobileMenu({ focusFirst: true });
       }
     });
-  }
+  });
 
   // Dropdown item clicks
   if (headerDropdown) {
@@ -172,9 +173,9 @@ function bindMobileEvents() {
   // Click outside → close dropdown
   document.addEventListener('click', (e) => {
     if (!mobileState.menuOpen) return;
-    const btnEl = $('headerMenuBtn');
+    const triggerEls = getMobileMenuTriggers();
     const ddEl = $('headerDropdown');
-    if (btnEl && btnEl.contains(e.target)) return;
+    if (triggerEls.some((trigger) => trigger.contains(e.target))) return;
     if (ddEl && ddEl.contains(e.target)) return;
     closeMobileMenu();
   });
@@ -208,19 +209,26 @@ function toggleMobileMenu() {
   mobileState.menuOpen ? closeMobileMenu() : openMobileMenu();
 }
 
+function getMobileMenuTriggers() {
+  const triggers = [...document.querySelectorAll('[data-mobile-menu-trigger]')];
+  const headerMenuBtn = $('headerMenuBtn');
+  if (headerMenuBtn && !triggers.includes(headerMenuBtn)) triggers.push(headerMenuBtn);
+  return triggers;
+}
+
 function openMobileMenu(options = {}) {
   const dd = $('headerDropdown');
   if (!dd) return;
-  const btn = $('headerMenuBtn');
+  const triggers = getMobileMenuTriggers();
   const backdrop = $('mobileOverlayBackdrop');
   mobileState.menuOpen = true;
   dd.classList.add('is-open');
   document.body.classList.add('mobile-menu-open');
   syncPreviewSheetBounds(dd);
-  if (btn) {
-    btn.setAttribute('aria-expanded', 'true');
-    btn.setAttribute('aria-label', 'Mobil menuyu kapat');
-  }
+  triggers.forEach((trigger) => {
+    trigger.setAttribute('aria-expanded', 'true');
+    trigger.setAttribute('aria-label', 'Mobil menuyu kapat');
+  });
   if (isMobileView() && backdrop) {
     backdrop.classList.add('is-open', 'is-menu-backdrop');
   }
@@ -229,21 +237,21 @@ function openMobileMenu(options = {}) {
 
 function closeMobileMenu(options = {}) {
   const dd = $('headerDropdown');
-  const btn = $('headerMenuBtn');
+  const triggers = getMobileMenuTriggers();
   const backdrop = $('mobileOverlayBackdrop');
   mobileState.menuOpen = false;
   if (dd) dd.classList.remove('is-open');
   resetPreviewSheetBounds(dd);
   document.body.classList.remove('mobile-menu-open');
-  if (btn) {
-    btn.setAttribute('aria-expanded', 'false');
-    btn.setAttribute('aria-label', 'Mobil menuyu ac');
-  }
+  triggers.forEach((trigger) => {
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-label', 'Mobil menuyu ac');
+  });
   if (backdrop) {
     backdrop.classList.remove('is-menu-backdrop');
     if (!mobileState.overlayOpen) backdrop.classList.remove('is-open');
   }
-  if (options.restoreFocus && btn) btn.focus();
+  if (options.restoreFocus) triggers.find((trigger) => trigger.offsetParent !== null)?.focus();
 }
 
 function getCurrentMenuMode() {
