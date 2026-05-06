@@ -912,7 +912,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           <header class="phone-home-header">
             <div class="phone-home-title">WhatsApp</div>
             <div class="phone-home-actions">
-              <button class="phone-home-icon-btn" type="button" aria-label="Kamera">
+              <button class="phone-home-icon-btn" id="phoneShellCameraBtn" type="button" aria-label="Kamera">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
               </button>
               <button class="phone-home-icon-btn header-menu-trigger" id="phoneShellMenuBtn" type="button" data-mobile-menu-trigger aria-haspopup="menu" aria-expanded="false" aria-controls="headerDropdown" aria-label="Mobil menuyu ac">
@@ -922,14 +922,34 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           </header>
 
           <div class="phone-tab-panels">
-            <section class="phone-tab-panel is-active" id="phoneTabChats" data-phone-tab-panel="chats" role="tabpanel" aria-labelledby="phoneTabBtnChats">
-              <button class="phone-chat-entry" type="button" data-phone-open-chat aria-label="Sohbet detayini ac">
-                <span class="phone-chat-entry-avatar" id="homeChatAvatar">G</span>
-                <span class="phone-chat-entry-copy">
-                  <span class="phone-chat-entry-title" id="homeChatTitle">Grup</span>
-                  <span class="phone-chat-entry-meta" id="homeChatSubtitle">Sohbet detayini ac</span>
-                </span>
-                <span class="phone-chat-entry-time" id="homeChatTime">12:00</span>
+            <section class="phone-tab-panel is-active" id="phoneTabChats" data-phone-tab-panel="chats" data-active-filter="all" role="tabpanel" aria-labelledby="phoneTabBtnChats">
+              <div class="phone-chats-toolbar" aria-label="Sohbet arama ve filtreleri">
+                <div class="phone-chat-search" role="search" aria-label="Sohbetlerde ara">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3a6.5 6.5 0 015.17 10.45l4.44 4.44-1.42 1.42-4.44-4.44A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+                  <span>Meta AI'ya veya Ara'ya sorun</span>
+                </div>
+                <div class="phone-chat-filters" role="group" aria-label="Sohbet filtreleri">
+                  <button class="phone-chat-filter-chip is-active" type="button" data-phone-chat-filter="all" aria-pressed="true">All</button>
+                  <button class="phone-chat-filter-chip" type="button" data-phone-chat-filter="unread" aria-pressed="false">Unread</button>
+                  <button class="phone-chat-filter-chip" type="button" data-phone-chat-filter="groups" aria-pressed="false">Groups</button>
+                </div>
+              </div>
+
+              <div class="phone-chat-list" id="homeChatList" aria-label="Sohbet listesi">
+                <button class="phone-chat-entry" type="button" data-phone-open-chat aria-label="Sohbet detayini ac">
+                  <span class="phone-chat-entry-avatar" id="homeChatAvatar" aria-hidden="true">G</span>
+                  <span class="phone-chat-entry-copy">
+                    <span class="phone-chat-entry-topline">
+                      <span class="phone-chat-entry-title" id="homeChatTitle">Grup</span>
+                      <span class="phone-chat-entry-time" id="homeChatTime">12:00</span>
+                    </span>
+                    <span class="phone-chat-entry-meta" id="homeChatSubtitle">Sohbet detayini ac</span>
+                  </span>
+                </button>
+              </div>
+
+              <button class="phone-message-fab" id="phoneMessageFab" type="button" aria-label="Yeni sohbet">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a3 3 0 00-3 3v15l4.2-3H19a3 3 0 003-3V6a3 3 0 00-3-3zm-9.8 10.1l-.3 2 2-.3 5.9-5.9-1.7-1.7-5.9 5.9zm8.5-5.1l-1.7-1.7.6-.6a1.2 1.2 0 011.7 0l.1.1a1.2 1.2 0 010 1.7l-.7.5z"/></svg>
               </button>
             </section>
             <section class="phone-tab-panel" id="phoneTabUpdates" data-phone-tab-panel="updates" role="tabpanel" aria-labelledby="phoneTabBtnUpdates" hidden>

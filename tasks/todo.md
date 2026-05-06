@@ -1,86 +1,102 @@
-# Faz 41 - Ana Kabuk & Navigasyon
+# Faz 42 - Sohbetler Sekmesi
 
 > Tarih: 2026-05-06
-> Branch: codex/faz-41
-> Kaynak: ROADMAP5 Faz 41
-> Durum: Devam ediyor
+> Branch: codex/faz-42
+> Kaynak: ROADMAP5 Faz 42
+> Durum: Tamamlandi
 
 ---
 
 ## Amac
 
-Telefon onizlemesini dogrudan sohbet detayindan baslatmak yerine, WhatsApp
-Android benzeri ana uygulama kabuguyla acmak. Mevcut sohbet motoru, composer,
-medya aksiyonlari ve mobil simulator menusu korunarak sohbet detayi bu kabugun
-icinden acilacak.
+Telefon ana shell'inin ilk sekmesini WhatsApp Android Sohbetler gorunumune
+yaklastirmak. Faz 41'de kurulan home shell, bottom nav ve chat detail gecisi
+korunacak; sohbet satiri mevcut sohbet detay ekranini acmaya devam edecek.
 
 ---
 
 ## Uygulama Plani
 
-- [x] 1. Mevcut telefon preview mimarisini incele:
-      - `.phone` DOM yapisi.
-      - Chat detail header/composer alanlari.
-      - Mevcut mobil menu `data-menu-root` baglantisi.
-- [x] 2. Ana shell ve chat detail ayrimini kur:
-      - `.phone` icinde home shell yuzeyi.
-      - Mevcut chat detail yuzeyini ayri state ile gostermek/gizlemek.
-      - Ilk acilista home shell'in aktif olmasi.
-- [x] 3. Bottom nav iskeletini ekle:
-      - Sohbetler, Guncellemeler, Topluluklar, Aramalar sekmeleri.
-      - Aktif sekmenin DOM/ARIA tarafindan okunabilir olmasi.
-- [x] 4. Uc nokta menu baglantisini koru:
-      - Ana shell ust aksiyonu mevcut simulator mobil menu modelini acmali.
-      - Chat detail icindeki mevcut menu davranisi bozulmamali.
-- [x] 5. Composer sinirini dogrula:
-      - Composer, emoji, atac, kamera ve mikrofon yalnizca chat detail'da gorunmeli.
-      - Home shell icinde bu kontroller bulunmamali.
-- [x] 6. Geri donus davranisini netlestir:
-      - Chat detail'dan home shell'e donus butonu.
-      - Mesaj motoru ve mevcut chat render akisi korunmali.
-- [x] 7. Test ve dogrulama ekle:
-      - `tests/phone-shell.test.js`.
-      - Hedefli `node --check`.
-      - Hedefli test, full test, build.
-      - Mobil browser sanity notlari.
+- [x] 1. Faz 41 shell temelini tekrar dogrula:
+      - `index.html` icindeki home shell/chat detail ayrimi.
+      - `js/phone/app-shell.js` mevcut state ve event modeli.
+      - `css/phone-shell.css` mevcut layout sinirlari.
+- [x] 2. Sohbetler ust barini zenginlestir:
+      - WhatsApp basligi korunur.
+      - Kamera ikonu eklenir.
+      - Uc nokta aksiyonu mevcut `data-mobile-menu-trigger` modelini kullanir.
+- [x] 3. Arama alanini ekle:
+      - Meta AI/Search benzeri yuvarlak alan.
+      - Dar mobil genisliklerde tasma yapmayan sabit yukseklik.
+- [x] 4. Filtre chiplerini ekle:
+      - All, Unread, Groups chipleri.
+      - Aktif chip gorsel ve makine tarafindan okunabilir state tasir.
+      - Secim layout shift yaratmaz.
+- [x] 5. Sohbet satirini gercekci hale getir:
+      - Mevcut grup/avatar/son mesaj bilgisinden turetilen ana satir.
+      - Bos veya eksik veri icin guvenli fallback.
+      - Satira tiklamak mevcut chat detail ekranini acar.
+- [x] 6. Mesaj FAB'ini ekle:
+      - Sag altta WhatsApp tarzinda mesaj FAB'i.
+      - Bottom nav ile carpismaz, dar viewportta tasmaz.
+- [x] 7. Testleri guncelle:
+      - `tests/phone-shell.test.js` Faz 42 hiyerarsisini dogrular.
+      - Chat row tiklamasi chat detail'i acar.
+      - Chip state'i ve fallback sohbet verisi test edilir.
+- [x] 8. Dogrulama calistir:
+      - `node --check js\phone\app-shell.js`
+      - `npm.cmd test -- tests\phone-shell.test.js`
+      - `npm.cmd test`
+      - `npm.cmd run build`
+      - Mobil browser sanity: home shell, chips, chat open, FAB/menu overlap.
 
 ---
 
 ## Kabul Kriterleri
 
-- Mobilde ilk ekran ana shell olarak acilir.
-- Bottom nav dort sekmeyi gosterir ve aktif sekme makine tarafindan okunabilir durumdadir.
-- Sohbet detayina gecince mevcut mesaj motoru ve composer calismaya devam eder.
-- Ana shell icinde composer/atac/kamera gorunmez.
-- Uc nokta butonu mevcut `data-menu-root` menusuyle ayni modeli kullanir.
+- Sohbetler sekmesi referans Android gorunumundeki hiyerarsiyi tasir.
+- Ana sohbet satiri bos veriyle de guvenli fallback gosterir.
+- Filtre chipleri layout shift yaratmadan secilebilir.
+- Sohbet satiri mevcut chat detail ekranini acar.
+- Uc nokta menusu ana Sohbetler ekranindan mevcut simulator menusunu acar.
+- Composer, atac, kamera ve mikrofon sadece chat detail icinde kalir.
 
 ---
 
 ## Review
 
-- `index.html` icinde telefon onizlemesi ana shell ve chat detail yuzeylerine ayrildi.
-- `js/phone/app-shell.js` eklendi:
-  - Ilk acilista home shell aktif.
-  - Dort sekmeli bottom nav state'i `aria-selected`, `hidden` ve `data-active-tab` ile okunabilir.
-  - Sohbet satiri mevcut chat detail yuzeyini acar; geri butonu home shell'e doner.
-- `css/phone-shell.css` eklendi:
-  - Ana shell, bottom nav ve chat detail gorunurluk kurallari izole edildi.
-  - Home shell icinde chat composer kontrolleri gorunmez; chat detail icinde mevcut composer korunur.
-- `js/ui/mobile.js` guncellendi:
-  - `data-mobile-menu-trigger` kullanan home shell ve chat detail uc nokta butonlari ayni `#headerDropdown` ve `data-menu-root` menusuyle calisir.
-- `tests/phone-shell.test.js` eklendi:
-  - Ilk shell state'i, bottom nav, composer siniri, chat detail gecisi ve ortak menu kokunu dogrular.
+- `index.html` icinde Sohbetler sekmesi WhatsApp Android hiyerarsisine
+  yaklastirildi:
+  - Ust barda kamera ve mevcut mobil menu tetikleyicisi korunur.
+  - Meta AI/Search benzeri arama satiri eklendi.
+  - All, Unread, Groups filtre chipleri eklendi.
+  - Ana sohbet satiri title, avatar, son mesaj ve saat alanlariyla yenilendi.
+  - Sag alt mesaj FAB'i bottom nav ustunde konumlandirildi.
+- `js/phone/app-shell.js` genisletildi:
+  - `CHAT_FILTERS` ve `setActiveChatFilter` eklendi.
+  - Aktif chip `aria-pressed` ve `data-active-filter` ile okunabilir.
+  - Sohbet satiri grup bilgisi ve son mesajdan turetilir.
+  - Bos title/subtitle/messages durumlari guvenli fallback gosterir.
+  - State degisince home sohbet ozeti senkron kalir.
+- `css/phone-shell.css` Faz 42 layoutunu kapsar:
+  - Arama alani, chipler, sohbet satiri, avatar gorseli ve FAB stilleri.
+  - Light tema icin arama/chip renkleri.
+  - Bottom nav ile FAB carpisma riskini azaltan sabit konum.
+- `tests/phone-shell.test.js` 7 teste genisletildi:
+  - Faz 42 hiyerarsisi.
+  - Chat filter state'i.
+  - Bos veri fallback'i.
+  - Sohbet satiri tiklamasiyla detail acma.
 - Dogrulama:
   - `node --check js\phone\app-shell.js`: basarili.
-  - `node --check js\ui\mobile.js`: basarili.
-  - `node --check js\app.js`: basarili.
-  - `npm.cmd test -- tests\phone-shell.test.js`: 4 test basarili.
-  - `npm.cmd test -- tests\menu-order.test.js`: 19 test basarili.
-  - `npm.cmd test`: 10 test dosyasi, 240 test basarili.
+  - `npm.cmd test -- tests\phone-shell.test.js`: 7 test basarili.
+  - `npm.cmd test`: 10 test dosyasi, 243 test basarili.
   - `npm.cmd run build`: Vite build basarili.
   - Browser sanity `http://127.0.0.1:5173`:
     - Home shell gorundu.
+    - Arama, 3 chip, sohbet satiri ve FAB gorundu.
     - Home shell icinde composer bulunmadi.
-    - Sohbet satiri chat detail'i acti.
-    - Geri butonu home shell'e dondu.
-    - Home shell uc nokta menusu `#headerDropdown` icinde 10 menu ogesiyle acildi.
+    - Unread chip secimi `aria-pressed=true` ve `data-active-filter=unread` oldu.
+    - Sohbet satiri chat detail'i acti; geri butonu home shell'e dondu.
+    - Home shell uc nokta menusu `#headerDropdown` icinde `data-menu-root` ile acildi.
+    - Console error gorulmedi.
