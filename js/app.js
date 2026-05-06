@@ -22,6 +22,7 @@ import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
 import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible } from './phone/statusbar.js';
+import { initPhoneShell } from './phone/app-shell.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
 import { addMessage, clearChat, rebuildChat, updateAllTicks, materializeAllMessages, regenerateMessageTimes, updateMessageTimesInDOM, scrollToBottom } from './phone/messages.js';
@@ -93,6 +94,7 @@ function init() {
 
   // Initialize phone modules
   try { initStatusBar(); } catch (e) { Logger.error('initStatusBar hatası:', e); }
+  try { initPhoneShell(); } catch (e) { Logger.error('initPhoneShell hatası:', e); }
   try { applyWallpaper(); } catch (e) { Logger.error('applyWallpaper hatası:', e); }
   try { applyAllTypography(); } catch (e) { Logger.error('applyAllTypography hatası:', e); }
 
