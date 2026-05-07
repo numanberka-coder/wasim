@@ -647,6 +647,239 @@
   outline-offset: 2px;
 }
 
+.phone-tab-panel[data-phone-tab-panel="calls"] {
+  padding-bottom: 134px;
+}
+
+.phone-calls-view {
+  min-height: 100%;
+  padding: 6px 0 36px;
+  color: #e9edef;
+}
+
+.phone-calls-quick,
+.phone-calls-section {
+  display: grid;
+}
+
+.phone-calls-section {
+  margin-top: 8px;
+  border-top: 8px solid rgba(17, 27, 33, 0.85);
+}
+
+.phone-calls-section-title {
+  margin: 0;
+  padding: 8px 16px 10px;
+  color: #e9edef;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.phone-calls-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 12px 14px;
+}
+
+.phone-call-shortcut {
+  min-width: 0;
+  min-height: 82px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #e9edef;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 8px;
+  padding: 4px 2px;
+  cursor: pointer;
+}
+
+.phone-call-shortcut:hover,
+.phone-call-shortcut:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+
+.phone-call-shortcut:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.85);
+  outline-offset: 2px;
+}
+
+.phone-call-shortcut-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #103529;
+  color: #25d366;
+}
+
+.phone-call-shortcut-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.phone-call-shortcut span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #d1d7db;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.phone-call-list {
+  display: grid;
+}
+
+.phone-call-row {
+  width: 100%;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px 9px 14px;
+  border: none;
+  border-bottom: 1px solid rgba(134, 150, 160, 0.14);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.phone-call-row:hover,
+.phone-call-row:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+
+.phone-call-row:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.85);
+  outline-offset: -2px;
+}
+
+.phone-call-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #7a566e;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.phone-call-avatar-teal {
+  background: #047a6b;
+}
+
+.phone-call-avatar-blue {
+  background: #3d6d93;
+}
+
+.phone-call-avatar-purple {
+  background: #6f5a9f;
+}
+
+.phone-call-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.phone-call-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #e9edef;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.phone-call-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #8696a0;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.phone-call-meta span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phone-call-direction {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  fill: #f15c6d;
+}
+
+.phone-call-direction.is-incoming,
+.phone-call-direction.is-outgoing {
+  fill: #00a884;
+}
+
+.phone-call-row-action {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  color: #00a884;
+}
+
+.phone-call-row-action svg {
+  width: 23px;
+  height: 23px;
+  fill: currentColor;
+}
+
+.phone-call-fab {
+  position: absolute;
+  right: 18px;
+  bottom: 88px;
+  z-index: 10;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #25d366;
+  color: #07130d;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.phone-call-fab svg {
+  width: 27px;
+  height: 27px;
+  fill: currentColor;
+}
+
+.phone-call-fab:focus-visible {
+  outline: 2px solid #e9edef;
+  outline-offset: 3px;
+}
+
 .phone-tab-placeholder {
   min-height: 220px;
   display: grid;
@@ -789,4 +1022,32 @@
 
 .phone.light .phone-communities-avatar-side {
   fill: #d8e2e7;
+}
+
+.phone.light .phone-calls-view,
+.phone.light .phone-calls-section-title,
+.phone.light .phone-call-name {
+  color: #111b21;
+}
+
+.phone.light .phone-calls-section {
+  border-top-color: #f0f2f5;
+}
+
+.phone.light .phone-call-shortcut {
+  color: #111b21;
+}
+
+.phone.light .phone-call-shortcut-icon {
+  background: #d9fdd3;
+  color: #008069;
+}
+
+.phone.light .phone-call-shortcut span:last-child,
+.phone.light .phone-call-meta {
+  color: #54656f;
+}
+
+.phone.light .phone-call-row {
+  border-bottom-color: rgba(17, 27, 33, 0.1);
 }

@@ -1,56 +1,54 @@
-# Faz 44 - Topluluklar Sekmesi
+# Faz 45 - Aramalar Sekmesi
 
 > Tarih: 2026-05-07
-> Branch: codex/faz-44
-> Kaynak: ROADMAP5 Faz 44
-> Durum: Planlandi
+> Branch: codex/faz-45
+> Kaynak: ROADMAP5 Faz 45
+> Durum: Tamamlandi
 
 ---
 
 ## Amac
 
-Telefon ana shell'inde Topluluklar sekmesini WhatsApp Android dark duzenindeki
-bos topluluk durumuna yaklastirmak. Faz 43'te tamamlanan Guncellemeler sekmesi,
-bottom nav davranisi ve mevcut mobil menu erisimi korunacak.
+Telefon ana shell'indeki Aramalar sekmesini WhatsApp Android hissine
+yaklastirmak. Faz 41-44 ile gelen ana shell, bottom nav, mobil menu, Sohbetler,
+Guncellemeler ve Topluluklar davranislari korunacak.
 
 ---
 
 ## Kapsam
 
 - [x] 1. Mevcut phone shell yapisini incele:
-      - Topluluklar sekmesi panelinin mevcut markup durumunu belirle.
-      - Bottom nav aktif state mekanizmasinin `communities` icin calistigini dogrula.
-      - Ana sekmelerde uc nokta menu modelinin ayni kaldigini kontrol et.
-- [x] 2. Topluluklar ust barini ekle:
-      - Baslik: `Topluluklar`.
-      - Uc nokta aksiyonu mevcut simulator menusunu acar.
-      - Bu sekmede arama/kamera gibi Faz 44 disi aksiyonlar gorunmez.
-- [x] 3. Bos durum illustasyonunu kur:
-      - Kod tabaninda hafif SVG/CSS illustasyon kullan.
-      - Merkezi gorsel 360x800 ve 390x844 viewportlarda dengeli kalir.
-- [x] 4. Aciklama metinlerini ekle:
-      - `Topluluklar sayesinde baglantida kalin` basligi.
-      - Referans bos durum hissini veren kisa aciklama.
-      - Metinler dar viewportta tasma veya overlap yaratmaz.
-- [x] 5. Ornek topluluk linkini ekle:
-      - Mavi link benzeri metin.
-      - Ok isareti veya icon ile yon hissi.
-      - Link gorunumu CTA ile karismayacak kadar ayrilir.
-- [x] 6. Genis CTA davranisini ekle:
-      - `Toplulugunuzu olusturun` yesil butonu.
-      - CTA bottom nav ile carpismaz.
-      - Light tema fallback'i okunur kalir.
+      - `calls` sekmesinin placeholder durumunu belirle.
+      - Header config'inde Aramalar basligi, arama ikonu ve menu davranisini dogrula.
+      - Bottom nav aktif state mekanizmasinin `calls` icin calistigini kontrol et.
+- [x] 2. Aramalar sekmesi ust barini tamamla:
+      - Baslik `Aramalar` shell header'indan gelir.
+      - Arama ikonu dogru `Aramalarda ara` etiketiyle gorunur, kamera gizli kalir.
+      - Uc nokta aksiyonu mevcut mobil menu root'una bagli kalir.
+- [x] 3. Hizli aksiyonlari ekle:
+      - Ara, Planla, Tus takimi, Favoriler kisa yol daireleri.
+      - Dar ekranda esit aralikli ve okunur grid.
+- [x] 4. Son aramalar listesini ekle:
+      - Gercekci avatar, isim, tarih ve yon bilgisi.
+      - Gelen/giden/cevapsiz durumlari ayirt edilebilir.
+      - Liste bottom nav altina tasmadan scroll eder.
+- [x] 5. Sag aksiyon ikonlarini ekle:
+      - Satir bazinda video veya telefon ikonu.
+      - Ikonlar metinle ve FAB ile carpismaz.
+- [x] 6. Cagri FAB davranisini ekle:
+      - Sag altta yesil yeni arama FAB'i.
+      - Bottom nav ve liste ikonlariyla carpismaz.
 - [x] 7. Testleri guncelle:
-      - `tests/phone-shell.test.js` Faz 44 hiyerarsisini dogrular.
-      - Topluluklar aktif bottom nav state'i dogrulanir.
-      - Uc nokta menusu bu sekmeden de acilir.
-      - CTA ve bos durum elementleri test edilir.
+      - `tests/phone-shell.test.js` Faz 45 hiyerarsisini dogrular.
+      - Header arama/kamera gorunurlugu test edilir.
+      - Hizli aksiyonlar, son aramalar ve FAB test edilir.
+      - Menu root'unun calls sekmesinde de ayni kaldigi dogrulanir.
 - [x] 8. Dogrulama calistir:
       - `node --check js\phone\app-shell.js`
       - `npm.cmd test -- tests\phone-shell.test.js`
       - `npm.cmd test`
       - `npm.cmd run build`
-      - Mobil browser sanity: 360x800 ve 390x844 Topluluklar layout, CTA/nav overlap ve menu acilimi.
+      - Mobil browser sanity: 360x800 ve 390x844 Aramalar layout, FAB/nav overlap ve menu acilimi.
 
 ---
 
@@ -58,42 +56,40 @@ bottom nav davranisi ve mevcut mobil menu erisimi korunacak.
 
 - `index.html`
 - `css/phone-shell.css`
-- `tests/phone-shell.test.js`
-
-Kontrol edilen ama degismeyen:
-
 - `js/phone/app-shell.js`
+- `tests/phone-shell.test.js`
 
 ---
 
 ## Review
 
-- `index.html` Faz 44 Topluluklar panelini icerir:
-  - Hafif inline SVG bos durum illustasyonu.
-  - `Topluluklar sayesinde baglantida kalin` basligi ve aciklama metni.
-  - `Ornek topluluklari gor` mavi link aksiyonu.
-  - `Toplulugunuzu olusturun` genis yesil CTA.
-  - Browser sanity'deki eski `favicon.ico` 404'unu engelleyen inline favicon.
-- `css/phone-shell.css` Topluluklar bos durum layoutunu kapsar:
-  - Merkezi 360x800 ve 390x844 dengesi.
-  - CTA'nin bottom nav ile carpmamasi icin panel padding ve flex yerlesimi.
-  - Dark ve light tema fallback stilleri.
-- `js/phone/app-shell.js` degismedi:
-  - `communities` header config'i zaten `Topluluklar` basligini, arama/kamera gizlemeyi ve menu trigger'ini sagliyordu.
-- `tests/phone-shell.test.js` 9 teste genisletildi:
-  - Faz 44 bos durum hiyerarsisi.
-  - Topluluklar aktif bottom nav state'i.
-  - Header arama/kamera gizleme davranisi.
-  - Topluluklar sekmesinden ayni mobil menu root'una erisim.
+- `index.html` Faz 45 Aramalar panelini icerir:
+  - `Hizli aksiyonlar` alani: Ara, Planla, Tus takimi, Favoriler.
+  - `Son aramalar` listesi: cevapsiz, giden ve gelen arama durumlari.
+  - Satir saginda telefon/video aksiyon ikonlari.
+  - `Yeni arama` yesil FAB'i.
+- `css/phone-shell.css` Aramalar layoutunu kapsar:
+  - Dortlu hizli aksiyon grid'i dar ekranda esit dagilir.
+  - Son aramalar listesi bottom nav/FAB alanina pay birakir.
+  - Dark ve light tema fallback stilleri eklendi.
+- `js/phone/app-shell.js` sekme header sozlesmesini koruyarak genisletildi:
+  - Aramalar sekmesinde search ikonu `Aramalarda ara` etiketiyle gorunur.
+  - Kamera Aramalar sekmesinde gizli kalir.
+  - Mevcut mobil menu trigger'i degismedi.
+- `tests/phone-shell.test.js` 10 teste genisletildi:
+  - Faz 45 hiyerarsisi, header state'i, hizli aksiyonlar, son aramalar, row aksiyonlari ve FAB test edildi.
+  - Mobil menu root'unun `calls` sekmesinde de ayni kaldigi dogrulandi.
 - Dogrulama:
   - `node --check js\phone\app-shell.js`: basarili.
-  - `npm.cmd test -- tests\phone-shell.test.js`: 9 test basarili.
-  - `npm.cmd test`: 10 test dosyasi, 245 test basarili.
+  - `npm.cmd test -- tests\phone-shell.test.js`: 10 test basarili.
+  - `npm.cmd test`: 10 test dosyasi, 246 test basarili.
   - `npm.cmd run build`: Vite build basarili.
   - `git diff --check`: whitespace hatasi yok.
   - Browser sanity `http://127.0.0.1:5173`:
-    - 360x800 ve 390x844 viewportlarda `data-active-tab=communities`.
-    - Header `Topluluklar`, arama ve kamera gizli.
-    - Bos durum illustasyonu gorunur, link ve CTA dogru metinle render edildi.
-    - CTA bottom nav ile carpmadi ve panel genisligi icinde kaldi.
-    - Console warning/error ve 400+ HTTP response bulunmadi.
+    - `data-active-tab=calls`, header `Aramalar`.
+    - Search etiketi `Aramalarda ara`, kamera gizli.
+    - 4 hizli aksiyon, 4 son arama satiri ve `Yeni arama` FAB'i gorunur.
+    - Uc nokta menu `headerDropdown`/`data-menu-root` ile acildi.
+    - Console warning/error kaydi yok.
+    - Screenshot alma CDP timeout verdi; bu nedenle browser sanity DOM ve gercek tiklama sinyalleriyle tamamlandi.
+- `AGENTS.md` untracked kaldigi icin kapsam disinda tutuldu.

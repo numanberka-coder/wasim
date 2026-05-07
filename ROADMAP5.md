@@ -16,8 +16,14 @@
 6. [Faz 44 - Topluluklar Sekmesi](#faz-44---topluluklar-sekmesi)
 7. [Faz 45 - Aramalar Sekmesi](#faz-45---aramalar-sekmesi)
 8. [Faz 46 - Mobil Polish, Test & Gorsel Dogrulama](#faz-46---mobil-polish-test--gorsel-dogrulama)
-9. [Uygulama Sirasi](#uygulama-sirasi)
-10. [Basari Kriterleri](#basari-kriterleri)
+9. [Faz 47 - Ikon Sistemi & Chat Header Polish](#faz-47---ikon-sistemi--chat-header-polish)
+10. [Faz 48 - Kalici Telefon Verisi & Bottom Sheet Editor Altyapisi](#faz-48---kalici-telefon-verisi--bottom-sheet-editor-altyapisi)
+11. [Faz 49 - Coklu Sohbetler & Yeni Sohbet Olusturma](#faz-49---coklu-sohbetler--yeni-sohbet-olusturma)
+12. [Faz 50 - Guncellemeler Duzenleme Akisi](#faz-50---guncellemeler-duzenleme-akisi)
+13. [Faz 51 - Topluluk Duzenleme Akisi](#faz-51---topluluk-duzenleme-akisi)
+14. [Faz 52 - Aramalar Duzenleme Akisi](#faz-52---aramalar-duzenleme-akisi)
+15. [Uygulama Sirasi](#uygulama-sirasi)
+16. [Basari Kriterleri](#basari-kriterleri)
 
 ---
 
@@ -42,6 +48,10 @@ ROADMAP4 sonunda simulatorun uretim paneli, mobil calisma menusu, Basit/Pro kura
 - Uc nokta butonu her ana sekmede simulatorun mevcut mobil ayarlar/calisma menusunu acmalidir.
 - Emoji, atac, kamera, mesaj inputu ve mikrofon yalnizca sohbet detay ekraninda bulunmalidir.
 - Sekmeler birbirinden kucuk ve dogrulanabilir fazlarla eklenmelidir.
+- Telefon + mobil UI ikonlari ortak SVG sistemi kullanmalidir.
+- Ana sekme duzenlemeleri telefon ici bottom sheet ile yapilmalidir.
+- Kullanicinin duzenledigi ana sekme verileri kalici olmalidir.
+- Coklu sohbet destegi mevcut uretim paneli, oynatma ve screenshot akislarini bozmamalidir.
 - Her faz `tasks/todo.md` uzerinden takip edilmeli; `AGENTS.md` commit kapsaminda tutulmamalidir.
 
 ---
@@ -183,6 +193,144 @@ ROADMAP4 sonunda simulatorun uretim paneli, mobil calisma menusu, Basit/Pro kura
 
 ---
 
+## Faz 47 - Ikon Sistemi & Chat Header Polish
+
+> *Telefon + mobil UI ikonlari tek bir gorsel dilde toparlanmali; sohbet geri butonu artefact uretmemeli.*
+
+| # | Iyilestirme | Detay | Oncelik |
+|---|---|---|---|
+| 47.1 | Ortak ikon sozlesmesi | Telefon header, bottom nav, FAB, composer, mobile menu ve edit sheet ikonlari ortak SVG diline tasinir | Kirmizi |
+| 47.2 | Header ikon polish | Ana shell ve sohbet detay header ikonlari boyut, stroke/fill ve hizalama acisindan eslenir | Kirmizi |
+| 47.3 | Chat geri butonu | Sohbet icindeki geri butonu acik yesil kare artefact uretmeyecek sekilde transparent ve dokunulabilir hale getirilir | Kirmizi |
+| 47.4 | FAB ve composer ikonlari | Mesaj, arama, kalem, kamera, atac, mikrofon ve gonder ikonlari ayni ailede gorunur | Sari |
+| 47.5 | Tema kontrasti | Dark/light tema ve custom header renklerinde ikon kontrasti korunur | Kirmizi |
+
+**Etkilenen dosyalar:** `index.html` - `js/ui/menu-model.js` - `js/phone/app-shell.js` - `css/phone.css` - `css/phone-shell.css` - `tests/phone-shell.test.js`
+
+**Kabul kriterleri:**
+
+- Telefon + mobil UI ikonlari tutarli SVG sistemiyle render edilir.
+- Sohbet geri butonu 360x800 ve 390x844 viewportlarda kare/yesil artefact gostermez.
+- Header, bottom nav, FAB ve composer ikonlari tasma veya hizalama kaymasi yaratmaz.
+- Dark/light temada ve custom header renklerinde okunabilir kontrast korunur.
+
+---
+
+## Faz 48 - Kalici Telefon Verisi & Bottom Sheet Editor Altyapisi
+
+> *Ana sekme duzenlemeleri telefon icinde bottom sheet ile yapilmali ve kalici state'e yazilmalidir.*
+
+| # | Iyilestirme | Detay | Oncelik |
+|---|---|---|---|
+| 48.1 | Kalici state modeli | `conversations` ve `phoneShellContent` alanlari state/export/import/reset akisina eklenir | Kirmizi |
+| 48.2 | Geriye donuk fallback | Eski kayitlar `group` ve `messages` verisinden tek default sohbet ve default sekme icerigi uretir | Kirmizi |
+| 48.3 | Bottom sheet altyapisi | Telefon icinde acilan, kapanan, kaydeden ve backdrop kullanan ortak editor sheet kurulur | Kirmizi |
+| 48.4 | Form sozlesmesi | Sheet formlari baslik, aciklama, kaydet, iptal ve hata durumlarini ortak modelle kullanir | Sari |
+| 48.5 | Z-index/pointer kontrolu | Sheet, mevcut mobile menu ve chat detail yuzeyleriyle pointer cakismasi yaratmaz | Kirmizi |
+
+**Etkilenen dosyalar:** `index.html` - `js/state.js` - `js/phone/app-shell.js` - `js/phone/home-editors.js` (yeni) - `css/phone-shell.css` - `tests/state.test.js` - `tests/phone-shell.test.js`
+
+**Kabul kriterleri:**
+
+- Bottom sheet ac/kapat/kaydet davranisi test edilebilir ve klavye ile ulasilabilir.
+- `state.export()` ve `state.import()` yeni telefon verilerini korur.
+- Eski localStorage/export dosyalari bozulmadan acilir ve default veriye tamamlanir.
+- Sheet acikken bottom nav, FAB ve mobile menu pointer davranisi bozulmaz.
+
+---
+
+## Faz 49 - Coklu Sohbetler & Yeni Sohbet Olusturma
+
+> *Sohbetler sekmesinden yeni sohbet eklenebilmeli; her sohbet kendi mesaj gecmisini korumali.*
+
+| # | Iyilestirme | Detay | Oncelik |
+|---|---|---|---|
+| 49.1 | Coklu sohbet listesi | Sohbetler sekmesi `conversations.items` listesinden satir uretir | Kirmizi |
+| 49.2 | Aktif sohbet senkronu | Secilen sohbet mevcut chat detail motoruna, `group`, `messages` ve `messageSeq` mirror'u uzerinden baglanir | Kirmizi |
+| 49.3 | Yeni sohbet sheet'i | Mesaj FAB'i sohbet adi, alt bilgi, avatar URL ve ilk mesaj alanlariyla bottom sheet acar | Kirmizi |
+| 49.4 | Sohbet secme | Home listesinde satira tiklamak once aktif sohbeti kaydeder, sonra hedef sohbeti chat detail olarak acar | Kirmizi |
+| 49.5 | Bos/fallback durumlari | Hic sohbet yoksa guvenli default sohbet uretir; gecersiz veri uygulamayi kirmadan temizlenir | Sari |
+
+**Etkilenen dosyalar:** `index.html` - `js/state.js` - `js/phone/app-shell.js` - `js/phone/home-editors.js` - `css/phone-shell.css` - `tests/state.test.js` - `tests/phone-shell.test.js`
+
+**Kabul kriterleri:**
+
+- Yeni sohbet kaydedilince Sohbetler listesine eklenir ve secilebilir olur.
+- Her sohbet kendi mesaj gecmisini, avatarini, basligini ve son mesaj ozetini korur.
+- Player, manuel composer, screenshot ve chat detail mevcut aktif sohbet uzerinden calismaya devam eder.
+- Export/import ve sahne kaydet/yukle coklu sohbet verisini korur.
+
+---
+
+## Faz 50 - Guncellemeler Duzenleme Akisi
+
+> *Guncellemeler sekmesindeki kalem ikonu, durum ve kanal iceriklerini kalici olarak duzenletmelidir.*
+
+| # | Iyilestirme | Detay | Oncelik |
+|---|---|---|---|
+| 50.1 | Kalem aksiyonu | `phoneUpdatesEditFab` ortak bottom sheet editorunu acacak sekilde baglanir | Kirmizi |
+| 50.2 | Durumum editoru | Durum basligi, yardimci metin ve durum zamani/metni duzenlenebilir olur | Kirmizi |
+| 50.3 | Son guncellemeler | En az iki son guncelleme satiri isim, zaman ve avatar bas harfiyle duzenlenir | Sari |
+| 50.4 | Kanal metinleri | Kanal aciklamasi ve CTA metinleri kalici icerikten render edilir | Sari |
+| 50.5 | Kalicilik | Duzenlenen guncellemeler localStorage, export/import ve sahne kaydinda korunur | Kirmizi |
+
+**Etkilenen dosyalar:** `index.html` - `js/state.js` - `js/phone/app-shell.js` - `js/phone/home-editors.js` - `css/phone-shell.css` - `tests/phone-shell.test.js`
+
+**Kabul kriterleri:**
+
+- Kalem ikonuna tiklayinca Guncellemeler editor sheet'i acilir.
+- Kaydedilen durum ve kanal metinleri sekmede hemen gorunur.
+- Sayfa yenileme, export/import ve sahne yukleme sonrasi guncellemeler korunur.
+- FAB'lar bottom nav ile carpismaz.
+
+---
+
+## Faz 51 - Topluluk Duzenleme Akisi
+
+> *Topluluk CTA'si, sohbet benzeri ama islevsel olmayan topluluk gorunumunu duzenletmelidir.*
+
+| # | Iyilestirme | Detay | Oncelik |
+|---|---|---|---|
+| 51.1 | CTA aksiyonu | `Toplulugunuzu olusturun` butonu ortak bottom sheet editorunu acacak sekilde baglanir | Kirmizi |
+| 51.2 | Sohbet benzeri gorunum | Topluluk editoru baslik, aciklama, ornek link ve CTA metnini sohbet benzeri yuzeyde duzenletir | Kirmizi |
+| 51.3 | Islev siniri | Topluluk icin gercek mesajlasma, katilimci yonetimi veya bildirim mantigi eklenmez | Kirmizi |
+| 51.4 | Bos durum renderi | Bos durum illustasyonu ve metinleri kalici `phoneShellContent.communities` verisinden render edilir | Sari |
+| 51.5 | Layout guvencesi | CTA ve editor sheet 360x800 ve 390x844 viewportlarda bottom nav ile carpismaz | Kirmizi |
+
+**Etkilenen dosyalar:** `index.html` - `js/state.js` - `js/phone/app-shell.js` - `js/phone/home-editors.js` - `css/phone-shell.css` - `tests/phone-shell.test.js`
+
+**Kabul kriterleri:**
+
+- Topluluk CTA'si editor sheet acar ve kaydetme sonrasi sekme metinlerini gunceller.
+- Duzenlenen topluluk gorunumu kalici olarak saklanir.
+- Topluluk gorunumu sohbet hissine yaklasir ama gercek sohbet motoruna baglanmaz.
+- CTA, link ve bottom nav arasinda overlap olmaz.
+
+---
+
+## Faz 52 - Aramalar Duzenleme Akisi
+
+> *Aramalar sekmesi, ust arama ikonundan acilan editorle kalici olarak duzenlenebilmelidir.*
+
+| # | Iyilestirme | Detay | Oncelik |
+|---|---|---|---|
+| 52.1 | Arama ikon aksiyonu | Aramalar sekmesindeyken ust `Ara` butonu arama listesi editor sheet'ini acar | Kirmizi |
+| 52.2 | Arama satiri editoru | Isim, tarih/metin, yon, cagri tipi ve avatar bas harfleri duzenlenebilir olur | Kirmizi |
+| 52.3 | Liste renderi | Son aramalar listesi `phoneShellContent.calls` verisinden uretilir | Kirmizi |
+| 52.4 | Ikon uyumu | Telefon/video ve yon ikonlari Faz 47 ortak ikon sistemiyle ayni gorunur | Sari |
+| 52.5 | Kalicilik | Arama listesi localStorage, export/import ve sahne kaydinda korunur | Kirmizi |
+
+**Etkilenen dosyalar:** `index.html` - `js/state.js` - `js/phone/app-shell.js` - `js/phone/home-editors.js` - `css/phone-shell.css` - `tests/phone-shell.test.js`
+
+**Kabul kriterleri:**
+
+- Aramalar sekmesindeki ust arama ikonuna tiklamak editor sheet acar.
+- Kaydedilen arama listesi sekmede hemen gorunur ve yenileme sonrasi korunur.
+- FAB, satir aksiyon ikonlari ve bottom nav dar viewportlarda carpismaz.
+- Full test, build ve mobil browser sanity basarili olur.
+
+---
+
 ## Uygulama Sirasi
 
 1. **Faz 41** - Shell ve navigasyon zemini.
@@ -191,8 +339,14 @@ ROADMAP4 sonunda simulatorun uretim paneli, mobil calisma menusu, Basit/Pro kura
 4. **Faz 44** - Topluluklar sekmesi.
 5. **Faz 45** - Aramalar sekmesi.
 6. **Faz 46** - Mobil polish, test ve gorsel dogrulama.
+7. **Faz 47** - Ikon sistemi ve chat header polish.
+8. **Faz 48** - Kalici telefon verisi ve bottom sheet editor altyapisi.
+9. **Faz 49** - Coklu sohbetler ve yeni sohbet olusturma.
+10. **Faz 50** - Guncellemeler duzenleme akisi.
+11. **Faz 51** - Topluluk duzenleme akisi.
+12. **Faz 52** - Aramalar duzenleme akisi.
 
-Her faz ayri branch/commit olarak uygulanabilir. Faz 41 tamamlanmadan sonraki sekme fazlarina baslanmamalidir; cunku home shell, bottom nav ve chat detail ayrimi sonraki tum sekmelerin temelidir.
+Her faz ayri branch/commit olarak uygulanabilir. Faz 41 tamamlanmadan sonraki sekme fazlarina baslanmamalidir; cunku home shell, bottom nav ve chat detail ayrimi sonraki tum sekmelerin temelidir. Faz 48 tamamlanmadan Faz 49-52 duzenleme akislarina baslanmamalidir; cunku kalici state ve bottom sheet altyapisi bu fazlarin ortak temelidir.
 
 ---
 
@@ -203,6 +357,12 @@ Her faz ayri branch/commit olarak uygulanabilir. Faz 41 tamamlanmadan sonraki se
 - Ana sekmelerde simulatorun uc nokta ayarlar/calisma menusu erisilebilir olur.
 - Composer ve medya ikonlari sadece sohbet detay ekraninda kalir.
 - Bottom nav, FAB'lar ve scroll alanlari mobil viewportlarda birbiriyle carpismaz.
+- Telefon + mobil UI ikonlari tutarli, temiz ve WhatsApp Android hissine yakin gorunur.
+- Sohbet geri butonu dark/light temada artefact veya okunurluk sorunu yaratmaz.
+- Kullanici Sohbetler sekmesinden birden fazla sohbet olusturabilir, secebilir ve her sohbetin mesaj gecmisi korunur.
+- Guncellemeler, Topluluklar ve Aramalar sekmeleri telefon ici bottom sheet ile duzenlenebilir.
+- Ana sekme duzenlemeleri localStorage, export/import ve sahne kaydet/yukle akislarinda korunur.
+- 360x800 ve 390x844 mobil viewportlarda edit sheet, menu, bottom nav ve FAB'lar pointer/overlap sorunu yaratmaz.
 - Mevcut uretim paneli, oynatma, screenshot, kaydet/yukle ve Basit/Pro menu davranislari korunur.
 
 ---
@@ -218,4 +378,4 @@ Her ROADMAP5 fazinda:
 5. Ilgili test dosyasi calistirilir.
 6. Full `npm.cmd test` ve `npm.cmd run build` calistirilir.
 7. User-visible fazlarda mobil browser sanity yapilir.
-
+8. Docs-only roadmap guncellemelerinde `git diff -- ROADMAP5.md`, markdown baslik/anchor kontrolu ve `git diff --check` yeterlidir.

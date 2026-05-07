@@ -98,6 +98,7 @@ describe('Faz 41 phone app shell', () => {
     expect(document.getElementById('phoneHomeShell')?.dataset.activeTab).toBe('updates');
     expect(document.querySelector('.phone-home-title')?.textContent).toBe('Guncellemeler');
     expect(searchButton?.hidden).toBe(false);
+    expect(searchButton?.getAttribute('aria-label')).toBe('Guncellemelerde ara');
     expect(cameraButton?.hidden).toBe(true);
     expect(updatesPanel?.hidden).toBe(false);
     expect(document.querySelector('[data-phone-tab="updates"]')?.getAttribute('aria-selected')).toBe('true');
@@ -132,6 +133,39 @@ describe('Faz 41 phone app shell', () => {
     expect(learnButton?.textContent).toContain('Ornek topluluklari gor');
     expect(cta?.textContent).toBe('Toplulugunuzu olusturun');
     expect(cta?.closest('[data-phone-tab-panel="communities"]')).not.toBeNull();
+  });
+
+  it('renders the Faz 45 calls hierarchy with shortcuts, recent calls and FAB', () => {
+    initPhoneShell();
+
+    const activeTab = setActivePhoneTab('calls');
+    const callsPanel = document.getElementById('phoneTabCalls');
+    const searchButton = document.getElementById('phoneShellSearchBtn');
+    const cameraButton = document.getElementById('phoneShellCameraBtn');
+    const shortcuts = [...document.querySelectorAll('#phoneTabCalls .phone-call-shortcut')];
+    const rows = [...document.querySelectorAll('#phoneTabCalls .phone-call-row')];
+    const rowActions = [...document.querySelectorAll('#phoneTabCalls .phone-call-row-action')];
+    const fab = document.getElementById('phoneCallFab');
+
+    expect(activeTab).toBe('calls');
+    expect(document.getElementById('phoneHomeShell')?.dataset.activeTab).toBe('calls');
+    expect(document.querySelector('.phone-home-title')?.textContent).toBe('Aramalar');
+    expect(searchButton?.hidden).toBe(false);
+    expect(searchButton?.getAttribute('aria-label')).toBe('Aramalarda ara');
+    expect(cameraButton?.hidden).toBe(true);
+    expect(callsPanel?.hidden).toBe(false);
+    expect(document.querySelector('[data-phone-tab="calls"]')?.getAttribute('aria-selected')).toBe('true');
+    expect(document.getElementById('phoneCallsQuickTitle')?.textContent).toBe('Hizli aksiyonlar');
+    expect(shortcuts.map((shortcut) => shortcut.textContent?.trim())).toEqual(['Ara', 'Planla', 'Tus takimi', 'Favoriler']);
+    expect(document.getElementById('phoneRecentCallsTitle')?.textContent).toBe('Son aramalar');
+    expect(rows).toHaveLength(4);
+    expect(rows[0]?.classList.contains('is-missed')).toBe(true);
+    expect(rows[0]?.textContent).toContain('Cevapsiz');
+    expect(rows[1]?.textContent).toContain('Giden');
+    expect(rows[2]?.textContent).toContain('Gelen');
+    expect(rowActions).toHaveLength(4);
+    expect(fab?.getAttribute('aria-label')).toBe('Yeni arama');
+    expect(fab?.closest('[data-phone-tab-panel="calls"]')).not.toBeNull();
   });
 
   it('derives chat row content from group and latest message with safe fallbacks', () => {
@@ -182,6 +216,8 @@ describe('Faz 41 phone app shell', () => {
     setActivePhoneTab('updates');
     expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
     setActivePhoneTab('communities');
+    expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
+    setActivePhoneTab('calls');
     expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(menu?.querySelectorAll('[data-menu-root]')).toHaveLength(1);
   });

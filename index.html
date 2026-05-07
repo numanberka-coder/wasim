@@ -1037,7 +1037,99 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               </div>
             </section>
             <section class="phone-tab-panel" id="phoneTabCalls" data-phone-tab-panel="calls" role="tabpanel" aria-labelledby="phoneTabBtnCalls" hidden>
-              <div class="phone-tab-placeholder">Aramalar</div>
+              <div class="phone-calls-view" aria-label="Aramalar akisi">
+                <section class="phone-calls-quick" aria-labelledby="phoneCallsQuickTitle">
+                  <h3 class="phone-calls-section-title" id="phoneCallsQuickTitle">Hizli aksiyonlar</h3>
+                  <div class="phone-calls-shortcuts" role="group" aria-label="Hizli arama aksiyonlari">
+                    <button class="phone-call-shortcut" type="button" aria-label="Ara">
+                      <span class="phone-call-shortcut-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24 11.36 11.36 0 003.57.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.57 3.57 1 1 0 01-.25 1.02l-2.2 2.2z"/></svg>
+                      </span>
+                      <span>Ara</span>
+                    </button>
+                    <button class="phone-call-shortcut" type="button" aria-label="Planla">
+                      <span class="phone-call-shortcut-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M7 2h2v2h6V2h2v2h2a2 2 0 012 2v13a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h2V2zm12 8H5v9h14v-9zm-3 3h-3v3h3v-3z"/></svg>
+                      </span>
+                      <span>Planla</span>
+                    </button>
+                    <button class="phone-call-shortcut" type="button" aria-label="Tus takimi">
+                      <span class="phone-call-shortcut-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M7 5a2 2 0 11-4 0 2 2 0 014 0zm7 0a2 2 0 11-4 0 2 2 0 014 0zm7 0a2 2 0 11-4 0 2 2 0 014 0zM7 12a2 2 0 11-4 0 2 2 0 014 0zm7 0a2 2 0 11-4 0 2 2 0 014 0zm7 0a2 2 0 11-4 0 2 2 0 014 0zM7 19a2 2 0 11-4 0 2 2 0 014 0zm7 0a2 2 0 11-4 0 2 2 0 014 0zm7 0a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                      </span>
+                      <span>Tus takimi</span>
+                    </button>
+                    <button class="phone-call-shortcut" type="button" aria-label="Favoriler">
+                      <span class="phone-call-shortcut-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z"/></svg>
+                      </span>
+                      <span>Favoriler</span>
+                    </button>
+                  </div>
+                </section>
+
+                <section class="phone-calls-section" aria-labelledby="phoneRecentCallsTitle">
+                  <h3 class="phone-calls-section-title" id="phoneRecentCallsTitle">Son aramalar</h3>
+                  <div class="phone-call-list">
+                    <button class="phone-call-row is-missed" type="button" aria-label="Ayse Eren cevapsiz sesli arama">
+                      <span class="phone-call-avatar">AE</span>
+                      <span class="phone-call-copy">
+                        <span class="phone-call-name">Ayse Eren</span>
+                        <span class="phone-call-meta">
+                          <svg class="phone-call-direction" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 7v6h-2V9.41l-9.29 9.3-1.42-1.42 9.3-9.29H12V6h7z"/></svg>
+                          <span>Cevapsiz, bugun 11:48</span>
+                        </span>
+                      </span>
+                      <span class="phone-call-row-action" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                      </span>
+                    </button>
+                    <button class="phone-call-row" type="button" aria-label="Destek Ekibi giden video aramasi">
+                      <span class="phone-call-avatar phone-call-avatar-teal">DE</span>
+                      <span class="phone-call-copy">
+                        <span class="phone-call-name">Destek Ekibi</span>
+                        <span class="phone-call-meta">
+                          <svg class="phone-call-direction is-outgoing" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17v-6h2v3.59l9.29-9.3 1.42 1.42-9.3 9.29H12v2H5z"/></svg>
+                          <span>Giden, dun 20:12</span>
+                        </span>
+                      </span>
+                      <span class="phone-call-row-action" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                      </span>
+                    </button>
+                    <button class="phone-call-row" type="button" aria-label="Aile Grubu gelen sesli arama">
+                      <span class="phone-call-avatar phone-call-avatar-blue">AG</span>
+                      <span class="phone-call-copy">
+                        <span class="phone-call-name">Aile Grubu</span>
+                        <span class="phone-call-meta">
+                          <svg class="phone-call-direction is-incoming" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 17h-6v-2h3.59l-9.3-9.29 1.42-1.42 9.29 9.3V10h2v7z"/></svg>
+                          <span>Gelen, sali 18:05</span>
+                        </span>
+                      </span>
+                      <span class="phone-call-row-action" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                      </span>
+                    </button>
+                    <button class="phone-call-row" type="button" aria-label="Ece Yildiz gelen video aramasi">
+                      <span class="phone-call-avatar phone-call-avatar-purple">EY</span>
+                      <span class="phone-call-copy">
+                        <span class="phone-call-name">Ece Yildiz</span>
+                        <span class="phone-call-meta">
+                          <svg class="phone-call-direction is-incoming" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 17h-6v-2h3.59l-9.3-9.29 1.42-1.42 9.29 9.3V10h2v7z"/></svg>
+                          <span>Gelen, pazartesi 09:31</span>
+                        </span>
+                      </span>
+                      <span class="phone-call-row-action" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                      </span>
+                    </button>
+                  </div>
+                </section>
+
+                <button class="phone-call-fab" id="phoneCallFab" type="button" aria-label="Yeni arama">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 11h-3V8h-2v3h-3v2h3v3h2v-3h3v-2z"/><path d="M20.01 15.38c-.72 0-1.43-.07-2.1-.2l-1.18 1.18c-2.7-1.38-4.91-3.59-6.29-6.29l1.18-1.18c-.13-.68-.2-1.38-.2-2.1A1.99 1.99 0 009.43 4H6a2 2 0 00-2 2c0 7.73 6.27 14 14 14a2 2 0 002-2v-3.43c0-.53-.21-1.04-.59-1.41-.37-.37-.88-.58-1.4-.58z"/></svg>
+                </button>
+              </div>
             </section>
           </div>
 
