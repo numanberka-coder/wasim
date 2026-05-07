@@ -108,6 +108,32 @@ describe('Faz 41 phone app shell', () => {
     expect(document.getElementById('phoneUpdatesCameraFab')).not.toBeNull();
   });
 
+  it('renders the Faz 44 communities empty state with CTA and active nav state', () => {
+    initPhoneShell();
+
+    const activeTab = setActivePhoneTab('communities');
+    const communitiesPanel = document.getElementById('phoneTabCommunities');
+    const searchButton = document.getElementById('phoneShellSearchBtn');
+    const cameraButton = document.getElementById('phoneShellCameraBtn');
+    const illustration = document.querySelector('#phoneTabCommunities .phone-communities-illustration');
+    const learnButton = document.querySelector('#phoneTabCommunities .phone-communities-link-button');
+    const cta = document.getElementById('phoneCommunitiesCreateBtn');
+
+    expect(activeTab).toBe('communities');
+    expect(document.getElementById('phoneHomeShell')?.dataset.activeTab).toBe('communities');
+    expect(document.querySelector('.phone-home-title')?.textContent).toBe('Topluluklar');
+    expect(searchButton?.hidden).toBe(true);
+    expect(cameraButton?.hidden).toBe(true);
+    expect(communitiesPanel?.hidden).toBe(false);
+    expect(document.querySelector('[data-phone-tab="communities"]')?.getAttribute('aria-selected')).toBe('true');
+    expect(illustration).not.toBeNull();
+    expect(document.getElementById('phoneCommunitiesTitle')?.textContent).toBe('Topluluklar sayesinde baglantida kalin');
+    expect(document.querySelector('#phoneTabCommunities .phone-communities-copy')?.textContent).toContain('Ilgili gruplari');
+    expect(learnButton?.textContent).toContain('Ornek topluluklari gor');
+    expect(cta?.textContent).toBe('Toplulugunuzu olusturun');
+    expect(cta?.closest('[data-phone-tab-panel="communities"]')).not.toBeNull();
+  });
+
   it('derives chat row content from group and latest message with safe fallbacks', () => {
     state.set('group.title', 'Aile Grubu');
     state.set('group.subtitle', '');
@@ -154,6 +180,8 @@ describe('Faz 41 phone app shell', () => {
     expect(shellTrigger?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(detailTrigger?.getAttribute('aria-controls')).toBe('headerDropdown');
     setActivePhoneTab('updates');
+    expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
+    setActivePhoneTab('communities');
     expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(menu?.querySelectorAll('[data-menu-root]')).toHaveLength(1);
   });
