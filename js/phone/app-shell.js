@@ -9,10 +9,10 @@ export const PHONE_TABS = ['chats', 'updates', 'communities', 'calls'];
 export const CHAT_FILTERS = ['all', 'unread', 'groups'];
 
 const PHONE_TAB_HEADERS = {
-  chats: { title: 'WhatsApp', search: false, camera: true },
-  updates: { title: 'Guncellemeler', search: true, camera: false },
-  communities: { title: 'Topluluklar', search: false, camera: false },
-  calls: { title: 'Aramalar', search: true, camera: false },
+  chats: { title: 'WhatsApp', search: false, camera: true, searchLabel: 'Sohbetlerde ara' },
+  updates: { title: 'Guncellemeler', search: true, camera: false, searchLabel: 'Guncellemelerde ara' },
+  communities: { title: 'Topluluklar', search: false, camera: false, searchLabel: 'Topluluklarda ara' },
+  calls: { title: 'Aramalar', search: true, camera: false, searchLabel: 'Aramalarda ara' },
 };
 
 const shellState = {
@@ -53,7 +53,10 @@ function syncPhoneHomeHeader(tab) {
   const header = PHONE_TAB_HEADERS[activeTab] || PHONE_TAB_HEADERS.chats;
 
   if (headerTitle) headerTitle.textContent = header.title;
-  if (searchButton) searchButton.hidden = !header.search;
+  if (searchButton) {
+    searchButton.hidden = !header.search;
+    searchButton.setAttribute('aria-label', header.searchLabel);
+  }
   if (cameraButton) cameraButton.hidden = !header.camera;
 }
 
