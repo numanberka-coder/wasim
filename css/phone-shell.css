@@ -288,6 +288,227 @@
   outline-offset: 3px;
 }
 
+.phone-updates-view {
+  min-height: 100%;
+  padding: 6px 0 38px;
+  color: #e9edef;
+}
+
+.phone-tab-panel[data-phone-tab-panel="updates"] {
+  padding-bottom: 136px;
+}
+
+.phone-status-card,
+.phone-updates-section,
+.phone-channels-section {
+  display: grid;
+}
+
+.phone-status-row {
+  width: 100%;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.phone-status-row:hover,
+.phone-status-row:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+
+.phone-status-avatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #6b7c85;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.phone-status-ring {
+  background:
+    linear-gradient(#0b141a, #0b141a) padding-box,
+    linear-gradient(145deg, #25d366, #09a884) border-box;
+  border: 3px solid transparent;
+}
+
+.phone-status-avatar-own {
+  background: #54656f;
+}
+
+.phone-status-add {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #0b141a;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #00a884;
+  color: #0b141a;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.phone-status-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.phone-status-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.phone-status-meta,
+.phone-status-note,
+.phone-channels-copy {
+  color: #8696a0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.phone-status-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phone-status-note {
+  margin: 0;
+  padding: 0 16px 14px 80px;
+}
+
+.phone-updates-section {
+  padding-top: 8px;
+  border-top: 8px solid rgba(17, 27, 33, 0.85);
+}
+
+.phone-updates-section-title {
+  margin: 0;
+  padding: 8px 16px 6px;
+  color: #e9edef;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.phone-status-list {
+  display: grid;
+}
+
+.phone-channels-section {
+  margin-top: 8px;
+  padding: 14px 16px 18px;
+  gap: 10px;
+  border-top: 8px solid rgba(17, 27, 33, 0.85);
+}
+
+.phone-channels-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.phone-channels-header .phone-updates-section-title {
+  padding: 0;
+}
+
+.phone-channels-copy {
+  margin: 0;
+}
+
+.phone-channel-discover,
+.phone-channel-create {
+  min-height: 34px;
+  border-radius: 17px;
+  border: 1px solid rgba(0, 168, 132, 0.65);
+  background: transparent;
+  color: #00a884;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.phone-channel-discover {
+  min-width: 76px;
+  padding: 0 14px;
+}
+
+.phone-channel-create {
+  justify-self: start;
+  padding: 0 16px;
+}
+
+.phone-channel-discover:focus-visible,
+.phone-channel-create:focus-visible,
+.phone-updates-fab:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.85);
+  outline-offset: 2px;
+}
+
+.phone-updates-fabs {
+  position: absolute;
+  right: 18px;
+  bottom: 88px;
+  z-index: 10;
+  display: grid;
+  gap: 12px;
+  justify-items: end;
+}
+
+.phone-updates-fab {
+  border: none;
+  display: grid;
+  place-items: center;
+  color: #07130d;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.phone-updates-fab svg {
+  width: 23px;
+  height: 23px;
+  fill: currentColor;
+}
+
+.phone-updates-fab-edit {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #d9fdd3;
+}
+
+.phone-updates-fab-camera {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #25d366;
+}
+
 .phone-tab-placeholder {
   min-height: 220px;
   display: grid;
@@ -382,4 +603,30 @@
 
 .phone.light .phone-chat-entry {
   border-bottom-color: rgba(17, 27, 33, 0.1);
+}
+
+.phone.light .phone-updates-view,
+.phone.light .phone-updates-section-title {
+  color: #111b21;
+}
+
+.phone.light .phone-status-meta,
+.phone.light .phone-status-note,
+.phone.light .phone-channels-copy {
+  color: #54656f;
+}
+
+.phone.light .phone-status-ring {
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(145deg, #25d366, #09a884) border-box;
+}
+
+.phone.light .phone-status-add {
+  border-color: #ffffff;
+}
+
+.phone.light .phone-updates-section,
+.phone.light .phone-channels-section {
+  border-top-color: #f0f2f5;
 }

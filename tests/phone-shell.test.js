@@ -85,6 +85,29 @@ describe('Faz 41 phone app shell', () => {
     expect(setActiveChatFilter('unknown')).toBe('all');
   });
 
+  it('renders the Faz 43 updates hierarchy with status, channels and double FAB', () => {
+    initPhoneShell();
+
+    const activeTab = setActivePhoneTab('updates');
+    const updatesPanel = document.getElementById('phoneTabUpdates');
+    const searchButton = document.getElementById('phoneShellSearchBtn');
+    const cameraButton = document.getElementById('phoneShellCameraBtn');
+    const statusRows = [...document.querySelectorAll('#phoneTabUpdates .phone-status-row')];
+
+    expect(activeTab).toBe('updates');
+    expect(document.getElementById('phoneHomeShell')?.dataset.activeTab).toBe('updates');
+    expect(document.querySelector('.phone-home-title')?.textContent).toBe('Guncellemeler');
+    expect(searchButton?.hidden).toBe(false);
+    expect(cameraButton?.hidden).toBe(true);
+    expect(updatesPanel?.hidden).toBe(false);
+    expect(document.querySelector('[data-phone-tab="updates"]')?.getAttribute('aria-selected')).toBe('true');
+    expect(statusRows).toHaveLength(3);
+    expect(document.querySelector('#phoneTabUpdates .phone-status-note')?.textContent).toContain('24 saat sonra');
+    expect(document.querySelector('#phoneTabUpdates .phone-channels-section')?.textContent).toContain('Kanallar');
+    expect(document.getElementById('phoneUpdatesEditFab')).not.toBeNull();
+    expect(document.getElementById('phoneUpdatesCameraFab')).not.toBeNull();
+  });
+
   it('derives chat row content from group and latest message with safe fallbacks', () => {
     state.set('group.title', 'Aile Grubu');
     state.set('group.subtitle', '');
@@ -130,6 +153,8 @@ describe('Faz 41 phone app shell', () => {
     expect(detailTrigger?.dataset.mobileMenuTrigger).toBe('');
     expect(shellTrigger?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(detailTrigger?.getAttribute('aria-controls')).toBe('headerDropdown');
+    setActivePhoneTab('updates');
+    expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(menu?.querySelectorAll('[data-menu-root]')).toHaveLength(1);
   });
 });
