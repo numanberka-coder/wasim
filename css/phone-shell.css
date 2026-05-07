@@ -509,6 +509,144 @@
   background: #25d366;
 }
 
+.phone-tab-panel[data-phone-tab-panel="communities"] {
+  padding: 0 20px 94px;
+}
+
+.phone-communities-view {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #e9edef;
+}
+
+.phone-communities-empty {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 18px 0 10px;
+  text-align: center;
+}
+
+.phone-communities-illustration {
+  width: min(52vw, 168px);
+  max-width: 100%;
+  aspect-ratio: 168 / 132;
+  display: grid;
+  place-items: center;
+  margin-bottom: 2px;
+}
+
+.phone-communities-illustration svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.phone-communities-card-back {
+  fill: #1f2c33;
+}
+
+.phone-communities-card-front {
+  fill: #17242b;
+  stroke: rgba(134, 150, 160, 0.25);
+  stroke-width: 1.5;
+}
+
+.phone-communities-avatar-main {
+  fill: #00a884;
+}
+
+.phone-communities-avatar-side {
+  fill: #54656f;
+}
+
+.phone-communities-avatar-cut,
+.phone-communities-link {
+  fill: none;
+  stroke: #d9fdd3;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.phone-communities-link {
+  stroke: rgba(217, 253, 211, 0.72);
+  stroke-width: 4;
+}
+
+.phone-communities-check {
+  fill: none;
+  stroke: #25d366;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.phone-communities-title {
+  max-width: 286px;
+  margin: 0;
+  color: #e9edef;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.18;
+}
+
+.phone-communities-copy {
+  max-width: 300px;
+  margin: 0;
+  color: #8696a0;
+  font-size: 14px;
+  line-height: 1.42;
+}
+
+.phone-communities-link-button {
+  min-height: 34px;
+  border: none;
+  background: transparent;
+  color: #53bdeb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.phone-communities-link-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.phone-communities-cta {
+  width: 100%;
+  min-height: 46px;
+  margin-top: auto;
+  border: none;
+  border-radius: 23px;
+  background: #00a884;
+  color: #07130d;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.phone-communities-link-button:focus-visible,
+.phone-communities-cta:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.85);
+  outline-offset: 2px;
+}
+
 .phone-tab-placeholder {
   min-height: 220px;
   display: grid;
@@ -629,4 +767,26 @@
 .phone.light .phone-updates-section,
 .phone.light .phone-channels-section {
   border-top-color: #f0f2f5;
+}
+
+.phone.light .phone-communities-view,
+.phone.light .phone-communities-title {
+  color: #111b21;
+}
+
+.phone.light .phone-communities-copy {
+  color: #54656f;
+}
+
+.phone.light .phone-communities-card-back {
+  fill: #eef3f5;
+}
+
+.phone.light .phone-communities-card-front {
+  fill: #ffffff;
+  stroke: rgba(17, 27, 33, 0.12);
+}
+
+.phone.light .phone-communities-avatar-side {
+  fill: #d8e2e7;
 }
