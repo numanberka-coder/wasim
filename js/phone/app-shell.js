@@ -8,6 +8,13 @@ import { state } from '../state.js';
 export const PHONE_TABS = ['chats', 'updates', 'communities', 'calls'];
 export const CHAT_FILTERS = ['all', 'unread', 'groups'];
 
+const PHONE_TAB_HEADERS = {
+  chats: { title: 'WhatsApp', search: false, camera: true },
+  updates: { title: 'Guncellemeler', search: true, camera: false },
+  communities: { title: 'Topluluklar', search: false, camera: false },
+  calls: { title: 'Aramalar', search: true, camera: false },
+};
+
 const shellState = {
   activeTab: 'chats',
   activeChatFilter: 'all',
@@ -22,6 +29,9 @@ function getShellElements() {
     home: $('phoneHomeShell'),
     detail: $('phoneChatDetail'),
     backButton: $('phoneChatBackBtn'),
+    headerTitle: document.querySelector('.phone-home-title'),
+    searchButton: $('phoneShellSearchBtn'),
+    cameraButton: $('phoneShellCameraBtn'),
     tabButtons: [...document.querySelectorAll('[data-phone-tab]')],
     tabPanels: [...document.querySelectorAll('[data-phone-tab-panel]')],
     chatFilterButtons: [...document.querySelectorAll('[data-phone-chat-filter]')],
@@ -37,12 +47,23 @@ function getSafeChatFilter(filter) {
   return CHAT_FILTERS.includes(filter) ? filter : 'all';
 }
 
+function syncPhoneHomeHeader(tab) {
+  const activeTab = getSafeTab(tab);
+  const { headerTitle, searchButton, cameraButton } = getShellElements();
+  const header = PHONE_TAB_HEADERS[activeTab] || PHONE_TAB_HEADERS.chats;
+
+  if (headerTitle) headerTitle.textContent = header.title;
+  if (searchButton) searchButton.hidden = !header.search;
+  if (cameraButton) cameraButton.hidden = !header.camera;
+}
+
 export function setActivePhoneTab(tab) {
   const activeTab = getSafeTab(tab);
   const { home, tabButtons, tabPanels } = getShellElements();
 
   shellState.activeTab = activeTab;
   if (home) home.dataset.activeTab = activeTab;
+  syncPhoneHomeHeader(activeTab);
 
   tabButtons.forEach((button) => {
     const isActive = button.dataset.phoneTab === activeTab;

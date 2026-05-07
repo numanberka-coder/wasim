@@ -912,6 +912,9 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           <header class="phone-home-header">
             <div class="phone-home-title">WhatsApp</div>
             <div class="phone-home-actions">
+              <button class="phone-home-icon-btn" id="phoneShellSearchBtn" type="button" aria-label="Guncellemelerde ara" hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3a6.5 6.5 0 015.17 10.45l4.44 4.44-1.42 1.42-4.44-4.44A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+              </button>
               <button class="phone-home-icon-btn" id="phoneShellCameraBtn" type="button" aria-label="Kamera">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
               </button>
@@ -953,7 +956,59 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               </button>
             </section>
             <section class="phone-tab-panel" id="phoneTabUpdates" data-phone-tab-panel="updates" role="tabpanel" aria-labelledby="phoneTabBtnUpdates" hidden>
-              <div class="phone-tab-placeholder">Guncellemeler</div>
+              <div class="phone-updates-view" aria-label="Guncellemeler akisi">
+                <section class="phone-status-card" aria-labelledby="phoneStatusTitle">
+                  <button class="phone-status-row phone-status-row-own" type="button" aria-label="Durum ekle">
+                    <span class="phone-status-avatar phone-status-avatar-own" aria-hidden="true">
+                      <span>G</span>
+                      <span class="phone-status-add">+</span>
+                    </span>
+                    <span class="phone-status-copy">
+                      <span class="phone-status-title" id="phoneStatusTitle">Durumum</span>
+                      <span class="phone-status-meta">Durum guncellemesi eklemek icin dokunun</span>
+                    </span>
+                  </button>
+                  <p class="phone-status-note">Durum guncellemeleriniz 24 saat sonra kaybolur.</p>
+                </section>
+
+                <section class="phone-updates-section" aria-labelledby="phoneRecentUpdatesTitle">
+                  <h3 class="phone-updates-section-title" id="phoneRecentUpdatesTitle">Son guncellemeler</h3>
+                  <div class="phone-status-list">
+                    <button class="phone-status-row" type="button" aria-label="Aile Grubu durumunu ac">
+                      <span class="phone-status-avatar phone-status-ring" aria-hidden="true"><span>AG</span></span>
+                      <span class="phone-status-copy">
+                        <span class="phone-status-title">Aile Grubu</span>
+                        <span class="phone-status-meta">Bugun 12:40</span>
+                      </span>
+                    </button>
+                    <button class="phone-status-row" type="button" aria-label="Destek Ekibi durumunu ac">
+                      <span class="phone-status-avatar phone-status-ring" aria-hidden="true"><span>DE</span></span>
+                      <span class="phone-status-copy">
+                        <span class="phone-status-title">Destek Ekibi</span>
+                        <span class="phone-status-meta">Bugun 09:18</span>
+                      </span>
+                    </button>
+                  </div>
+                </section>
+
+                <section class="phone-channels-section" aria-labelledby="phoneChannelsTitle">
+                  <div class="phone-channels-header">
+                    <h3 class="phone-updates-section-title" id="phoneChannelsTitle">Kanallar</h3>
+                    <button class="phone-channel-discover" type="button">Kesfet</button>
+                  </div>
+                  <p class="phone-channels-copy">Ilgilendiginiz konulardan haber almak icin kanallari takip edin.</p>
+                  <button class="phone-channel-create" type="button">Kanal olustur</button>
+                </section>
+
+                <div class="phone-updates-fabs" aria-label="Guncelleme aksiyonlari">
+                  <button class="phone-updates-fab phone-updates-fab-edit" id="phoneUpdatesEditFab" type="button" aria-label="Durum yaz">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25zm15.71-10.04a1 1 0 000-1.42l-1.5-1.5a1 1 0 00-1.42 0l-1.04 1.04 2.75 2.75 1.21-1.21z"/></svg>
+                  </button>
+                  <button class="phone-updates-fab phone-updates-fab-camera" id="phoneUpdatesCameraFab" type="button" aria-label="Kamerayla durum ekle">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                  </button>
+                </div>
+              </div>
             </section>
             <section class="phone-tab-panel" id="phoneTabCommunities" data-phone-tab-panel="communities" role="tabpanel" aria-labelledby="phoneTabBtnCommunities" hidden>
               <div class="phone-tab-placeholder">Topluluklar</div>
