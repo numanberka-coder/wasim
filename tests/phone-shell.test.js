@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   CHAT_FILTERS,
+  PHONE_ICON_SVG,
   getPhoneShellState,
   initPhoneShell,
   setActiveChatFilter,
@@ -11,17 +12,65 @@ import {
   showPhoneHome,
 } from '../js/phone/app-shell.js';
 import { state } from '../js/state.js';
+import { initMobile, registerMobileCallback } from '../js/ui/mobile.js';
 
 function mountIndexDocument() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
   const doc = new DOMParser().parseFromString(html, 'text/html');
   document.body.innerHTML = doc.body.innerHTML;
+  if (!window.matchMedia) {
+    window.matchMedia = () => ({
+      matches: false,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
+  }
   return document;
+}
+
+function loadPhoneShellCss() {
+  return readFileSync(join(process.cwd(), 'css', 'phone-shell.css'), 'utf8');
+}
+
+function loadPhoneCss() {
+  return readFileSync(join(process.cwd(), 'css', 'phone.css'), 'utf8');
+}
+
+function loadResponsiveCss() {
+  return readFileSync(join(process.cwd(), 'css', 'responsive.css'), 'utf8');
+}
+
+function setViewportWidth(width) {
+  Object.defineProperty(window, 'innerWidth', {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+}
+
+function expectMenuOpenFrom(trigger) {
+  const menu = document.getElementById('headerDropdown');
+  const backdrop = document.getElementById('mobileOverlayBackdrop');
+
+  trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+  expect(document.body.classList.contains('mobile-menu-open')).toBe(true);
+  expect(menu?.classList.contains('is-open')).toBe(true);
+  expect(backdrop?.classList.contains('is-open')).toBe(true);
+  expect(backdrop?.classList.contains('is-menu-backdrop')).toBe(true);
+  expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+  document.getElementById('headerMenuCloseBtn')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+  expect(document.body.classList.contains('mobile-menu-open')).toBe(false);
+  expect(menu?.classList.contains('is-open')).toBe(false);
+  expect(trigger.getAttribute('aria-expanded')).toBe('false');
 }
 
 describe('Faz 41 phone app shell', () => {
   beforeEach(() => {
     state.reset();
+    setViewportWidth(1024);
     mountIndexDocument();
   });
 
@@ -220,5 +269,126 @@ describe('Faz 41 phone app shell', () => {
     setActivePhoneTab('calls');
     expect(document.getElementById('phoneShellMenuBtn')?.getAttribute('aria-controls')).toBe('headerDropdown');
     expect(menu?.querySelectorAll('[data-menu-root]')).toHaveLength(1);
+  });
+
+  it('opens the shared mobile sheet from every home tab and chat detail trigger', () => {
+    setViewportWidth(390);
+    initPhoneShell();
+    initMobile();
+
+    const shellTrigger = document.getElementById('phoneShellMenuBtn');
+    const detailTrigger = document.getElementById('headerMenuBtn');
+
+    expect(shellTrigger).not.toBeNull();
+    expect(detailTrigger).not.toBeNull();
+
+    ['chats', 'updates', 'communities', 'calls'].forEach((tab) => {
+      showPhoneHome();
+      setActivePhoneTab(tab);
+      expectMenuOpenFrom(shellTrigger);
+    });
+
+    showPhoneChatDetail();
+    expectMenuOpenFrom(detailTrigger);
+  });
+
+  it('keeps screenshot output available through the existing mobile sheet action', () => {
+    setViewportWidth(390);
+    initPhoneShell();
+    initMobile();
+
+    let screenshotCalls = 0;
+    registerMobileCallback('takeScreenshot', () => {
+      screenshotCalls += 1;
+    });
+
+    document.getElementById('phoneShellMenuBtn')?.click();
+    document.querySelector('#headerDropdown [data-action="screenshot"]')?.click();
+
+    expect(screenshotCalls).toBe(1);
+    expect(document.getElementById('headerDropdown')?.classList.contains('is-open')).toBe(false);
+  });
+
+  it('renders Faz 47 phone icons through the shared SVG contract', () => {
+    initPhoneShell();
+
+    const iconHosts = [...document.querySelectorAll('[data-phone-icon]')];
+    const missingIconNames = iconHosts
+      .map((icon) => icon.getAttribute('data-phone-icon'))
+      .filter((name) => !PHONE_ICON_SVG[name]);
+
+    expect(iconHosts.length).toBeGreaterThan(20);
+    expect(missingIconNames).toEqual([]);
+    iconHosts.forEach((icon) => {
+      expect(icon.classList.contains('wa-phone-icon')).toBe(true);
+      expect(icon.getAttribute('aria-hidden')).toBe('true');
+      expect(icon.querySelectorAll('svg')).toHaveLength(1);
+    });
+    expect(document.getElementById('headerMenuBtn')?.tagName).toBe('BUTTON');
+    expect(PHONE_ICON_SVG.chatPlus).toContain('m84.375 66.668');
+    expect(PHONE_ICON_SVG.chatPlus).toContain('m51.043 62.5v-25');
+    expect(PHONE_ICON_SVG.phonePlus).toContain('m33.812 9.7148');
+    expect(PHONE_ICON_SVG.phonePlus).toContain('m69.793 45.832');
+    expect(PHONE_ICON_SVG.phone).toContain('M59.308,74.811');
+    expect(PHONE_ICON_SVG.video).toContain('m65.625 33.332');
+  });
+
+  it('keeps the chat back button transparent, touchable and behaviorally wired', () => {
+    const phoneCss = loadPhoneCss();
+    initPhoneShell();
+
+    const backButton = document.getElementById('phoneChatBackBtn');
+    showPhoneChatDetail();
+    backButton?.click();
+
+    expect(backButton?.tagName).toBe('BUTTON');
+    expect(backButton?.querySelector('[data-phone-icon="back"] svg')).not.toBeNull();
+    expect(document.querySelector('.phone')?.dataset.phoneView).toBe('home');
+    expect(phoneCss).toContain('.back-btn');
+    expect(phoneCss).toContain('width: 40px');
+    expect(phoneCss).toContain('height: 40px');
+    expect(phoneCss).toContain('border: none');
+    expect(phoneCss).toContain('background: transparent');
+    expect(phoneCss).toContain('-webkit-tap-highlight-color: transparent');
+  });
+
+  it('defines the Faz 46 mobile spacing and menu stacking CSS contract', () => {
+    const phoneShellCss = loadPhoneShellCss();
+    const responsiveCss = loadResponsiveCss();
+
+    expect(phoneShellCss).toContain('--phone-bottom-nav-height');
+    expect(phoneShellCss).toContain('--phone-fab-bottom');
+    expect(phoneShellCss).toContain('scroll-padding-bottom: var(--phone-tab-bottom-pad)');
+    expect(phoneShellCss).toContain('.phone-bottom-nav-item::before');
+    expect(phoneShellCss).toContain('.phone-tab-panel[data-phone-tab-panel="updates"]');
+    expect(phoneShellCss).toContain('@media (max-width: 380px)');
+    expect(responsiveCss).toContain('body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open');
+    expect(responsiveCss).toContain('z-index: 603');
+    expect(responsiveCss).toContain('pointer-events: auto');
+  });
+
+  it('defines the Faz 47 shared icon sizing and contrast CSS contract', () => {
+    const phoneCss = loadPhoneCss();
+    const phoneShellCss = loadPhoneShellCss();
+
+    expect(phoneShellCss).toContain('.wa-phone-icon');
+    expect(phoneShellCss).toContain('.wa-phone-icon svg');
+    expect(phoneShellCss).toContain('stroke: currentColor');
+    expect(phoneShellCss).toContain('stroke-linecap: round');
+    expect(phoneShellCss).toContain('.phone-bottom-nav-item.is-active .wa-phone-icon');
+    expect(phoneShellCss).toContain('color: #fff');
+    expect(phoneShellCss).toContain('.phone-call-shortcut-icon .wa-phone-icon');
+    expect(phoneShellCss).toContain('.phone-message-fab .wa-phone-icon');
+    expect(phoneShellCss).toContain('.phone-call-fab .wa-phone-icon');
+    expect(phoneShellCss).toContain('width: 52px');
+    expect(phoneShellCss).toContain('background: #21c063');
+    expect(phoneShellCss).toContain('width: 22px');
+    expect(phoneShellCss).toContain('width: 27px');
+    expect(phoneCss).toContain('.header-icon.wa-phone-icon');
+    expect(phoneCss).toContain('.header-icon.wa-phone-icon[data-phone-icon="video"]');
+    expect(phoneCss).toContain('.header-icon.wa-phone-icon[data-phone-icon="phone"]');
+    expect(phoneCss).toContain('width: 21px');
+    expect(phoneCss).toContain('.composer-icon-btn .wa-phone-icon');
+    expect(phoneCss).toContain('.main-action-btn .wa-phone-icon');
   });
 });

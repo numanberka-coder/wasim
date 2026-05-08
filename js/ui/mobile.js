@@ -42,6 +42,7 @@ function isMobileView() {
 /** Mobile UI state */
 const mobileState = {
   menuOpen: false,
+  menuTrigger: null,
   overlayOpen: false,
   currentPanel: null,
   // Panel move referansları
@@ -93,7 +94,7 @@ function bindMobileEvents() {
   menuTriggers.forEach((trigger) => {
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      toggleMobileMenu();
+      toggleMobileMenu(trigger);
     });
     trigger.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -102,7 +103,7 @@ function bindMobileEvents() {
       if (mobileState.menuOpen) {
         closeMobileMenu({ restoreFocus: true });
       } else {
-        openMobileMenu({ focusFirst: true });
+        openMobileMenu({ focusFirst: true, trigger });
       }
     });
   });
@@ -205,8 +206,8 @@ function bindMobileEvents() {
    DROPDOWN MENU
    ======================================== */
 
-function toggleMobileMenu() {
-  mobileState.menuOpen ? closeMobileMenu() : openMobileMenu();
+function toggleMobileMenu(trigger = null) {
+  mobileState.menuOpen ? closeMobileMenu() : openMobileMenu({ trigger });
 }
 
 function getMobileMenuTriggers() {
@@ -222,6 +223,9 @@ function openMobileMenu(options = {}) {
   const triggers = getMobileMenuTriggers();
   const backdrop = $('mobileOverlayBackdrop');
   mobileState.menuOpen = true;
+  mobileState.menuTrigger = options.trigger || (
+    triggers.includes(document.activeElement) ? document.activeElement : null
+  );
   dd.classList.add('is-open');
   document.body.classList.add('mobile-menu-open');
   syncPreviewSheetBounds(dd);
@@ -251,7 +255,12 @@ function closeMobileMenu(options = {}) {
     backdrop.classList.remove('is-menu-backdrop');
     if (!mobileState.overlayOpen) backdrop.classList.remove('is-open');
   }
-  if (options.restoreFocus) triggers.find((trigger) => trigger.offsetParent !== null)?.focus();
+  if (options.restoreFocus) {
+    const visibleTrigger = triggers.find((trigger) => trigger.offsetParent !== null);
+    const focusTarget = mobileState.menuTrigger || visibleTrigger || triggers[0];
+    focusTarget?.focus();
+  }
+  mobileState.menuTrigger = null;
 }
 
 function getCurrentMenuMode() {

@@ -8,6 +8,31 @@ import { state } from '../state.js';
 export const PHONE_TABS = ['chats', 'updates', 'communities', 'calls'];
 export const CHAT_FILTERS = ['all', 'unread', 'groups'];
 
+export const PHONE_ICON_SVG = Object.freeze({
+  search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>',
+  camera: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="4"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>',
+  chatPlus: '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" stroke="none" d="m84.375 66.668c0 2.875-2.332 5.207-5.207 5.207h-50c-2.875 0-5.207-2.332-5.207-5.207v-20.285c0-0.38672-0.074219-0.77344-0.21484-1.1367l-6.6719-17.121h62.094c2.875 0 5.207 2.332 5.207 5.207zm6.25-33.336c0-6.3281-5.1289-11.457-11.457-11.457h-66.668c-1.0312 0-1.9961 0.51172-2.5781 1.3633-0.58203 0.85156-0.70703 1.9375-0.33594 2.8984l8.125 20.84v19.691c0 6.3281 5.1289 11.457 11.457 11.457h50c6.3281 0 11.457-5.1289 11.457-11.457z"/><path fill="currentColor" stroke="none" d="m51.043 62.5v-25c0-1.7266 1.3984-3.125 3.125-3.125 1.7227 0 3.125 1.3984 3.125 3.125v25c0 1.7266-1.4023 3.125-3.125 3.125-1.7266 0-3.125-1.3984-3.125-3.125z"/><path fill="currentColor" stroke="none" d="m66.668 53.125h-25c-1.7266 0-3.125-1.3984-3.125-3.125s1.3984-3.125 3.125-3.125h25c1.7227 0 3.125 1.3984 3.125 3.125s-1.4023 3.125-3.125 3.125z"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5Z"/><path d="m14.5 6 3.5 3.5"/></svg>',
+  arrowRight: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
+  phone: '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" stroke="none" fill-rule="evenodd" clip-rule="evenodd" d="M59.308,74.811c2.274,1.191,4.92,0.539,6.6-1.287l4.688-5.097c0.91-0.989,2.2-1.193,3.454-0.79l17.509,5.627c1.28,0.411,2.49,1.529,2.352,2.947l-1.364,14.007c-0.216,2.22-1.351,3.867-3.688,3.694C44.673,90.632,9.354,55.31,6.087,11.139c-0.11-1.486,0.666-2.805,2.025-3.333c1.333-0.517,13.376-1.496,15.676-1.72c1.418-0.138,2.536,1.073,2.948,2.352l5.627,17.509c0.214,0.667,0.252,1.34,0.105,1.951c-0.796,3.302-10.495,6.651-7.279,12.791c3.793,7.24,8.626,13.966,14.39,19.73C45.34,66.182,52.072,71.02,59.308,74.811z"/></svg>',
+  phonePlus: '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" stroke="none" d="m33.812 9.7148c3.8086-2.1992 8.6797-0.89062 10.879 2.918l5.5117 9.5508c1.7148 2.9688 1.3359 6.6992-0.9375 9.2656l-3.2109 3.6172c-1.8711 2.1094-2.1797 5.1836-0.76953 7.625l7.5391 13.055c1.4102 2.4453 4.2266 3.7109 6.9883 3.1445l4.7383-0.96875c3.3555-0.6875 6.7773 0.85156 8.4922 3.8203l5.5156 9.5508c2.1992 3.8086 0.89453 8.6797-2.9141 10.879l-7.1016 4.0938c-6.9375 4.0078-15.633 3.2891-21.82-1.8008-15.613-12.844-26.039-30.906-29.359-50.848-1.3125-7.9023 2.4102-15.793 9.3516-19.801zm5.4648 6.0391c-0.47266-0.81641-1.5234-1.0977-2.3398-0.625l-7.0977 4.1016c-4.6836 2.7031-7.1992 8.0273-6.3125 13.359 3.0703 18.449 12.723 35.164 27.164 47.051 4.1758 3.4336 10.043 3.918 14.727 1.2148l7.1016-4.0977c0.82031-0.47266 1.1016-1.5234 0.62891-2.3398l-5.5195-9.5508c-0.36719-0.63672-1.1016-0.96875-1.8242-0.82422l-4.7383 0.97266c-5.3984 1.1055-10.898-1.3711-13.656-6.1445l-7.5391-13.055c-2.7539-4.7734-2.1484-10.773 1.5078-14.898l3.2109-3.6172c0.48828-0.55078 0.57031-1.3555 0.19922-1.9922z"/><path fill="currentColor" stroke="none" d="m69.793 45.832v-20.832c0-1.7266 1.3984-3.125 3.125-3.125 1.7227 0 3.125 1.3984 3.125 3.125v20.832c0 1.7266-1.4023 3.125-3.125 3.125-1.7266 0-3.125-1.3984-3.125-3.125z"/><path fill="currentColor" stroke="none" d="m83.332 38.543h-20.832c-1.7266 0-3.125-1.4023-3.125-3.125 0-1.7266 1.3984-3.125 3.125-3.125h20.832c1.7266 0 3.125 1.3984 3.125 3.125 0 1.7227-1.3984 3.125-3.125 3.125z"/></svg>',
+  video: '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" stroke="none" d="m65.625 33.332c0-2.875-2.332-5.207-5.207-5.207h-39.586c-2.875 0-5.207 2.332-5.207 5.207v33.336c0 2.875 2.332 5.207 5.207 5.207h39.586c2.875 0 5.207-2.332 5.207-5.207v-5.1289c0-3.5312 3.4102-5.9688 6.6719-5l0.65234 0.23828 11.426 5.0781v-23.711l-11.426 5.0781c-3.4453 1.5273-7.3242-0.99219-7.3242-4.7617zm6.25 3.5234 14.355-6.3789c0.96484-0.42969 2.082-0.33984 2.9688 0.23438 0.89062 0.57812 1.4258 1.5664 1.4258 2.6211v33.336c0 1.0547-0.53516 2.043-1.4258 2.6172-0.88672 0.57812-2.0039 0.66797-2.9688 0.23828l-14.355-6.3789v3.5234c0 6.3281-5.1289 11.457-11.457 11.457h-39.586c-6.3281 0-11.457-5.1289-11.457-11.457v-33.336c0-6.3281 5.1289-11.457 11.457-11.457h39.586c6.3281 0 11.457 5.1289 11.457 11.457z"/><path fill="currentColor" stroke="none" d="m33.332 40.625h-8.332c-1.7266 0-3.125-1.3984-3.125-3.125s1.3984-3.125 3.125-3.125h8.332c1.7266 0 3.125 1.3984 3.125 3.125s-1.3984 3.125-3.125 3.125z"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M13 14h4v4h-4z"/></svg>',
+  keypad: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h.01M12 5h.01M18 5h.01M6 12h.01M12 12h.01M18 12h.01M6 19h.01M12 19h.01M18 19h.01"/></svg>',
+  star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>',
+  callOut: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 18 6M12 6h6v6"/></svg>',
+  callIn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-10 10M8 10v6h6"/></svg>',
+  chats: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A3.5 3.5 0 0 1 16.5 18H8l-4 3v-4.5A3.5 3.5 0 0 1 2 13.5v-6A3.5 3.5 0 0 1 5.5 4h11A3.5 3.5 0 0 1 20 7.5v7Z"/></svg>',
+  updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v9h9"/></svg>',
+  communities: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM2 21v-1a6 6 0 0 1 12 0v1"/><path d="M17 11a3 3 0 1 0-2.4-4.8M15.5 14.2A5.5 5.5 0 0 1 22 19.6V21h-4"/></svg>',
+  back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>',
+  emoji: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 10h.01M15.5 10h.01M8 14c.9 1.4 2.2 2.1 4 2.1s3.1-.7 4-2.1"/></svg>',
+  attach: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 11.5-8.6 8.6a5 5 0 0 1-7.1-7.1l9.3-9.3a3.2 3.2 0 0 1 4.5 4.5l-9.1 9.1a1.5 1.5 0 0 1-2.1-2.1l8.4-8.4"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',
+});
+
 const PHONE_TAB_HEADERS = {
   chats: { title: 'WhatsApp', search: false, camera: true, searchLabel: 'Sohbetlerde ara' },
   updates: { title: 'Guncellemeler', search: true, camera: false, searchLabel: 'Guncellemelerde ara' },
@@ -22,6 +47,19 @@ const shellState = {
 };
 
 let shellStateListenerBound = false;
+
+function renderPhoneIcon(name) {
+  return PHONE_ICON_SVG[name] || PHONE_ICON_SVG.search;
+}
+
+function syncPhoneIcons() {
+  document.querySelectorAll('[data-phone-icon]').forEach((icon) => {
+    const name = icon.dataset.phoneIcon;
+    icon.classList.add('wa-phone-icon');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML = renderPhoneIcon(name);
+  });
+}
 
 function getShellElements() {
   return {
@@ -240,6 +278,7 @@ function bindPhoneShellEvents() {
 }
 
 export function initPhoneShell() {
+  syncPhoneIcons();
   bindPhoneShellEvents();
   bindPhoneShellStateListener();
   syncHomeChatSummary();
