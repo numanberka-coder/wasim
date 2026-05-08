@@ -25,10 +25,16 @@
 
 .mobile-overlay-backdrop.is-menu-backdrop {
   z-index: 500;
+  pointer-events: auto;
 }
 
 body.mobile-menu-open .chat-header {
   z-index: 602;
+}
+
+body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
+  z-index: 603;
+  pointer-events: auto;
 }
 
 /* ===== HEADER DROPDOWN ===== */
@@ -733,7 +739,8 @@ body.mobile-menu-open .chat-header {
     left: 12px;
     width: auto;
     max-height: min(64dvh, 520px);
-    z-index: 601;
+    z-index: 603;
+    pointer-events: auto;
     overflow: hidden;
     animation: mobileSheetIn 0.22s ease-out;
   }
