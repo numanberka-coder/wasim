@@ -43,6 +43,11 @@ const PHONE_TAB_HEADERS = {
   calls: { title: 'Aramalar', search: true, camera: false, searchLabel: 'Aramalarda ara' },
 };
 
+const DEFAULT_RECENT_UPDATES = [
+  { title: 'Aile Grubu', meta: 'Bugun 12:40', initials: 'AG' },
+  { title: 'Destek Ekibi', meta: 'Bugun 09:18', initials: 'DE' },
+];
+
 const shellState = {
   activeTab: 'chats',
   activeChatFilter: 'all',
@@ -81,6 +86,8 @@ function getShellElements() {
     statusTitle: $('phoneStatusTitle'),
     statusMeta: $('phoneStatusMeta'),
     statusNote: $('phoneStatusNote'),
+    recentUpdatesList: $('phoneRecentUpdatesList'),
+    channelsTitle: $('phoneChannelsTitle'),
     channelsDescription: $('phoneChannelsDescription'),
     channelDiscover: $('phoneChannelDiscoverBtn'),
     channelCreate: $('phoneChannelCreateBtn'),
@@ -299,6 +306,36 @@ function syncHomeChatSummary() {
   });
 }
 
+function createRecentUpdateRow(update) {
+  const title = cleanText(update?.title, 'Guncelleme');
+  const meta = cleanText(update?.meta, 'Bugun');
+  const initials = cleanText(update?.initials, getInitials(title)).slice(0, 3).toLocaleUpperCase('tr-TR');
+  const button = document.createElement('button');
+  button.className = 'phone-status-row';
+  button.type = 'button';
+  button.setAttribute('aria-label', `${title} durumunu ac`);
+
+  const avatar = document.createElement('span');
+  avatar.className = 'phone-status-avatar phone-status-ring';
+  avatar.setAttribute('aria-hidden', 'true');
+  const avatarText = document.createElement('span');
+  avatarText.textContent = initials || getInitials(title);
+  avatar.appendChild(avatarText);
+
+  const copy = document.createElement('span');
+  copy.className = 'phone-status-copy';
+  const titleEl = document.createElement('span');
+  titleEl.className = 'phone-status-title';
+  titleEl.textContent = title;
+  const metaEl = document.createElement('span');
+  metaEl.className = 'phone-status-meta';
+  metaEl.textContent = meta;
+
+  copy.append(titleEl, metaEl);
+  button.append(avatar, copy);
+  return button;
+}
+
 function syncPhoneShellContent() {
   const content = state.get('phoneShellContent') || {};
   const updates = content.updates || {};
@@ -307,6 +344,8 @@ function syncPhoneShellContent() {
     statusTitle,
     statusMeta,
     statusNote,
+    recentUpdatesList,
+    channelsTitle,
     channelsDescription,
     channelDiscover,
     channelCreate,
@@ -319,6 +358,12 @@ function syncPhoneShellContent() {
   if (statusTitle) statusTitle.textContent = cleanText(updates.status?.title, 'Durumum');
   if (statusMeta) statusMeta.textContent = cleanText(updates.status?.meta, 'Durum guncellemesi eklemek icin dokunun');
   if (statusNote) statusNote.textContent = cleanText(updates.status?.note, 'Durum guncellemeleriniz 24 saat sonra kaybolur.');
+  if (recentUpdatesList) {
+    const recent = Array.isArray(updates.recent) ? updates.recent : [];
+    const rows = recent.length ? recent : DEFAULT_RECENT_UPDATES;
+    recentUpdatesList.replaceChildren(...rows.slice(0, 2).map(createRecentUpdateRow));
+  }
+  if (channelsTitle) channelsTitle.textContent = cleanText(updates.channels?.title, 'Kanallar');
   if (channelsDescription) channelsDescription.textContent = cleanText(updates.channels?.description, 'Ilgilendiginiz konulardan haber almak icin kanallari takip edin.');
   if (channelDiscover) channelDiscover.textContent = cleanText(updates.channels?.discoverLabel, 'Kesfet');
   if (channelCreate) channelCreate.textContent = cleanText(updates.channels?.createLabel, 'Kanal olustur');

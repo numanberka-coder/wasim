@@ -5,6 +5,30 @@
 import { $ } from '../utils.js';
 import { state } from '../state.js';
 
+function cleanValue(value) {
+  return String(value ?? '').trim();
+}
+
+function getUpdatesEditorValues() {
+  const updates = state.get('phoneShellContent.updates') || {};
+  const recent = Array.isArray(updates.recent) ? updates.recent : [];
+  return {
+    statusTitle: cleanValue(updates.status?.title),
+    statusMeta: cleanValue(updates.status?.meta),
+    statusNote: cleanValue(updates.status?.note),
+    recent0Title: cleanValue(recent[0]?.title),
+    recent0Meta: cleanValue(recent[0]?.meta),
+    recent0Initials: cleanValue(recent[0]?.initials),
+    recent1Title: cleanValue(recent[1]?.title),
+    recent1Meta: cleanValue(recent[1]?.meta),
+    recent1Initials: cleanValue(recent[1]?.initials),
+    channelTitle: cleanValue(updates.channels?.title),
+    channelDescription: cleanValue(updates.channels?.description),
+    channelDiscoverLabel: cleanValue(updates.channels?.discoverLabel),
+    channelCreateLabel: cleanValue(updates.channels?.createLabel),
+  };
+}
+
 const EDITOR_CONFIGS = {
   newConversation: {
     title: 'Yeni sohbet',
@@ -25,13 +49,55 @@ const EDITOR_CONFIGS = {
     },
   },
   updatesStatus: {
-    title: 'Durum bilgisini duzenle',
-    description: 'Ana Guncellemeler sekmesindeki durum satirini gunceller.',
-    path: 'phoneShellContent.updates.status',
+    title: 'Guncellemeleri duzenle',
+    description: 'Durum, son guncellemeler ve kanal metinlerini gunceller.',
     fields: [
-      { name: 'title', label: 'Baslik', required: true, maxLength: 48 },
-      { name: 'meta', label: 'Aciklama', required: true, maxLength: 96 },
+      { name: 'statusTitle', label: 'Durum basligi', required: true, maxLength: 48 },
+      { name: 'statusMeta', label: 'Durum yardimci metni', required: true, maxLength: 96 },
+      { name: 'statusNote', label: 'Durum zamani/metni', required: true, maxLength: 120 },
+      { name: 'recent0Title', label: 'Son guncelleme 1 isim', required: true, maxLength: 48 },
+      { name: 'recent0Meta', label: 'Son guncelleme 1 zaman', required: true, maxLength: 48 },
+      { name: 'recent0Initials', label: 'Son guncelleme 1 avatar', required: true, maxLength: 3 },
+      { name: 'recent1Title', label: 'Son guncelleme 2 isim', required: true, maxLength: 48 },
+      { name: 'recent1Meta', label: 'Son guncelleme 2 zaman', required: true, maxLength: 48 },
+      { name: 'recent1Initials', label: 'Son guncelleme 2 avatar', required: true, maxLength: 3 },
+      { name: 'channelTitle', label: 'Kanal basligi', required: true, maxLength: 48 },
+      { name: 'channelDescription', label: 'Kanal aciklamasi', required: true, maxLength: 180, multiline: true },
+      { name: 'channelDiscoverLabel', label: 'Kesfet CTA', required: true, maxLength: 32 },
+      { name: 'channelCreateLabel', label: 'Kanal olustur CTA', required: true, maxLength: 48 },
     ],
+    values: getUpdatesEditorValues,
+    save(values) {
+      const current = state.get('phoneShellContent.updates') || {};
+      state.set('phoneShellContent.updates', {
+        ...current,
+        status: {
+          ...(current.status || {}),
+          title: values.statusTitle,
+          meta: values.statusMeta,
+          note: values.statusNote,
+        },
+        recent: [
+          {
+            title: values.recent0Title,
+            meta: values.recent0Meta,
+            initials: values.recent0Initials,
+          },
+          {
+            title: values.recent1Title,
+            meta: values.recent1Meta,
+            initials: values.recent1Initials,
+          },
+        ],
+        channels: {
+          ...(current.channels || {}),
+          title: values.channelTitle,
+          description: values.channelDescription,
+          discoverLabel: values.channelDiscoverLabel,
+          createLabel: values.channelCreateLabel,
+        },
+      });
+    },
   },
   communitiesIntro: {
     title: 'Topluluk gorunumunu duzenle',
@@ -72,10 +138,6 @@ function getElements() {
     cancelButton: $('phoneEditorCancelBtn'),
     backdrop: $('phoneEditorBackdrop'),
   };
-}
-
-function cleanValue(value) {
-  return String(value ?? '').trim();
 }
 
 function setError(message = '') {
@@ -125,7 +187,9 @@ function createField(field, value) {
 function renderFields(config) {
   const { fields } = getElements();
   if (!fields) return;
-  const values = config.path ? (state.get(config.path) || {}) : {};
+  const values = typeof config.values === 'function'
+    ? config.values()
+    : (config.path ? (state.get(config.path) || {}) : {});
   fields.replaceChildren();
   config.fields.forEach((field) => {
     fields.appendChild(createField(field, values[field.name]));

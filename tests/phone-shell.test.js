@@ -354,7 +354,7 @@ describe('Faz 41 phone app shell', () => {
     expect(document.getElementById('headerDropdown')?.classList.contains('is-open')).toBe(false);
   });
 
-  it('opens, cancels and saves the Faz 48 phone editor bottom sheet', () => {
+  it('opens, cancels, saves and persists the Faz 50 updates editor sheet', () => {
     initPhoneShell();
 
     document.getElementById('phoneUpdatesEditFab')?.click();
@@ -363,23 +363,48 @@ describe('Faz 41 phone app shell', () => {
     expect(document.body.classList.contains('phone-editor-open')).toBe(true);
     expect(document.getElementById('phoneEditorLayer')?.getAttribute('aria-hidden')).toBe('false');
     expect(document.getElementById('phoneEditorForm')?.getAttribute('role')).toBe('dialog');
-    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Durum bilgisini duzenle');
-    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(2);
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Guncellemeleri duzenle');
+    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(12);
+    expect(document.querySelectorAll('#phoneEditorFields textarea')).toHaveLength(1);
 
     document.getElementById('phoneEditorCancelBtn')?.click();
     expect(isPhoneEditorSheetOpen()).toBe(false);
 
     openPhoneEditorSheet('updatesStatus');
-    const titleInput = document.querySelector('#phoneEditorFields input[name="title"]');
-    const metaInput = document.querySelector('#phoneEditorFields input[name="meta"]');
-    titleInput.value = 'Sahne hazir';
-    metaInput.value = 'Bugun 18:30';
+    document.querySelector('#phoneEditorFields input[name="statusTitle"]').value = 'Sahne hazir';
+    document.querySelector('#phoneEditorFields input[name="statusMeta"]').value = 'Bugun 18:30';
+    document.querySelector('#phoneEditorFields input[name="statusNote"]').value = 'Yeni durum 24 saat sonra silinir.';
+    document.querySelector('#phoneEditorFields input[name="recent0Title"]').value = 'Tasarim Ekibi';
+    document.querySelector('#phoneEditorFields input[name="recent0Meta"]').value = 'Bugun 17:10';
+    document.querySelector('#phoneEditorFields input[name="recent0Initials"]').value = 'TE';
+    document.querySelector('#phoneEditorFields input[name="recent1Title"]').value = 'Satis';
+    document.querySelector('#phoneEditorFields input[name="recent1Meta"]').value = 'Dun 22:05';
+    document.querySelector('#phoneEditorFields input[name="recent1Initials"]').value = 'S';
+    document.querySelector('#phoneEditorFields input[name="channelTitle"]').value = 'Duyurular';
+    document.querySelector('#phoneEditorFields textarea[name="channelDescription"]').value = 'Sadece onemli duyurular burada gorunur.';
+    document.querySelector('#phoneEditorFields input[name="channelDiscoverLabel"]').value = 'Bul';
+    document.querySelector('#phoneEditorFields input[name="channelCreateLabel"]').value = 'Duyuru kanali ac';
     document.getElementById('phoneEditorForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 
     expect(isPhoneEditorSheetOpen()).toBe(false);
-    expect(state.get('phoneShellContent.updates.status.title')).toBe('Sahne hazir');
+    const exported = state.export();
+
     expect(document.getElementById('phoneStatusTitle')?.textContent).toBe('Sahne hazir');
     expect(document.getElementById('phoneStatusMeta')?.textContent).toBe('Bugun 18:30');
+    expect(document.getElementById('phoneStatusNote')?.textContent).toBe('Yeni durum 24 saat sonra silinir.');
+    expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Tasarim Ekibi');
+    expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Dun 22:05');
+    expect(document.getElementById('phoneChannelsTitle')?.textContent).toBe('Duyurular');
+    expect(document.getElementById('phoneChannelsDescription')?.textContent).toBe('Sadece onemli duyurular burada gorunur.');
+    expect(document.getElementById('phoneChannelDiscoverBtn')?.textContent).toBe('Bul');
+    expect(document.getElementById('phoneChannelCreateBtn')?.textContent).toBe('Duyuru kanali ac');
+
+    state.reset();
+    state.import({ phoneShellContent: exported.phoneShellContent });
+
+    expect(document.getElementById('phoneStatusTitle')?.textContent).toBe('Sahne hazir');
+    expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Tasarim Ekibi');
+    expect(document.getElementById('phoneChannelCreateBtn')?.textContent).toBe('Duyuru kanali ac');
   });
 
   it('creates a new conversation from the message FAB sheet and opens it', () => {

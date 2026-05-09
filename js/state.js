@@ -14,6 +14,10 @@ const DEFAULT_PHONE_SHELL_CONTENT = Object.freeze({
       meta: 'Durum guncellemesi eklemek icin dokunun',
       note: 'Durum guncellemeleriniz 24 saat sonra kaybolur.',
     },
+    recent: [
+      { title: 'Aile Grubu', meta: 'Bugun 12:40', initials: 'AG' },
+      { title: 'Destek Ekibi', meta: 'Bugun 09:18', initials: 'DE' },
+    ],
     channels: {
       title: 'Kanallar',
       description: 'Ilgilendiginiz konulardan haber almak icin kanallari takip edin.',
@@ -145,6 +149,14 @@ function normalizeConversations(value, group, messages, messageSeq) {
 
 function mergeDefaults(defaults, value) {
   if (!value || typeof value !== 'object') return deepClone(defaults);
+  if (Array.isArray(defaults)) {
+    const source = Array.isArray(value) ? value : [];
+    return defaults.map((defaultValue, index) => (
+      defaultValue && typeof defaultValue === 'object' && !Array.isArray(defaultValue)
+        ? mergeDefaults(defaultValue, source[index])
+        : (source[index] ?? deepClone(defaultValue))
+    ));
+  }
   const output = Array.isArray(defaults) ? [] : {};
 
   Object.entries(defaults).forEach(([key, defaultValue]) => {
