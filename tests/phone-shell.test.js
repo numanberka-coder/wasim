@@ -407,6 +407,46 @@ describe('Faz 41 phone app shell', () => {
     expect(document.getElementById('phoneChannelCreateBtn')?.textContent).toBe('Duyuru kanali ac');
   });
 
+  it('opens, saves and persists the Faz 51 communities editor sheet', () => {
+    const phoneShellCss = loadPhoneShellCss();
+    initPhoneShell();
+    setActivePhoneTab('communities');
+
+    document.getElementById('phoneCommunitiesCreateBtn')?.click();
+
+    expect(isPhoneEditorSheetOpen()).toBe(true);
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Topluluk gorunumunu duzenle');
+    expect(document.getElementById('phoneEditorFields')?.dataset.phoneEditorSurface).toBe('communities-chat');
+    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(3);
+    expect(document.querySelectorAll('#phoneEditorFields textarea')).toHaveLength(1);
+    expect(document.querySelector('#phoneEditorFields input[name="linkLabel"]')).not.toBeNull();
+    expect(document.querySelector('#phoneEditorFields input[name="ctaLabel"]')).not.toBeNull();
+
+    document.querySelector('#phoneEditorFields input[name="title"]').value = 'Mahalle toplulugu';
+    document.querySelector('#phoneEditorFields textarea[name="description"]').value = 'Duyurular ve etkinlikler burada derli toplu kalir.';
+    document.querySelector('#phoneEditorFields input[name="linkLabel"]').value = 'Ornekleri incele';
+    document.querySelector('#phoneEditorFields input[name="ctaLabel"]').value = 'Toplulugu hazirla';
+    document.getElementById('phoneEditorForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+    const exported = state.export();
+
+    expect(document.getElementById('phoneCommunitiesTitle')?.textContent).toBe('Mahalle toplulugu');
+    expect(document.getElementById('phoneCommunitiesDescription')?.textContent).toBe('Duyurular ve etkinlikler burada derli toplu kalir.');
+    expect(document.getElementById('phoneCommunitiesLinkLabel')?.textContent).toBe('Ornekleri incele');
+    expect(document.getElementById('phoneCommunitiesCreateBtn')?.textContent).toBe('Toplulugu hazirla');
+    expect(state.get('phoneShellContent.communities.linkLabel')).toBe('Ornekleri incele');
+
+    state.reset();
+    state.import({ phoneShellContent: exported.phoneShellContent });
+
+    expect(document.getElementById('phoneCommunitiesTitle')?.textContent).toBe('Mahalle toplulugu');
+    expect(document.getElementById('phoneCommunitiesLinkLabel')?.textContent).toBe('Ornekleri incele');
+    expect(document.getElementById('phoneCommunitiesCreateBtn')?.textContent).toBe('Toplulugu hazirla');
+    expect(phoneShellCss).toContain('.phone-editor-fields[data-phone-editor-surface="communities-chat"]');
+    expect(phoneShellCss).toContain('var(--phone-bottom-nav-height)');
+  });
+
   it('creates a new conversation from the message FAB sheet and opens it', () => {
     initPhoneShell();
 
@@ -447,7 +487,7 @@ describe('Faz 41 phone app shell', () => {
 
     expect(isPhoneEditorSheetOpen()).toBe(true);
     expect(document.getElementById('phoneEditorError')?.hidden).toBe(false);
-    expect(document.getElementById('phoneEditorError')?.textContent).toContain('Baslik');
+    expect(document.getElementById('phoneEditorError')?.textContent).toContain('Topluluk basligi');
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(isPhoneEditorSheetOpen()).toBe(false);
