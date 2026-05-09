@@ -48,6 +48,26 @@ const DEFAULT_RECENT_UPDATES = [
   { title: 'Destek Ekibi', meta: 'Bugun 09:18', initials: 'DE' },
 ];
 
+const DEFAULT_RECENT_CALLS = [
+  { name: 'Ayse Eren', meta: 'bugun 11:48', direction: 'missed', type: 'voice', initials: 'AE' },
+  { name: 'Destek Ekibi', meta: 'dun 20:12', direction: 'outgoing', type: 'video', initials: 'DE' },
+  { name: 'Aile Grubu', meta: 'sali 18:05', direction: 'incoming', type: 'voice', initials: 'AG' },
+  { name: 'Ece Yildiz', meta: 'pazartesi 09:31', direction: 'incoming', type: 'video', initials: 'EY' },
+];
+
+const CALL_DIRECTION_META = {
+  missed: { label: 'Cevapsiz', icon: 'callOut', className: '', rowClassName: 'is-missed' },
+  outgoing: { label: 'Giden', icon: 'callOut', className: 'is-outgoing', rowClassName: '' },
+  incoming: { label: 'Gelen', icon: 'callIn', className: 'is-incoming', rowClassName: '' },
+};
+
+const CALL_TYPE_META = {
+  voice: { label: 'sesli arama', icon: 'phone' },
+  video: { label: 'video aramasi', icon: 'video' },
+};
+
+const CALL_AVATAR_TONES = ['', 'teal', 'blue', 'purple'];
+
 const shellState = {
   activeTab: 'chats',
   activeChatFilter: 'all',
@@ -95,6 +115,7 @@ function getShellElements() {
     communitiesDescription: $('phoneCommunitiesDescription'),
     communitiesLinkLabel: $('phoneCommunitiesLinkLabel'),
     communitiesCta: $('phoneCommunitiesCreateBtn'),
+    recentCallsList: $('phoneRecentCallsList'),
   };
 }
 
@@ -336,10 +357,75 @@ function createRecentUpdateRow(update) {
   return button;
 }
 
+function getSafeCallDirection(direction) {
+  return CALL_DIRECTION_META[direction] ? direction : 'incoming';
+}
+
+function getSafeCallType(type) {
+  return CALL_TYPE_META[type] ? type : 'voice';
+}
+
+function createCallRow(call, index = 0) {
+  const name = cleanText(call?.name, 'Arama');
+  const meta = cleanText(call?.meta, 'bugun');
+  const directionKey = getSafeCallDirection(call?.direction);
+  const typeKey = getSafeCallType(call?.type);
+  const direction = CALL_DIRECTION_META[directionKey];
+  const type = CALL_TYPE_META[typeKey];
+  const initials = cleanText(call?.initials, getInitials(name)).slice(0, 3).toLocaleUpperCase('tr-TR');
+  const tone = CALL_AVATAR_TONES[index % CALL_AVATAR_TONES.length];
+
+  const button = document.createElement('button');
+  button.className = 'phone-call-row';
+  button.type = 'button';
+  if (direction.rowClassName) button.classList.add(direction.rowClassName);
+  button.setAttribute('aria-label', `${name} ${direction.label.toLocaleLowerCase('tr-TR')} ${type.label}`);
+
+  const avatar = document.createElement('span');
+  avatar.className = 'phone-call-avatar';
+  if (tone) avatar.classList.add(`phone-call-avatar-${tone}`);
+  avatar.textContent = initials || getInitials(name);
+
+  const copy = document.createElement('span');
+  copy.className = 'phone-call-copy';
+
+  const nameEl = document.createElement('span');
+  nameEl.className = 'phone-call-name';
+  nameEl.textContent = name;
+
+  const metaEl = document.createElement('span');
+  metaEl.className = 'phone-call-meta';
+
+  const directionIcon = document.createElement('span');
+  directionIcon.className = 'phone-call-direction wa-phone-icon';
+  if (direction.className) directionIcon.classList.add(direction.className);
+  directionIcon.dataset.phoneIcon = direction.icon;
+  directionIcon.setAttribute('aria-hidden', 'true');
+
+  const metaText = document.createElement('span');
+  metaText.textContent = `${direction.label}, ${meta}`;
+
+  metaEl.append(directionIcon, metaText);
+  copy.append(nameEl, metaEl);
+
+  const action = document.createElement('span');
+  action.className = 'phone-call-row-action';
+  action.setAttribute('aria-hidden', 'true');
+  const actionIcon = document.createElement('span');
+  actionIcon.className = 'wa-phone-icon';
+  actionIcon.dataset.phoneIcon = type.icon;
+  actionIcon.setAttribute('aria-hidden', 'true');
+  action.appendChild(actionIcon);
+
+  button.append(avatar, copy, action);
+  return button;
+}
+
 function syncPhoneShellContent() {
   const content = state.get('phoneShellContent') || {};
   const updates = content.updates || {};
   const communities = content.communities || {};
+  const calls = content.calls || {};
   const {
     statusTitle,
     statusMeta,
@@ -353,6 +439,7 @@ function syncPhoneShellContent() {
     communitiesDescription,
     communitiesLinkLabel,
     communitiesCta,
+    recentCallsList,
   } = getShellElements();
 
   if (statusTitle) statusTitle.textContent = cleanText(updates.status?.title, 'Durumum');
@@ -372,6 +459,13 @@ function syncPhoneShellContent() {
   if (communitiesDescription) communitiesDescription.textContent = cleanText(communities.description, 'Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.');
   if (communitiesLinkLabel) communitiesLinkLabel.textContent = cleanText(communities.linkLabel, 'Ornek topluluklari gor');
   if (communitiesCta) communitiesCta.textContent = cleanText(communities.ctaLabel, 'Toplulugunuzu olusturun');
+
+  if (recentCallsList) {
+    const items = Array.isArray(calls.items) ? calls.items : [];
+    const rows = items.length ? items : DEFAULT_RECENT_CALLS;
+    recentCallsList.replaceChildren(...rows.slice(0, 4).map(createCallRow));
+    syncPhoneIcons();
+  }
 }
 
 function shouldSyncHomeChatSummary(path) {

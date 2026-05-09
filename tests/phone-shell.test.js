@@ -447,6 +447,61 @@ describe('Faz 41 phone app shell', () => {
     expect(phoneShellCss).toContain('var(--phone-bottom-nav-height)');
   });
 
+  it('opens, saves and persists the Faz 52 calls editor sheet from search', () => {
+    const phoneShellCss = loadPhoneShellCss();
+    initPhoneShell();
+    setActivePhoneTab('updates');
+
+    document.getElementById('phoneShellSearchBtn')?.click();
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+
+    setActivePhoneTab('calls');
+    document.getElementById('phoneShellSearchBtn')?.click();
+
+    expect(isPhoneEditorSheetOpen()).toBe(true);
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Arama listesini duzenle');
+    expect(document.getElementById('phoneEditorFields')?.dataset.phoneEditorSurface).toBe('calls-list');
+    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(12);
+    expect(document.querySelectorAll('#phoneEditorFields select')).toHaveLength(8);
+    expect(document.querySelector('#phoneEditorFields select[name="call0Direction"]')?.value).toBe('missed');
+    expect(document.querySelector('#phoneEditorFields select[name="call1Type"]')?.value).toBe('video');
+
+    document.querySelector('#phoneEditorFields input[name="call0Name"]').value = 'Musteri Hizmetleri';
+    document.querySelector('#phoneEditorFields input[name="call0Meta"]').value = 'bugun 14:22';
+    document.querySelector('#phoneEditorFields select[name="call0Direction"]').value = 'outgoing';
+    document.querySelector('#phoneEditorFields select[name="call0Type"]').value = 'video';
+    document.querySelector('#phoneEditorFields input[name="call0Initials"]').value = 'MH';
+    document.querySelector('#phoneEditorFields input[name="call1Name"]').value = 'Derya';
+    document.querySelector('#phoneEditorFields input[name="call1Meta"]').value = 'dun 08:11';
+    document.querySelector('#phoneEditorFields select[name="call1Direction"]').value = 'missed';
+    document.querySelector('#phoneEditorFields select[name="call1Type"]').value = 'voice';
+    document.querySelector('#phoneEditorFields input[name="call1Initials"]').value = 'D';
+    document.getElementById('phoneEditorForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+    const exported = state.export();
+    const rows = [...document.querySelectorAll('#phoneRecentCallsList .phone-call-row')];
+
+    expect(rows).toHaveLength(4);
+    expect(rows[0]?.textContent).toContain('Musteri Hizmetleri');
+    expect(rows[0]?.textContent).toContain('Giden, bugun 14:22');
+    expect(rows[0]?.classList.contains('is-missed')).toBe(false);
+    expect(rows[0]?.querySelector('.phone-call-row-action [data-phone-icon]')?.dataset.phoneIcon).toBe('video');
+    expect(rows[1]?.textContent).toContain('Derya');
+    expect(rows[1]?.textContent).toContain('Cevapsiz, dun 08:11');
+    expect(rows[1]?.classList.contains('is-missed')).toBe(true);
+    expect(state.get('phoneShellContent.calls.items.0.initials')).toBe('MH');
+
+    state.reset();
+    state.import({ phoneShellContent: exported.phoneShellContent });
+
+    expect(document.querySelector('#phoneRecentCallsList .phone-call-row')?.textContent).toContain('Musteri Hizmetleri');
+    expect(document.querySelector('#phoneRecentCallsList .phone-call-row')?.textContent).toContain('Giden, bugun 14:22');
+    expect(phoneShellCss).toContain('.phone-editor-fields[data-phone-editor-surface="calls-list"]');
+    expect(phoneShellCss).toContain('.phone-editor-field select');
+    expect(phoneShellCss).toContain('var(--phone-bottom-nav-height)');
+  });
+
   it('creates a new conversation from the message FAB sheet and opens it', () => {
     initPhoneShell();
 

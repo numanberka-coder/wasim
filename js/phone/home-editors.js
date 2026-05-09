@@ -29,6 +29,31 @@ function getUpdatesEditorValues() {
   };
 }
 
+function getCallsEditorValues() {
+  const calls = state.get('phoneShellContent.calls') || {};
+  const items = Array.isArray(calls.items) ? calls.items : [];
+  const values = {};
+  items.slice(0, 4).forEach((call, index) => {
+    values[`call${index}Name`] = cleanValue(call?.name);
+    values[`call${index}Meta`] = cleanValue(call?.meta);
+    values[`call${index}Direction`] = cleanValue(call?.direction) || 'incoming';
+    values[`call${index}Type`] = cleanValue(call?.type) || 'voice';
+    values[`call${index}Initials`] = cleanValue(call?.initials);
+  });
+  return values;
+}
+
+const CALL_DIRECTION_OPTIONS = [
+  { value: 'missed', label: 'Cevapsiz' },
+  { value: 'outgoing', label: 'Giden' },
+  { value: 'incoming', label: 'Gelen' },
+];
+
+const CALL_TYPE_OPTIONS = [
+  { value: 'voice', label: 'Sesli' },
+  { value: 'video', label: 'Video' },
+];
+
 const EDITOR_CONFIGS = {
   newConversation: {
     title: 'Yeni sohbet',
@@ -111,14 +136,44 @@ const EDITOR_CONFIGS = {
       { name: 'ctaLabel', label: 'CTA metni', required: true, maxLength: 48 },
     ],
   },
-  callsDraft: {
-    title: 'Arama editor altyapisi',
-    description: 'Aramalar sekmesi icin ortak sheet davranisini dogrular.',
-    path: 'phoneShellContent.calls.editorDraft',
+  callsList: {
+    title: 'Arama listesini duzenle',
+    description: 'Son aramalar satirlarinin isim, zaman, yon, tip ve avatar metinlerini gunceller.',
+    surface: 'calls-list',
     fields: [
-      { name: 'title', label: 'Baslik', required: true, maxLength: 48 },
-      { name: 'description', label: 'Aciklama', required: true, maxLength: 120 },
+      { name: 'call0Name', label: 'Arama 1 isim', required: true, maxLength: 48 },
+      { name: 'call0Meta', label: 'Arama 1 tarih/metin', required: true, maxLength: 48 },
+      { name: 'call0Direction', label: 'Arama 1 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call0Type', label: 'Arama 1 tipi', required: true, options: CALL_TYPE_OPTIONS },
+      { name: 'call0Initials', label: 'Arama 1 avatar', required: true, maxLength: 3 },
+      { name: 'call1Name', label: 'Arama 2 isim', required: true, maxLength: 48 },
+      { name: 'call1Meta', label: 'Arama 2 tarih/metin', required: true, maxLength: 48 },
+      { name: 'call1Direction', label: 'Arama 2 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call1Type', label: 'Arama 2 tipi', required: true, options: CALL_TYPE_OPTIONS },
+      { name: 'call1Initials', label: 'Arama 2 avatar', required: true, maxLength: 3 },
+      { name: 'call2Name', label: 'Arama 3 isim', required: true, maxLength: 48 },
+      { name: 'call2Meta', label: 'Arama 3 tarih/metin', required: true, maxLength: 48 },
+      { name: 'call2Direction', label: 'Arama 3 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call2Type', label: 'Arama 3 tipi', required: true, options: CALL_TYPE_OPTIONS },
+      { name: 'call2Initials', label: 'Arama 3 avatar', required: true, maxLength: 3 },
+      { name: 'call3Name', label: 'Arama 4 isim', required: true, maxLength: 48 },
+      { name: 'call3Meta', label: 'Arama 4 tarih/metin', required: true, maxLength: 48 },
+      { name: 'call3Direction', label: 'Arama 4 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call3Type', label: 'Arama 4 tipi', required: true, options: CALL_TYPE_OPTIONS },
+      { name: 'call3Initials', label: 'Arama 4 avatar', required: true, maxLength: 3 },
     ],
+    values: getCallsEditorValues,
+    save(values) {
+      const current = state.get('phoneShellContent.calls') || {};
+      const items = [0, 1, 2, 3].map((index) => ({
+        name: values[`call${index}Name`],
+        meta: values[`call${index}Meta`],
+        direction: values[`call${index}Direction`],
+        type: values[`call${index}Type`],
+        initials: values[`call${index}Initials`],
+      }));
+      state.set('phoneShellContent.calls', { ...current, items });
+    },
   },
 };
 
@@ -173,14 +228,22 @@ function createField(field, value) {
   label.className = 'phone-editor-label';
   label.textContent = field.label;
 
-  const input = document.createElement(field.multiline ? 'textarea' : 'input');
+  const input = document.createElement(field.options ? 'select' : (field.multiline ? 'textarea' : 'input'));
   input.id = `phoneEditorField_${field.name}`;
   input.name = field.name;
-  if (!field.multiline) input.type = 'text';
-  input.value = cleanValue(value);
+  if (!field.multiline && !field.options) input.type = 'text';
   input.autocomplete = 'off';
-  input.maxLength = field.maxLength || 120;
+  if (field.maxLength) input.maxLength = field.maxLength;
   if (field.required) input.required = true;
+  if (field.options) {
+    field.options.forEach((option) => {
+      const item = document.createElement('option');
+      item.value = option.value;
+      item.textContent = option.label;
+      input.appendChild(item);
+    });
+  }
+  input.value = cleanValue(value);
 
   wrap.append(label, input);
   return wrap;
@@ -286,6 +349,18 @@ function bindEditorTrigger(id, editorKey) {
   trigger.addEventListener('click', () => openPhoneEditorSheet(editorKey, { trigger }));
 }
 
+function bindCallsSearchTrigger() {
+  const trigger = $('phoneShellSearchBtn');
+  if (!trigger || trigger.dataset.phoneCallsSearchBound === 'true') return;
+  trigger.dataset.phoneCallsSearchBound = 'true';
+  trigger.addEventListener('click', () => {
+    const activeTab = $('phoneHomeShell')?.dataset.activeTab;
+    if (activeTab === 'calls') {
+      openPhoneEditorSheet('callsList', { trigger });
+    }
+  });
+}
+
 function bindEditorShellEvents() {
   const { form, closeButton, cancelButton, backdrop } = getElements();
   if (!form || form.dataset.phoneEditorFormBound === 'true') return;
@@ -317,5 +392,6 @@ export function initPhoneHomeEditors(options = {}) {
   bindEditorTrigger('phoneMessageFab', 'newConversation');
   bindEditorTrigger('phoneUpdatesEditFab', 'updatesStatus');
   bindEditorTrigger('phoneCommunitiesCreateBtn', 'communitiesIntro');
-  bindEditorTrigger('phoneCallFab', 'callsDraft');
+  bindEditorTrigger('phoneCallFab', 'callsList');
+  bindCallsSearchTrigger();
 }

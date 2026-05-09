@@ -32,10 +32,12 @@ const DEFAULT_PHONE_SHELL_CONTENT = Object.freeze({
     ctaLabel: 'Toplulugunuzu olusturun',
   },
   calls: {
-    editorDraft: {
-      title: 'Yeni arama',
-      description: 'Arama listesi duzenleme altyapisi hazir.',
-    },
+    items: [
+      { name: 'Ayse Eren', meta: 'bugun 11:48', direction: 'missed', type: 'voice', initials: 'AE' },
+      { name: 'Destek Ekibi', meta: 'dun 20:12', direction: 'outgoing', type: 'video', initials: 'DE' },
+      { name: 'Aile Grubu', meta: 'sali 18:05', direction: 'incoming', type: 'voice', initials: 'AG' },
+      { name: 'Ece Yildiz', meta: 'pazartesi 09:31', direction: 'incoming', type: 'video', initials: 'EY' },
+    ],
   },
 });
 
