@@ -1081,6 +1081,7 @@
 }
 
 .phone-editor-fields {
+  min-height: 0;
   display: grid;
   gap: 10px;
   overflow: auto;
