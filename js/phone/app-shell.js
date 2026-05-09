@@ -4,6 +4,7 @@
 
 import { $ } from '../utils.js';
 import { state } from '../state.js';
+import { initPhoneHomeEditors } from './home-editors.js';
 
 export const PHONE_TABS = ['chats', 'updates', 'communities', 'calls'];
 export const CHAT_FILTERS = ['all', 'unread', 'groups'];
@@ -74,6 +75,16 @@ function getShellElements() {
     tabPanels: [...document.querySelectorAll('[data-phone-tab-panel]')],
     chatFilterButtons: [...document.querySelectorAll('[data-phone-chat-filter]')],
     openChatButtons: [...document.querySelectorAll('[data-phone-open-chat]')],
+    statusTitle: $('phoneStatusTitle'),
+    statusMeta: $('phoneStatusMeta'),
+    statusNote: $('phoneStatusNote'),
+    channelsDescription: $('phoneChannelsDescription'),
+    channelDiscover: $('phoneChannelDiscoverBtn'),
+    channelCreate: $('phoneChannelCreateBtn'),
+    communitiesTitle: $('phoneCommunitiesTitle'),
+    communitiesDescription: $('phoneCommunitiesDescription'),
+    communitiesLinkLabel: $('phoneCommunitiesLinkLabel'),
+    communitiesCta: $('phoneCommunitiesCreateBtn'),
   };
 }
 
@@ -238,6 +249,36 @@ function syncHomeChatSummary() {
   syncAvatar(avatarEl, group, title);
 }
 
+function syncPhoneShellContent() {
+  const content = state.get('phoneShellContent') || {};
+  const updates = content.updates || {};
+  const communities = content.communities || {};
+  const {
+    statusTitle,
+    statusMeta,
+    statusNote,
+    channelsDescription,
+    channelDiscover,
+    channelCreate,
+    communitiesTitle,
+    communitiesDescription,
+    communitiesLinkLabel,
+    communitiesCta,
+  } = getShellElements();
+
+  if (statusTitle) statusTitle.textContent = cleanText(updates.status?.title, 'Durumum');
+  if (statusMeta) statusMeta.textContent = cleanText(updates.status?.meta, 'Durum guncellemesi eklemek icin dokunun');
+  if (statusNote) statusNote.textContent = cleanText(updates.status?.note, 'Durum guncellemeleriniz 24 saat sonra kaybolur.');
+  if (channelsDescription) channelsDescription.textContent = cleanText(updates.channels?.description, 'Ilgilendiginiz konulardan haber almak icin kanallari takip edin.');
+  if (channelDiscover) channelDiscover.textContent = cleanText(updates.channels?.discoverLabel, 'Kesfet');
+  if (channelCreate) channelCreate.textContent = cleanText(updates.channels?.createLabel, 'Kanal olustur');
+
+  if (communitiesTitle) communitiesTitle.textContent = cleanText(communities.title, 'Topluluklar sayesinde baglantida kalin');
+  if (communitiesDescription) communitiesDescription.textContent = cleanText(communities.description, 'Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.');
+  if (communitiesLinkLabel) communitiesLinkLabel.textContent = cleanText(communities.linkLabel, 'Ornek topluluklari gor');
+  if (communitiesCta) communitiesCta.textContent = cleanText(communities.ctaLabel, 'Toplulugunuzu olusturun');
+}
+
 function shouldSyncHomeChatSummary(path) {
   return (
     !path ||
@@ -247,10 +288,15 @@ function shouldSyncHomeChatSummary(path) {
   );
 }
 
+function shouldSyncPhoneShellContent(path) {
+  return !path || path.startsWith('phoneShellContent');
+}
+
 function bindPhoneShellStateListener() {
   if (shellStateListenerBound) return;
   state.subscribe((path) => {
     if (shouldSyncHomeChatSummary(path)) syncHomeChatSummary();
+    if (shouldSyncPhoneShellContent(path)) syncPhoneShellContent();
   });
   shellStateListenerBound = true;
 }
@@ -281,7 +327,9 @@ export function initPhoneShell() {
   syncPhoneIcons();
   bindPhoneShellEvents();
   bindPhoneShellStateListener();
+  initPhoneHomeEditors({ syncIcons: syncPhoneIcons });
   syncHomeChatSummary();
+  syncPhoneShellContent();
   setActivePhoneTab(shellState.activeTab);
   setActiveChatFilter(shellState.activeChatFilter);
   showPhoneHome();

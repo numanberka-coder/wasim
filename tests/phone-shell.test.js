@@ -11,6 +11,11 @@ import {
   showPhoneChatDetail,
   showPhoneHome,
 } from '../js/phone/app-shell.js';
+import {
+  closePhoneEditorSheet,
+  isPhoneEditorSheetOpen,
+  openPhoneEditorSheet,
+} from '../js/phone/home-editors.js';
 import { state } from '../js/state.js';
 import { initMobile, registerMobileCallback } from '../js/ui/mobile.js';
 
@@ -152,7 +157,8 @@ describe('Faz 41 phone app shell', () => {
     expect(updatesPanel?.hidden).toBe(false);
     expect(document.querySelector('[data-phone-tab="updates"]')?.getAttribute('aria-selected')).toBe('true');
     expect(statusRows).toHaveLength(3);
-    expect(document.querySelector('#phoneTabUpdates .phone-status-note')?.textContent).toContain('24 saat sonra');
+    expect(document.getElementById('phoneStatusMeta')?.textContent).toContain('Durum guncellemesi');
+    expect(document.getElementById('phoneStatusNote')?.textContent).toContain('24 saat sonra');
     expect(document.querySelector('#phoneTabUpdates .phone-channels-section')?.textContent).toContain('Kanallar');
     expect(document.getElementById('phoneUpdatesEditFab')).not.toBeNull();
     expect(document.getElementById('phoneUpdatesCameraFab')).not.toBeNull();
@@ -178,9 +184,10 @@ describe('Faz 41 phone app shell', () => {
     expect(document.querySelector('[data-phone-tab="communities"]')?.getAttribute('aria-selected')).toBe('true');
     expect(illustration).not.toBeNull();
     expect(document.getElementById('phoneCommunitiesTitle')?.textContent).toBe('Topluluklar sayesinde baglantida kalin');
-    expect(document.querySelector('#phoneTabCommunities .phone-communities-copy')?.textContent).toContain('Ilgili gruplari');
-    expect(learnButton?.textContent).toContain('Ornek topluluklari gor');
+    expect(document.getElementById('phoneCommunitiesDescription')?.textContent).toContain('Ilgili gruplari');
+    expect(document.getElementById('phoneCommunitiesLinkLabel')?.textContent).toContain('Ornek topluluklari gor');
     expect(cta?.textContent).toBe('Toplulugunuzu olusturun');
+    expect(learnButton).not.toBeNull();
     expect(cta?.closest('[data-phone-tab-panel="communities"]')).not.toBeNull();
   });
 
@@ -307,6 +314,58 @@ describe('Faz 41 phone app shell', () => {
 
     expect(screenshotCalls).toBe(1);
     expect(document.getElementById('headerDropdown')?.classList.contains('is-open')).toBe(false);
+  });
+
+  it('opens, cancels and saves the Faz 48 phone editor bottom sheet', () => {
+    initPhoneShell();
+
+    document.getElementById('phoneUpdatesEditFab')?.click();
+
+    expect(isPhoneEditorSheetOpen()).toBe(true);
+    expect(document.body.classList.contains('phone-editor-open')).toBe(true);
+    expect(document.getElementById('phoneEditorLayer')?.getAttribute('aria-hidden')).toBe('false');
+    expect(document.getElementById('phoneEditorForm')?.getAttribute('role')).toBe('dialog');
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Durum bilgisini duzenle');
+    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(2);
+
+    document.getElementById('phoneEditorCancelBtn')?.click();
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+
+    openPhoneEditorSheet('updatesStatus');
+    const titleInput = document.querySelector('#phoneEditorFields input[name="title"]');
+    const metaInput = document.querySelector('#phoneEditorFields input[name="meta"]');
+    titleInput.value = 'Sahne hazir';
+    metaInput.value = 'Bugun 18:30';
+    document.getElementById('phoneEditorForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+    expect(state.get('phoneShellContent.updates.status.title')).toBe('Sahne hazir');
+    expect(document.getElementById('phoneStatusTitle')?.textContent).toBe('Sahne hazir');
+    expect(document.getElementById('phoneStatusMeta')?.textContent).toBe('Bugun 18:30');
+  });
+
+  it('keeps editor validation, Escape close and mobile menu pointer contracts testable', () => {
+    const phoneShellCss = loadPhoneShellCss();
+    initPhoneShell();
+
+    openPhoneEditorSheet('communitiesIntro');
+    const titleInput = document.querySelector('#phoneEditorFields input[name="title"]');
+    titleInput.value = '';
+    document.getElementById('phoneEditorForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    expect(isPhoneEditorSheetOpen()).toBe(true);
+    expect(document.getElementById('phoneEditorError')?.hidden).toBe(false);
+    expect(document.getElementById('phoneEditorError')?.textContent).toContain('Baslik');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+
+    expect(phoneShellCss).toContain('.phone-editor-layer');
+    expect(phoneShellCss).toContain('z-index: 24');
+    expect(phoneShellCss).toContain('body.phone-editor-open .header-dropdown.mobile-action-sheet.is-open');
+    expect(phoneShellCss).toContain('pointer-events: none');
+
+    closePhoneEditorSheet();
   });
 
   it('renders Faz 47 phone icons through the shared SVG contract', () => {

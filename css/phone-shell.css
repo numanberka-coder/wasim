@@ -292,8 +292,8 @@
   right: var(--phone-shell-edge);
   bottom: var(--phone-fab-bottom);
   z-index: 10;
-  width: 52px;
-  height: 52px;
+  width: 42px;
+  height: 42px;
   border: none;
   border-radius: 14px;
   display: grid;
@@ -880,8 +880,8 @@
   right: var(--phone-shell-edge);
   bottom: var(--phone-fab-bottom);
   z-index: 10;
-  width: 52px;
-  height: 52px;
+  width: 42px;
+  height: 42px;
   border: none;
   border-radius: 15px;
   display: grid;
@@ -989,6 +989,176 @@
   outline-offset: -2px;
 }
 
+.phone-editor-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  display: none;
+  pointer-events: none;
+}
+
+.phone-editor-layer.is-open {
+  display: block;
+  pointer-events: auto;
+}
+
+.phone-editor-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.48);
+  cursor: default;
+}
+
+.phone-editor-sheet {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  z-index: 1;
+  max-height: min(72%, 520px);
+  padding: 10px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #e9edef;
+  background: #111b21;
+  border: 1px solid rgba(134, 150, 160, 0.24);
+  border-radius: 20px 20px 16px 16px;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.48);
+  overflow: hidden;
+}
+
+.phone-editor-handle {
+  width: 42px;
+  height: 4px;
+  margin: 0 auto 2px;
+  border-radius: 999px;
+  background: rgba(233, 237, 239, 0.32);
+}
+
+.phone-editor-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.phone-editor-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 3px;
+}
+
+.phone-editor-copy strong {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.phone-editor-copy span {
+  color: #8696a0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.phone-editor-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #e9edef;
+  background: rgba(134, 150, 160, 0.12);
+}
+
+.phone-editor-close .wa-phone-icon {
+  width: 21px;
+  height: 21px;
+}
+
+.phone-editor-fields {
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.phone-editor-field {
+  display: grid;
+  gap: 5px;
+}
+
+.phone-editor-label {
+  color: #aebac1;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.phone-editor-field input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(134, 150, 160, 0.28);
+  border-radius: 12px;
+  padding: 0 12px;
+  color: #e9edef;
+  background: #1f2c34;
+  font: inherit;
+  outline: none;
+}
+
+.phone-editor-field input:focus {
+  border-color: #25d366;
+  box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.18);
+}
+
+.phone-editor-error {
+  min-height: 18px;
+  color: #ffb4a9;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.phone-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.phone-editor-secondary,
+.phone-editor-primary {
+  min-height: 38px;
+  border: none;
+  border-radius: 999px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 600;
+}
+
+.phone-editor-secondary {
+  color: #e9edef;
+  background: rgba(134, 150, 160, 0.16);
+}
+
+.phone-editor-primary {
+  color: #07130d;
+  background: #25d366;
+}
+
+.phone-editor-close:focus-visible,
+.phone-editor-secondary:focus-visible,
+.phone-editor-primary:focus-visible,
+.phone-editor-backdrop:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.85);
+  outline-offset: 2px;
+}
+
+body.phone-editor-open .header-dropdown.mobile-action-sheet.is-open {
+  pointer-events: none;
+}
+
 .phone.light .phone-app-shell,
 .phone.light .phone-home-header {
   background: #ffffff;
@@ -1026,6 +1196,29 @@
 
 .phone.light .phone-bottom-nav-item.is-active .wa-phone-icon {
   color: #008069;
+}
+
+.phone.light .phone-editor-sheet {
+  color: #111b21;
+  background: #ffffff;
+  border-color: rgba(17, 27, 33, 0.14);
+}
+
+.phone.light .phone-editor-copy span,
+.phone.light .phone-editor-label {
+  color: #667781;
+}
+
+.phone.light .phone-editor-close,
+.phone.light .phone-editor-secondary {
+  color: #111b21;
+  background: rgba(17, 27, 33, 0.08);
+}
+
+.phone.light .phone-editor-field input {
+  color: #111b21;
+  background: #f0f2f5;
+  border-color: rgba(17, 27, 33, 0.14);
 }
 
 .phone.light .phone-chat-entry {
