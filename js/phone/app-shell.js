@@ -4,7 +4,9 @@
 
 import { $ } from '../utils.js';
 import { state } from '../state.js';
+import { syncHeader } from './header.js';
 import { initPhoneHomeEditors } from './home-editors.js';
+import { rebuildChat } from './messages.js';
 
 export const PHONE_TABS = ['chats', 'updates', 'communities', 'calls'];
 export const CHAT_FILTERS = ['all', 'unread', 'groups'];
@@ -74,7 +76,8 @@ function getShellElements() {
     tabButtons: [...document.querySelectorAll('[data-phone-tab]')],
     tabPanels: [...document.querySelectorAll('[data-phone-tab-panel]')],
     chatFilterButtons: [...document.querySelectorAll('[data-phone-chat-filter]')],
-    openChatButtons: [...document.querySelectorAll('[data-phone-open-chat]')],
+    chatList: $('homeChatList'),
+    messageFab: $('phoneMessageFab'),
     statusTitle: $('phoneStatusTitle'),
     statusMeta: $('phoneStatusMeta'),
     statusNote: $('phoneStatusNote'),
@@ -156,7 +159,7 @@ export function showPhoneHome(options = {}) {
   if (phone) phone.dataset.phoneView = 'home';
   if (home) {
     home.removeAttribute('aria-hidden');
-    if (options.focus) home.querySelector('[data-phone-open-chat]')?.focus();
+    if (options.focus) home.querySelector('[data-phone-open-chat].is-active, [data-phone-open-chat]')?.focus();
   }
   if (detail) detail.setAttribute('aria-hidden', 'true');
 }
@@ -223,6 +226,11 @@ function getChatPreview(group, messages) {
   return `${displayName}: ${label}`;
 }
 
+function getChatTime(messages) {
+  const lastMessage = getLastMessage(messages);
+  return cleanText(lastMessage?.time, cleanText($('statusTime')?.textContent, '12:00'));
+}
+
 function syncAvatar(avatarEl, group, title) {
   if (!avatarEl) return;
   const avatarUrl = cleanText(group.avatarDataUrl || group.photoUrl, '');
@@ -231,22 +239,64 @@ function syncAvatar(avatarEl, group, title) {
   avatarEl.textContent = avatarUrl ? '' : getInitials(title);
 }
 
-function syncHomeChatSummary() {
-  const group = state.get('group') || {};
-  const messages = state.get('messages') || [];
-  const lastMessage = getLastMessage(messages);
-  const title = cleanText(group.title, 'Grup');
-  const subtitle = getChatPreview(group, messages);
-  const time = cleanText(lastMessage?.time, cleanText($('statusTime')?.textContent, '12:00'));
-  const titleEl = $('homeChatTitle');
-  const subtitleEl = $('homeChatSubtitle');
-  const avatarEl = $('homeChatAvatar');
-  const timeEl = $('homeChatTime');
+function createChatRow(conversation, options = {}) {
+  const button = document.createElement('button');
+  const isActive = Boolean(options.isActive);
+  const title = cleanText(conversation.title, 'Grup');
+  const messages = Array.isArray(conversation.messages) ? conversation.messages : [];
+  button.className = 'phone-chat-entry';
+  button.type = 'button';
+  button.dataset.phoneOpenChat = '';
+  button.dataset.conversationId = conversation.id;
+  button.classList.toggle('is-active', isActive);
+  button.setAttribute('aria-label', `${title} sohbetini ac`);
 
-  if (titleEl) titleEl.textContent = title;
-  if (subtitleEl) subtitleEl.textContent = subtitle;
-  if (timeEl) timeEl.textContent = time;
-  syncAvatar(avatarEl, group, title);
+  const avatar = document.createElement('span');
+  avatar.className = 'phone-chat-entry-avatar';
+  avatar.setAttribute('aria-hidden', 'true');
+  if (options.withLegacyIds) avatar.id = 'homeChatAvatar';
+
+  const copy = document.createElement('span');
+  copy.className = 'phone-chat-entry-copy';
+
+  const topline = document.createElement('span');
+  topline.className = 'phone-chat-entry-topline';
+
+  const titleEl = document.createElement('span');
+  titleEl.className = 'phone-chat-entry-title';
+  titleEl.textContent = title;
+  if (options.withLegacyIds) titleEl.id = 'homeChatTitle';
+
+  const timeEl = document.createElement('span');
+  timeEl.className = 'phone-chat-entry-time';
+  timeEl.textContent = getChatTime(messages);
+  if (options.withLegacyIds) timeEl.id = 'homeChatTime';
+
+  const meta = document.createElement('span');
+  meta.className = 'phone-chat-entry-meta';
+  meta.textContent = getChatPreview(conversation, messages);
+  if (options.withLegacyIds) meta.id = 'homeChatSubtitle';
+
+  topline.append(titleEl, timeEl);
+  copy.append(topline, meta);
+  button.append(avatar, copy);
+  syncAvatar(avatar, conversation, title);
+  return button;
+}
+
+function syncHomeChatSummary() {
+  const { chatList } = getShellElements();
+  if (!chatList) return;
+
+  const conversations = state.ensureConversations();
+  const items = conversations.items.length ? conversations.items : [state.getActiveConversation()];
+  chatList.replaceChildren();
+  items.forEach((conversation, index) => {
+    chatList.appendChild(createChatRow(conversation, {
+      isActive: conversation.id === conversations.activeId,
+      withLegacyIds: index === 0,
+    }));
+  });
 }
 
 function syncPhoneShellContent() {
@@ -283,6 +333,9 @@ function shouldSyncHomeChatSummary(path) {
   return (
     !path ||
     path === 'messages' ||
+    path === 'messageSeq' ||
+    path === 'conversations' ||
+    path.startsWith('conversations.') ||
     path.startsWith('group.') ||
     path === 'settings.statusTimeOverride'
   );
@@ -302,7 +355,7 @@ function bindPhoneShellStateListener() {
 }
 
 function bindPhoneShellEvents() {
-  const { phone, backButton, tabButtons, chatFilterButtons, openChatButtons } = getShellElements();
+  const { phone, backButton, tabButtons, chatFilterButtons } = getShellElements();
   if (!phone || phone.dataset.phoneShellBound === 'true') return;
   phone.dataset.phoneShellBound = 'true';
 
@@ -310,8 +363,15 @@ function bindPhoneShellEvents() {
     button.addEventListener('click', () => setActivePhoneTab(button.dataset.phoneTab));
   });
 
-  openChatButtons.forEach((button) => {
-    button.addEventListener('click', () => showPhoneChatDetail({ focus: true }));
+  phone.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-phone-open-chat]');
+    if (!button || !phone.contains(button)) return;
+    const conversation = state.selectConversation(button.dataset.conversationId);
+    if (!conversation) return;
+    syncHeader();
+    rebuildChat();
+    syncHomeChatSummary();
+    showPhoneChatDetail({ focus: true });
   });
 
   chatFilterButtons.forEach((button) => {
@@ -323,11 +383,23 @@ function bindPhoneShellEvents() {
   }
 }
 
+function handleConversationCreated(conversation) {
+  if (!conversation) return;
+  setActivePhoneTab('chats');
+  syncHeader();
+  rebuildChat();
+  syncHomeChatSummary();
+  showPhoneChatDetail({ focus: true });
+}
+
 export function initPhoneShell() {
   syncPhoneIcons();
   bindPhoneShellEvents();
   bindPhoneShellStateListener();
-  initPhoneHomeEditors({ syncIcons: syncPhoneIcons });
+  initPhoneHomeEditors({
+    syncIcons: syncPhoneIcons,
+    onConversationCreated: handleConversationCreated,
+  });
   syncHomeChatSummary();
   syncPhoneShellContent();
   setActivePhoneTab(shellState.activeTab);

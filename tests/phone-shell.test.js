@@ -243,6 +243,44 @@ describe('Faz 41 phone app shell', () => {
     expect(document.getElementById('homeChatSubtitle')?.textContent).toBe('Sohbet detayini ac');
   });
 
+  it('renders conversations from state and selects the clicked chat before opening detail', () => {
+    state.import({
+      conversations: {
+        activeId: 'family',
+        items: [
+          {
+            id: 'family',
+            title: 'Aile Grubu',
+            subtitle: '3 kisi',
+            messages: [{ id: 0, speaker: 'Me', text: 'Hazir', time: '13:05' }],
+            messageSeq: 1,
+          },
+          {
+            id: 'support',
+            title: 'Destek',
+            subtitle: 'Online',
+            messages: [{ id: 0, speaker: 'Ali', text: 'Buradayiz', time: '14:10' }],
+            messageSeq: 1,
+          },
+        ],
+      },
+    });
+    initPhoneShell();
+
+    const rows = [...document.querySelectorAll('#homeChatList [data-phone-open-chat]')];
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.textContent).toContain('Aile Grubu');
+    expect(rows[1]?.textContent).toContain('Destek');
+
+    rows[1]?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(state.get('conversations.activeId')).toBe('support');
+    expect(state.get('group.title')).toBe('Destek');
+    expect(state.get('messages')[0].text).toBe('Buradayiz');
+    expect(getPhoneShellState().view).toBe('chat');
+    expect(document.querySelector('.phone')?.dataset.phoneView).toBe('chat');
+  });
+
   it('opens chat detail and returns to the home shell', () => {
     initPhoneShell();
 
@@ -342,6 +380,35 @@ describe('Faz 41 phone app shell', () => {
     expect(state.get('phoneShellContent.updates.status.title')).toBe('Sahne hazir');
     expect(document.getElementById('phoneStatusTitle')?.textContent).toBe('Sahne hazir');
     expect(document.getElementById('phoneStatusMeta')?.textContent).toBe('Bugun 18:30');
+  });
+
+  it('creates a new conversation from the message FAB sheet and opens it', () => {
+    initPhoneShell();
+
+    document.getElementById('phoneMessageFab')?.click();
+
+    expect(isPhoneEditorSheetOpen()).toBe(true);
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Yeni sohbet');
+    expect(document.querySelector('#phoneEditorFields input[name="title"]')).not.toBeNull();
+    expect(document.querySelector('#phoneEditorFields textarea[name="firstMessage"]')).not.toBeNull();
+
+    document.querySelector('#phoneEditorFields input[name="title"]').value = 'Proje Ekibi';
+    document.querySelector('#phoneEditorFields input[name="subtitle"]').value = '5 kisi';
+    document.querySelector('#phoneEditorFields input[name="avatarUrl"]').value = 'https://example.com/proje.png';
+    document.querySelector('#phoneEditorFields textarea[name="firstMessage"]').value = 'Selam ekip';
+    document.getElementById('phoneEditorForm')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    const conversations = state.get('conversations');
+    const created = conversations.items.find((item) => item.title === 'Proje Ekibi');
+
+    expect(isPhoneEditorSheetOpen()).toBe(false);
+    expect(created).toBeTruthy();
+    expect(conversations.activeId).toBe(created.id);
+    expect(state.get('group.title')).toBe('Proje Ekibi');
+    expect(state.get('messages')[0].text).toBe('Selam ekip');
+    expect(getPhoneShellState().activeTab).toBe('chats');
+    expect(getPhoneShellState().view).toBe('chat');
+    expect(document.getElementById('homeChatList')?.textContent).toContain('Proje Ekibi');
   });
 
   it('keeps editor validation, Escape close and mobile menu pointer contracts testable', () => {

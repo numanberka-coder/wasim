@@ -290,6 +290,58 @@ describe('StateManager', () => {
       expect(sm2.get('phoneShellContent.communities.ctaLabel')).toBe('Baslat');
     });
 
+    it('mirrors the active conversation into group, messages and export data', () => {
+      const conversation = sm.addConversation({
+        title: 'Destek',
+        subtitle: 'Online',
+        firstMessage: 'Merhaba',
+      });
+
+      expect(sm.get('conversations.activeId')).toBe(conversation.id);
+      expect(sm.get('group.title')).toBe('Destek');
+      expect(sm.get('messages')[0].text).toBe('Merhaba');
+
+      sm.addMessage({ speaker: 'Ali', text: 'Yanit' });
+      const exported = sm.export();
+      const active = exported.conversations.items.find((item) => item.id === conversation.id);
+
+      expect(active.messages.map((message) => message.text)).toEqual(['Merhaba', 'Yanit']);
+      expect(active.messageSeq).toBe(2);
+      expect(exported.messages.map((message) => message.text)).toEqual(['Merhaba', 'Yanit']);
+    });
+
+    it('preserves each conversation history when switching active chats', () => {
+      sm.set('group.title', 'Ana Grup');
+      sm.addMessage({ speaker: 'Me', text: 'Ana mesaj' });
+      const support = sm.addConversation({
+        title: 'Destek',
+        firstMessage: 'Destek ilk',
+      });
+      sm.addMessage({ speaker: 'Ali', text: 'Destek ikinci' });
+
+      sm.selectConversation('default');
+      expect(sm.get('group.title')).toBe('Ana Grup');
+      expect(sm.get('messages').map((message) => message.text)).toEqual(['Ana mesaj']);
+
+      sm.selectConversation(support.id);
+      expect(sm.get('group.title')).toBe('Destek');
+      expect(sm.get('messages').map((message) => message.text)).toEqual(['Destek ilk', 'Destek ikinci']);
+    });
+
+    it('cleans invalid conversations into a safe default chat', () => {
+      sm.import({
+        conversations: {
+          activeId: 'missing',
+          items: [],
+        },
+      });
+
+      expect(sm.get('conversations.activeId')).toBe('default');
+      expect(sm.get('conversations.items')).toHaveLength(1);
+      expect(sm.get('group.title')).toBe('Felsefe Grubu');
+      expect(sm.get('messages')).toEqual([]);
+    });
+
     it('import recalculates messageSeq if not provided', () => {
       sm.import({
         messages: [
