@@ -966,10 +966,10 @@ Destek: Bunu anlayamadım 🤔"></textarea>
                     </span>
                     <span class="phone-status-copy">
                       <span class="phone-status-title" id="phoneStatusTitle">Durumum</span>
-                      <span class="phone-status-meta">Durum guncellemesi eklemek icin dokunun</span>
+                      <span class="phone-status-meta" id="phoneStatusMeta">Durum guncellemesi eklemek icin dokunun</span>
                     </span>
                   </button>
-                  <p class="phone-status-note">Durum guncellemeleriniz 24 saat sonra kaybolur.</p>
+                  <p class="phone-status-note" id="phoneStatusNote">Durum guncellemeleriniz 24 saat sonra kaybolur.</p>
                 </section>
 
                 <section class="phone-updates-section" aria-labelledby="phoneRecentUpdatesTitle">
@@ -995,10 +995,10 @@ Destek: Bunu anlayamadım 🤔"></textarea>
                 <section class="phone-channels-section" aria-labelledby="phoneChannelsTitle">
                   <div class="phone-channels-header">
                     <h3 class="phone-updates-section-title" id="phoneChannelsTitle">Kanallar</h3>
-                    <button class="phone-channel-discover" type="button">Kesfet</button>
+                    <button class="phone-channel-discover" id="phoneChannelDiscoverBtn" type="button">Kesfet</button>
                   </div>
-                  <p class="phone-channels-copy">Ilgilendiginiz konulardan haber almak icin kanallari takip edin.</p>
-                  <button class="phone-channel-create" type="button">Kanal olustur</button>
+                  <p class="phone-channels-copy" id="phoneChannelsDescription">Ilgilendiginiz konulardan haber almak icin kanallari takip edin.</p>
+                  <button class="phone-channel-create" id="phoneChannelCreateBtn" type="button">Kanal olustur</button>
                 </section>
 
                 <div class="phone-updates-fabs" aria-label="Guncelleme aksiyonlari">
@@ -1027,9 +1027,9 @@ Destek: Bunu anlayamadım 🤔"></textarea>
                     </svg>
                   </div>
                   <h2 class="phone-communities-title" id="phoneCommunitiesTitle">Topluluklar sayesinde baglantida kalin</h2>
-                  <p class="phone-communities-copy">Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.</p>
+                  <p class="phone-communities-copy" id="phoneCommunitiesDescription">Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.</p>
                   <button class="phone-communities-link-button" type="button">
-                    <span>Ornek topluluklari gor</span>
+                    <span id="phoneCommunitiesLinkLabel">Ornek topluluklari gor</span>
                     <span class="wa-phone-icon" data-phone-icon="arrowRight" aria-hidden="true"></span>
                   </button>
                 </div>
@@ -1151,6 +1151,28 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <span>Aramalar</span>
             </button>
           </nav>
+
+          <div class="phone-editor-layer" id="phoneEditorLayer" aria-hidden="true">
+            <button class="phone-editor-backdrop" id="phoneEditorBackdrop" type="button" aria-label="Editoru kapat"></button>
+            <form class="phone-editor-sheet" id="phoneEditorForm" role="dialog" aria-modal="true" aria-labelledby="phoneEditorTitle" aria-describedby="phoneEditorDescription" novalidate>
+              <div class="phone-editor-handle" aria-hidden="true"></div>
+              <div class="phone-editor-head">
+                <span class="phone-editor-copy">
+                  <strong id="phoneEditorTitle">Editor</strong>
+                  <span id="phoneEditorDescription">Telefon icerigini duzenle</span>
+                </span>
+                <button class="phone-editor-close" id="phoneEditorCloseBtn" type="button" aria-label="Editoru kapat">
+                  <span class="wa-phone-icon" data-phone-icon="close" aria-hidden="true"></span>
+                </button>
+              </div>
+              <div class="phone-editor-fields" id="phoneEditorFields"></div>
+              <div class="phone-editor-error" id="phoneEditorError" role="alert" hidden></div>
+              <div class="phone-editor-actions">
+                <button class="phone-editor-secondary" id="phoneEditorCancelBtn" type="button">Iptal</button>
+                <button class="phone-editor-primary" id="phoneEditorSaveBtn" type="submit">Kaydet</button>
+              </div>
+            </form>
+          </div>
         </section>
 
         <!-- Chat Detail -->

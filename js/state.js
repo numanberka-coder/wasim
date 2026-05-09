@@ -5,6 +5,146 @@
 import { DEFAULT_STATE, DEFAULT_PEOPLE, COLOR_POOL, THEME_DEFAULTS } from './config.js';
 import { deepClone, nowTime } from './utils.js';
 
+const DEFAULT_CONVERSATION_ID = 'default';
+
+const DEFAULT_PHONE_SHELL_CONTENT = Object.freeze({
+  updates: {
+    status: {
+      title: 'Durumum',
+      meta: 'Durum guncellemesi eklemek icin dokunun',
+      note: 'Durum guncellemeleriniz 24 saat sonra kaybolur.',
+    },
+    channels: {
+      title: 'Kanallar',
+      description: 'Ilgilendiginiz konulardan haber almak icin kanallari takip edin.',
+      discoverLabel: 'Kesfet',
+      createLabel: 'Kanal olustur',
+    },
+  },
+  communities: {
+    title: 'Topluluklar sayesinde baglantida kalin',
+    description: 'Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.',
+    linkLabel: 'Ornek topluluklari gor',
+    ctaLabel: 'Toplulugunuzu olusturun',
+  },
+  calls: {
+    editorDraft: {
+      title: 'Yeni arama',
+      description: 'Arama listesi duzenleme altyapisi hazir.',
+    },
+  },
+});
+
+function cleanText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text || fallback;
+}
+
+function normalizeMessage(message, index = 0, baseTime = nowTime()) {
+  return {
+    id: typeof message?.id === 'number' ? message.id : index,
+    speaker: message?.speaker || '?',
+    text: message?.text || '',
+    replyTo: message?.replyTo || null,
+    time: message?.time || baseTime,
+    kind: message?.kind || null,
+    src: message?.src || null,
+    durationSec: (typeof message?.durationSec === 'number') ? message.durationSec : (message?.durationSec ?? null),
+    tickStatus: message?.tickStatus || null,
+    reactions: Array.isArray(message?.reactions) ? message.reactions : [],
+  };
+}
+
+function createDefaultConversation(group = {}, messages = [], messageSeq = 0) {
+  const safeMessages = Array.isArray(messages)
+    ? messages.map((message, index) => normalizeMessage(message, index))
+    : [];
+  const fallbackSeq = safeMessages.reduce((max, message) => Math.max(max, Number(message.id) || 0), -1) + 1;
+
+  return {
+    id: DEFAULT_CONVERSATION_ID,
+    title: cleanText(group.title, DEFAULT_STATE.groupTitle),
+    subtitle: cleanText(group.subtitle, DEFAULT_STATE.groupSubtitle),
+    photoUrl: cleanText(group.photoUrl, ''),
+    avatarDataUrl: group.avatarDataUrl || null,
+    messages: safeMessages,
+    messageSeq: typeof messageSeq === 'number' ? messageSeq : fallbackSeq,
+  };
+}
+
+function normalizeConversation(item, fallback) {
+  const base = fallback || createDefaultConversation();
+  const messages = Array.isArray(item?.messages)
+    ? item.messages.map((message, index) => normalizeMessage(message, index))
+    : deepClone(base.messages);
+  const fallbackSeq = messages.reduce((max, message) => Math.max(max, Number(message.id) || 0), -1) + 1;
+
+  return {
+    id: cleanText(item?.id, base.id || DEFAULT_CONVERSATION_ID),
+    title: cleanText(item?.title, base.title),
+    subtitle: cleanText(item?.subtitle, base.subtitle),
+    photoUrl: cleanText(item?.photoUrl, base.photoUrl),
+    avatarDataUrl: item?.avatarDataUrl || base.avatarDataUrl || null,
+    messages,
+    messageSeq: typeof item?.messageSeq === 'number' ? item.messageSeq : fallbackSeq,
+  };
+}
+
+function normalizeConversations(value, group, messages, messageSeq) {
+  const fallback = createDefaultConversation(group, messages, messageSeq);
+  if (!value || typeof value !== 'object') {
+    return { activeId: fallback.id, items: [fallback] };
+  }
+
+  const rawItems = Array.isArray(value.items) ? value.items : [];
+  const items = rawItems
+    .map((item, index) => normalizeConversation(item, index === 0 ? fallback : null))
+    .filter((item) => item.id);
+
+  if (!items.length) items.push(fallback);
+
+  const activeId = items.some((item) => item.id === value.activeId)
+    ? value.activeId
+    : items[0].id;
+
+  return { activeId, items };
+}
+
+function mergeDefaults(defaults, value) {
+  if (!value || typeof value !== 'object') return deepClone(defaults);
+  const output = Array.isArray(defaults) ? [] : {};
+
+  Object.entries(defaults).forEach(([key, defaultValue]) => {
+    const nextValue = value[key];
+    if (
+      defaultValue &&
+      typeof defaultValue === 'object' &&
+      !Array.isArray(defaultValue)
+    ) {
+      output[key] = mergeDefaults(defaultValue, nextValue);
+    } else if (typeof defaultValue === 'string') {
+      output[key] = cleanText(nextValue, defaultValue);
+    } else {
+      output[key] = nextValue ?? deepClone(defaultValue);
+    }
+  });
+
+  return output;
+}
+
+function normalizePhoneShellContent(value) {
+  return mergeDefaults(DEFAULT_PHONE_SHELL_CONTENT, value);
+}
+
+function shouldMirrorLegacyConversation(conversations) {
+  return (
+    conversations?.activeId === DEFAULT_CONVERSATION_ID &&
+    Array.isArray(conversations.items) &&
+    conversations.items.length === 1 &&
+    conversations.items[0]?.id === DEFAULT_CONVERSATION_ID
+  );
+}
+
 /**
  * Reactive State Manager
  */
@@ -59,6 +199,10 @@ export class StateManager {
       messages: [],
       messageSeq: 0,
 
+      // Phone home data
+      conversations: null,
+      phoneShellContent: normalizePhoneShellContent(),
+
       // Player
       player: {
         queue: [],
@@ -79,6 +223,12 @@ export class StateManager {
     };
 
     this.listeners = new Set();
+    this.data.conversations = normalizeConversations(
+      null,
+      this.data.group,
+      this.data.messages,
+      this.data.messageSeq
+    );
   }
 
   /**
@@ -206,6 +356,21 @@ export class StateManager {
    * Export state for storage
    */
   export() {
+    this.data.conversations = normalizeConversations(
+      this.data.conversations,
+      this.data.group,
+      this.data.messages,
+      this.data.messageSeq
+    );
+    if (shouldMirrorLegacyConversation(this.data.conversations)) {
+      this.data.conversations.items[0] = createDefaultConversation(
+        this.data.group,
+        this.data.messages,
+        this.data.messageSeq
+      );
+    }
+    this.data.phoneShellContent = normalizePhoneShellContent(this.data.phoneShellContent);
+
     return {
       people: this.data.people,
       selfName: this.data.selfName,
@@ -214,6 +379,8 @@ export class StateManager {
       messageTimes: this.data.messageTimes,
       messages: this.data.messages,
       messageSeq: this.data.messageSeq,
+      conversations: deepClone(this.data.conversations),
+      phoneShellContent: deepClone(this.data.phoneShellContent),
       player: {
         speed: this.data.player.speed,
         jitter: this.data.player.jitter,
@@ -242,18 +409,7 @@ export class StateManager {
     }
 
     if (data.messages) {
-      this.data.messages = data.messages.map((m, idx) => ({
-        id: typeof m.id === 'number' ? m.id : idx,
-        speaker: m.speaker || '?',
-        text: m.text || '',
-        replyTo: m.replyTo || null,
-        time: m.time || this.data.messageTimes.baseTime,
-        kind: m.kind || null,
-        src: m.src || null,
-        durationSec: (typeof m.durationSec === 'number') ? m.durationSec : (m.durationSec ?? null),
-        tickStatus: m.tickStatus || null,
-        reactions: Array.isArray(m.reactions) ? m.reactions : [],
-      }));
+      this.data.messages = data.messages.map((m, idx) => normalizeMessage(m, idx, this.data.messageTimes.baseTime));
     }
 
     if (typeof data.messageSeq === 'number') {
@@ -268,6 +424,14 @@ export class StateManager {
       this.data.player.jitter = data.player.jitter || DEFAULT_STATE.jitter;
       this.data.player.script = data.player.script || '';
     }
+
+    this.data.conversations = normalizeConversations(
+      data.conversations,
+      this.data.group,
+      this.data.messages,
+      this.data.messageSeq
+    );
+    this.data.phoneShellContent = normalizePhoneShellContent(data.phoneShellContent);
 
     this.notify();
   }
@@ -319,6 +483,13 @@ export class StateManager {
 
     this.data.messages = [];
     this.data.messageSeq = 0;
+    this.data.conversations = normalizeConversations(
+      null,
+      this.data.group,
+      this.data.messages,
+      this.data.messageSeq
+    );
+    this.data.phoneShellContent = normalizePhoneShellContent();
 
     this.data.player = {
       queue: [],

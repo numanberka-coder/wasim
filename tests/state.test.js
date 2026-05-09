@@ -199,6 +199,8 @@ describe('StateManager', () => {
       expect(exported).toHaveProperty('group');
       expect(exported).toHaveProperty('settings');
       expect(exported).toHaveProperty('messages');
+      expect(exported).toHaveProperty('conversations');
+      expect(exported).toHaveProperty('phoneShellContent');
       expect(exported).toHaveProperty('player');
       // Should not have runtime state
       expect(exported.player).not.toHaveProperty('playTimer');
@@ -214,10 +216,78 @@ describe('StateManager', () => {
       sm2.import(exported);
       expect(sm2.get('group.title')).toBe('Test Grubu');
       expect(sm2.get('messages')).toHaveLength(1);
+      expect(sm2.get('conversations.items')[0].title).toBe('Test Grubu');
+      expect(sm2.get('phoneShellContent.updates.status.title')).toBe('Durumum');
     });
 
     it('import handles missing fields gracefully', () => {
       expect(() => sm.import({})).not.toThrow();
+    });
+
+    it('backfills legacy exports with one default conversation and shell content', () => {
+      sm.import({
+        group: {
+          title: 'Legacy Grup',
+          subtitle: '3 kisi',
+          photoUrl: 'https://example.com/avatar.png',
+        },
+        messages: [
+          { id: 4, speaker: 'Ali', text: 'Eski mesaj', time: '10:20' },
+        ],
+      });
+
+      const conversations = sm.get('conversations');
+      expect(conversations.activeId).toBe('default');
+      expect(conversations.items).toHaveLength(1);
+      expect(conversations.items[0]).toMatchObject({
+        id: 'default',
+        title: 'Legacy Grup',
+        subtitle: '3 kisi',
+        photoUrl: 'https://example.com/avatar.png',
+      });
+      expect(conversations.items[0].messages[0].text).toBe('Eski mesaj');
+      expect(conversations.items[0].messageSeq).toBe(5);
+      expect(sm.get('phoneShellContent.communities.ctaLabel')).toBe('Toplulugunuzu olusturun');
+    });
+
+    it('preserves explicit phone data through export and import', () => {
+      sm.import({
+        conversations: {
+          activeId: 'support',
+          items: [
+            {
+              id: 'support',
+              title: 'Destek',
+              subtitle: 'Online',
+              messages: [{ id: 0, speaker: 'Me', text: 'Merhaba' }],
+              messageSeq: 1,
+            },
+          ],
+        },
+        phoneShellContent: {
+          updates: {
+            status: {
+              title: 'Yeni Durum',
+              meta: 'Hazir',
+            },
+          },
+          communities: {
+            title: 'Yeni Topluluk',
+            description: 'Aciklama',
+            ctaLabel: 'Baslat',
+          },
+        },
+      });
+
+      const exported = sm.export();
+      const sm2 = new StateManager();
+      sm2.import(JSON.parse(JSON.stringify(exported)));
+
+      expect(sm2.get('conversations.activeId')).toBe('support');
+      expect(sm2.get('conversations.items')[0].title).toBe('Destek');
+      expect(sm2.get('phoneShellContent.updates.status.title')).toBe('Yeni Durum');
+      expect(sm2.get('phoneShellContent.updates.status.note')).toContain('24 saat');
+      expect(sm2.get('phoneShellContent.communities.ctaLabel')).toBe('Baslat');
     });
 
     it('import recalculates messageSeq if not provided', () => {
@@ -261,6 +331,9 @@ describe('StateManager', () => {
       expect(sm.isActive('Ali')).toBe(false);
       expect(sm.get('messages')).toEqual([]);
       expect(sm.get('settings.theme')).toBe('dark');
+      expect(sm.get('conversations.items')).toHaveLength(1);
+      expect(sm.get('conversations.items')[0].title).toBe('Felsefe Grubu');
+      expect(sm.get('phoneShellContent.updates.status.title')).toBe('Durumum');
     });
 
     it('reset triggers notification', () => {
