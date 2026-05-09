@@ -101,12 +101,14 @@ const EDITOR_CONFIGS = {
   },
   communitiesIntro: {
     title: 'Topluluk gorunumunu duzenle',
-    description: 'Topluluklar sekmesindeki bos durum metinlerini gunceller.',
+    description: 'Bos durum kartini sohbet benzeri bir topluluk tanitimi olarak gunceller.',
+    surface: 'communities-chat',
     path: 'phoneShellContent.communities',
     fields: [
-      { name: 'title', label: 'Baslik', required: true, maxLength: 72 },
-      { name: 'description', label: 'Aciklama', required: true, maxLength: 180 },
-      { name: 'ctaLabel', label: 'Buton metni', required: true, maxLength: 48 },
+      { name: 'title', label: 'Topluluk basligi', required: true, maxLength: 72 },
+      { name: 'description', label: 'Topluluk aciklamasi', required: true, maxLength: 180, multiline: true },
+      { name: 'linkLabel', label: 'Ornek link metni', required: true, maxLength: 48 },
+      { name: 'ctaLabel', label: 'CTA metni', required: true, maxLength: 48 },
     ],
   },
   callsDraft: {
@@ -190,6 +192,7 @@ function renderFields(config) {
   const values = typeof config.values === 'function'
     ? config.values()
     : (config.path ? (state.get(config.path) || {}) : {});
+  fields.dataset.phoneEditorSurface = config.surface || 'default';
   fields.replaceChildren();
   config.fields.forEach((field) => {
     fields.appendChild(createField(field, values[field.name]));

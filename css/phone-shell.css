@@ -1088,6 +1088,36 @@
   padding-right: 2px;
 }
 
+.phone-editor-fields[data-phone-editor-surface="communities-chat"] {
+  padding: 10px;
+  border: 1px solid rgba(134, 150, 160, 0.18);
+  border-radius: 16px;
+  background:
+    linear-gradient(rgba(17, 27, 33, 0.88), rgba(17, 27, 33, 0.88)),
+    radial-gradient(circle at 12px 12px, rgba(134, 150, 160, 0.22) 1px, transparent 1.5px);
+  background-size: auto, 18px 18px;
+}
+
+.phone-editor-fields[data-phone-editor-surface="communities-chat"] .phone-editor-field {
+  width: min(100%, 272px);
+  padding: 9px 10px 10px;
+  border-radius: 14px 14px 14px 4px;
+  background: #1f2c34;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+
+.phone-editor-fields[data-phone-editor-surface="communities-chat"] .phone-editor-field:nth-child(even) {
+  justify-self: end;
+  border-radius: 14px 14px 4px 14px;
+  background: #005c4b;
+}
+
+.phone-editor-fields[data-phone-editor-surface="communities-chat"] .phone-editor-field input,
+.phone-editor-fields[data-phone-editor-surface="communities-chat"] .phone-editor-field textarea {
+  border-color: rgba(233, 237, 239, 0.14);
+  background: rgba(17, 27, 33, 0.42);
+}
+
 .phone-editor-field {
   display: grid;
   gap: 5px;
