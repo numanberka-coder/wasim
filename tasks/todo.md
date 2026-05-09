@@ -1,54 +1,50 @@
-# Faz 48 - Kalici Telefon Verisi & Bottom Sheet Editor Altyapisi
+# Faz 49 - Coklu Sohbetler & Yeni Sohbet Olusturma
 
 > Tarih: 2026-05-09
-> Branch: codex/faz-48
-> Kaynak: ROADMAP5 Faz 48
+> Branch: codex/faz-49
+> Kaynak: ROADMAP5 Faz 49
 > Durum: Tamamlandi
-> Not: `AGENTS.md` untracked ve kapsam disi kalacak. Mevcut `css/phone-shell.css`
-> degisikligi korunacak; ayni dosyada gerekli olursa uzerine dikkatle calisilacak.
+> Not: `AGENTS.md` untracked ve kapsam disi kaldi.
 
 ---
 
 ## Amac
 
-Ana sekme duzenlemeleri icin telefon icinde ortak bottom sheet editor altyapisi
-kurmak; yeni telefon verilerini state/export/import/reset akisinda kalici hale
-getirmek; eski kayitlari `group` ve `messages` verisinden guvenli varsayilan
-telefon verisine tamamlamak.
+Sohbetler sekmesini kalici `conversations.items` listesinden uretmek; yeni
+sohbet olusturma sheet'i eklemek; secilen sohbeti mevcut chat detail, player,
+composer, screenshot ve export/import akislarina aktif sohbet olarak baglamak.
 
 ---
 
 ## Kapsam
 
-- [x] 1. Faz 48 kapsam ve derslerini oku:
-      - `ROADMAP5.md` Faz 48 kabul kriterleri.
-      - `tasks/lessons.md` mobil pointer/stacking ve ikon polish dersleri.
-      - Mevcut Faz 41-47 phone shell ve test yuzeyi.
-- [x] 2. Faz 48 branch'ini hazirla:
-      - `codex/faz-48` branch'i acildi.
-      - Var olan `css/phone-shell.css` degisikligi ve untracked `AGENTS.md`
-        kullanici calismasi olarak korunacak.
-- [x] 3. Kalici state modelini ekle:
-      - `conversations` ve `phoneShellContent` varsayilanlarini state'e ekle.
-      - `state.export()`, `state.import()` ve `state.reset()` yeni alanlari
-        korusun.
-      - Eski export/localStorage verisi, `group` + `messages` uzerinden tek
-        default sohbet ve default sekme icerigine tamamlanabilsin.
-- [x] 4. Bottom sheet editor altyapisini kur:
-      - Yeni `js/phone/home-editors.js` ortak editor sheet sozlesmesini yonetsin.
-      - Ac/kapat/kaydet/iptal/backdrop ve hata durumlari test edilebilir olsun.
-      - Sheet klavye ile ulasilabilir ve mevcut mobile menuyle pointer
-        cakismasi yaratmasin.
-- [x] 5. Phone shell entegrasyonunu yap:
-      - `js/phone/app-shell.js` editor altyapisini baslatip state degisikliklerine
-        duyarlilik kazansin.
-      - `index.html` yalnizca gerekli sheet kokunu ve baglanti noktalarini alsin.
-      - `css/phone-shell.css` bottom sheet/backdrop/form durumlarini kapsasin.
-- [x] 6. Regression testlerini guclendir:
-      - `tests/state.test.js` export/import/reset/fallback davranisini kapsasin.
-      - `tests/phone-shell.test.js` sheet ac/kapat/kaydet/iptal ve pointer
-        kontratini kapsasin.
-- [ ] 7. Dogrulama calistir:
+- [x] 1. Faz 49 kapsam ve derslerini oku:
+      - `ROADMAP5.md` Faz 49 kabul kriterleri.
+      - `tasks/lessons.md` mobil pointer/ikon polish dersleri.
+      - Faz 48 kalici state ve bottom sheet altyapisi.
+- [x] 2. Faz 49 branch'ini hazirla:
+      - `codex/faz-49` branch'i `codex/faz-48` temelinden acildi.
+      - `AGENTS.md` kapsam disinda tutuldu.
+- [x] 3. Coklu sohbet state modelini tamamla:
+      - `conversations.items` guvenli normalize ediliyor.
+      - Aktif sohbet `group`, `messages` ve `messageSeq` ile senkron kaliyor.
+      - Export/import/reset ve legacy fallback coklu sohbet verisini koruyor.
+- [x] 4. Yeni sohbet sheet'i ekle:
+      - Mesaj FAB'i sohbet adi, alt bilgi, avatar URL ve ilk mesaj alanlariyla
+        bottom sheet aciyor.
+      - Kayit sonrasi yeni sohbet aktif oluyor ve chat detail aciliyor.
+      - Gecersiz/bos veri uygulamayi kirmadan guvenli hata/fallback aliyor.
+- [x] 5. Sohbetler sekmesi secme akislarini bagla:
+      - Liste `conversations.items` uzerinden render ediliyor.
+      - Satira tiklama once mevcut aktif sohbeti kaydediyor, sonra hedef sohbeti
+        chat detail olarak aciyor.
+      - Bos liste guvenli default sohbet uretiyor.
+- [x] 6. Regression testlerini guncelle:
+      - `tests/state.test.js` aktif sohbet senkronu ve coklu sohbet
+        kaliciligini kapsiyor.
+      - `tests/phone-shell.test.js` yeni sohbet sheet'i, liste ve secme
+        akislarini kapsiyor.
+- [x] 7. Dogrulama calistir:
       - [x] `node --check js\state.js`
       - [x] `node --check js\phone\app-shell.js`
       - [x] `node --check js\phone\home-editors.js`
@@ -75,40 +71,41 @@ telefon verisine tamamlamak.
 
 ## Review
 
-- `js/state.js` icinde Faz 48 kalici telefon verisi modeli kuruldu:
-  - `conversations` ve `phoneShellContent` state'e eklendi.
-  - `state.export()`, `state.import()` ve `state.reset()` yeni alanlari koruyor.
-  - Eski export/localStorage verisi `group` + `messages` uzerinden tek
-    `default` sohbet ve default ana sekme icerigine tamamlanıyor.
-  - Mevcut tek sohbet motoru bozulmasin diye `default` sohbet export aninda
-    legacy `group/messages` verisini aynaliyor.
-- Yeni `js/phone/home-editors.js` ortak bottom sheet altyapisini ekledi:
-  - Sheet ac/kapat, backdrop, Escape, iptal, kaydet ve validation davranislari
-    tek modulde toplandi.
-  - Updates, Communities ve Calls icin kucuk editor konfigurasyonlari eklendi;
-    sonraki fazlar bu sozlesmenin uzerine detayli akis kurabilecek.
-- `index.html` ve `js/phone/app-shell.js` phone shell baglantisini tamamladı:
-  - Ana sekme metinlerine state ile senkron id'ler eklendi.
-  - Telefon icinde `phoneEditorLayer` dialog kok'u eklendi.
-  - `phoneShellContent` degisiklikleri DOM'a aninda yansiyor.
-- `css/phone-shell.css` bottom sheet yuzeyini kapsiyor:
-  - Sheet, backdrop, form alanlari, hata mesaji, light tema ve pointer kontrati
-    eklendi.
-  - Var olan FAB boyut degisikligi korunarak uzerine calisildi.
+- `js/state.js` icinde coklu sohbet API'si tamamlandi:
+  - `ensureConversations()`, `getActiveConversation()`, `selectConversation()`
+    ve `addConversation()` eklendi.
+  - Aktif sohbet, legacy `group/messages/messageSeq` motoruna iki yonlu
+    baglandi.
+  - `addMessage()`, `clearMessages()`, `set('group.*')`, `set('messages')`,
+    `export()` ve `import()` aktif sohbet verisini kaybetmeden calisiyor.
+  - Bos veya bozuk `conversations.items` verisi default sohbete temizleniyor.
+- `js/phone/app-shell.js` Sohbetler sekmesini state listesinden render ediyor:
+  - Her satir kendi avatar, baslik, son mesaj ozeti ve saatini tasiyor.
+  - Satir tiklamasi hedef sohbeti aktif yapiyor, header/chat DOM'unu yeniden
+    kuruyor ve chat detail'i aciyor.
+- `js/phone/home-editors.js` yeni sohbet sheet'ini Faz 48 altyapisina ekledi:
+  - Mesaj FAB'i `newConversation` editorunu aciyor.
+  - Sohbet adi zorunlu, alt bilgi/avatar URL/ilk mesaj opsiyonel.
+  - Kayit sonrasi yeni sohbet aktif oluyor ve mevcut sohbet motoruna baglaniyor.
+- `index.html` ve `css/phone-shell.css` sheet kokunu ve form yuzeyini
+  tamamliyor:
+  - Editor sheet artik selector sozlesmesiyle bulunuyor.
+  - Ilk mesaj icin textarea ve aktif sohbet satiri stili eklendi.
 - Regression testleri:
-  - `tests/state.test.js` legacy fallback, export/import kaliciligi ve reset
-    davranisini kapsayacak sekilde 34 teste cikarildi.
-  - `tests/phone-shell.test.js` sheet ac/kapat/kaydet/validation/Escape ve
-    pointer CSS kontratini kapsayacak sekilde 18 teste cikarildi.
+  - `tests/state.test.js`: 37 test basarili.
+  - `tests/phone-shell.test.js`: 20 test basarili.
+  - Tam suite: 10 test dosyasi, 261 test basarili.
 - Dogrulama:
   - `node --check js\state.js`: basarili.
   - `node --check js\phone\app-shell.js`: basarili.
   - `node --check js\phone\home-editors.js`: basarili.
-  - `npm.cmd test -- tests\state.test.js`: 34 test basarili.
-  - `npm.cmd test -- tests\phone-shell.test.js`: 18 test basarili.
-  - `npm.cmd test`: 10 test dosyasi, 256 test basarili.
-  - `npm.cmd run build`: Vite build basarili.
+  - `npm.cmd test -- tests\state.test.js`: basarili.
+  - `npm.cmd test -- tests\phone-shell.test.js`: basarili.
+  - `npm.cmd test`: basarili.
+  - `npm.cmd run build`: basarili.
   - `git diff --check`: whitespace hatasi yok; yalnizca CRLF uyarilari var.
-  - HTTP sanity: Vite dev server baslatildi, `http://127.0.0.1:5173` 200 dondu
-    ve `phoneEditorLayer` HTML'de goruldu.
-- `AGENTS.md` untracked ve kapsam disi kaldı.
+  - HTTP sanity: `http://127.0.0.1:5173` 200 dondu ve HTML'de
+    `phoneHomeShell`, `phoneMessageFab`, `phoneEditorLayer`,
+    `data-phone-open-chat` goruldu.
+  - In-app browser eklentisi bu ortamda Node izin hatasiyla acilamadi; bunun
+    yerine local HTTP/DOM sanity ve regression testleriyle dogrulama tamamlandi.

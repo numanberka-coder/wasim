@@ -221,7 +221,8 @@
 }
 
 .phone-chat-entry:hover,
-.phone-chat-entry:focus-visible {
+.phone-chat-entry:focus-visible,
+.phone-chat-entry.is-active {
   background: rgba(255, 255, 255, 0.05);
   outline: none;
 }
@@ -1097,7 +1098,8 @@
   font-weight: 500;
 }
 
-.phone-editor-field input {
+.phone-editor-field input,
+.phone-editor-field textarea {
   width: 100%;
   min-height: 42px;
   border: 1px solid rgba(134, 150, 160, 0.28);
@@ -1109,7 +1111,15 @@
   outline: none;
 }
 
-.phone-editor-field input:focus {
+.phone-editor-field textarea {
+  min-height: 78px;
+  padding-block: 10px;
+  line-height: 1.35;
+  resize: none;
+}
+
+.phone-editor-field input:focus,
+.phone-editor-field textarea:focus {
   border-color: #25d366;
   box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.18);
 }
@@ -1215,7 +1225,8 @@ body.phone-editor-open .header-dropdown.mobile-action-sheet.is-open {
   background: rgba(17, 27, 33, 0.08);
 }
 
-.phone.light .phone-editor-field input {
+.phone.light .phone-editor-field input,
+.phone.light .phone-editor-field textarea {
   color: #111b21;
   background: #f0f2f5;
   border-color: rgba(17, 27, 33, 0.14);

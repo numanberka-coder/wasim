@@ -6,6 +6,24 @@ import { $ } from '../utils.js';
 import { state } from '../state.js';
 
 const EDITOR_CONFIGS = {
+  newConversation: {
+    title: 'Yeni sohbet',
+    description: 'Sohbetler listesine kalici yeni bir sohbet ekler.',
+    fields: [
+      { name: 'title', label: 'Sohbet adi', required: true, maxLength: 64 },
+      { name: 'subtitle', label: 'Alt bilgi', required: false, maxLength: 96 },
+      { name: 'avatarUrl', label: 'Avatar URL', required: false, maxLength: 240 },
+      { name: 'firstMessage', label: 'Ilk mesaj', required: false, maxLength: 280, multiline: true },
+    ],
+    save(values) {
+      return state.addConversation({
+        title: values.title,
+        subtitle: values.subtitle,
+        photoUrl: values.avatarUrl,
+        firstMessage: values.firstMessage,
+      });
+    },
+  },
   updatesStatus: {
     title: 'Durum bilgisini duzenle',
     description: 'Ana Guncellemeler sekmesindeki durum satirini gunceller.',
@@ -39,11 +57,12 @@ const EDITOR_CONFIGS = {
 let activeEditorKey = null;
 let lastTrigger = null;
 let syncIcons = () => {};
+let onConversationCreated = () => {};
 
 function getElements() {
   return {
     layer: $('phoneEditorLayer'),
-    sheet: $('phoneEditorSheet'),
+    sheet: document.querySelector('[data-phone-editor-sheet]'),
     form: $('phoneEditorForm'),
     title: $('phoneEditorTitle'),
     description: $('phoneEditorDescription'),
@@ -90,10 +109,10 @@ function createField(field, value) {
   label.className = 'phone-editor-label';
   label.textContent = field.label;
 
-  const input = document.createElement('input');
+  const input = document.createElement(field.multiline ? 'textarea' : 'input');
   input.id = `phoneEditorField_${field.name}`;
   input.name = field.name;
-  input.type = 'text';
+  if (!field.multiline) input.type = 'text';
   input.value = cleanValue(value);
   input.autocomplete = 'off';
   input.maxLength = field.maxLength || 120;
@@ -106,7 +125,7 @@ function createField(field, value) {
 function renderFields(config) {
   const { fields } = getElements();
   if (!fields) return;
-  const values = state.get(config.path) || {};
+  const values = config.path ? (state.get(config.path) || {}) : {};
   fields.replaceChildren();
   config.fields.forEach((field) => {
     fields.appendChild(createField(field, values[field.name]));
@@ -115,7 +134,7 @@ function renderFields(config) {
 
 function focusFirstField() {
   const { fields } = getElements();
-  fields?.querySelector('input')?.focus();
+  fields?.querySelector('input, textarea')?.focus();
 }
 
 function collectValues(config) {
@@ -138,6 +157,7 @@ function collectValues(config) {
 function saveActiveEditor() {
   const config = EDITOR_CONFIGS[activeEditorKey];
   if (!config) return false;
+  const editorKey = activeEditorKey;
 
   const result = collectValues(config);
   if (!result.ok) {
@@ -145,9 +165,17 @@ function saveActiveEditor() {
     return false;
   }
 
-  const current = state.get(config.path) || {};
-  state.set(config.path, { ...current, ...result.values });
+  const output = typeof config.save === 'function'
+    ? config.save(result.values)
+    : null;
+  if (!config.save) {
+    const current = state.get(config.path) || {};
+    state.set(config.path, { ...current, ...result.values });
+  }
   closePhoneEditorSheet({ restoreFocus: true });
+  if (editorKey === 'newConversation') {
+    onConversationCreated(output);
+  }
   return true;
 }
 
@@ -215,7 +243,11 @@ function bindEditorShellEvents() {
 
 export function initPhoneHomeEditors(options = {}) {
   syncIcons = typeof options.syncIcons === 'function' ? options.syncIcons : syncIcons;
+  onConversationCreated = typeof options.onConversationCreated === 'function'
+    ? options.onConversationCreated
+    : onConversationCreated;
   bindEditorShellEvents();
+  bindEditorTrigger('phoneMessageFab', 'newConversation');
   bindEditorTrigger('phoneUpdatesEditFab', 'updatesStatus');
   bindEditorTrigger('phoneCommunitiesCreateBtn', 'communitiesIntro');
   bindEditorTrigger('phoneCallFab', 'callsDraft');

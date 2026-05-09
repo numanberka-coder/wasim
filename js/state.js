@@ -40,6 +40,26 @@ function cleanText(value, fallback = '') {
   return text || fallback;
 }
 
+function createSafeConversationId(value, fallback = 'conversation') {
+  return cleanText(value, fallback)
+    .toLocaleLowerCase('tr-TR')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    || fallback;
+}
+
+function createUniqueConversationId(value, existingIds, fallback = 'conversation') {
+  const base = createSafeConversationId(value, fallback);
+  let candidate = base;
+  let index = 2;
+  while (existingIds.has(candidate)) {
+    candidate = `${base}-${index}`;
+    index += 1;
+  }
+  existingIds.add(candidate);
+  return candidate;
+}
+
 function normalizeMessage(message, index = 0, baseTime = nowTime()) {
   return {
     id: typeof message?.id === 'number' ? message.id : index,
@@ -74,6 +94,7 @@ function createDefaultConversation(group = {}, messages = [], messageSeq = 0) {
 
 function normalizeConversation(item, fallback) {
   const base = fallback || createDefaultConversation();
+  const hasOwn = (key) => Object.prototype.hasOwnProperty.call(item || {}, key);
   const messages = Array.isArray(item?.messages)
     ? item.messages.map((message, index) => normalizeMessage(message, index))
     : deepClone(base.messages);
@@ -81,9 +102,9 @@ function normalizeConversation(item, fallback) {
 
   return {
     id: cleanText(item?.id, base.id || DEFAULT_CONVERSATION_ID),
-    title: cleanText(item?.title, base.title),
-    subtitle: cleanText(item?.subtitle, base.subtitle),
-    photoUrl: cleanText(item?.photoUrl, base.photoUrl),
+    title: hasOwn('title') ? String(item.title ?? '').trim() : cleanText(base.title, DEFAULT_STATE.groupTitle),
+    subtitle: hasOwn('subtitle') ? String(item.subtitle ?? '').trim() : cleanText(base.subtitle, DEFAULT_STATE.groupSubtitle),
+    photoUrl: hasOwn('photoUrl') ? String(item.photoUrl ?? '').trim() : cleanText(base.photoUrl, ''),
     avatarDataUrl: item?.avatarDataUrl || base.avatarDataUrl || null,
     messages,
     messageSeq: typeof item?.messageSeq === 'number' ? item.messageSeq : fallbackSeq,
@@ -97,11 +118,23 @@ function normalizeConversations(value, group, messages, messageSeq) {
   }
 
   const rawItems = Array.isArray(value.items) ? value.items : [];
+  const existingIds = new Set();
   const items = rawItems
-    .map((item, index) => normalizeConversation(item, index === 0 ? fallback : null))
+    .map((item, index) => {
+      const normalized = normalizeConversation(item, index === 0 ? fallback : null);
+      normalized.id = createUniqueConversationId(
+        normalized.id,
+        existingIds,
+        index === 0 ? DEFAULT_CONVERSATION_ID : `conversation-${index + 1}`
+      );
+      return normalized;
+    })
     .filter((item) => item.id);
 
-  if (!items.length) items.push(fallback);
+  if (!items.length) {
+    existingIds.add(fallback.id);
+    items.push(fallback);
+  }
 
   const activeId = items.some((item) => item.id === value.activeId)
     ? value.activeId
@@ -142,6 +175,15 @@ function shouldMirrorLegacyConversation(conversations) {
     Array.isArray(conversations.items) &&
     conversations.items.length === 1 &&
     conversations.items[0]?.id === DEFAULT_CONVERSATION_ID
+  );
+}
+
+function shouldSyncConversationFromPath(path) {
+  return (
+    path === 'messages' ||
+    path === 'messageSeq' ||
+    path === 'group' ||
+    path.startsWith('group.')
   );
 }
 
@@ -274,7 +316,104 @@ export class StateManager {
       return obj[key];
     }, this.data);
     target[last] = value;
+    if (shouldSyncConversationFromPath(path)) {
+      this.syncActiveConversationFromLegacy();
+    }
     if (!silent) this.notify(path);
+  }
+
+  ensureConversations() {
+    this.data.conversations = normalizeConversations(
+      this.data.conversations,
+      this.data.group,
+      this.data.messages,
+      this.data.messageSeq
+    );
+    return this.data.conversations;
+  }
+
+  getActiveConversation() {
+    const conversations = this.ensureConversations();
+    return conversations.items.find((item) => item.id === conversations.activeId) || conversations.items[0];
+  }
+
+  syncActiveConversationFromLegacy() {
+    const conversations = this.ensureConversations();
+    const activeIndex = conversations.items.findIndex((item) => item.id === conversations.activeId);
+    if (activeIndex < 0) return null;
+
+    const active = conversations.items[activeIndex];
+    const messages = Array.isArray(this.data.messages)
+      ? this.data.messages.map((message, index) => normalizeMessage(message, index))
+      : [];
+    const fallbackSeq = messages.reduce((max, message) => Math.max(max, Number(message.id) || 0), -1) + 1;
+    const updated = {
+      ...active,
+      title: String(this.data.group.title ?? '').trim(),
+      subtitle: String(this.data.group.subtitle ?? '').trim(),
+      photoUrl: String(this.data.group.photoUrl ?? '').trim(),
+      avatarDataUrl: this.data.group.avatarDataUrl,
+      messages,
+      messageSeq: typeof this.data.messageSeq === 'number' ? this.data.messageSeq : fallbackSeq,
+    };
+
+    conversations.items[activeIndex] = updated;
+    return updated;
+  }
+
+  applyConversationToLegacy(conversation) {
+    const active = normalizeConversation(conversation, createDefaultConversation(this.data.group, this.data.messages, this.data.messageSeq));
+    this.data.group = {
+      ...this.data.group,
+      title: active.title,
+      subtitle: active.subtitle,
+      photoUrl: active.photoUrl,
+      avatarDataUrl: active.avatarDataUrl,
+    };
+    this.data.messages = deepClone(active.messages);
+    this.data.messageSeq = active.messageSeq;
+    return active;
+  }
+
+  selectConversation(id, silent = false) {
+    this.syncActiveConversationFromLegacy();
+    const conversations = this.ensureConversations();
+    const next = conversations.items.find((item) => item.id === id) || conversations.items[0];
+    conversations.activeId = next.id;
+    this.applyConversationToLegacy(next);
+    if (!silent) this.notify('conversations.activeId');
+    return next;
+  }
+
+  addConversation(input = {}, silent = false) {
+    this.syncActiveConversationFromLegacy();
+    const conversations = this.ensureConversations();
+    const existingIds = new Set(conversations.items.map((item) => item.id));
+    const title = cleanText(input.title, 'Yeni sohbet');
+    const firstMessage = cleanText(input.firstMessage, '');
+    const messages = firstMessage
+      ? [normalizeMessage({
+        id: 0,
+        speaker: this.data.selfName || DEFAULT_STATE.selfName,
+        text: firstMessage,
+        time: nowTime(),
+      }, 0)]
+      : [];
+    const conversation = normalizeConversation({
+      id: createUniqueConversationId(input.id || title, existingIds, `conversation-${conversations.items.length + 1}`),
+      title,
+      subtitle: cleanText(input.subtitle, 'Sohbet detayini ac'),
+      photoUrl: cleanText(input.photoUrl || input.avatarUrl, ''),
+      avatarDataUrl: input.avatarDataUrl || null,
+      messages,
+      messageSeq: messages.length,
+    }, createDefaultConversation({ title, subtitle: input.subtitle, photoUrl: input.photoUrl }, messages, messages.length));
+
+    conversations.items.push(conversation);
+    conversations.activeId = conversation.id;
+    this.applyConversationToLegacy(conversation);
+    if (!silent) this.notify('conversations');
+    return conversation;
   }
 
   /**
@@ -339,6 +478,7 @@ export class StateManager {
     const id = this.data.messageSeq++;
     const message = { id, ...msg, tickStatus: msg.tickStatus || null, reactions: Array.isArray(msg.reactions) ? msg.reactions : [] };
     this.data.messages.push(message);
+    this.syncActiveConversationFromLegacy();
     this.notify('messages');
     return message;
   }
@@ -349,6 +489,7 @@ export class StateManager {
   clearMessages() {
     this.data.messages = [];
     this.data.messageSeq = 0;
+    this.syncActiveConversationFromLegacy();
     this.notify('messages');
   }
 
@@ -356,6 +497,7 @@ export class StateManager {
    * Export state for storage
    */
   export() {
+    this.syncActiveConversationFromLegacy();
     this.data.conversations = normalizeConversations(
       this.data.conversations,
       this.data.group,
@@ -431,6 +573,7 @@ export class StateManager {
       this.data.messages,
       this.data.messageSeq
     );
+    this.applyConversationToLegacy(this.getActiveConversation());
     this.data.phoneShellContent = normalizePhoneShellContent(data.phoneShellContent);
 
     this.notify();
