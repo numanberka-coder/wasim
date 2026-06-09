@@ -571,12 +571,19 @@ describe('Faz 41 phone app shell', () => {
       expect(icon.querySelectorAll('svg')).toHaveLength(1);
     });
     expect(document.getElementById('headerMenuBtn')?.tagName).toBe('BUTTON');
-    expect(PHONE_ICON_SVG.chatPlus).toContain('m84.375 66.668');
-    expect(PHONE_ICON_SVG.chatPlus).toContain('m51.043 62.5v-25');
-    expect(PHONE_ICON_SVG.phonePlus).toContain('m33.812 9.7148');
-    expect(PHONE_ICON_SVG.phonePlus).toContain('m69.793 45.832');
-    expect(PHONE_ICON_SVG.phone).toContain('M59.308,74.811');
-    expect(PHONE_ICON_SVG.video).toContain('m65.625 33.332');
+    Object.values(PHONE_ICON_SVG).forEach((svg) => {
+      expect(svg).toContain('viewBox="0 0 24 24"');
+      expect(svg).not.toContain('viewBox="0 0 100 100"');
+    });
+    expect(PHONE_ICON_SVG.chatPlus).toContain('q-.475.475-1.088.213');
+    expect(PHONE_ICON_SVG.phonePlus).toContain('M19.95 21');
+    expect(PHONE_ICON_SVG.phone).toContain('M19.95 21');
+    expect(PHONE_ICON_SVG.video).toContain('M4 20q-.825');
+    expect(PHONE_ICON_SVG.keypad).toContain('M12 23');
+    expect(PHONE_ICON_SVG.updates).toContain('<circle cx="12" cy="12" r="4.15"');
+    expect(PHONE_ICON_SVG.updates).toContain('A9.45 9.45 0 0 1');
+    expect(PHONE_ICON_SVG.updates).toContain('M5.8 17.45 3.45 21.15 7.85 19.55');
+    expect(PHONE_ICON_SVG.updates).toContain('stroke-linecap="round"');
   });
 
   it('keeps the chat back button transparent, touchable and behaviorally wired', () => {
@@ -619,8 +626,8 @@ describe('Faz 41 phone app shell', () => {
 
     expect(phoneShellCss).toContain('.wa-phone-icon');
     expect(phoneShellCss).toContain('.wa-phone-icon svg');
-    expect(phoneShellCss).toContain('stroke: currentColor');
-    expect(phoneShellCss).toContain('stroke-linecap: round');
+    expect(phoneShellCss).toContain('fill: currentColor');
+    expect(phoneShellCss).toContain('stroke: none');
     expect(phoneShellCss).toContain('.phone-bottom-nav-item.is-active .wa-phone-icon');
     expect(phoneShellCss).toContain('color: #fff');
     expect(phoneShellCss).toContain('.phone-call-shortcut-icon .wa-phone-icon');
