@@ -453,7 +453,7 @@ export class StateManager {
     const conversation = normalizeConversation({
       id: createUniqueConversationId(input.id || title, existingIds, `conversation-${conversations.items.length + 1}`),
       title,
-      subtitle: cleanText(input.subtitle, 'Sohbet detayini ac'),
+      subtitle: cleanText(input.subtitle, 'Sohbet detayını aç'),
       photoUrl: cleanText(input.photoUrl || input.avatarUrl, ''),
       avatarDataUrl: input.avatarDataUrl || null,
       messages,

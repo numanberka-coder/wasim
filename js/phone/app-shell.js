@@ -354,7 +354,7 @@ function syncHomeChatSummary() {
 
 function createRecentUpdateRow(update) {
   const title = cleanText(update?.title, 'Güncelleme');
-  const meta = cleanText(update?.meta, 'Bugun');
+  const meta = cleanText(update?.meta, 'Bugün');
   const initials = cleanText(update?.initials, getInitials(title)).slice(0, 3).toLocaleUpperCase('tr-TR');
   const button = document.createElement('button');
   button.className = 'phone-status-row';

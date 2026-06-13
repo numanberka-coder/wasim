@@ -121,6 +121,19 @@ function init() {
   // Bind event handlers — KRİTİK: bu satıra ulaşılmazsa hiçbir buton çalışmaz
   bindEventHandlers();
 
+  // Hedef sohbet seçicileri + grup formu senkronu (Basit + Pro)
+  state.subscribe((path) => {
+    if (!path || path === 'conversations' || path.startsWith('conversations')) {
+      syncActiveConversationUI();
+    } else if (path === 'group' || path.startsWith('group.')) {
+      refreshTargetConversationSelects();
+    }
+  });
+  document.querySelectorAll('[data-target-conversation]').forEach((select) => {
+    select.addEventListener('change', handleTargetConversationChange);
+  });
+  syncActiveConversationUI();
+
   // Render scene list + event delegation
   initSceneListDelegation();
   renderSceneUx();
@@ -232,6 +245,60 @@ function populateFormFields() {
   } catch (err) {
     Logger.error('Form alanları doldurulurken hata:', err);
   }
+}
+
+/**
+ * Hedef sohbet seçicileri (Hazırla + Senaryo) — aktif conversation'ı seçtirir.
+ * Senaryo/Satır Sırası oynatması aktif sohbete yazıldığı için bu seçici hedefi belirler.
+ */
+function refreshTargetConversationSelects() {
+  const selects = document.querySelectorAll('[data-target-conversation]');
+  if (!selects.length) return;
+  const conversations = state.ensureConversations();
+  selects.forEach((select) => {
+    select.replaceChildren(
+      ...conversations.items.map((c) => createElement('option', { value: c.id }, [
+        (c.title || '').trim() || 'Sohbet',
+      ])),
+      createElement('option', { value: '__new__' }, ['➕ Yeni sohbet…'])
+    );
+    select.value = conversations.activeId;
+  });
+}
+
+/** Grup Bilgileri formunu aktif sohbetin grup verisinden doldur */
+function populateGroupFormFromState() {
+  const group = state.get('group') || {};
+  setInputValue('groupTitle', group.title);
+  setInputValue('groupSubtitle', group.subtitle);
+  setInputValue('dayLabel', group.dayLabel);
+  setInputValue('groupPhotoUrl', group.photoUrl);
+}
+
+function syncActiveConversationUI() {
+  populateGroupFormFromState();
+  refreshTargetConversationSelects();
+}
+
+function handleTargetConversationChange(e) {
+  const select = e.target.closest('[data-target-conversation]');
+  if (!select) return;
+  const value = select.value;
+
+  if (value === '__new__') {
+    const name = (window.prompt('Yeni sohbet adı:') || '').trim();
+    if (!name) {
+      refreshTargetConversationSelects(); // seçiciyi aktif sohbete geri al
+      return;
+    }
+    state.addConversation({ title: name });
+  } else {
+    state.selectConversation(value);
+  }
+
+  // Telefon önizlemesi seçilen sohbete döner; form + seçiciler abonelik ile tazelenir.
+  syncHeader();
+  rebuildChat();
 }
 
 /**

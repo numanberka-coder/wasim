@@ -120,7 +120,7 @@ describe('Faz 41 phone app shell', () => {
     expect(document.getElementById('phoneShellCameraBtn')).not.toBeNull();
     expect(search?.textContent).toContain('Ara');
     expect(filters.map((filter) => filter.dataset.phoneChatFilter)).toEqual(CHAT_FILTERS);
-    expect(filters.map((filter) => filter.textContent?.trim())).toEqual(['All', 'Unread', 'Groups']);
+    expect(filters.map((filter) => filter.textContent?.trim())).toEqual(['Tümü', 'Okunmamış', 'Gruplar']);
     expect(document.querySelector('[data-phone-chat-filter="all"]')?.getAttribute('aria-pressed')).toBe('true');
     expect(chatRow?.querySelector('#homeChatTitle')).not.toBeNull();
     expect(fab?.closest('[data-phone-tab-panel="chats"]')).not.toBeNull();

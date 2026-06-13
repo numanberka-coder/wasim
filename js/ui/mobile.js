@@ -231,7 +231,7 @@ function openMobileMenu(options = {}) {
   syncPreviewSheetBounds(dd);
   triggers.forEach((trigger) => {
     trigger.setAttribute('aria-expanded', 'true');
-    trigger.setAttribute('aria-label', 'Mobil menuyu kapat');
+    trigger.setAttribute('aria-label', 'Mobil menüyü kapat');
   });
   if (isMobileView() && backdrop) {
     backdrop.classList.add('is-open', 'is-menu-backdrop');
@@ -249,7 +249,7 @@ function closeMobileMenu(options = {}) {
   document.body.classList.remove('mobile-menu-open');
   triggers.forEach((trigger) => {
     trigger.setAttribute('aria-expanded', 'false');
-    trigger.setAttribute('aria-label', 'Mobil menuyu ac');
+    trigger.setAttribute('aria-label', 'Mobil menüyü aç');
   });
   if (backdrop) {
     backdrop.classList.remove('is-menu-backdrop');
@@ -356,7 +356,7 @@ function createMenuItemElement(item) {
   button.dataset.target = item.target;
   if (item.mode === MENU_MODES.PRO) button.dataset.mode = MENU_MODES.PRO;
   button.setAttribute('role', 'menuitem');
-  button.setAttribute('aria-label', `${item.label} - ${item.type === 'panel' ? 'panel ac' : 'aksiyon calistir'}`);
+  button.setAttribute('aria-label', `${item.label} - ${item.type === 'panel' ? 'paneli aç' : 'aksiyonu çalıştır'}`);
   if (item.type === 'panel') button.setAttribute('aria-controls', item.target);
 
   const icon = document.createElement('span');
