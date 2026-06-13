@@ -2,7 +2,8 @@
    CSS VARIABLES - WhatsApp Simulator
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+/* Roboto, index.html'deki <link rel="preconnect"> + <link rel="stylesheet">
+   ile yükleniyor; burada @import tekrarı render-bloklayıcı olduğu için kaldırıldı. */
 
 :root {
   /* ===== ANA RENKLER (COLORS) ===== */

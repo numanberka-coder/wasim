@@ -2,8 +2,12 @@
    PHONE HOME EDITORS - Shared bottom sheet infrastructure
    ======================================== */
 
-import { $ } from '../utils.js';
+import { $, readFileAsDataURL } from '../utils.js';
 import { state } from '../state.js';
+
+function sanitizeImageValue(value) {
+  return String(value || '').replace(/["\r\n\\]/g, '');
+}
 
 function cleanValue(value) {
   return String(value ?? '').trim();
@@ -16,12 +20,13 @@ function getUpdatesEditorValues() {
     statusTitle: cleanValue(updates.status?.title),
     statusMeta: cleanValue(updates.status?.meta),
     statusNote: cleanValue(updates.status?.note),
-    recent0Title: cleanValue(recent[0]?.title),
-    recent0Meta: cleanValue(recent[0]?.meta),
-    recent0Initials: cleanValue(recent[0]?.initials),
-    recent1Title: cleanValue(recent[1]?.title),
-    recent1Meta: cleanValue(recent[1]?.meta),
-    recent1Initials: cleanValue(recent[1]?.initials),
+    statusPhoto: cleanValue(updates.status?.photo),
+    recent: recent.map((item) => ({
+      title: cleanValue(item?.title),
+      meta: cleanValue(item?.meta),
+      initials: cleanValue(item?.initials),
+      photo: cleanValue(item?.photo),
+    })),
     channelTitle: cleanValue(updates.channels?.title),
     channelDescription: cleanValue(updates.channels?.description),
     channelDiscoverLabel: cleanValue(updates.channels?.discoverLabel),
@@ -39,12 +44,13 @@ function getCallsEditorValues() {
     values[`call${index}Direction`] = cleanValue(call?.direction) || 'incoming';
     values[`call${index}Type`] = cleanValue(call?.type) || 'voice';
     values[`call${index}Initials`] = cleanValue(call?.initials);
+    values[`call${index}Avatar`] = cleanValue(call?.avatarDataUrl || call?.avatarUrl);
   });
   return values;
 }
 
 const CALL_DIRECTION_OPTIONS = [
-  { value: 'missed', label: 'Cevapsiz' },
+  { value: 'missed', label: 'Cevapsız' },
   { value: 'outgoing', label: 'Giden' },
   { value: 'incoming', label: 'Gelen' },
 ];
@@ -57,12 +63,12 @@ const CALL_TYPE_OPTIONS = [
 const EDITOR_CONFIGS = {
   newConversation: {
     title: 'Yeni sohbet',
-    description: 'Sohbetler listesine kalici yeni bir sohbet ekler.',
+    description: 'Sohbetler listesine kalıcı yeni bir sohbet ekler.',
     fields: [
-      { name: 'title', label: 'Sohbet adi', required: true, maxLength: 64 },
+      { name: 'title', label: 'Sohbet adı', required: true, maxLength: 64 },
       { name: 'subtitle', label: 'Alt bilgi', required: false, maxLength: 96 },
       { name: 'avatarUrl', label: 'Avatar URL', required: false, maxLength: 240 },
-      { name: 'firstMessage', label: 'Ilk mesaj', required: false, maxLength: 280, multiline: true },
+      { name: 'firstMessage', label: 'İlk mesaj', required: false, maxLength: 280, multiline: true },
     ],
     save(values) {
       return state.addConversation({
@@ -74,26 +80,41 @@ const EDITOR_CONFIGS = {
     },
   },
   updatesStatus: {
-    title: 'Guncellemeleri duzenle',
-    description: 'Durum, son guncellemeler ve kanal metinlerini gunceller.',
+    title: 'Güncellemeleri düzenle',
+    description: 'Durum, son güncellemeler ve kanal metinlerini günceller.',
     fields: [
-      { name: 'statusTitle', label: 'Durum basligi', required: true, maxLength: 48 },
-      { name: 'statusMeta', label: 'Durum yardimci metni', required: true, maxLength: 96 },
-      { name: 'statusNote', label: 'Durum zamani/metni', required: true, maxLength: 120 },
-      { name: 'recent0Title', label: 'Son guncelleme 1 isim', required: true, maxLength: 48 },
-      { name: 'recent0Meta', label: 'Son guncelleme 1 zaman', required: true, maxLength: 48 },
-      { name: 'recent0Initials', label: 'Son guncelleme 1 avatar', required: true, maxLength: 3 },
-      { name: 'recent1Title', label: 'Son guncelleme 2 isim', required: true, maxLength: 48 },
-      { name: 'recent1Meta', label: 'Son guncelleme 2 zaman', required: true, maxLength: 48 },
-      { name: 'recent1Initials', label: 'Son guncelleme 2 avatar', required: true, maxLength: 3 },
-      { name: 'channelTitle', label: 'Kanal basligi', required: true, maxLength: 48 },
-      { name: 'channelDescription', label: 'Kanal aciklamasi', required: true, maxLength: 180, multiline: true },
-      { name: 'channelDiscoverLabel', label: 'Kesfet CTA', required: true, maxLength: 32 },
-      { name: 'channelCreateLabel', label: 'Kanal olustur CTA', required: true, maxLength: 48 },
+      { name: 'statusTitle', label: 'Durum başlığı', required: true, maxLength: 48 },
+      { name: 'statusMeta', label: 'Durum yardımcı metni', required: true, maxLength: 96 },
+      { name: 'statusNote', label: 'Durum zamanı/metni', required: true, maxLength: 120 },
+      { name: 'statusPhoto', label: 'Durum fotoğrafı', type: 'avatar', required: false },
+      {
+        name: 'recent',
+        label: 'Son güncellemeler',
+        type: 'list',
+        addLabel: 'Güncelleme ekle',
+        min: 0,
+        max: 8,
+        itemFields: [
+          { name: 'title', label: 'İsim', required: true, maxLength: 48 },
+          { name: 'meta', label: 'Zaman', required: true, maxLength: 48 },
+          { name: 'initials', label: 'Avatar (baş harf)', required: false, maxLength: 3 },
+          { name: 'photo', label: 'Fotoğraf', type: 'avatar', required: false },
+        ],
+      },
+      { name: 'channelTitle', label: 'Kanal başlığı', required: true, maxLength: 48 },
+      { name: 'channelDescription', label: 'Kanal açıklaması', required: true, maxLength: 180, multiline: true },
+      { name: 'channelDiscoverLabel', label: 'Keşfet CTA', required: true, maxLength: 32 },
+      { name: 'channelCreateLabel', label: 'Kanal oluştur CTA', required: true, maxLength: 48 },
     ],
     values: getUpdatesEditorValues,
     save(values) {
       const current = state.get('phoneShellContent.updates') || {};
+      const recent = (Array.isArray(values.recent) ? values.recent : []).map((item) => ({
+        title: item.title,
+        meta: item.meta,
+        initials: item.initials,
+        photo: item.photo || '',
+      }));
       state.set('phoneShellContent.updates', {
         ...current,
         status: {
@@ -101,19 +122,9 @@ const EDITOR_CONFIGS = {
           title: values.statusTitle,
           meta: values.statusMeta,
           note: values.statusNote,
+          photo: values.statusPhoto || '',
         },
-        recent: [
-          {
-            title: values.recent0Title,
-            meta: values.recent0Meta,
-            initials: values.recent0Initials,
-          },
-          {
-            title: values.recent1Title,
-            meta: values.recent1Meta,
-            initials: values.recent1Initials,
-          },
-        ],
+        recent,
         channels: {
           ...(current.channels || {}),
           title: values.channelTitle,
@@ -125,53 +136,63 @@ const EDITOR_CONFIGS = {
     },
   },
   communitiesIntro: {
-    title: 'Topluluk gorunumunu duzenle',
-    description: 'Bos durum kartini sohbet benzeri bir topluluk tanitimi olarak gunceller.',
+    title: 'Topluluk görünümünü düzenle',
+    description: 'Boş durum kartını sohbet benzeri bir topluluk tanıtımı olarak günceller.',
     surface: 'communities-chat',
     path: 'phoneShellContent.communities',
     fields: [
-      { name: 'title', label: 'Topluluk basligi', required: true, maxLength: 72 },
-      { name: 'description', label: 'Topluluk aciklamasi', required: true, maxLength: 180, multiline: true },
-      { name: 'linkLabel', label: 'Ornek link metni', required: true, maxLength: 48 },
+      { name: 'title', label: 'Topluluk başlığı', required: true, maxLength: 72 },
+      { name: 'description', label: 'Topluluk açıklaması', required: true, maxLength: 180, multiline: true },
+      { name: 'linkLabel', label: 'Örnek link metni', required: true, maxLength: 48 },
       { name: 'ctaLabel', label: 'CTA metni', required: true, maxLength: 48 },
     ],
   },
   callsList: {
-    title: 'Arama listesini duzenle',
-    description: 'Son aramalar satirlarinin isim, zaman, yon, tip ve avatar metinlerini gunceller.',
+    title: 'Arama listesini düzenle',
+    description: 'Son aramalar satırlarının isim, zaman, yön, tip ve avatar metinlerini günceller.',
     surface: 'calls-list',
     fields: [
       { name: 'call0Name', label: 'Arama 1 isim', required: true, maxLength: 48 },
       { name: 'call0Meta', label: 'Arama 1 tarih/metin', required: true, maxLength: 48 },
-      { name: 'call0Direction', label: 'Arama 1 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call0Direction', label: 'Arama 1 yön', required: true, options: CALL_DIRECTION_OPTIONS },
       { name: 'call0Type', label: 'Arama 1 tipi', required: true, options: CALL_TYPE_OPTIONS },
-      { name: 'call0Initials', label: 'Arama 1 avatar', required: true, maxLength: 3 },
+      { name: 'call0Initials', label: 'Arama 1 avatar (baş harf)', required: true, maxLength: 3 },
+      { name: 'call0Avatar', label: 'Arama 1 foto', type: 'avatar', required: false },
       { name: 'call1Name', label: 'Arama 2 isim', required: true, maxLength: 48 },
       { name: 'call1Meta', label: 'Arama 2 tarih/metin', required: true, maxLength: 48 },
-      { name: 'call1Direction', label: 'Arama 2 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call1Direction', label: 'Arama 2 yön', required: true, options: CALL_DIRECTION_OPTIONS },
       { name: 'call1Type', label: 'Arama 2 tipi', required: true, options: CALL_TYPE_OPTIONS },
-      { name: 'call1Initials', label: 'Arama 2 avatar', required: true, maxLength: 3 },
+      { name: 'call1Initials', label: 'Arama 2 avatar (baş harf)', required: true, maxLength: 3 },
+      { name: 'call1Avatar', label: 'Arama 2 foto', type: 'avatar', required: false },
       { name: 'call2Name', label: 'Arama 3 isim', required: true, maxLength: 48 },
       { name: 'call2Meta', label: 'Arama 3 tarih/metin', required: true, maxLength: 48 },
-      { name: 'call2Direction', label: 'Arama 3 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call2Direction', label: 'Arama 3 yön', required: true, options: CALL_DIRECTION_OPTIONS },
       { name: 'call2Type', label: 'Arama 3 tipi', required: true, options: CALL_TYPE_OPTIONS },
-      { name: 'call2Initials', label: 'Arama 3 avatar', required: true, maxLength: 3 },
+      { name: 'call2Initials', label: 'Arama 3 avatar (baş harf)', required: true, maxLength: 3 },
+      { name: 'call2Avatar', label: 'Arama 3 foto', type: 'avatar', required: false },
       { name: 'call3Name', label: 'Arama 4 isim', required: true, maxLength: 48 },
       { name: 'call3Meta', label: 'Arama 4 tarih/metin', required: true, maxLength: 48 },
-      { name: 'call3Direction', label: 'Arama 4 yon', required: true, options: CALL_DIRECTION_OPTIONS },
+      { name: 'call3Direction', label: 'Arama 4 yön', required: true, options: CALL_DIRECTION_OPTIONS },
       { name: 'call3Type', label: 'Arama 4 tipi', required: true, options: CALL_TYPE_OPTIONS },
-      { name: 'call3Initials', label: 'Arama 4 avatar', required: true, maxLength: 3 },
+      { name: 'call3Initials', label: 'Arama 4 avatar (baş harf)', required: true, maxLength: 3 },
+      { name: 'call3Avatar', label: 'Arama 4 foto', type: 'avatar', required: false },
     ],
     values: getCallsEditorValues,
     save(values) {
       const current = state.get('phoneShellContent.calls') || {};
-      const items = [0, 1, 2, 3].map((index) => ({
-        name: values[`call${index}Name`],
-        meta: values[`call${index}Meta`],
-        direction: values[`call${index}Direction`],
-        type: values[`call${index}Type`],
-        initials: values[`call${index}Initials`],
-      }));
+      const items = [0, 1, 2, 3].map((index) => {
+        const avatar = values[`call${index}Avatar`] || '';
+        const isData = /^data:/i.test(avatar);
+        return {
+          name: values[`call${index}Name`],
+          meta: values[`call${index}Meta`],
+          direction: values[`call${index}Direction`],
+          type: values[`call${index}Type`],
+          initials: values[`call${index}Initials`],
+          avatarUrl: isData ? '' : avatar,
+          avatarDataUrl: isData ? avatar : null,
+        };
+      });
       state.set('phoneShellContent.calls', { ...current, items });
     },
   },
@@ -219,7 +240,132 @@ function setSheetOpen(isOpen) {
   }
 }
 
+function createAvatarField(field, value) {
+  const wrap = document.createElement('div');
+  wrap.className = 'phone-editor-field phone-editor-field-avatar';
+
+  const label = document.createElement('span');
+  label.className = 'phone-editor-label';
+  label.textContent = field.label;
+
+  const row = document.createElement('div');
+  row.className = 'phone-editor-avatar-row';
+
+  const preview = document.createElement('span');
+  preview.className = 'phone-editor-avatar-preview';
+  preview.setAttribute('aria-hidden', 'true');
+
+  const hidden = document.createElement('input');
+  hidden.type = 'hidden';
+  hidden.name = field.name;
+  hidden.value = cleanValue(value);
+
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.hidden = true;
+
+  const controls = document.createElement('div');
+  controls.className = 'phone-editor-avatar-controls';
+
+  const fileBtn = document.createElement('button');
+  fileBtn.type = 'button';
+  fileBtn.className = 'phone-editor-avatar-btn';
+  fileBtn.textContent = 'Foto seç';
+
+  const urlInput = document.createElement('input');
+  urlInput.type = 'text';
+  urlInput.className = 'phone-editor-avatar-url';
+  urlInput.placeholder = 'veya görsel URL';
+  urlInput.autocomplete = 'off';
+  urlInput.value = /^data:/i.test(hidden.value) ? '' : hidden.value;
+
+  const setPreview = (v) => {
+    const safe = sanitizeImageValue(v);
+    preview.style.backgroundImage = safe ? `url("${safe}")` : '';
+    preview.classList.toggle('has-image', Boolean(safe));
+  };
+  setPreview(hidden.value);
+
+  fileBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    try {
+      const data = await readFileAsDataURL(file);
+      hidden.value = data;
+      urlInput.value = '';
+      setPreview(data);
+    } catch {
+      /* görsel okunamadı — yoksay */
+    }
+  });
+  urlInput.addEventListener('input', () => {
+    hidden.value = urlInput.value.trim();
+    setPreview(hidden.value);
+  });
+
+  controls.append(fileBtn, urlInput);
+  row.append(preview, controls);
+  wrap.append(label, row, hidden, fileInput);
+  return wrap;
+}
+
+function createListField(field, value) {
+  const wrap = document.createElement('div');
+  wrap.className = 'phone-editor-list';
+  wrap.dataset.listName = field.name;
+
+  const head = document.createElement('div');
+  head.className = 'phone-editor-list-head';
+  const label = document.createElement('span');
+  label.className = 'phone-editor-label';
+  label.textContent = field.label;
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'phone-editor-list-add';
+  addBtn.textContent = field.addLabel || 'Ekle';
+  head.append(label, addBtn);
+
+  const rows = document.createElement('div');
+  rows.className = 'phone-editor-list-rows';
+
+  const max = field.max || 12;
+  const min = field.min || 0;
+
+  const addRow = (itemValue = {}) => {
+    if (rows.children.length >= max) return;
+    const row = document.createElement('div');
+    row.className = 'phone-editor-list-row';
+    field.itemFields.forEach((itemField) => {
+      row.appendChild(createField(itemField, itemValue[itemField.name]));
+    });
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'phone-editor-list-remove';
+    remove.textContent = 'Satırı sil';
+    remove.addEventListener('click', () => {
+      if (rows.children.length <= min) return;
+      row.remove();
+    });
+    row.appendChild(remove);
+    rows.appendChild(row);
+  };
+
+  const initial = Array.isArray(value) ? value : [];
+  if (initial.length) initial.forEach((item) => addRow(item));
+  else addRow({});
+
+  addBtn.addEventListener('click', () => addRow({}));
+
+  wrap.append(head, rows);
+  return wrap;
+}
+
 function createField(field, value) {
+  if (field.type === 'avatar') return createAvatarField(field, value);
+  if (field.type === 'list') return createListField(field, value);
+
   const wrap = document.createElement('label');
   wrap.className = 'phone-editor-field';
   wrap.setAttribute('for', `phoneEditorField_${field.name}`);
@@ -272,11 +418,32 @@ function collectValues(config) {
   const values = {};
 
   for (const field of config.fields) {
+    if (field.type === 'list') {
+      const container = fields?.querySelector(`.phone-editor-list[data-list-name="${field.name}"]`);
+      const rowEls = container ? [...container.querySelectorAll('.phone-editor-list-row')] : [];
+      const items = [];
+      for (const rowEl of rowEls) {
+        const item = {};
+        for (const itemField of field.itemFields) {
+          const cell = rowEl.querySelector(`[name="${itemField.name}"]`);
+          const cellValue = cleanValue(cell?.value);
+          if (itemField.required && !cellValue) {
+            cell?.focus();
+            return { ok: false, error: `${field.label}: tüm zorunlu alanları doldurun.` };
+          }
+          item[itemField.name] = cellValue;
+        }
+        items.push(item);
+      }
+      values[field.name] = items;
+      continue;
+    }
+
     const input = fields?.querySelector(`[name="${field.name}"]`);
     const value = cleanValue(input?.value);
     if (field.required && !value) {
       input?.focus();
-      return { ok: false, error: `${field.label} bos birakilamaz.` };
+      return { ok: false, error: `${field.label} boş bırakılamaz.` };
     }
     values[field.name] = value;
   }

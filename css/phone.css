@@ -14,12 +14,12 @@
   --chat-wallpaper-size: auto, auto, auto, 400px 400px, auto;
   --chat-wallpaper-blend: normal, normal, normal, overlay, normal;
   --chat-font-size: 14.2px;
-  --chat-line-height: 19px;
+  --chat-line-height: 1.34;       /* birimsiz çarpan — typography.js ile aynı model */
   --bubble-max-width: 55%;
-  --bubble-padding-top: 3px;
-  --bubble-padding-right: 4px;
-  --bubble-padding-bottom: 3px;
-  --bubble-padding-left: 4px;
+  --bubble-padding-top: 6px;
+  --bubble-padding-right: 7px;
+  --bubble-padding-bottom: 8px;
+  --bubble-padding-left: 9px;
 
   width: 400px;
   height: 820px;
@@ -562,11 +562,11 @@
 /* Message Bubble */
 .msg-bubble {
   max-width: var(--bubble-max-width);
-  padding: 6px 7px 8px 9px;
+  padding: var(--bubble-padding-top) var(--bubble-padding-right) var(--bubble-padding-bottom) var(--bubble-padding-left);
   border-radius: 7.5px;
   white-space: pre-wrap;
-  font-size: 14.2px;
-  line-height: 19px;
+  font-size: var(--chat-font-size);
+  line-height: var(--chat-line-height);
   position: relative;
   word-wrap: break-word;
   overflow: visible;

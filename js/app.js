@@ -18,6 +18,7 @@ import { markInvalid, clearInvalid } from './ui/validation.js';
 import { initMobile, registerMobileCallback } from './ui/mobile.js';
 import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
+import { initUiIcons } from './ui/ui-icons.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
@@ -88,6 +89,7 @@ function init() {
   // Initialize UI modules
   initTabs();
   initAccordions();
+  initUiIcons();
   initForms();
   initPlayer();
   initInteractive();

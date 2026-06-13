@@ -29,6 +29,23 @@
 - **Duzeltme:** FAB ve kritik sekme ikonlari icin referans goruntudeki
   silhouette once ayarlanacak, sonra DOM/CSS testleriyle sozlesme korunacak.
 
+## 5. `[hidden]` özniteliği `display:grid/flex` ile ezilir
+- **Hata:** `syncPhoneHomeHeader` sekme-başına `button.hidden` ayarlıyordu ama
+  `.phone-home-icon-btn { display: grid }` UA `[hidden]{display:none}` kuralını
+  (eşit specificity, sonra gelen kazanır) eziyordu → kamera/arama her sekmede göründü.
+- **Kural:** `[hidden]` ile gizlenecek elemanlara `display` veren bir kural varsa,
+  mutlaka `.selector[hidden]{display:none}` override'ı ekle. JS'in `.hidden=true`
+  yazması, CSS layout testleri olmadan (jsdom) yakalanmaz; canlı `getComputedStyle`
+  ile doğrula.
+
+## 6. UI metinleri doğru Türkçe karakterlerle yazılmalı
+- **Hata:** Telefon shell ve editor metinleri ASCII-only kalmıştı (`Guncellemeler`,
+  `Hizli`, `Cevapsiz`, `dun`, `Yildiz`...). Kullanıcı tüm sekmelerde eksik Türkçe
+  karakter bildirdi.
+- **Kural:** README "UI metinleri Türkçe" diyor — string'lerde ş/ı/ğ/ü/ö/ç/İ doğru
+  kullanılmalı. Test assertion'ları da gerçek metinle eşleşmeli; ASCII placeholder
+  bırakma. Yeni metin eklerken Türkçe karakter taraması yap.
+
 ## 4. Dolgu ikonlar optik olcekle dengelenmeli
 - **Hata:** Kullanici tarafindan verilen dolu SVG ikonlar dogru aileye yaklasti
   ama ayni piksel kutusunda chat header kamerasi kucuk, telefonu buyuk;
