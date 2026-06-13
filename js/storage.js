@@ -129,14 +129,14 @@ function buildDailyCounts(events, days, now = new Date()) {
 }
 
 function buildAnalyticsRecommendation(actions, onboarding) {
-  if (!actions.total) return 'Veri birikince sonraki odak daha net gorunecek.';
+  if (!actions.total) return 'Veri birikince sonraki odak daha net görünecek.';
   if (onboarding.status === 'skipped' || onboarding.status === 'in_progress') {
-    return 'Onboarding adimlarini kisaltma veya daha netlestirme oncelikli gorunuyor.';
+    return 'Onboarding adımlarını kısaltma veya daha netleştirme öncelikli görünüyor.';
   }
-  if (actions.play === 0) return 'Ilk oynatma akisini daha gorunur hale getirmek oncelikli.';
-  if (actions.screenshot === 0) return 'Ekran goruntusu alma aksiyonunu daha belirginlestirmek oncelikli.';
-  if (actions.templateLoad > actions.play) return 'Sablondan oynatmaya gecisi guclendirmek iyi bir sonraki odak.';
-  return 'Kullanim sinyalleri dengeli; Faz 35 akilli eslestirme icin veri birikiyor.';
+  if (actions.play === 0) return 'İlk oynatma akışını daha görünür hale getirmek öncelikli.';
+  if (actions.screenshot === 0) return 'Ekran görüntüsü alma aksiyonunu daha belirginleştirmek öncelikli.';
+  if (actions.templateLoad > actions.play) return 'Şablondan oynatmaya geçişi güçlendirmek iyi bir sonraki odak.';
+  return 'Kullanım sinyalleri dengeli; Faz 35 akıllı eşleştirme için veri birikiyor.';
 }
 
 

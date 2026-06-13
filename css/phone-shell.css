@@ -974,7 +974,7 @@
 .phone-bottom-nav-item::before {
   content: '';
   position: absolute;
-  top: 3px;
+  top: 6px;
   left: 50%;
   z-index: -1;
   width: 58px;
@@ -1512,7 +1512,7 @@ body.phone-editor-open .header-dropdown.mobile-action-sheet.is-open {
   }
 
   .phone-bottom-nav-item::before {
-    width: 44px;
+    width: 52px;
   }
 
   .phone-bottom-nav-item span {

@@ -258,7 +258,7 @@ export const DEFAULT_STATE = {
 
   // Group
   groupTitle: 'Felsefe Grubu',
-  groupSubtitle: 'Online',
+  groupSubtitle: 'çevrimiçi',
   dayLabel: 'Bugün',
   groupPhotoUrl: '',
   groupAvatarDataUrl: null,

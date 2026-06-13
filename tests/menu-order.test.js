@@ -331,10 +331,10 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(panelItem?.getAttribute('aria-controls')).toBe('script');
     expect(panelItem?.querySelector('.hd-item-icon')).not.toBeNull();
     expect(panelItem?.querySelector('.hd-item-description')?.textContent).toBe('Akış ve mesajlar');
-    expect(panelItem?.getAttribute('aria-label')).toContain('panel ac');
+    expect(panelItem?.getAttribute('aria-label')).toContain('paneli aç');
     expect(playItem?.classList.contains('hd-item-primary')).toBe(true);
     expect(resetItem?.querySelector('.hd-item-label')?.textContent).toBe('Sıfırla');
-    expect(clearItem?.getAttribute('aria-label')).toContain('aksiyon calistir');
+    expect(clearItem?.getAttribute('aria-label')).toContain('aksiyonu çalıştır');
   });
 
   it('supports keyboard open, arrow navigation, and Escape close for the mobile menu', () => {
