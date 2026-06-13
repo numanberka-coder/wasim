@@ -118,13 +118,13 @@
               <label>veya Dosya Yükle</label>
               <div class="file-input">
                 <input type="file" id="groupPhotoFile" accept="image/*">
-                <button type="button" class="file-btn secondary btn-sm">📁 Dosya Seç</button>
+                <button type="button" class="file-btn secondary btn-sm"><span class="ui-icon" data-ui-icon="folder"></span>Dosya Seç</button>
                 <span class="file-name">Seçilmedi</span>
               </div>
             </div>
             <div class="form-row" style="margin-top: 16px;">
-              <button id="applyGroupBtn" type="button">✓ Uygula</button>
-              <button id="clearGroupPhotoBtn" type="button" class="secondary">🗑️ Fotoğrafı Kaldır</button>
+              <button id="applyGroupBtn" type="button"><span class="ui-icon" data-ui-icon="check"></span>Uygula</button>
+              <button id="clearGroupPhotoBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="trash"></span>Fotoğrafı Kaldır</button>
             </div>
           </div>
         </details>
@@ -154,15 +154,15 @@
               <label>veya Dosya Yükle</label>
               <div class="file-input">
                 <input type="file" id="pAvatarFile" accept="image/*">
-                <button type="button" class="file-btn secondary btn-sm">📁 Avatar Seç</button>
+                <button type="button" class="file-btn secondary btn-sm"><span class="ui-icon" data-ui-icon="folder"></span>Avatar Seç</button>
                 <span class="file-name">Seçilmedi</span>
               </div>
             </div>
             <div class="form-row" style="margin-top: 16px; gap: 8px;">
-              <button id="savePersonBtn" type="button">💾 Kaydet</button>
-              <button id="newPersonBtn" type="button" class="secondary">➕ Yeni</button>
-              <button id="clearAvatarBtn" type="button" class="secondary">🖼️ Avatar Sil</button>
-              <button id="deletePersonBtn" type="button" class="danger">🗑️ Sil</button>
+              <button id="savePersonBtn" type="button"><span class="ui-icon" data-ui-icon="save"></span>Kaydet</button>
+              <button id="newPersonBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="plus"></span>Yeni</button>
+              <button id="clearAvatarBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="imageOff"></span>Avatar Sil</button>
+              <button id="deletePersonBtn" type="button" class="danger"><span class="ui-icon" data-ui-icon="trash"></span>Sil</button>
             </div>
           </div>
         </details>
@@ -189,9 +189,9 @@
           <div class="accordion-body">
             <div id="groupBuilderList" class="builder-list"></div>
             <div class="builder-actions" style="margin-top: 10px;">
-              <button id="groupBuilderPushBtn" type="button" class="secondary">⬇️ Senaryoya Aktar</button>
-              <button id="groupBuilderPlayBtn" type="button">▶️ Oynat</button>
-              <button id="groupBuilderClearBtn" type="button" class="danger">🗑️ Temizle</button>
+              <button id="groupBuilderPushBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="pushDown"></span>Senaryoya Aktar</button>
+              <button id="groupBuilderPlayBtn" type="button"><span class="ui-icon" data-ui-icon="play"></span>Oynat</button>
+              <button id="groupBuilderClearBtn" type="button" class="danger"><span class="ui-icon" data-ui-icon="trash"></span>Temizle</button>
             </div>
             <div class="scenario-hint" id="scenarioHint">
               💡 Daha fazla kontrol için → <strong>Senaryo Editörü</strong>
@@ -210,8 +210,8 @@
               <textarea id="peopleJson" rows="8" style="font-family: monospace; font-size: 12px;"></textarea>
             </div>
             <div class="form-row">
-              <button id="applyJsonBtn" type="button">✓ JSON Uygula</button>
-              <button id="refreshJsonBtn" type="button" class="secondary">🔄 Yenile</button>
+              <button id="applyJsonBtn" type="button"><span class="ui-icon" data-ui-icon="check"></span>JSON Uygula</button>
+              <button id="refreshJsonBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="refresh"></span>Yenile</button>
             </div>
           </div>
         </details>
@@ -335,7 +335,7 @@
                 <label id="mediaFileLabel">Dosya (foto/gif)</label>
                 <div class="file-input">
                   <input id="mediaFileInput" type="file" accept="image/*,image/gif">
-                  <button type="button" class="file-btn secondary btn-sm">📁 Dosya Seç</button>
+                  <button type="button" class="file-btn secondary btn-sm"><span class="ui-icon" data-ui-icon="folder"></span>Dosya Seç</button>
                   <span class="file-name">Seçilmedi</span>
                 </div>
               </div>
@@ -351,7 +351,7 @@
             </div>
 
             <div class="form-row" style="gap: 8px;">
-              <button id="mediaInsertBtn" type="button">➕ Senaryoya ekle</button>
+              <button id="mediaInsertBtn" type="button"><span class="ui-icon" data-ui-icon="plus"></span>Senaryoya ekle</button>
               <button id="mediaClearBtn" type="button" class="secondary">Temizle</button>
             </div>
           </div>
@@ -459,9 +459,9 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           </div>
 
           <div class="form-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <button id="interactiveToggleBtn" type="button">🎮 İnteraktif Modu Aç</button>
-            <button id="loadInteractiveDemoBtn" type="button" class="secondary">📥 Demo Yükle</button>
-            <button id="interactiveResetBtn" type="button" class="danger">🔄 Sıfırla</button>
+            <button id="interactiveToggleBtn" type="button"><span class="ui-icon" data-ui-icon="gamepad"></span>İnteraktif Modu Aç</button>
+            <button id="loadInteractiveDemoBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="inbox"></span>Demo Yükle</button>
+            <button id="interactiveResetBtn" type="button" class="danger"><span class="ui-icon" data-ui-icon="refresh"></span>Sıfırla</button>
             <span id="interactiveBadge" class="badge badge-success" style="display:none;">AKTİF</span>
           </div>
 
@@ -589,7 +589,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <p class="hint">Basit mod yeni kullanıcılar için sadeleştirilmiş ekran gösterir.</p>
             </div>
             <div class="form-row">
-              <button id="reopenOnboardingBtn" type="button" class="secondary">📖 Rehberi Tekrar Göster</button>
+              <button id="reopenOnboardingBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="book"></span>Rehberi Tekrar Göster</button>
             </div>
             <div class="onboarding-goals-mini">
               <div class="goal-chip" id="goalPlayChip">▶️ İlk mesajı oynat</div>
@@ -605,8 +605,8 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           </summary>
           <div class="accordion-body">
             <div class="form-row" style="gap: 8px;">
-              <button id="themeDarkBtn" type="button" style="flex:1;">🌙 Dark</button>
-              <button id="themeLightBtn" type="button" class="secondary" style="flex:1;">☀️ Light</button>
+              <button id="themeDarkBtn" type="button" style="flex:1;"><span class="ui-icon" data-ui-icon="moon"></span>Dark</button>
+              <button id="themeLightBtn" type="button" class="secondary" style="flex:1;"><span class="ui-icon" data-ui-icon="sun"></span>Light</button>
             </div>
           </div>
         </details>
@@ -704,7 +704,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <div class="form-row">
                 <input type="text" id="sceneNameInput" placeholder="Sahne adı girin...">
                 <select id="sceneCategoryInput" aria-label="Sahne kategorisi"></select>
-                <button type="button" id="saveSceneBtn" class="btn-sm">💾 Kaydet</button>
+                <button type="button" id="saveSceneBtn" class="btn-sm"><span class="ui-icon" data-ui-icon="save"></span>Kaydet</button>
               </div>
             </div>
             <div id="lastScenePrompt" class="scene-last-prompt" hidden></div>
@@ -779,11 +779,11 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <label>Özel Görsel</label>
               <div class="file-input">
                 <input type="file" id="wallpaperImageFile" accept="image/*">
-                <button type="button" class="file-btn secondary btn-sm">📁 Görsel Seç</button>
+                <button type="button" class="file-btn secondary btn-sm"><span class="ui-icon" data-ui-icon="folder"></span>Görsel Seç</button>
                 <span class="file-name">Seçilmedi</span>
               </div>
             </div>
-            <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+            <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
           </div>
         </details>
 
@@ -806,7 +806,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <label for="headerIconColorInput">İkon Rengi</label>
               <input type="color" id="headerIconColorInput" value="#aebac1">
             </div>
-            <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+            <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
           </div>
         </details>
 
@@ -825,7 +825,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <label for="bubbleInColorInput">Gelen Balon Rengi</label>
               <input type="color" id="bubbleInColorInput" value="#1f2c33">
             </div>
-            <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;">🔄 Varsayılana Dön</button>
+            <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
           </div>
         </details>
 
@@ -913,7 +913,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
           <header class="phone-home-header">
             <div class="phone-home-title">WhatsApp</div>
             <div class="phone-home-actions">
-              <button class="phone-home-icon-btn" id="phoneShellSearchBtn" type="button" aria-label="Guncellemelerde ara" hidden>
+              <button class="phone-home-icon-btn" id="phoneShellSearchBtn" type="button" aria-label="Güncellemelerde ara" hidden>
                 <span class="wa-phone-icon" data-phone-icon="search" aria-hidden="true"></span>
               </button>
               <button class="phone-home-icon-btn" id="phoneShellCameraBtn" type="button" aria-label="Kamera">
@@ -930,7 +930,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <div class="phone-chats-toolbar" aria-label="Sohbet arama ve filtreleri">
                 <div class="phone-chat-search" role="search" aria-label="Sohbetlerde ara">
                   <span class="wa-phone-icon" data-phone-icon="search" aria-hidden="true"></span>
-                  <span>Meta AI'ya veya Ara'ya sorun</span>
+                  <span>Ara</span>
                 </div>
                 <div class="phone-chat-filters" role="group" aria-label="Sohbet filtreleri">
                   <button class="phone-chat-filter-chip is-active" type="button" data-phone-chat-filter="all" aria-pressed="true">All</button>
@@ -957,7 +957,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               </button>
             </section>
             <section class="phone-tab-panel" id="phoneTabUpdates" data-phone-tab-panel="updates" role="tabpanel" aria-labelledby="phoneTabBtnUpdates" hidden>
-              <div class="phone-updates-view" aria-label="Guncellemeler akisi">
+              <div class="phone-updates-view" aria-label="Güncellemeler akışı">
                 <section class="phone-status-card" aria-labelledby="phoneStatusTitle">
                   <button class="phone-status-row phone-status-row-own" type="button" aria-label="Durum ekle">
                     <span class="phone-status-avatar phone-status-avatar-own" aria-hidden="true">
@@ -966,27 +966,27 @@ Destek: Bunu anlayamadım 🤔"></textarea>
                     </span>
                     <span class="phone-status-copy">
                       <span class="phone-status-title" id="phoneStatusTitle">Durumum</span>
-                      <span class="phone-status-meta" id="phoneStatusMeta">Durum guncellemesi eklemek icin dokunun</span>
+                      <span class="phone-status-meta" id="phoneStatusMeta">Durum güncellemesi eklemek için dokunun</span>
                     </span>
                   </button>
-                  <p class="phone-status-note" id="phoneStatusNote">Durum guncellemeleriniz 24 saat sonra kaybolur.</p>
+                  <p class="phone-status-note" id="phoneStatusNote">Durum güncellemeleriniz 24 saat sonra kaybolur.</p>
                 </section>
 
                 <section class="phone-updates-section" aria-labelledby="phoneRecentUpdatesTitle">
-                  <h3 class="phone-updates-section-title" id="phoneRecentUpdatesTitle">Son guncellemeler</h3>
+                  <h3 class="phone-updates-section-title" id="phoneRecentUpdatesTitle">Son güncellemeler</h3>
                   <div class="phone-status-list" id="phoneRecentUpdatesList"></div>
                 </section>
 
                 <section class="phone-channels-section" aria-labelledby="phoneChannelsTitle">
                   <div class="phone-channels-header">
                     <h3 class="phone-updates-section-title" id="phoneChannelsTitle">Kanallar</h3>
-                    <button class="phone-channel-discover" id="phoneChannelDiscoverBtn" type="button">Kesfet</button>
+                    <button class="phone-channel-discover" id="phoneChannelDiscoverBtn" type="button">Keşfet</button>
                   </div>
-                  <p class="phone-channels-copy" id="phoneChannelsDescription">Ilgilendiginiz konulardan haber almak icin kanallari takip edin.</p>
-                  <button class="phone-channel-create" id="phoneChannelCreateBtn" type="button">Kanal olustur</button>
+                  <p class="phone-channels-copy" id="phoneChannelsDescription">İlgilendiğiniz konulardan haber almak için kanalları takip edin.</p>
+                  <button class="phone-channel-create" id="phoneChannelCreateBtn" type="button">Kanal oluştur</button>
                 </section>
 
-                <div class="phone-updates-fabs" aria-label="Guncelleme aksiyonlari">
+                <div class="phone-updates-fabs" aria-label="Güncelleme aksiyonları">
                   <button class="phone-updates-fab phone-updates-fab-edit" id="phoneUpdatesEditFab" type="button" aria-label="Durum yaz">
                     <span class="wa-phone-icon" data-phone-icon="edit" aria-hidden="true"></span>
                   </button>
@@ -1011,21 +1011,21 @@ Destek: Bunu anlayamadım 🤔"></textarea>
                       <path class="phone-communities-check" d="M121 36l8 8 17-20"/>
                     </svg>
                   </div>
-                  <h2 class="phone-communities-title" id="phoneCommunitiesTitle">Topluluklar sayesinde baglantida kalin</h2>
-                  <p class="phone-communities-copy" id="phoneCommunitiesDescription">Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.</p>
+                  <h2 class="phone-communities-title" id="phoneCommunitiesTitle">Topluluklar sayesinde bağlantıda kalın</h2>
+                  <p class="phone-communities-copy" id="phoneCommunitiesDescription">İlgili grupları bir araya getirin, duyuruları kolayca paylaşın ve herkesin aynı yerde kalmasını sağlayın.</p>
                   <button class="phone-communities-link-button" type="button">
-                    <span id="phoneCommunitiesLinkLabel">Ornek topluluklari gor</span>
+                    <span id="phoneCommunitiesLinkLabel">Örnek toplulukları gör</span>
                     <span class="wa-phone-icon" data-phone-icon="arrowRight" aria-hidden="true"></span>
                   </button>
                 </div>
-                <button class="phone-communities-cta" id="phoneCommunitiesCreateBtn" type="button">Toplulugunuzu olusturun</button>
+                <button class="phone-communities-cta" id="phoneCommunitiesCreateBtn" type="button">Topluluğunuzu oluşturun</button>
               </div>
             </section>
             <section class="phone-tab-panel" id="phoneTabCalls" data-phone-tab-panel="calls" role="tabpanel" aria-labelledby="phoneTabBtnCalls" hidden>
               <div class="phone-calls-view" aria-label="Aramalar akisi">
                 <section class="phone-calls-quick" aria-labelledby="phoneCallsQuickTitle">
-                  <h3 class="phone-calls-section-title" id="phoneCallsQuickTitle">Hizli aksiyonlar</h3>
-                  <div class="phone-calls-shortcuts" role="group" aria-label="Hizli arama aksiyonlari">
+                  <h3 class="phone-calls-section-title" id="phoneCallsQuickTitle">Hızlı aksiyonlar</h3>
+                  <div class="phone-calls-shortcuts" role="group" aria-label="Hızlı arama aksiyonları">
                     <button class="phone-call-shortcut" type="button" aria-label="Ara">
                       <span class="phone-call-shortcut-icon" aria-hidden="true">
                         <span class="wa-phone-icon" data-phone-icon="phone" aria-hidden="true"></span>
@@ -1038,11 +1038,11 @@ Destek: Bunu anlayamadım 🤔"></textarea>
                       </span>
                       <span>Planla</span>
                     </button>
-                    <button class="phone-call-shortcut" type="button" aria-label="Tus takimi">
+                    <button class="phone-call-shortcut" type="button" aria-label="Tuş takımı">
                       <span class="phone-call-shortcut-icon" aria-hidden="true">
                         <span class="wa-phone-icon" data-phone-icon="keypad" aria-hidden="true"></span>
                       </span>
-                      <span>Tus takimi</span>
+                      <span>Tuş takımı</span>
                     </button>
                     <button class="phone-call-shortcut" type="button" aria-label="Favoriler">
                       <span class="phone-call-shortcut-icon" aria-hidden="true">
@@ -1072,7 +1072,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
             </button>
             <button class="phone-bottom-nav-item" id="phoneTabBtnUpdates" type="button" role="tab" data-phone-tab="updates" aria-selected="false" aria-controls="phoneTabUpdates" tabindex="-1">
               <span class="wa-phone-icon" data-phone-icon="updates" aria-hidden="true"></span>
-              <span>Guncellemeler</span>
+              <span>Güncellemeler</span>
             </button>
             <button class="phone-bottom-nav-item" id="phoneTabBtnCommunities" type="button" role="tab" data-phone-tab="communities" aria-selected="false" aria-controls="phoneTabCommunities" tabindex="-1">
               <span class="wa-phone-icon" data-phone-icon="communities" aria-hidden="true"></span>
@@ -1091,7 +1091,7 @@ Destek: Bunu anlayamadım 🤔"></textarea>
               <div class="phone-editor-head">
                 <span class="phone-editor-copy">
                   <strong id="phoneEditorTitle">Editor</strong>
-                  <span id="phoneEditorDescription">Telefon icerigini duzenle</span>
+                  <span id="phoneEditorDescription">Telefon içeriğini düzenle</span>
                 </span>
                 <button class="phone-editor-close" id="phoneEditorCloseBtn" type="button" aria-label="Editoru kapat">
                   <span class="wa-phone-icon" data-phone-icon="close" aria-hidden="true"></span>

@@ -59,9 +59,10 @@ export function applyBubbleSize() {
 
   phoneEl.style.setProperty('--bubble-max-width', `${maxWidth}%`);
 
-  // Adjust padding proportionally
-  const right = Math.round(10 * factor * 10) / 10;
-  const left = Math.round(12 * factor * 10) / 10;
+  // Yatay dolgu balon genişliğiyle orantılı — taban değerler (7/9) varsayılan
+  // ayarda .msg-bubble'ın eski sabit görünümünü (sağ 7px, sol 9px) korur.
+  const right = Math.round(7 * factor * 10) / 10;
+  const left = Math.round(9 * factor * 10) / 10;
   phoneEl.style.setProperty('--bubble-padding-right', `${right}px`);
   phoneEl.style.setProperty('--bubble-padding-left', `${left}px`);
 }
@@ -83,8 +84,9 @@ export function applyBubblePaddingY() {
   if (!phoneEl) return;
 
   const pad = clamp(state.get('settings.bubblePaddingY'), 8, 14);
-  const top = Math.max(6, pad - 1);
-  const bottom = pad + 1;
+  // Taban (pad=10) varsayılanda eski sabit dikey dolguyu (üst 6px, alt 8px) korur.
+  const top = Math.max(4, pad - 4);
+  const bottom = Math.max(6, pad - 2);
 
   phoneEl.style.setProperty('--bubble-padding-top', `${top}px`);
   phoneEl.style.setProperty('--bubble-padding-bottom', `${bottom}px`);

@@ -247,7 +247,7 @@ describe('StateManager', () => {
       });
       expect(conversations.items[0].messages[0].text).toBe('Eski mesaj');
       expect(conversations.items[0].messageSeq).toBe(5);
-      expect(sm.get('phoneShellContent.communities.ctaLabel')).toBe('Toplulugunuzu olusturun');
+      expect(sm.get('phoneShellContent.communities.ctaLabel')).toBe('Topluluğunuzu oluşturun');
     });
 
     it('preserves explicit phone data through export and import', () => {
@@ -326,6 +326,31 @@ describe('StateManager', () => {
       sm.selectConversation(support.id);
       expect(sm.get('group.title')).toBe('Destek');
       expect(sm.get('messages').map((message) => message.text)).toEqual(['Destek ilk', 'Destek ikinci']);
+    });
+
+    it('removes a conversation and falls back to another when the active one is deleted', () => {
+      sm.set('group.title', 'Ana Grup');
+      sm.addMessage({ speaker: 'Me', text: 'Ana mesaj' });
+      const support = sm.addConversation({ title: 'Destek', firstMessage: 'Destek ilk' });
+
+      // Aktif olan "Destek" siliniyor → kalan sohbete düşmeli
+      expect(sm.get('conversations.activeId')).toBe(support.id);
+      expect(sm.removeConversation(support.id)).toBe(true);
+      expect(sm.get('conversations.items').some((item) => item.id === support.id)).toBe(false);
+      expect(sm.get('group.title')).toBe('Ana Grup');
+      expect(sm.get('messages').map((message) => message.text)).toEqual(['Ana mesaj']);
+    });
+
+    it('keeps a safe default chat when the last conversation is removed', () => {
+      const activeId = sm.get('conversations.activeId');
+      expect(sm.removeConversation(activeId)).toBe(true);
+      const items = sm.get('conversations.items');
+      expect(items).toHaveLength(1);
+      expect(sm.get('messages')).toEqual([]);
+    });
+
+    it('returns false for an unknown conversation id', () => {
+      expect(sm.removeConversation('does-not-exist')).toBe(false);
     });
 
     it('cleans invalid conversations into a safe default chat', () => {

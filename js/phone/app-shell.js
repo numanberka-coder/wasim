@@ -27,7 +27,7 @@ export const PHONE_ICON_SVG = Object.freeze({
   callOut: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8.4L6.1 19.3q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7L15.6 7H10q-.425 0-.712-.288T9 6t.288-.712T10 5h8q.425 0 .713.288T19 6v8q0 .425-.288.713T18 15t-.712-.288T17 14z"/></svg>',
   callIn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 20q-.425 0-.713-.288T5 19v-8q0-.425.288-.713T6 10q.425 0 .713.288T7 11v5.6L17.925 5.675Q18.2 5.4 18.6 5.4t.7.3q.275.275.275.7t-.275.7L8.4 18H14q.425 0 .713.288T15 19q0 .425-.288.713T14 20H6Z"/></svg>',
   chats: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 18l-2.3 2.3q-.475.475-1.088.213T2 19.575V4q0-.825.588-1.412T4 2h16q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm-.85-2H20V4H4v13.125zM4 16V4zm3-2h6q.425 0 .713-.288T14 13t-.288-.712T13 12H7q-.425 0-.712.288T6 13t.288.713T7 14m0-3h10q.425 0 .713-.288T18 10t-.288-.712T17 9H7q-.425 0-.712.288T6 10t.288.713T7 11m0-3h10q.425 0 .713-.288T18 7t-.288-.712T17 6H7q-.425 0-.712.288T6 7t.288.713T7 8"/></svg>',
-  updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.15"/><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M4.95 18.35A9.45 9.45 0 0 1 3.1 9.65A9.45 9.45 0 0 1 9.35 3.1"/><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M14.65 3.1a9.45 9.45 0 0 1 6.25 6.55a9.45 9.45 0 0 1-1.85 8.7"/><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" d="M7.35 20.45A9.45 9.45 0 0 0 12 21.5a9.45 9.45 0 0 0 4.65-1.05"/><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5.8 17.45 3.45 21.15 7.85 19.55"/></svg>',
+  updates: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6" fill="currentColor"/><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="4.7 2.9"/></svg>',
   communities: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 18q-.425 0-.712-.288T0 17v-.575q0-1.075 1.1-1.75T4 14q.325 0 .625.013t.575.062q-.35.525-.525 1.1t-.175 1.2V18zm6 0q-.425 0-.712-.288T6 17v-.625q0-.8.438-1.463t1.237-1.162T9.588 13T12 12.75q1.325 0 2.438.25t1.912.75t1.225 1.163t.425 1.462V17q0 .425-.287.713T17 18zm12.5 0v-1.625q0-.65-.162-1.225t-.488-1.075q.275-.05.563-.062T20 14q1.8 0 2.9.663t1.1 1.762V17q0 .425-.288.713T23 18zM8.125 16H15.9q-.25-.5-1.388-.875T12 14.75t-2.512.375T8.125 16M4 13q-.825 0-1.412-.587T2 11q0-.85.588-1.425T4 9q.85 0 1.425.575T6 11q0 .825-.575 1.413T4 13m16 0q-.825 0-1.412-.587T18 11q0-.85.588-1.425T20 9q.85 0 1.425.575T22 11q0 .825-.575 1.413T20 13m-8-1q-1.25 0-2.125-.875T9 9q0-1.275.875-2.137T12 6q1.275 0 2.138.863T15 9q0 1.25-.862 2.125T12 12m0-2q.425 0 .713-.288T13 9t-.288-.712T12 8t-.712.288T11 9t.288.713T12 10m0-1"/></svg>',
   back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7.825 13l4.9 4.9q.3.3.288.7t-.313.7q-.3.275-.7.288t-.7-.288l-6.6-6.6q-.15-.15-.213-.325T4.426 12t.063-.375t.212-.325l6.6-6.6q.275-.275.688-.275t.712.275q.3.3.3.713t-.3.712L7.825 11H19q.425 0 .713.288T20 12t-.288.713T19 13z"/></svg>',
   emoji: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 11q.625 0 1.063-.437T17 9.5t-.437-1.062T15.5 8t-1.062.438T14 9.5t.438 1.063T15.5 11m-7 0q.625 0 1.063-.437T10 9.5t-.437-1.062T8.5 8t-1.062.438T7 9.5t.438 1.063T8.5 11m-.4 10.213q-1.825-.788-3.175-2.138T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22t-3.9-.788M12 17.5q1.45 0 2.675-.7t1.975-1.9q.15-.3-.025-.6T16.1 14H7.9q-.35 0-.525.3t-.025.6q.75 1.2 1.988 1.9t2.662.7"/></svg>',
@@ -38,32 +38,32 @@ export const PHONE_ICON_SVG = Object.freeze({
 
 const PHONE_TAB_HEADERS = {
   chats: { title: 'WhatsApp', search: false, camera: true, searchLabel: 'Sohbetlerde ara' },
-  updates: { title: 'Guncellemeler', search: true, camera: false, searchLabel: 'Guncellemelerde ara' },
+  updates: { title: 'Güncellemeler', search: true, camera: false, searchLabel: 'Güncellemelerde ara' },
   communities: { title: 'Topluluklar', search: false, camera: false, searchLabel: 'Topluluklarda ara' },
   calls: { title: 'Aramalar', search: true, camera: false, searchLabel: 'Aramalarda ara' },
 };
 
 const DEFAULT_RECENT_UPDATES = [
-  { title: 'Aile Grubu', meta: 'Bugun 12:40', initials: 'AG' },
-  { title: 'Destek Ekibi', meta: 'Bugun 09:18', initials: 'DE' },
+  { title: 'Aile Grubu', meta: 'Bugün 12:40', initials: 'AG' },
+  { title: 'Destek Ekibi', meta: 'Bugün 09:18', initials: 'DE' },
 ];
 
 const DEFAULT_RECENT_CALLS = [
-  { name: 'Ayse Eren', meta: 'bugun 11:48', direction: 'missed', type: 'voice', initials: 'AE' },
-  { name: 'Destek Ekibi', meta: 'dun 20:12', direction: 'outgoing', type: 'video', initials: 'DE' },
-  { name: 'Aile Grubu', meta: 'sali 18:05', direction: 'incoming', type: 'voice', initials: 'AG' },
-  { name: 'Ece Yildiz', meta: 'pazartesi 09:31', direction: 'incoming', type: 'video', initials: 'EY' },
+  { name: 'Ayşe Eren', meta: 'bugün 11:48', direction: 'missed', type: 'voice', initials: 'AE' },
+  { name: 'Destek Ekibi', meta: 'dün 20:12', direction: 'outgoing', type: 'video', initials: 'DE' },
+  { name: 'Aile Grubu', meta: 'salı 18:05', direction: 'incoming', type: 'voice', initials: 'AG' },
+  { name: 'Ece Yıldız', meta: 'pazartesi 09:31', direction: 'incoming', type: 'video', initials: 'EY' },
 ];
 
 const CALL_DIRECTION_META = {
-  missed: { label: 'Cevapsiz', icon: 'callOut', className: '', rowClassName: 'is-missed' },
+  missed: { label: 'Cevapsız', icon: 'callOut', className: '', rowClassName: 'is-missed' },
   outgoing: { label: 'Giden', icon: 'callOut', className: 'is-outgoing', rowClassName: '' },
   incoming: { label: 'Gelen', icon: 'callIn', className: 'is-incoming', rowClassName: '' },
 };
 
 const CALL_TYPE_META = {
   voice: { label: 'sesli arama', icon: 'phone' },
-  video: { label: 'video aramasi', icon: 'video' },
+  video: { label: 'video araması', icon: 'video' },
 };
 
 const CALL_AVATAR_TONES = ['', 'teal', 'blue', 'purple'];
@@ -75,6 +75,7 @@ const shellState = {
 };
 
 let shellStateListenerBound = false;
+let suppressChatOpen = false;
 
 function renderPhoneIcon(name) {
   return PHONE_ICON_SVG[name] || PHONE_ICON_SVG.search;
@@ -216,19 +217,43 @@ function getInitials(title) {
   return (initials || 'G').toLocaleUpperCase('tr-TR');
 }
 
+/** İsmi mevcut sohbet başlıkları ve kişilerle eşleştirip varsa avatarını döndürür. */
+function resolveAvatarForName(name) {
+  const target = cleanText(name, '').toLocaleLowerCase('tr-TR');
+  if (!target) return '';
+
+  const conversations = state.get('conversations');
+  for (const conversation of (conversations?.items || [])) {
+    if (cleanText(conversation.title, '').toLocaleLowerCase('tr-TR') === target) {
+      const image = cleanText(conversation.avatarDataUrl || conversation.photoUrl, '');
+      if (image) return image;
+    }
+  }
+
+  const people = state.get('people') || {};
+  for (const [personName, info] of Object.entries(people)) {
+    if (personName.toLocaleLowerCase('tr-TR') === target) {
+      const image = cleanText(info?.avatar, '');
+      if (image) return image;
+    }
+  }
+
+  return '';
+}
+
 function getMessageLabel(message) {
   const text = String(message?.text || '').trim();
   if (text) return text;
 
   const labels = {
-    photo: 'Fotograf',
+    photo: 'Fotoğraf',
     video: 'Video',
     voice: 'Sesli mesaj',
     location: 'Konum',
     document: 'Belge',
-    sticker: 'Sticker',
-    viewonce: 'Bir kez goruntule',
-    link: 'Baglanti',
+    sticker: 'Çıkartma',
+    viewonce: 'Bir kez görüntüle',
+    link: 'Bağlantı',
   };
 
   return labels[message?.kind] || 'Mesaj';
@@ -243,7 +268,7 @@ function getLastMessage(messages) {
 function getChatPreview(group, messages) {
   const lastMessage = getLastMessage(messages);
   if (!lastMessage) {
-    return cleanText(group.subtitle, 'Sohbet detayini ac');
+    return cleanText(group.subtitle, 'Sohbet detayını aç');
   }
 
   const label = getMessageLabel(lastMessage);
@@ -277,7 +302,7 @@ function createChatRow(conversation, options = {}) {
   button.dataset.phoneOpenChat = '';
   button.dataset.conversationId = conversation.id;
   button.classList.toggle('is-active', isActive);
-  button.setAttribute('aria-label', `${title} sohbetini ac`);
+  button.setAttribute('aria-label', `${title} sohbetini aç`);
 
   const avatar = document.createElement('span');
   avatar.className = 'phone-chat-entry-avatar';
@@ -328,20 +353,26 @@ function syncHomeChatSummary() {
 }
 
 function createRecentUpdateRow(update) {
-  const title = cleanText(update?.title, 'Guncelleme');
+  const title = cleanText(update?.title, 'Güncelleme');
   const meta = cleanText(update?.meta, 'Bugun');
   const initials = cleanText(update?.initials, getInitials(title)).slice(0, 3).toLocaleUpperCase('tr-TR');
   const button = document.createElement('button');
   button.className = 'phone-status-row';
   button.type = 'button';
-  button.setAttribute('aria-label', `${title} durumunu ac`);
+  button.setAttribute('aria-label', `${title} durumunu aç`);
 
   const avatar = document.createElement('span');
   avatar.className = 'phone-status-avatar phone-status-ring';
   avatar.setAttribute('aria-hidden', 'true');
-  const avatarText = document.createElement('span');
-  avatarText.textContent = initials || getInitials(title);
-  avatar.appendChild(avatarText);
+  const photo = cleanText(update?.photo, '');
+  if (photo) {
+    avatar.classList.add('has-image');
+    avatar.style.backgroundImage = `url("${photo.replace(/["\r\n\\]/g, '')}")`;
+  } else {
+    const avatarText = document.createElement('span');
+    avatarText.textContent = initials || getInitials(title);
+    avatar.appendChild(avatarText);
+  }
 
   const copy = document.createElement('span');
   copy.className = 'phone-status-copy';
@@ -367,7 +398,7 @@ function getSafeCallType(type) {
 
 function createCallRow(call, index = 0) {
   const name = cleanText(call?.name, 'Arama');
-  const meta = cleanText(call?.meta, 'bugun');
+  const meta = cleanText(call?.meta, 'bugün');
   const directionKey = getSafeCallDirection(call?.direction);
   const typeKey = getSafeCallType(call?.type);
   const direction = CALL_DIRECTION_META[directionKey];
@@ -384,7 +415,13 @@ function createCallRow(call, index = 0) {
   const avatar = document.createElement('span');
   avatar.className = 'phone-call-avatar';
   if (tone) avatar.classList.add(`phone-call-avatar-${tone}`);
-  avatar.textContent = initials || getInitials(name);
+  const callImage = cleanText(call?.avatarDataUrl || call?.avatarUrl, '') || resolveAvatarForName(name);
+  if (callImage) {
+    avatar.classList.add('has-image');
+    avatar.style.backgroundImage = `url("${callImage.replace(/["\r\n\\]/g, '')}")`;
+  } else {
+    avatar.textContent = initials || getInitials(name);
+  }
 
   const copy = document.createElement('span');
   copy.className = 'phone-call-copy';
@@ -443,22 +480,28 @@ function syncPhoneShellContent() {
   } = getShellElements();
 
   if (statusTitle) statusTitle.textContent = cleanText(updates.status?.title, 'Durumum');
-  if (statusMeta) statusMeta.textContent = cleanText(updates.status?.meta, 'Durum guncellemesi eklemek icin dokunun');
-  if (statusNote) statusNote.textContent = cleanText(updates.status?.note, 'Durum guncellemeleriniz 24 saat sonra kaybolur.');
+  if (statusMeta) statusMeta.textContent = cleanText(updates.status?.meta, 'Durum güncellemesi eklemek için dokunun');
+  if (statusNote) statusNote.textContent = cleanText(updates.status?.note, 'Durum güncellemeleriniz 24 saat sonra kaybolur.');
+  const ownStatusAvatar = document.querySelector('.phone-status-avatar-own');
+  if (ownStatusAvatar) {
+    const ownPhoto = cleanText(updates.status?.photo, '');
+    ownStatusAvatar.classList.toggle('has-image', Boolean(ownPhoto));
+    ownStatusAvatar.style.backgroundImage = ownPhoto ? `url("${ownPhoto.replace(/["\r\n\\]/g, '')}")` : '';
+  }
   if (recentUpdatesList) {
     const recent = Array.isArray(updates.recent) ? updates.recent : [];
     const rows = recent.length ? recent : DEFAULT_RECENT_UPDATES;
-    recentUpdatesList.replaceChildren(...rows.slice(0, 2).map(createRecentUpdateRow));
+    recentUpdatesList.replaceChildren(...rows.slice(0, 8).map(createRecentUpdateRow));
   }
   if (channelsTitle) channelsTitle.textContent = cleanText(updates.channels?.title, 'Kanallar');
-  if (channelsDescription) channelsDescription.textContent = cleanText(updates.channels?.description, 'Ilgilendiginiz konulardan haber almak icin kanallari takip edin.');
-  if (channelDiscover) channelDiscover.textContent = cleanText(updates.channels?.discoverLabel, 'Kesfet');
-  if (channelCreate) channelCreate.textContent = cleanText(updates.channels?.createLabel, 'Kanal olustur');
+  if (channelsDescription) channelsDescription.textContent = cleanText(updates.channels?.description, 'İlgilendiğiniz konulardan haber almak için kanalları takip edin.');
+  if (channelDiscover) channelDiscover.textContent = cleanText(updates.channels?.discoverLabel, 'Keşfet');
+  if (channelCreate) channelCreate.textContent = cleanText(updates.channels?.createLabel, 'Kanal oluştur');
 
-  if (communitiesTitle) communitiesTitle.textContent = cleanText(communities.title, 'Topluluklar sayesinde baglantida kalin');
-  if (communitiesDescription) communitiesDescription.textContent = cleanText(communities.description, 'Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.');
-  if (communitiesLinkLabel) communitiesLinkLabel.textContent = cleanText(communities.linkLabel, 'Ornek topluluklari gor');
-  if (communitiesCta) communitiesCta.textContent = cleanText(communities.ctaLabel, 'Toplulugunuzu olusturun');
+  if (communitiesTitle) communitiesTitle.textContent = cleanText(communities.title, 'Topluluklar sayesinde bağlantıda kalın');
+  if (communitiesDescription) communitiesDescription.textContent = cleanText(communities.description, 'İlgili grupları bir araya getirin, duyuruları kolayca paylaşın ve herkesin aynı yerde kalmasını sağlayın.');
+  if (communitiesLinkLabel) communitiesLinkLabel.textContent = cleanText(communities.linkLabel, 'Örnek toplulukları gör');
+  if (communitiesCta) communitiesCta.textContent = cleanText(communities.ctaLabel, 'Topluluğunuzu oluşturun');
 
   if (recentCallsList) {
     const items = Array.isArray(calls.items) ? calls.items : [];
@@ -505,6 +548,11 @@ function bindPhoneShellEvents() {
   phone.addEventListener('click', (event) => {
     const button = event.target.closest('[data-phone-open-chat]');
     if (!button || !phone.contains(button)) return;
+    if (suppressChatOpen) {
+      // Az önce uzun-bas ile silme tetiklendi — bu click sohbeti açmasın.
+      suppressChatOpen = false;
+      return;
+    }
     const conversation = state.selectConversation(button.dataset.conversationId);
     if (!conversation) return;
     syncHeader();
@@ -513,6 +561,8 @@ function bindPhoneShellEvents() {
     showPhoneChatDetail({ focus: true });
   });
 
+  bindChatDeleteGestures();
+
   chatFilterButtons.forEach((button) => {
     button.addEventListener('click', () => setActiveChatFilter(button.dataset.phoneChatFilter));
   });
@@ -520,6 +570,54 @@ function bindPhoneShellEvents() {
   if (backButton) {
     backButton.addEventListener('click', () => showPhoneHome({ focus: true }));
   }
+}
+
+function requestDeleteConversation(button) {
+  const id = button?.dataset.conversationId;
+  if (!id) return;
+  const title = button.querySelector('.phone-chat-entry-title')?.textContent?.trim() || 'Bu sohbet';
+  if (!window.confirm(`"${title}" sohbeti silinsin mi? Bu işlem geri alınamaz.`)) return;
+  state.removeConversation(id);
+  syncHeader();
+  rebuildChat();
+  syncHomeChatSummary();
+}
+
+/** Sohbet satırında uzun-bas (mobil) ve sağ-tık (masaüstü) → sil onayı */
+function bindChatDeleteGestures() {
+  const { chatList } = getShellElements();
+  if (!chatList) return;
+
+  let pressTimer = null;
+  const clearPress = () => {
+    if (pressTimer) {
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+  };
+
+  chatList.addEventListener('pointerdown', (event) => {
+    const button = event.target.closest('[data-phone-open-chat]');
+    if (!button) return;
+    clearPress();
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      suppressChatOpen = true;
+      requestDeleteConversation(button);
+    }, 500);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((evt) => {
+    chatList.addEventListener(evt, clearPress);
+  });
+  chatList.addEventListener('scroll', clearPress, true);
+
+  chatList.addEventListener('contextmenu', (event) => {
+    const button = event.target.closest('[data-phone-open-chat]');
+    if (!button) return;
+    event.preventDefault();
+    clearPress();
+    requestDeleteConversation(button);
+  });
 }
 
 function handleConversationCreated(conversation) {

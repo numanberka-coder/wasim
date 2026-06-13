@@ -118,7 +118,7 @@ describe('Faz 41 phone app shell', () => {
     const fab = document.getElementById('phoneMessageFab');
 
     expect(document.getElementById('phoneShellCameraBtn')).not.toBeNull();
-    expect(search?.textContent).toContain("Meta AI'ya veya Ara'ya sorun");
+    expect(search?.textContent).toContain('Ara');
     expect(filters.map((filter) => filter.dataset.phoneChatFilter)).toEqual(CHAT_FILTERS);
     expect(filters.map((filter) => filter.textContent?.trim())).toEqual(['All', 'Unread', 'Groups']);
     expect(document.querySelector('[data-phone-chat-filter="all"]')?.getAttribute('aria-pressed')).toBe('true');
@@ -150,14 +150,14 @@ describe('Faz 41 phone app shell', () => {
 
     expect(activeTab).toBe('updates');
     expect(document.getElementById('phoneHomeShell')?.dataset.activeTab).toBe('updates');
-    expect(document.querySelector('.phone-home-title')?.textContent).toBe('Guncellemeler');
+    expect(document.querySelector('.phone-home-title')?.textContent).toBe('Güncellemeler');
     expect(searchButton?.hidden).toBe(false);
-    expect(searchButton?.getAttribute('aria-label')).toBe('Guncellemelerde ara');
+    expect(searchButton?.getAttribute('aria-label')).toBe('Güncellemelerde ara');
     expect(cameraButton?.hidden).toBe(true);
     expect(updatesPanel?.hidden).toBe(false);
     expect(document.querySelector('[data-phone-tab="updates"]')?.getAttribute('aria-selected')).toBe('true');
     expect(statusRows).toHaveLength(3);
-    expect(document.getElementById('phoneStatusMeta')?.textContent).toContain('Durum guncellemesi');
+    expect(document.getElementById('phoneStatusMeta')?.textContent).toContain('Durum güncellemesi');
     expect(document.getElementById('phoneStatusNote')?.textContent).toContain('24 saat sonra');
     expect(document.querySelector('#phoneTabUpdates .phone-channels-section')?.textContent).toContain('Kanallar');
     expect(document.getElementById('phoneUpdatesEditFab')).not.toBeNull();
@@ -183,10 +183,10 @@ describe('Faz 41 phone app shell', () => {
     expect(communitiesPanel?.hidden).toBe(false);
     expect(document.querySelector('[data-phone-tab="communities"]')?.getAttribute('aria-selected')).toBe('true');
     expect(illustration).not.toBeNull();
-    expect(document.getElementById('phoneCommunitiesTitle')?.textContent).toBe('Topluluklar sayesinde baglantida kalin');
-    expect(document.getElementById('phoneCommunitiesDescription')?.textContent).toContain('Ilgili gruplari');
-    expect(document.getElementById('phoneCommunitiesLinkLabel')?.textContent).toContain('Ornek topluluklari gor');
-    expect(cta?.textContent).toBe('Toplulugunuzu olusturun');
+    expect(document.getElementById('phoneCommunitiesTitle')?.textContent).toBe('Topluluklar sayesinde bağlantıda kalın');
+    expect(document.getElementById('phoneCommunitiesDescription')?.textContent).toContain('İlgili grupları');
+    expect(document.getElementById('phoneCommunitiesLinkLabel')?.textContent).toContain('Örnek toplulukları gör');
+    expect(cta?.textContent).toBe('Topluluğunuzu oluşturun');
     expect(learnButton).not.toBeNull();
     expect(cta?.closest('[data-phone-tab-panel="communities"]')).not.toBeNull();
   });
@@ -211,12 +211,12 @@ describe('Faz 41 phone app shell', () => {
     expect(cameraButton?.hidden).toBe(true);
     expect(callsPanel?.hidden).toBe(false);
     expect(document.querySelector('[data-phone-tab="calls"]')?.getAttribute('aria-selected')).toBe('true');
-    expect(document.getElementById('phoneCallsQuickTitle')?.textContent).toBe('Hizli aksiyonlar');
-    expect(shortcuts.map((shortcut) => shortcut.textContent?.trim())).toEqual(['Ara', 'Planla', 'Tus takimi', 'Favoriler']);
+    expect(document.getElementById('phoneCallsQuickTitle')?.textContent).toBe('Hızlı aksiyonlar');
+    expect(shortcuts.map((shortcut) => shortcut.textContent?.trim())).toEqual(['Ara', 'Planla', 'Tuş takımı', 'Favoriler']);
     expect(document.getElementById('phoneRecentCallsTitle')?.textContent).toBe('Son aramalar');
     expect(rows).toHaveLength(4);
     expect(rows[0]?.classList.contains('is-missed')).toBe(true);
-    expect(rows[0]?.textContent).toContain('Cevapsiz');
+    expect(rows[0]?.textContent).toContain('Cevapsız');
     expect(rows[1]?.textContent).toContain('Giden');
     expect(rows[2]?.textContent).toContain('Gelen');
     expect(rowActions).toHaveLength(4);
@@ -240,7 +240,7 @@ describe('Faz 41 phone app shell', () => {
     state.set('messages', []);
 
     expect(document.getElementById('homeChatTitle')?.textContent).toBe('Grup');
-    expect(document.getElementById('homeChatSubtitle')?.textContent).toBe('Sohbet detayini ac');
+    expect(document.getElementById('homeChatSubtitle')?.textContent).toBe('Sohbet detayını aç');
   });
 
   it('renders conversations from state and selects the clicked chat before opening detail', () => {
@@ -363,9 +363,10 @@ describe('Faz 41 phone app shell', () => {
     expect(document.body.classList.contains('phone-editor-open')).toBe(true);
     expect(document.getElementById('phoneEditorLayer')?.getAttribute('aria-hidden')).toBe('false');
     expect(document.getElementById('phoneEditorForm')?.getAttribute('role')).toBe('dialog');
-    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Guncellemeleri duzenle');
-    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(12);
-    expect(document.querySelectorAll('#phoneEditorFields textarea')).toHaveLength(1);
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Güncellemeleri düzenle');
+    expect(document.querySelector('#phoneEditorFields input[name="statusTitle"]')).not.toBeNull();
+    expect(document.querySelector('#phoneEditorFields .phone-editor-field-avatar input[name="statusPhoto"]')).not.toBeNull();
+    expect(document.querySelector('#phoneEditorFields .phone-editor-list[data-list-name="recent"]')).not.toBeNull();
 
     document.getElementById('phoneEditorCancelBtn')?.click();
     expect(isPhoneEditorSheetOpen()).toBe(false);
@@ -374,12 +375,25 @@ describe('Faz 41 phone app shell', () => {
     document.querySelector('#phoneEditorFields input[name="statusTitle"]').value = 'Sahne hazir';
     document.querySelector('#phoneEditorFields input[name="statusMeta"]').value = 'Bugun 18:30';
     document.querySelector('#phoneEditorFields input[name="statusNote"]').value = 'Yeni durum 24 saat sonra silinir.';
-    document.querySelector('#phoneEditorFields input[name="recent0Title"]').value = 'Tasarim Ekibi';
-    document.querySelector('#phoneEditorFields input[name="recent0Meta"]').value = 'Bugun 17:10';
-    document.querySelector('#phoneEditorFields input[name="recent0Initials"]').value = 'TE';
-    document.querySelector('#phoneEditorFields input[name="recent1Title"]').value = 'Satis';
-    document.querySelector('#phoneEditorFields input[name="recent1Meta"]').value = 'Dun 22:05';
-    document.querySelector('#phoneEditorFields input[name="recent1Initials"]').value = 'S';
+
+    const recentList = document.querySelector('.phone-editor-list[data-list-name="recent"]');
+    const initialRows = recentList.querySelectorAll('.phone-editor-list-row');
+    expect(initialRows).toHaveLength(2);
+    initialRows[0].querySelector('[name="title"]').value = 'Tasarim Ekibi';
+    initialRows[0].querySelector('[name="meta"]').value = 'Bugun 17:10';
+    initialRows[0].querySelector('[name="initials"]').value = 'TE';
+    initialRows[1].querySelector('[name="title"]').value = 'Satis';
+    initialRows[1].querySelector('[name="meta"]').value = 'Dun 22:05';
+    initialRows[1].querySelector('[name="initials"]').value = 'S';
+
+    // Yeni durum satırı ekle (ekle/sil akışı)
+    recentList.querySelector('.phone-editor-list-add').click();
+    const rowsAfterAdd = recentList.querySelectorAll('.phone-editor-list-row');
+    expect(rowsAfterAdd).toHaveLength(3);
+    rowsAfterAdd[2].querySelector('[name="title"]').value = 'Pazarlama';
+    rowsAfterAdd[2].querySelector('[name="meta"]').value = 'Bugun 16:00';
+    rowsAfterAdd[2].querySelector('[name="initials"]').value = 'PZ';
+
     document.querySelector('#phoneEditorFields input[name="channelTitle"]').value = 'Duyurular';
     document.querySelector('#phoneEditorFields textarea[name="channelDescription"]').value = 'Sadece onemli duyurular burada gorunur.';
     document.querySelector('#phoneEditorFields input[name="channelDiscoverLabel"]').value = 'Bul';
@@ -388,12 +402,14 @@ describe('Faz 41 phone app shell', () => {
 
     expect(isPhoneEditorSheetOpen()).toBe(false);
     const exported = state.export();
+    expect(exported.phoneShellContent.updates.recent).toHaveLength(3);
 
     expect(document.getElementById('phoneStatusTitle')?.textContent).toBe('Sahne hazir');
     expect(document.getElementById('phoneStatusMeta')?.textContent).toBe('Bugun 18:30');
     expect(document.getElementById('phoneStatusNote')?.textContent).toBe('Yeni durum 24 saat sonra silinir.');
     expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Tasarim Ekibi');
     expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Dun 22:05');
+    expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Pazarlama');
     expect(document.getElementById('phoneChannelsTitle')?.textContent).toBe('Duyurular');
     expect(document.getElementById('phoneChannelsDescription')?.textContent).toBe('Sadece onemli duyurular burada gorunur.');
     expect(document.getElementById('phoneChannelDiscoverBtn')?.textContent).toBe('Bul');
@@ -403,7 +419,7 @@ describe('Faz 41 phone app shell', () => {
     state.import({ phoneShellContent: exported.phoneShellContent });
 
     expect(document.getElementById('phoneStatusTitle')?.textContent).toBe('Sahne hazir');
-    expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Tasarim Ekibi');
+    expect(document.getElementById('phoneRecentUpdatesList')?.textContent).toContain('Pazarlama');
     expect(document.getElementById('phoneChannelCreateBtn')?.textContent).toBe('Duyuru kanali ac');
   });
 
@@ -415,7 +431,7 @@ describe('Faz 41 phone app shell', () => {
     document.getElementById('phoneCommunitiesCreateBtn')?.click();
 
     expect(isPhoneEditorSheetOpen()).toBe(true);
-    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Topluluk gorunumunu duzenle');
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Topluluk görünümünü düzenle');
     expect(document.getElementById('phoneEditorFields')?.dataset.phoneEditorSurface).toBe('communities-chat');
     expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(3);
     expect(document.querySelectorAll('#phoneEditorFields textarea')).toHaveLength(1);
@@ -459,10 +475,10 @@ describe('Faz 41 phone app shell', () => {
     document.getElementById('phoneShellSearchBtn')?.click();
 
     expect(isPhoneEditorSheetOpen()).toBe(true);
-    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Arama listesini duzenle');
+    expect(document.getElementById('phoneEditorTitle')?.textContent).toBe('Arama listesini düzenle');
     expect(document.getElementById('phoneEditorFields')?.dataset.phoneEditorSurface).toBe('calls-list');
-    expect(document.querySelectorAll('#phoneEditorFields input')).toHaveLength(12);
     expect(document.querySelectorAll('#phoneEditorFields select')).toHaveLength(8);
+    expect(document.querySelector('#phoneEditorFields .phone-editor-field-avatar input[name="call0Avatar"]')).not.toBeNull();
     expect(document.querySelector('#phoneEditorFields select[name="call0Direction"]')?.value).toBe('missed');
     expect(document.querySelector('#phoneEditorFields select[name="call1Type"]')?.value).toBe('video');
 
@@ -488,7 +504,7 @@ describe('Faz 41 phone app shell', () => {
     expect(rows[0]?.classList.contains('is-missed')).toBe(false);
     expect(rows[0]?.querySelector('.phone-call-row-action [data-phone-icon]')?.dataset.phoneIcon).toBe('video');
     expect(rows[1]?.textContent).toContain('Derya');
-    expect(rows[1]?.textContent).toContain('Cevapsiz, dun 08:11');
+    expect(rows[1]?.textContent).toContain('Cevapsız, dun 08:11');
     expect(rows[1]?.classList.contains('is-missed')).toBe(true);
     expect(state.get('phoneShellContent.calls.items.0.initials')).toBe('MH');
 
@@ -542,7 +558,7 @@ describe('Faz 41 phone app shell', () => {
 
     expect(isPhoneEditorSheetOpen()).toBe(true);
     expect(document.getElementById('phoneEditorError')?.hidden).toBe(false);
-    expect(document.getElementById('phoneEditorError')?.textContent).toContain('Topluluk basligi');
+    expect(document.getElementById('phoneEditorError')?.textContent).toContain('Topluluk başlığı');
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(isPhoneEditorSheetOpen()).toBe(false);
@@ -580,9 +596,9 @@ describe('Faz 41 phone app shell', () => {
     expect(PHONE_ICON_SVG.phone).toContain('M19.95 21');
     expect(PHONE_ICON_SVG.video).toContain('M4 20q-.825');
     expect(PHONE_ICON_SVG.keypad).toContain('M12 23');
-    expect(PHONE_ICON_SVG.updates).toContain('<circle cx="12" cy="12" r="4.15"');
-    expect(PHONE_ICON_SVG.updates).toContain('A9.45 9.45 0 0 1');
-    expect(PHONE_ICON_SVG.updates).toContain('M5.8 17.45 3.45 21.15 7.85 19.55');
+    expect(PHONE_ICON_SVG.updates).toContain('<circle cx="12" cy="12" r="3.6" fill="currentColor"');
+    expect(PHONE_ICON_SVG.updates).toContain('r="8.4"');
+    expect(PHONE_ICON_SVG.updates).toContain('stroke-dasharray="4.7 2.9"');
     expect(PHONE_ICON_SVG.updates).toContain('stroke-linecap="round"');
   });
 

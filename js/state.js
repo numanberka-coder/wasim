@@ -11,32 +11,32 @@ const DEFAULT_PHONE_SHELL_CONTENT = Object.freeze({
   updates: {
     status: {
       title: 'Durumum',
-      meta: 'Durum guncellemesi eklemek icin dokunun',
-      note: 'Durum guncellemeleriniz 24 saat sonra kaybolur.',
+      meta: 'Durum güncellemesi eklemek için dokunun',
+      note: 'Durum güncellemeleriniz 24 saat sonra kaybolur.',
     },
     recent: [
-      { title: 'Aile Grubu', meta: 'Bugun 12:40', initials: 'AG' },
-      { title: 'Destek Ekibi', meta: 'Bugun 09:18', initials: 'DE' },
+      { title: 'Aile Grubu', meta: 'Bugün 12:40', initials: 'AG' },
+      { title: 'Destek Ekibi', meta: 'Bugün 09:18', initials: 'DE' },
     ],
     channels: {
       title: 'Kanallar',
-      description: 'Ilgilendiginiz konulardan haber almak icin kanallari takip edin.',
-      discoverLabel: 'Kesfet',
-      createLabel: 'Kanal olustur',
+      description: 'İlgilendiğiniz konulardan haber almak için kanalları takip edin.',
+      discoverLabel: 'Keşfet',
+      createLabel: 'Kanal oluştur',
     },
   },
   communities: {
-    title: 'Topluluklar sayesinde baglantida kalin',
-    description: 'Ilgili gruplari bir araya getirin, duyurulari kolayca paylasin ve herkesin ayni yerde kalmasini saglayin.',
-    linkLabel: 'Ornek topluluklari gor',
-    ctaLabel: 'Toplulugunuzu olusturun',
+    title: 'Topluluklar sayesinde bağlantıda kalın',
+    description: 'İlgili grupları bir araya getirin, duyuruları kolayca paylaşın ve herkesin aynı yerde kalmasını sağlayın.',
+    linkLabel: 'Örnek toplulukları gör',
+    ctaLabel: 'Topluluğunuzu oluşturun',
   },
   calls: {
     items: [
-      { name: 'Ayse Eren', meta: 'bugun 11:48', direction: 'missed', type: 'voice', initials: 'AE' },
-      { name: 'Destek Ekibi', meta: 'dun 20:12', direction: 'outgoing', type: 'video', initials: 'DE' },
-      { name: 'Aile Grubu', meta: 'sali 18:05', direction: 'incoming', type: 'voice', initials: 'AG' },
-      { name: 'Ece Yildiz', meta: 'pazartesi 09:31', direction: 'incoming', type: 'video', initials: 'EY' },
+      { name: 'Ayşe Eren', meta: 'bugün 11:48', direction: 'missed', type: 'voice', initials: 'AE' },
+      { name: 'Destek Ekibi', meta: 'dün 20:12', direction: 'outgoing', type: 'video', initials: 'DE' },
+      { name: 'Aile Grubu', meta: 'salı 18:05', direction: 'incoming', type: 'voice', initials: 'AG' },
+      { name: 'Ece Yıldız', meta: 'pazartesi 09:31', direction: 'incoming', type: 'video', initials: 'EY' },
     ],
   },
 });
@@ -179,8 +179,45 @@ function mergeDefaults(defaults, value) {
   return output;
 }
 
+function normalizeUpdateItem(item) {
+  return {
+    title: cleanText(item?.title, 'Güncelleme'),
+    meta: cleanText(item?.meta, 'Bugün'),
+    initials: cleanText(item?.initials, ''),
+    photo: cleanText(item?.photo, ''),
+  };
+}
+
+function normalizeCallItem(item) {
+  return {
+    name: cleanText(item?.name, 'Arama'),
+    meta: cleanText(item?.meta, 'bugün'),
+    direction: cleanText(item?.direction, 'incoming'),
+    type: cleanText(item?.type, 'voice'),
+    initials: cleanText(item?.initials, ''),
+    avatarUrl: cleanText(item?.avatarUrl, ''),
+    avatarDataUrl: item?.avatarDataUrl || null,
+  };
+}
+
 function normalizePhoneShellContent(value) {
-  return mergeDefaults(DEFAULT_PHONE_SHELL_CONTENT, value);
+  // mergeDefaults skaler/metin yapısını doldurur; recent ve calls.items listeleri
+  // şablon uzunluğuna sabitlenmeden kaynaktan (değişken uzunlukta) korunur ki
+  // ekle/sil ve foto/avatar verisi export/import'ta kaybolmasın.
+  const merged = mergeDefaults(DEFAULT_PHONE_SHELL_CONTENT, value);
+
+  const srcRecent = Array.isArray(value?.updates?.recent)
+    ? value.updates.recent
+    : DEFAULT_PHONE_SHELL_CONTENT.updates.recent;
+  merged.updates.recent = srcRecent.slice(0, 12).map(normalizeUpdateItem);
+  merged.updates.status.photo = cleanText(value?.updates?.status?.photo, '');
+
+  const srcCalls = Array.isArray(value?.calls?.items)
+    ? value.calls.items
+    : DEFAULT_PHONE_SHELL_CONTENT.calls.items;
+  merged.calls.items = srcCalls.slice(0, 20).map(normalizeCallItem);
+
+  return merged;
 }
 
 function shouldMirrorLegacyConversation(conversations) {
@@ -428,6 +465,31 @@ export class StateManager {
     this.applyConversationToLegacy(conversation);
     if (!silent) this.notify('conversations');
     return conversation;
+  }
+
+  removeConversation(id, silent = false) {
+    this.syncActiveConversationFromLegacy();
+    const conversations = this.ensureConversations();
+    const index = conversations.items.findIndex((item) => item.id === id);
+    if (index < 0) return false;
+
+    const wasActive = conversations.activeId === id;
+    conversations.items.splice(index, 1);
+
+    if (!conversations.items.length) {
+      // Son sohbet de silindi — güvenli boş default üret.
+      const fallback = createDefaultConversation({}, [], 0);
+      conversations.items.push(fallback);
+      conversations.activeId = fallback.id;
+      this.applyConversationToLegacy(fallback);
+    } else if (wasActive) {
+      const next = conversations.items[Math.max(0, index - 1)] || conversations.items[0];
+      conversations.activeId = next.id;
+      this.applyConversationToLegacy(next);
+    }
+
+    if (!silent) this.notify('conversations');
+    return true;
   }
 
   /**

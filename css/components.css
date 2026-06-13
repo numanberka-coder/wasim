@@ -20,6 +20,23 @@ button {
   gap: var(--space-sm);
 }
 
+/* Masaüstü panel aksiyon ikonları (data-ui-icon ile enjekte edilir) */
+.ui-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.ui-icon svg {
+  width: 1.05em;
+  height: 1.05em;
+  display: block;
+}
+button.btn-sm .ui-icon svg {
+  width: 1em;
+  height: 1em;
+}
+
 button:hover {
   transform: translateY(-1px);
   filter: brightness(1.1);
