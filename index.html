@@ -98,6 +98,11 @@
           </summary>
           <div class="accordion-body">
             <div class="form-group">
+              <label for="groupTargetConversation">Hedef sohbet</label>
+              <select id="groupTargetConversation" class="target-conversation-select" data-target-conversation></select>
+              <p class="hint">Satır Sırası ve Senaryo bu sohbete akar.</p>
+            </div>
+            <div class="form-group">
               <label for="groupTitle">Grup Adı</label>
               <input type="text" id="groupTitle" value="Felsefe Grubu" placeholder="Grup adı">
             </div>
@@ -232,6 +237,12 @@
 
         <!-- ═══════ TAB 1: SENARYO ═══════ -->
         <div class="script-tab-panel active" id="tabSenaryo">
+
+          <div class="form-group">
+            <label for="scriptTargetConversation">Hedef sohbet</label>
+            <select id="scriptTargetConversation" class="target-conversation-select" data-target-conversation></select>
+            <p class="hint">Yükle/Oynat bu sohbete akar.</p>
+          </div>
 
           <!-- Rehber -->
           <details class="accordion tutorial-guide" id="tutorialSenaryo">
