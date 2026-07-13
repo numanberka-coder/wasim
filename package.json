@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode pwa",
+    "build:portable": "vite build --mode portable",
+    "build:pwa": "vite build --mode pwa",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
