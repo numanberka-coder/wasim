@@ -1312,3 +1312,10 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+// PWA service worker kaydi — yalnizca http/https altinda (file:// portable build'de atlanir).
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}

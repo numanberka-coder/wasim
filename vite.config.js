@@ -21,6 +21,9 @@ export default defineConfig(({ mode }) => {
   return {
     root: './',
     base: './',
+    // Dev/preview sunucusunu LAN'a ac: telefon ayni Wi-Fi'den http://<bilgisayar-ip>:5173 ile baglanir.
+    server: { host: true },
+    preview: { host: true },
     // Portable'da manifest/icon kopyalanmasin; PWA'da public/ oldugu gibi kopyalansin.
     publicDir: isPortable ? false : 'public',
     plugins: isPortable ? [viteSingleFile(), stripPwaTags()] : [],
