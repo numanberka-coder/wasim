@@ -1,8 +1,11 @@
 name: Deploy PWA to GitHub Pages
 
 on:
+  # Yalnizca varsayilan daldan deploy et; github-pages ortami sadece main'e izin
+  # verdigi icin feature dallarindan tetiklenen kosular deploy adiminda basarisiz
+  # oluyordu. Elle calistirmak icin workflow_dispatch birakildi.
   push:
-    branches: [main, master, claude/vigilant-hawking-dgq2fn]
+    branches: [main, master]
   workflow_dispatch:
 
 # Pages deploy icin gereken izinler
