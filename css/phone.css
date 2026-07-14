@@ -21,16 +21,15 @@
   --bubble-padding-bottom: 8px;
   --bubble-padding-left: 9px;
 
+  /* Status bar yüksekliği — home shell üst offset'i ile tek kaynaktan senkron */
+  --phone-status-bar-height: 28px;
+
   width: 400px;
   height: 820px;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Wallpaper tüm telefona yayılıyor */
-  background: var(--chat-wallpaper);
-  background-size: var(--chat-wallpaper-size);
-  background-blend-mode: var(--chat-wallpaper-blend);
-  background-position: center;
-  background-repeat: no-repeat;
+  /* Kök katman düz renk kalır; doodle wallpaper yalnızca sohbet gövdesine uygulanır */
+  background: #0b141a;
 
   border-radius: 48px;
 
@@ -138,7 +137,7 @@
 /* ===== STATUS BAR ===== */
 .status-bar {
   background: var(--wa-header-color, #1f2c33);
-  height: 28px;
+  height: var(--phone-status-bar-height, 28px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -444,7 +443,12 @@
   flex: 1;
   padding: 20px 16px 22px;
   overflow-y: auto;
-  background: transparent;
+  /* Doodle wallpaper yalnızca sohbet gövdesinde; kök katman düz kalır */
+  background: var(--chat-wallpaper);
+  background-size: var(--chat-wallpaper-size);
+  background-blend-mode: var(--chat-wallpaper-blend);
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Day Divider */
@@ -1536,6 +1540,8 @@
 .phone.light {
   /* Ana renkler */
   color: var(--wa-text);
+  /* Light modda kök katman açık gri kalsın (doodle chat-body'de) */
+  background: #efeae2;
   --wa-bg: #efeae2;
   --wa-header: #008069;
   --wa-panel: #ffffff;
