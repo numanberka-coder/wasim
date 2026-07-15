@@ -74,8 +74,6 @@ function initMobile() {
   if (isMobileView()) {
     setupVisualViewport();
   }
-  // Standalone / APK / PWA tespiti — sahte status bar'ı gizle
-  detectStandaloneMode();
 }
 
 /* ========================================
@@ -806,24 +804,6 @@ function setupVisualViewport() {
 
   vv.addEventListener('resize', onViewportChange);
   vv.addEventListener('scroll', onViewportChange);
-}
-
-/* ========================================
-   STANDALONE / APK / PWA DETECTION
-   CSS media query fallback — iOS Safari
-   ve bazı WebView'lar için JS tespiti
-   ======================================== */
-
-function detectStandaloneMode() {
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.matchMedia('(display-mode: fullscreen)').matches ||
-    window.navigator.standalone === true;
-
-  if (isStandalone) {
-    const statusBar = document.querySelector('.status-bar');
-    if (statusBar) statusBar.style.display = 'none';
-  }
 }
 
 export { initMobile };
