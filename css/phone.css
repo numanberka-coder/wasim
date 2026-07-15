@@ -22,9 +22,11 @@
   --bubble-padding-left: 9px;
 
   /* Status bar yüksekliği — home shell üst offset'i ile tek kaynaktan senkron.
-     Çentikli/delikli ekranlarda (fullscreen PWA) safe-area üstü de bar rengiyle dolar. */
+     Çentikli/delikli ekranda bar, inset kadar büyür ve içerik (saat/ikonlar)
+     TÜM bar boyunca dikey ortalanır — gerçek Android status bar'ı gibi saat
+     oyuk hizasının içinde durur, altına itilmez. */
   --phone-status-bar-height: 28px;
-  --phone-status-bar-total: calc(var(--phone-status-bar-height) + env(safe-area-inset-top, 0px));
+  --phone-status-bar-total: max(var(--phone-status-bar-height), env(safe-area-inset-top, 0px));
 
   width: 400px;
   height: 820px;
@@ -139,12 +141,12 @@
 /* ===== STATUS BAR ===== */
 .status-bar {
   background: var(--wa-header-color, #1f2c33);
-  /* Toplam yükseklik = içerik (28px) + çentik alanı; içerik çentiğin altında kalır */
+  /* Yükseklik = max(ayar, çentik inset'i); içerik tüm bar boyunca dikey ortalı */
   height: var(--phone-status-bar-total, 28px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: env(safe-area-inset-top, 0px) 14px 0;
+  padding: 0 14px;
   /* Yazı boyutu ayarlanabilir (Ayarlar → Durum Çubuğu); çocuklar em ile ölçeklenir */
   font-size: var(--status-bar-font-size, 11px);
   font-weight: 600;
