@@ -21,8 +21,10 @@
   --bubble-padding-bottom: 8px;
   --bubble-padding-left: 9px;
 
-  /* Status bar yüksekliği — home shell üst offset'i ile tek kaynaktan senkron */
+  /* Status bar yüksekliği — home shell üst offset'i ile tek kaynaktan senkron.
+     Çentikli/delikli ekranlarda (fullscreen PWA) safe-area üstü de bar rengiyle dolar. */
   --phone-status-bar-height: 28px;
+  --phone-status-bar-total: calc(var(--phone-status-bar-height) + env(safe-area-inset-top, 0px));
 
   width: 400px;
   height: 820px;
@@ -137,16 +139,18 @@
 /* ===== STATUS BAR ===== */
 .status-bar {
   background: var(--wa-header-color, #1f2c33);
-  height: var(--phone-status-bar-height, 28px);
+  /* Toplam yükseklik = içerik (28px) + çentik alanı; içerik çentiğin altında kalır */
+  height: var(--phone-status-bar-total, 28px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: env(safe-area-inset-top, 0px) 14px 0;
   font-size: 11px;
   font-weight: 600;
   color: var(--wa-text);
   position: relative;
-  z-index: 10;
+  /* Header (10-11), doodle katmanı ve mobil bottom sheet'in (603) üzerinde */
+  z-index: 650;
   border-bottom: none;
   font-family: 'Roboto', sans-serif;
   letter-spacing: 0.1px;

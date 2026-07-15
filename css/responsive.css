@@ -643,10 +643,12 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
    3 nokta FAB menü + overlay panel sistemi aktif olur
    ========================================================== */
 @media (max-width: 768px) {
-  /* --- Genel --- */
+  /* --- Genel ---
+     Üst inset html'e değil status bar'a verilir (phone.css): böylece çentik
+     alanı boş kalmaz, bar'ın kendi rengiyle dolar. */
   html {
     padding:
-      env(safe-area-inset-top)
+      0
       env(safe-area-inset-right)
       env(safe-area-inset-bottom)
       env(safe-area-inset-left);
@@ -953,16 +955,12 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 }
 
 /* ===== STANDALONE / APK / PWA MODU =====
-   Gerçek telefonda açıldığında sahte status bar gizlenir,
-   telefonun kendi status bar'ı görünmeye devam eder.
-   display-mode: standalone → PWA / TWA / WebView (APK)
-   display-mode: fullscreen → Tam ekran modu
+   Sahte status bar PWA/fullscreen modda da görünür kalır: OS status bar
+   bu modlarda gizlendiği için bar'ı kaldırmak üstte boşluk bırakıyor ve
+   home shell (absolute, status bar yüksekliği kadar offset'li) ile chat
+   detail'in (akışta) üst hizasını bozuyordu. Çentik alanı status bar'ın
+   kendi safe-area padding'i ile dolduruluyor (bkz. phone.css .status-bar).
    ========================================== */
-@media (display-mode: standalone), (display-mode: fullscreen) {
-  .status-bar {
-    display: none !important;
-  }
-}
 
 /* ===== PRINT ===== */
 @media print {

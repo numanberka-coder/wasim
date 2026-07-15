@@ -19,8 +19,8 @@
   --phone-tab-bottom-pad: calc(var(--phone-bottom-nav-height) + 20px);
   --phone-fab-bottom: calc(var(--phone-bottom-nav-height) + 16px);
   position: absolute;
-  /* Üst offset status bar yüksekliğine eşit — chat detail ile birebir hizalı */
-  inset: var(--phone-status-bar-height, 28px) 0 0;
+  /* Üst offset status bar toplam yüksekliğine (safe-area dahil) eşit — chat detail ile birebir hizalı */
+  inset: var(--phone-status-bar-total, 28px) 0 0;
   z-index: 8;
   background: #0b141a;
   color: var(--wa-text);
