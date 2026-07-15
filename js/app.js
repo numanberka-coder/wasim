@@ -22,7 +22,7 @@ import { initUiIcons } from './ui/ui-icons.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
-import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible } from './phone/statusbar.js';
+import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible, setStatusBarHeight, setStatusBarFontSize, setStatusBarIconScale } from './phone/statusbar.js';
 import { initPhoneShell } from './phone/app-shell.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
@@ -228,6 +228,17 @@ function populateFormFields() {
     setTextContent('bubbleSizeValue', `${settings.bubbleSize}%`);
     setInputValue('bubblePaddingYControl', settings.bubblePaddingY);
     setTextContent('bubblePaddingYValue', `${settings.bubblePaddingY}px`);
+
+    // Status bar layout
+    const sbHeight = settings.statusBarHeight ?? 28;
+    const sbFont = settings.statusBarFontSize ?? 11;
+    const sbIcon = settings.statusBarIconScale ?? 1;
+    setInputValue('statusBarHeightControl', sbHeight);
+    setTextContent('statusBarHeightValue', `${sbHeight}px`);
+    setInputValue('statusBarFontSizeControl', sbFont);
+    setTextContent('statusBarFontSizeValue', `${sbFont}px`);
+    setInputValue('statusBarIconScaleControl', sbIcon);
+    setTextContent('statusBarIconScaleValue', `${Number(sbIcon).toFixed(2).replace(/\.?0+$/, '')}x`);
 
     // Message times
     setChecked('autoMessageTimesToggle', messageTimes.auto);
@@ -578,6 +589,25 @@ function bindEventHandlers() {
     const val = Number(e.target.value);
     setBubblePaddingY(val);
     setTextContent('bubblePaddingYValue', `${val}px`);
+  });
+
+  // === STATUS BAR LAYOUT ===
+  bindInput('statusBarHeightControl', (e) => {
+    const val = Number(e.target.value);
+    setStatusBarHeight(val);
+    setTextContent('statusBarHeightValue', `${val}px`);
+  });
+
+  bindInput('statusBarFontSizeControl', (e) => {
+    const val = parseFloat(e.target.value);
+    setStatusBarFontSize(val);
+    setTextContent('statusBarFontSizeValue', `${val}px`);
+  });
+
+  bindInput('statusBarIconScaleControl', (e) => {
+    const val = parseFloat(e.target.value);
+    setStatusBarIconScale(val);
+    setTextContent('statusBarIconScaleValue', `${val.toFixed(2).replace(/\.?0+$/, '')}x`);
   });
 
   // === MESSAGE TIMES ===

@@ -145,7 +145,8 @@
   align-items: center;
   justify-content: space-between;
   padding: env(safe-area-inset-top, 0px) 14px 0;
-  font-size: 11px;
+  /* Yazı boyutu ayarlanabilir (Ayarlar → Durum Çubuğu); çocuklar em ile ölçeklenir */
+  font-size: var(--status-bar-font-size, 11px);
   font-weight: 600;
   color: var(--wa-text);
   position: relative;
@@ -181,16 +182,16 @@
   padding-right: 20px;
 }
 
-/* Operator + network label */
+/* Operator + network label — bar font boyutuna göre ölçeklenir */
 .status-operator {
-  font-size: 11px;
+  font-size: 1em;
   font-weight: 500;
   color: var(--wa-text);
   letter-spacing: 0.05px;
 }
 
 .status-network {
-  font-size: 10px;
+  font-size: 0.9em;
   font-weight: 700;
   color: var(--wa-text);
   letter-spacing: 0.3px;
@@ -234,15 +235,23 @@
   height: 14px;
 }
 
-/* Battery */
+/* Battery — bar font boyutuna göre ölçeklenir */
 .battery {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: 1em;
   font-weight: 500;
   letter-spacing: 0.1px;
   color: var(--wa-text);
+}
+
+/* Durum çubuğu ikonları — ayarlanabilir ölçek (Ayarlar → Durum Çubuğu) */
+.signal-icon,
+.wifi-icon,
+.battery-icon {
+  transform: scale(var(--status-bar-icon-scale, 1));
+  transform-origin: center;
 }
 
 .phone.battery-hidden .battery {

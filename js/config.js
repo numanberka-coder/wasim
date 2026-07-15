@@ -282,6 +282,11 @@ export const DEFAULT_STATE = {
   bubbleInColor: null,
   tickStatus: 'read',
 
+  // Status bar layout — her cihazın gerçek durum çubuğu farklı olduğundan ayarlanabilir
+  statusBarHeight: 28,
+  statusBarFontSize: 11,
+  statusBarIconScale: 1,
+
   // Message Times
   messageTimesAuto: true,
   messageBaseTime: null, // Will be set to current time

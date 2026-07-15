@@ -120,6 +120,49 @@ export function stopTimeUpdates() {
 }
 
 /**
+ * Apply status bar layout (height / font size / icon scale).
+ * Her cihazın gerçek durum çubuğu farklı olduğundan bu ölçüler kullanıcı
+ * ayarıdır; CSS değişkenleri üzerinden tüm ekranlara (home + chat) yansır.
+ */
+export function applyStatusBarLayout() {
+  const phoneEl = $one('.phone');
+  if (!phoneEl) return;
+
+  const settings = state.get('settings');
+  const height = clamp(settings.statusBarHeight ?? 28, 24, 48);
+  const fontSize = clamp(settings.statusBarFontSize ?? 11, 10, 16);
+  const iconScale = clamp(settings.statusBarIconScale ?? 1, 0.8, 1.5);
+
+  phoneEl.style.setProperty('--phone-status-bar-height', `${height}px`);
+  phoneEl.style.setProperty('--status-bar-font-size', `${fontSize}px`);
+  phoneEl.style.setProperty('--status-bar-icon-scale', iconScale);
+}
+
+/**
+ * Set status bar height (px)
+ */
+export function setStatusBarHeight(height) {
+  state.set('settings.statusBarHeight', clamp(height, 24, 48));
+  applyStatusBarLayout();
+}
+
+/**
+ * Set status bar font size (px)
+ */
+export function setStatusBarFontSize(size) {
+  state.set('settings.statusBarFontSize', clamp(size, 10, 16));
+  applyStatusBarLayout();
+}
+
+/**
+ * Set status bar icon scale (multiplier)
+ */
+export function setStatusBarIconScale(scale) {
+  state.set('settings.statusBarIconScale', clamp(scale, 0.8, 1.5));
+  applyStatusBarLayout();
+}
+
+/**
  * Set operator name in status bar
  */
 export function setOperatorName(name) {
@@ -134,6 +177,7 @@ export function setOperatorName(name) {
 export function initStatusBar() {
   updateStatusBar();
   applyBatterySettings();
+  applyStatusBarLayout();
   startTimeUpdates();
 
   // Restore operator name from state
