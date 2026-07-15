@@ -279,6 +279,9 @@ export class StateManager {
         bubbleOutColor: DEFAULT_STATE.bubbleOutColor,
         bubbleInColor: DEFAULT_STATE.bubbleInColor,
         tickStatus: DEFAULT_STATE.tickStatus,
+        statusBarHeight: DEFAULT_STATE.statusBarHeight,
+        statusBarFontSize: DEFAULT_STATE.statusBarFontSize,
+        statusBarIconScale: DEFAULT_STATE.statusBarIconScale,
       },
 
       // Message times
@@ -692,6 +695,9 @@ export class StateManager {
       bubbleOutColor: null,
       bubbleInColor: null,
       tickStatus: 'read',
+      statusBarHeight: 28,
+      statusBarFontSize: 11,
+      statusBarIconScale: 1,
     };
 
     this.data.messageTimes = {
