@@ -140,7 +140,8 @@
 
 /* ===== STATUS BAR ===== */
 .status-bar {
-  background: var(--wa-header-color, #1f2c33);
+  /* Özel renk seçilmemişse header rengini takip eder */
+  background: var(--wa-status-bar-color, var(--wa-header-color, #1f2c33));
   /* Yükseklik = max(ayar, çentik inset'i); içerik tüm bar boyunca dikey ortalı */
   height: var(--phone-status-bar-total, 28px);
   display: flex;

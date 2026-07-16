@@ -22,7 +22,7 @@ import { initUiIcons } from './ui/ui-icons.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
-import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible, setStatusBarHeight, setStatusBarFontSize, setStatusBarIconScale } from './phone/statusbar.js';
+import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible, setStatusBarHeight, setStatusBarFontSize, setStatusBarIconScale, setStatusBarColor } from './phone/statusbar.js';
 import { initPhoneShell } from './phone/app-shell.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
@@ -239,6 +239,7 @@ function populateFormFields() {
     setTextContent('statusBarFontSizeValue', `${sbFont}px`);
     setInputValue('statusBarIconScaleControl', sbIcon);
     setTextContent('statusBarIconScaleValue', `${Number(sbIcon).toFixed(2).replace(/\.?0+$/, '')}x`);
+    setInputValue('statusBarColorInput', settings.statusBarColor || settings.headerColor || THEME_DEFAULTS.dark.headerColor);
 
     // Message times
     setChecked('autoMessageTimesToggle', messageTimes.auto);
@@ -608,6 +609,17 @@ function bindEventHandlers() {
     const val = parseFloat(e.target.value);
     setStatusBarIconScale(val);
     setTextContent('statusBarIconScaleValue', `${val.toFixed(2).replace(/\.?0+$/, '')}x`);
+  });
+
+  bindInput('statusBarColorInput', (e) => {
+    setStatusBarColor(e.target.value);
+  });
+
+  bindClick('resetStatusBarColorBtn', () => {
+    setStatusBarColor(null);
+    const settings = state.get('settings');
+    setInputValue('statusBarColorInput', settings.headerColor || THEME_DEFAULTS.dark.headerColor);
+    showToast('Durum çubuğu header rengine döndü', 'success');
   });
 
   // === MESSAGE TIMES ===

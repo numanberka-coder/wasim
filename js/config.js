@@ -286,6 +286,7 @@ export const DEFAULT_STATE = {
   statusBarHeight: 28,
   statusBarFontSize: 11,
   statusBarIconScale: 1,
+  statusBarColor: null,
 
   // Message Times
   messageTimesAuto: true,
