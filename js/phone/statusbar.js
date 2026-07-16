@@ -163,6 +163,28 @@ export function setStatusBarIconScale(scale) {
 }
 
 /**
+ * Apply status bar background color.
+ * null/boş = header rengini takip et (CSS fallback devreye girer).
+ */
+export function applyStatusBarColor(color) {
+  const phoneEl = $one('.phone');
+  if (!phoneEl) return;
+  if (color) {
+    phoneEl.style.setProperty('--wa-status-bar-color', color);
+  } else {
+    phoneEl.style.removeProperty('--wa-status-bar-color');
+  }
+}
+
+/**
+ * Set status bar background color — updates state + applies
+ */
+export function setStatusBarColor(color) {
+  state.set('settings.statusBarColor', color || null);
+  applyStatusBarColor(color);
+}
+
+/**
  * Set operator name in status bar
  */
 export function setOperatorName(name) {
@@ -178,6 +200,7 @@ export function initStatusBar() {
   updateStatusBar();
   applyBatterySettings();
   applyStatusBarLayout();
+  applyStatusBarColor(state.get('settings.statusBarColor'));
   startTimeUpdates();
 
   // Restore operator name from state

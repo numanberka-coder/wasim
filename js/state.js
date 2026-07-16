@@ -282,6 +282,7 @@ export class StateManager {
         statusBarHeight: DEFAULT_STATE.statusBarHeight,
         statusBarFontSize: DEFAULT_STATE.statusBarFontSize,
         statusBarIconScale: DEFAULT_STATE.statusBarIconScale,
+        statusBarColor: DEFAULT_STATE.statusBarColor,
       },
 
       // Message times
@@ -698,6 +699,7 @@ export class StateManager {
       statusBarHeight: 28,
       statusBarFontSize: 11,
       statusBarIconScale: 1,
+      statusBarColor: null,
     };
 
     this.data.messageTimes = {
