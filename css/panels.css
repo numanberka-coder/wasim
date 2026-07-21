@@ -373,50 +373,47 @@
 /* ===== SCRIPT INNER TABS ===== */
 .script-tabs {
   display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--wa-divider);
-  background: rgba(22, 31, 38, 0.6);
-  border-radius: 8px 8px 0 0;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(145, 170, 182, 0.13);
+  background: rgba(13, 23, 32, 0.6);
+  border-radius: 10px;
   overflow: hidden;
-  margin: 0 calc(-1 * var(--space-lg));
-  margin-top: calc(-1 * var(--space-lg));
-  margin-bottom: var(--space-lg);
+  margin: 0 0 var(--space-lg);
 }
 
 .script-tab {
   flex: 1;
-  padding: 10px 8px;
+  padding: 8px;
   cursor: pointer;
   user-select: none;
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--wa-text-secondary);
-  transition: all var(--transition-normal);
-  font-size: 12px;
-  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+  font-size: 12.5px;
   background: transparent;
   border: none;
-  border-radius: 0;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   letter-spacing: 0.2px;
   white-space: nowrap;
-  min-height: 40px;
+  min-height: 36px;
 }
 
 .script-tab:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--wa-text);
   transform: none;
   filter: none;
 }
 
 .script-tab.active {
-  color: var(--wa-green);
-  border-bottom-color: var(--wa-green);
-  background: rgba(37, 211, 102, 0.06);
+  color: #0b141a;
+  background: var(--wa-green);
 }
 
 .script-tab-panel {

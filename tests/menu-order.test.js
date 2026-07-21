@@ -54,12 +54,6 @@ function getMobilePanelActions(mode = MENU_MODES.PRO) {
   return getPanelMenuItems(mode).map((item) => item.action);
 }
 
-function getPanelAccordionLabels(doc, panelId) {
-  return [...doc.querySelectorAll(`#${panelId} > details.accordion > summary`)].map((summary) =>
-    summary.textContent.replace(/\s+/g, ' ').trim()
-  );
-}
-
 describe('Faz 36 menu discipline', () => {
   it('orders header menu groups by the product workflow', () => {
     const groups = getHeaderMenuGroups();
@@ -132,7 +126,9 @@ describe('Faz 37 desktop menu and panel order', () => {
 
   it('keeps preparation workflow accordions before technical JSON editing', () => {
     const doc = loadIndexDocument();
-    const labels = getPanelAccordionLabels(doc, 'group');
+    const labels = [
+      ...doc.querySelectorAll('#group .panel-group details.accordion > summary .accordion-title'),
+    ].map((el) => el.textContent.replace(/\s+/g, ' ').trim());
 
     expect(labels).toEqual([
       'Grup Bilgileri',
@@ -146,7 +142,7 @@ describe('Faz 37 desktop menu and panel order', () => {
   it('keeps common settings before pro and technical settings', () => {
     const doc = loadIndexDocument();
     const labels = [
-      ...doc.querySelectorAll('#settings .settings-group details.accordion > summary .accordion-title'),
+      ...doc.querySelectorAll('#settings .panel-group details.accordion > summary .accordion-title'),
     ].map((el) => el.textContent.replace(/\s+/g, ' ').trim());
 
     expect(labels.indexOf('Tema')).toBeGreaterThan(labels.indexOf('Mod & Rehber'));

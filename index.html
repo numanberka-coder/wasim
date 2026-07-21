@@ -100,11 +100,17 @@
 
       <!-- ===== PANEL: GROUP ===== -->
       <div class="panel active" id="group">
+
+        <!-- ===== SECTION: GRUP ===== -->
+        <section class="panel-group">
+          <h3 class="panel-group-title">Grup</h3>
+
         <!-- Group Info -->
         <details class="accordion" open>
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            Grup Bilgileri
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="users"></span></span>
+            <span class="accordion-title">Grup Bilgileri</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div class="form-group">
@@ -143,12 +149,18 @@
             </div>
           </div>
         </details>
+        </section>
+
+        <!-- ===== SECTION: KİŞİLER ===== -->
+        <section class="panel-group">
+          <h3 class="panel-group-title">Kişiler</h3>
 
         <!-- Person Form (merged from Kişiler) -->
         <details class="accordion" open>
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            Kişi Ekle / Düzenle
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="userPlus"></span></span>
+            <span class="accordion-title">Kişi Ekle / Düzenle</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div class="form-group">
@@ -185,8 +197,9 @@
         <!-- People List -->
         <details class="accordion" open>
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            Kişi Listesi
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="list"></span></span>
+            <span class="accordion-title">Kişi Listesi</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div id="peopleList" class="people-list">
@@ -194,12 +207,18 @@
             </div>
           </div>
         </details>
+        </section>
+
+        <!-- ===== SECTION: AKIŞ ===== -->
+        <section class="panel-group">
+          <h3 class="panel-group-title">Akış</h3>
 
         <!-- Satır Sırası -->
         <details class="accordion" open>
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            Satır Sırası
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="listOrdered"></span></span>
+            <span class="accordion-title">Satır Sırası</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div id="groupBuilderList" class="builder-list"></div>
@@ -213,12 +232,18 @@
             </div>
           </div>
         </details>
+        </section>
+
+        <!-- ===== SECTION: GELİŞMİŞ (pro) ===== -->
+        <section class="panel-group" data-mode="pro">
+          <h3 class="panel-group-title">Gelişmiş</h3>
 
         <!-- JSON Editor -->
-        <details class="accordion pro-only" data-mode="pro">
+        <details class="accordion">
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            JSON Düzenle
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="code"></span></span>
+            <span class="accordion-title">JSON Düzenle</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div class="form-group">
@@ -230,6 +255,7 @@
             </div>
           </div>
         </details>
+        </section>
 
       </div>
 
@@ -257,8 +283,9 @@
           <!-- Rehber -->
           <details class="accordion tutorial-guide" id="tutorialSenaryo">
             <summary class="accordion-header">
-              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              📖 Nasıl Kullanılır?
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="book"></span></span>
+              <span class="accordion-title">Nasıl Kullanılır?</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
             <div class="accordion-body">
 
@@ -420,8 +447,9 @@
           <!-- Rehber -->
           <details class="accordion tutorial-guide" id="tutorialInteractive">
             <summary class="accordion-header">
-              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              📖 Nasıl Kullanılır?
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="book"></span></span>
+              <span class="accordion-title">Nasıl Kullanılır?</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
             <div class="accordion-body">
 
@@ -528,8 +556,9 @@ Destek: Bunu anlayamadım 🤔"></textarea>
 
           <details class="accordion" style="margin-top: 12px;">
             <summary class="accordion-header">
-              <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              ❓ Syntax Referansı
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="helpCircle"></span></span>
+              <span class="accordion-title">Syntax Referansı</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
             <div class="accordion-body">
               <div style="background: rgba(20,30,38,0.8); border: 1px solid var(--wa-divider); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; line-height: 1.8; color: var(--wa-text-secondary);">
@@ -550,8 +579,9 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         <!-- Manuel Gönderim (tab'ların altında accordion olarak kalır) -->
         <details class="accordion pro-only" data-mode="pro">
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            ✉️ Manuel Gönderim
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="send"></span></span>
+            <span class="accordion-title">Manuel Gönderim</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div class="form-group">
@@ -567,8 +597,9 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         <!-- Command Help -->
         <details class="accordion" id="commandHelpAccordion">
           <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            ❓ Komut Yardımı
+            <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="helpCircle"></span></span>
+            <span class="accordion-title">Komut Yardımı</span>
+            <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
             <div class="command-help">
@@ -594,11 +625,11 @@ Destek: Bunu anlayamadım 🤔"></textarea>
       </div>
 
       <!-- ===== PANEL: SETTINGS ===== -->
-      <div class="panel settings-panel" id="settings">
+      <div class="panel" id="settings">
 
         <!-- ===== SECTION: GENEL ===== -->
-        <section class="settings-group">
-          <h3 class="settings-group-title">Genel</h3>
+        <section class="panel-group">
+          <h3 class="panel-group-title">Genel</h3>
 
           <!-- Mode & Onboarding -->
           <details class="accordion" open>
@@ -643,8 +674,8 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </section>
 
         <!-- ===== SECTION: GÖRÜNÜM ===== -->
-        <section class="settings-group">
-          <h3 class="settings-group-title">Görünüm</h3>
+        <section class="panel-group">
+          <h3 class="panel-group-title">Görünüm</h3>
 
           <!-- Typography -->
           <details class="accordion">
@@ -843,8 +874,8 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </section>
 
         <!-- ===== SECTION: GELİŞMİŞ (pro) ===== -->
-        <section class="settings-group" data-mode="pro">
-          <h3 class="settings-group-title">Gelişmiş</h3>
+        <section class="panel-group" data-mode="pro">
+          <h3 class="panel-group-title">Gelişmiş</h3>
 
           <!-- Message Times -->
           <details class="accordion">
@@ -910,8 +941,8 @@ Destek: Bunu anlayamadım 🤔"></textarea>
         </section>
 
         <!-- ===== SECTION: VERİ ===== -->
-        <section class="settings-group">
-          <h3 class="settings-group-title">Veri</h3>
+        <section class="panel-group">
+          <h3 class="panel-group-title">Veri</h3>
 
           <!-- Usage Analytics -->
           <details class="accordion">
