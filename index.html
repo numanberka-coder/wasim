@@ -594,308 +594,344 @@ Destek: Bunu anlayamadım 🤔"></textarea>
       </div>
 
       <!-- ===== PANEL: SETTINGS ===== -->
-      <div class="panel" id="settings">
-        <details class="accordion" open>
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🧭 Başlangıç Rehberi & Mod
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="appModeToggle">Arayüz Modu</label>
-              <select id="appModeToggle">
-                <option value="simple">Basit Mod (önerilen)</option>
-                <option value="pro">Pro Mod (tüm kontroller)</option>
-              </select>
-              <p class="hint">Basit mod yeni kullanıcılar için sadeleştirilmiş ekran gösterir.</p>
-            </div>
-            <div class="form-row">
-              <button id="reopenOnboardingBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="book"></span>Rehberi Tekrar Göster</button>
-            </div>
-            <div class="onboarding-goals-mini">
-              <div class="goal-chip" id="goalPlayChip">▶️ İlk mesajı oynat</div>
-              <div class="goal-chip" id="goalShotChip">📸 İlk ekran görüntüsünü al</div>
-            </div>
-          </div>
-        </details>
-        <!-- Theme Toggle -->
-        <details class="accordion" open>
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🌗 Tema
-          </summary>
-          <div class="accordion-body">
-            <div class="form-row" style="gap: 8px;">
-              <button id="themeDarkBtn" type="button" style="flex:1;"><span class="ui-icon" data-ui-icon="moon"></span>Dark</button>
-              <button id="themeLightBtn" type="button" class="secondary" style="flex:1;"><span class="ui-icon" data-ui-icon="sun"></span>Light</button>
-            </div>
-          </div>
-        </details>
-        <details class="accordion" open>
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            Kullanım Özeti
-          </summary>
-          <div class="accordion-body">
-            <div id="analyticsSummary" class="analytics-summary">
-              <div class="analytics-empty">Henüz yerel kullanım verisi yok.</div>
-            </div>
-            <div class="form-row analytics-actions">
-              <button id="refreshAnalyticsBtn" type="button" class="secondary">Yenile</button>
-              <button id="clearAnalyticsBtn" type="button" class="secondary danger">Veriyi Temizle</button>
-            </div>
-            <p class="hint">Yerel ve anonim.</p>
-          </div>
-        </details>
+      <div class="panel settings-panel" id="settings">
 
-        <!-- Typography -->
-        <details class="accordion" open>
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🔤 Tipografi
-          </summary>
-          <div class="accordion-body">
-            <div class="range-row">
-              <label>Yazı Boyutu</label>
-              <input type="range" id="fontSizeControl" min="12" max="18" step="1" value="14" data-unit="px">
-              <output id="fontSizeValue">14px</output>
-            </div>
-            <div class="range-row">
-              <label>Satır Aralığı</label>
-              <input type="range" id="lineHeightControl" min="1.2" max="1.6" step="0.05" value="1.4" data-unit="x">
-              <output id="lineHeightValue">1.4x</output>
-            </div>
-            <div class="range-row">
-              <label>Balon Genişliği</label>
-              <input type="range" id="bubbleSizeControl" min="70" max="90" step="1" value="78" data-unit="%">
-              <output id="bubbleSizeValue">78%</output>
-            </div>
-            <div class="range-row">
-              <label>Balon Dolgu (Y)</label>
-              <input type="range" id="bubblePaddingYControl" min="8" max="14" step="1" value="10" data-unit="px">
-              <output id="bubblePaddingYValue">10px</output>
-            </div>
-          </div>
-        </details>
+        <!-- ===== SECTION: GENEL ===== -->
+        <section class="settings-group">
+          <h3 class="settings-group-title">Genel</h3>
 
-        <!-- Message Times -->
-        <details class="accordion pro-only" data-mode="pro">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            ⏱️ Mesaj Saatleri
-          </summary>
-          <div class="accordion-body">
-            <label class="checkbox-row">
-              <input type="checkbox" id="autoMessageTimesToggle" checked>
-              <span class="checkbox-label">Otomatik Saat Artışı</span>
-            </label>
-            
-            <div id="autoTimeSection" style="margin-top: 16px;">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="messageBaseTimeInput">Başlangıç Saati</label>
-                  <input type="time" id="messageBaseTimeInput" step="60">
-                </div>
-                <div class="form-group">
-                  <label for="messageIncrementInput">Artış (dk)</label>
-                  <input type="number" id="messageIncrementInput" min="0" max="180" value="1">
-                </div>
+          <!-- Mode & Onboarding -->
+          <details class="accordion" open>
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="sliders"></span></span>
+              <span class="accordion-title">Mod &amp; Rehber</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="form-group">
+                <label for="appModeToggle">Arayüz Modu</label>
+                <select id="appModeToggle">
+                  <option value="simple">Basit Mod (önerilen)</option>
+                  <option value="pro">Pro Mod (tüm kontroller)</option>
+                </select>
+                <p class="hint">Basit mod yeni kullanıcılar için sadeleştirilmiş ekran gösterir.</p>
               </div>
-              <p class="hint">Her mesaj otomatik olarak belirtilen dakika kadar ileri saate sahip olacak.</p>
-            </div>
-
-            <div id="manualTimeSection" style="display: none; margin-top: 16px;">
-              <p class="hint" style="margin-bottom: 12px;">Her mesajın saatini ayrı ayrı düzenleyebilirsiniz:</p>
-              <div id="manualTimeList" class="time-list">
-                <div class="hint">Henüz mesaj yok.</div>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Scene Management -->
-        <details class="accordion pro-only" data-mode="pro">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎬 Sahne Yönetimi
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="sceneNameInput">Sahne Adı</label>
               <div class="form-row">
-                <input type="text" id="sceneNameInput" placeholder="Sahne adı girin...">
-                <select id="sceneCategoryInput" aria-label="Sahne kategorisi"></select>
-                <button type="button" id="saveSceneBtn" class="btn-sm"><span class="ui-icon" data-ui-icon="save"></span>Kaydet</button>
+                <button id="reopenOnboardingBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="book"></span>Rehberi Tekrar Göster</button>
+              </div>
+              <div class="onboarding-goals-mini">
+                <div class="goal-chip" id="goalPlayChip">▶️ İlk mesajı oynat</div>
+                <div class="goal-chip" id="goalShotChip">📸 İlk ekran görüntüsünü al</div>
               </div>
             </div>
-            <div id="lastScenePrompt" class="scene-last-prompt" hidden></div>
-            <div id="recentScenes" class="scene-quick-list"></div>
-            <div class="form-group scene-search-group">
-              <label for="sceneSearchInput">Sahne Ara</label>
-              <input type="search" id="sceneSearchInput" placeholder="İsim veya kategori ara...">
-            </div>
-            <div id="sceneList" class="scene-list"></div>
-          </div>
-        </details>
+          </details>
 
-        <!-- Status Bar -->
-        <details class="accordion pro-only" data-mode="pro">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🕐 Durum Çubuğu
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="operatorNameInput">Operatör Adı</label>
-              <input type="text" id="operatorNameInput" value="Turkcell" placeholder="örn: Turkcell, Vodafone, Türk Telekom">
+          <!-- Theme Toggle -->
+          <details class="accordion" open>
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="contrast"></span></span>
+              <span class="accordion-title">Tema</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="form-row" style="gap: 8px;">
+                <button id="themeDarkBtn" type="button" style="flex:1;"><span class="ui-icon" data-ui-icon="moon"></span>Dark</button>
+                <button id="themeLightBtn" type="button" class="secondary" style="flex:1;"><span class="ui-icon" data-ui-icon="sun"></span>Light</button>
+              </div>
             </div>
-            <div class="divider"></div>
-            <div class="form-group">
-              <label for="statusTimeInput">Saat (boş bırak = gerçek saat)</label>
-              <input type="time" id="statusTimeInput" step="60">
+          </details>
+        </section>
+
+        <!-- ===== SECTION: GÖRÜNÜM ===== -->
+        <section class="settings-group">
+          <h3 class="settings-group-title">Görünüm</h3>
+
+          <!-- Typography -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="type"></span></span>
+              <span class="accordion-title">Tipografi</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="range-row">
+                <label>Yazı Boyutu</label>
+                <input type="range" id="fontSizeControl" min="12" max="18" step="1" value="14" data-unit="px">
+                <output id="fontSizeValue">14px</output>
+              </div>
+              <div class="range-row">
+                <label>Satır Aralığı</label>
+                <input type="range" id="lineHeightControl" min="1.2" max="1.6" step="0.05" value="1.4" data-unit="x">
+                <output id="lineHeightValue">1.4x</output>
+              </div>
+              <div class="range-row">
+                <label>Balon Genişliği</label>
+                <input type="range" id="bubbleSizeControl" min="70" max="90" step="1" value="78" data-unit="%">
+                <output id="bubbleSizeValue">78%</output>
+              </div>
+              <div class="range-row">
+                <label>Balon Dolgu (Y)</label>
+                <input type="range" id="bubblePaddingYControl" min="8" max="14" step="1" value="10" data-unit="px">
+                <output id="bubblePaddingYValue">10px</output>
+              </div>
             </div>
-            <div class="divider"></div>
-            <label class="checkbox-row">
-              <input type="checkbox" id="batteryVisible" checked>
-              <span class="checkbox-label">Batarya Göster</span>
-            </label>
-            <div class="form-grid" style="margin-top: 12px;">
+          </details>
+
+          <!-- Wallpaper -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="image"></span></span>
+              <span class="accordion-title">Duvar Kağıdı</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
               <div class="form-group">
-                <label for="batteryPercentInput">Batarya %</label>
-                <input type="number" id="batteryPercentInput" min="0" max="100" value="95">
+                <label for="wallpaperPreset">Hazır Tema</label>
+                <select id="wallpaperPreset">
+                  <option value="default">Varsayılan</option>
+                  <option value="velvet">Kadife</option>
+                  <option value="graph">Izgara</option>
+                  <option value="plain">Düz</option>
+                  <option value="light-default">Light Varsayılan</option>
+                  <option value="light-plain">Light Düz</option>
+                  <option value="custom-color">Özel Renk</option>
+                  <option value="custom-image">Özel Görsel</option>
+                </select>
               </div>
               <div class="form-group">
-                <label for="batteryHealthInput">Sağlık %</label>
-                <input type="number" id="batteryHealthInput" min="0" max="100" value="100">
+                <label for="wallpaperColor">Özel Renk</label>
+                <input type="color" id="wallpaperColor" value="#0b141a">
+              </div>
+              <div class="form-group">
+                <label>Özel Görsel</label>
+                <div class="file-input">
+                  <input type="file" id="wallpaperImageFile" accept="image/*">
+                  <button type="button" class="file-btn secondary btn-sm"><span class="ui-icon" data-ui-icon="folder"></span>Görsel Seç</button>
+                  <span class="file-name">Seçilmedi</span>
+                </div>
+              </div>
+              <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
+            </div>
+          </details>
+
+          <!-- Header Color -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="layoutTop"></span></span>
+              <span class="accordion-title">Başlık Rengi</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="form-group">
+                <label for="headerColorInput">Arka Plan Rengi</label>
+                <input type="color" id="headerColorInput" value="#1f2c33">
+              </div>
+              <div class="form-group" style="margin-top: 8px;">
+                <label for="headerTextColorInput">Yazı Rengi</label>
+                <input type="color" id="headerTextColorInput" value="#e9edef">
+              </div>
+              <div class="form-group" style="margin-top: 8px;">
+                <label for="headerIconColorInput">İkon Rengi</label>
+                <input type="color" id="headerIconColorInput" value="#aebac1">
+              </div>
+              <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
+            </div>
+          </details>
+
+          <!-- Bubble Colors -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="messageCircle"></span></span>
+              <span class="accordion-title">Balon Renkleri</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="form-group">
+                <label for="bubbleOutColorInput">Giden Balon Rengi</label>
+                <input type="color" id="bubbleOutColorInput" value="#005c4b">
+              </div>
+              <div class="form-group" style="margin-top: 8px;">
+                <label for="bubbleInColorInput">Gelen Balon Rengi</label>
+                <input type="color" id="bubbleInColorInput" value="#1f2c33">
+              </div>
+              <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
+            </div>
+          </details>
+
+          <!-- Status Bar -->
+          <details class="accordion pro-only" data-mode="pro">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="smartphone"></span></span>
+              <span class="accordion-title">Durum Çubuğu</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="form-group">
+                <label for="operatorNameInput">Operatör Adı</label>
+                <input type="text" id="operatorNameInput" value="Turkcell" placeholder="örn: Turkcell, Vodafone, Türk Telekom">
+              </div>
+              <div class="divider"></div>
+              <div class="form-group">
+                <label for="statusTimeInput">Saat (boş bırak = gerçek saat)</label>
+                <input type="time" id="statusTimeInput" step="60">
+              </div>
+              <div class="divider"></div>
+              <label class="checkbox-row">
+                <input type="checkbox" id="batteryVisible" checked>
+                <span class="checkbox-label">Batarya Göster</span>
+              </label>
+              <div class="form-grid" style="margin-top: 12px;">
+                <div class="form-group">
+                  <label for="batteryPercentInput">Batarya %</label>
+                  <input type="number" id="batteryPercentInput" min="0" max="100" value="95">
+                </div>
+                <div class="form-group">
+                  <label for="batteryHealthInput">Sağlık %</label>
+                  <input type="number" id="batteryHealthInput" min="0" max="100" value="100">
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="range-row">
+                <label>Bar Yüksekliği</label>
+                <input type="range" id="statusBarHeightControl" min="24" max="48" step="1" value="28" data-unit="px">
+                <output id="statusBarHeightValue">28px</output>
+              </div>
+              <div class="range-row">
+                <label>Yazı Boyutu</label>
+                <input type="range" id="statusBarFontSizeControl" min="10" max="16" step="0.5" value="11" data-unit="px">
+                <output id="statusBarFontSizeValue">11px</output>
+              </div>
+              <div class="range-row">
+                <label>İkon Boyutu</label>
+                <input type="range" id="statusBarIconScaleControl" min="0.8" max="1.5" step="0.05" value="1" data-unit="x">
+                <output id="statusBarIconScaleValue">1x</output>
+              </div>
+              <div class="form-group" style="margin-top: 12px;">
+                <label for="statusBarColorInput">Bar Rengi</label>
+                <input type="color" id="statusBarColorInput" value="#1f2c33">
+              </div>
+              <button id="resetStatusBarColorBtn" type="button" class="secondary btn-sm" style="margin-top: 8px;"><span class="ui-icon" data-ui-icon="refresh"></span>Header Rengine Dön</button>
+              <p class="hint">Kurulu uygulamada barı telefonunuzun gerçek durum çubuğuna benzetmek için ayarlayın.</p>
+            </div>
+          </details>
+
+          <!-- Tick Status -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="checkCheck"></span></span>
+              <span class="accordion-title">Tik Durumu</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <label style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
+              <div class="tick-status-group" style="display: flex; gap: 6px;">
+                <button id="tickSentBtn" type="button" class="tick-btn secondary btn-sm" data-tick="sent">
+                  <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                  Gönderildi
+                </button>
+                <button id="tickDeliveredBtn" type="button" class="tick-btn secondary btn-sm" data-tick="delivered">
+                  <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                  İletildi
+                </button>
+                <button id="tickReadBtn" type="button" class="tick-btn secondary btn-sm active" data-tick="read">
+                  <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                  Okundu
+                </button>
               </div>
             </div>
-            <div class="divider"></div>
-            <div class="range-row">
-              <label>Bar Yüksekliği</label>
-              <input type="range" id="statusBarHeightControl" min="24" max="48" step="1" value="28" data-unit="px">
-              <output id="statusBarHeightValue">28px</output>
-            </div>
-            <div class="range-row">
-              <label>Yazı Boyutu</label>
-              <input type="range" id="statusBarFontSizeControl" min="10" max="16" step="0.5" value="11" data-unit="px">
-              <output id="statusBarFontSizeValue">11px</output>
-            </div>
-            <div class="range-row">
-              <label>İkon Boyutu</label>
-              <input type="range" id="statusBarIconScaleControl" min="0.8" max="1.5" step="0.05" value="1" data-unit="x">
-              <output id="statusBarIconScaleValue">1x</output>
-            </div>
-            <div class="form-group" style="margin-top: 12px;">
-              <label for="statusBarColorInput">Bar Rengi</label>
-              <input type="color" id="statusBarColorInput" value="#1f2c33">
-            </div>
-            <button id="resetStatusBarColorBtn" type="button" class="secondary btn-sm" style="margin-top: 8px;"><span class="ui-icon" data-ui-icon="refresh"></span>Header Rengine Dön</button>
-            <p class="hint">Kurulu uygulamada barı telefonunuzun gerçek durum çubuğuna benzetmek için ayarlayın.</p>
-          </div>
-        </details>
+          </details>
+        </section>
 
-        <!-- Wallpaper -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎨 Duvar Kağıdı
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="wallpaperPreset">Hazır Tema</label>
-              <select id="wallpaperPreset">
-                <option value="default">Varsayılan</option>
-                <option value="velvet">Kadife</option>
-                <option value="graph">Izgara</option>
-                <option value="plain">Düz</option>
-                <option value="light-default">Light Varsayılan</option>
-                <option value="light-plain">Light Düz</option>
-                <option value="custom-color">Özel Renk</option>
-                <option value="custom-image">Özel Görsel</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="wallpaperColor">Özel Renk</label>
-              <input type="color" id="wallpaperColor" value="#0b141a">
-            </div>
-            <div class="form-group">
-              <label>Özel Görsel</label>
-              <div class="file-input">
-                <input type="file" id="wallpaperImageFile" accept="image/*">
-                <button type="button" class="file-btn secondary btn-sm"><span class="ui-icon" data-ui-icon="folder"></span>Görsel Seç</button>
-                <span class="file-name">Seçilmedi</span>
+        <!-- ===== SECTION: GELİŞMİŞ (pro) ===== -->
+        <section class="settings-group" data-mode="pro">
+          <h3 class="settings-group-title">Gelişmiş</h3>
+
+          <!-- Message Times -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="clock"></span></span>
+              <span class="accordion-title">Mesaj Saatleri</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <label class="checkbox-row">
+                <input type="checkbox" id="autoMessageTimesToggle" checked>
+                <span class="checkbox-label">Otomatik Saat Artışı</span>
+              </label>
+
+              <div id="autoTimeSection" style="margin-top: 16px;">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="messageBaseTimeInput">Başlangıç Saati</label>
+                    <input type="time" id="messageBaseTimeInput" step="60">
+                  </div>
+                  <div class="form-group">
+                    <label for="messageIncrementInput">Artış (dk)</label>
+                    <input type="number" id="messageIncrementInput" min="0" max="180" value="1">
+                  </div>
+                </div>
+                <p class="hint">Her mesaj otomatik olarak belirtilen dakika kadar ileri saate sahip olacak.</p>
+              </div>
+
+              <div id="manualTimeSection" style="display: none; margin-top: 16px;">
+                <p class="hint" style="margin-bottom: 12px;">Her mesajın saatini ayrı ayrı düzenleyebilirsiniz:</p>
+                <div id="manualTimeList" class="time-list">
+                  <div class="hint">Henüz mesaj yok.</div>
+                </div>
               </div>
             </div>
-            <button id="clearWallpaperBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
-          </div>
-        </details>
+          </details>
 
-        <!-- Header Color -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎨 Header Rengi
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="headerColorInput">Arka Plan Rengi</label>
-              <input type="color" id="headerColorInput" value="#1f2c33">
+          <!-- Scene Management -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="film"></span></span>
+              <span class="accordion-title">Sahneler</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div class="form-group">
+                <label for="sceneNameInput">Sahne Adı</label>
+                <div class="form-row">
+                  <input type="text" id="sceneNameInput" placeholder="Sahne adı girin...">
+                  <select id="sceneCategoryInput" aria-label="Sahne kategorisi"></select>
+                  <button type="button" id="saveSceneBtn" class="btn-sm"><span class="ui-icon" data-ui-icon="save"></span>Kaydet</button>
+                </div>
+              </div>
+              <div id="lastScenePrompt" class="scene-last-prompt" hidden></div>
+              <div id="recentScenes" class="scene-quick-list"></div>
+              <div class="form-group scene-search-group">
+                <label for="sceneSearchInput">Sahne Ara</label>
+                <input type="search" id="sceneSearchInput" placeholder="İsim veya kategori ara...">
+              </div>
+              <div id="sceneList" class="scene-list"></div>
             </div>
-            <div class="form-group" style="margin-top: 8px;">
-              <label for="headerTextColorInput">Yazı Rengi</label>
-              <input type="color" id="headerTextColorInput" value="#e9edef">
-            </div>
-            <div class="form-group" style="margin-top: 8px;">
-              <label for="headerIconColorInput">İkon Rengi</label>
-              <input type="color" id="headerIconColorInput" value="#aebac1">
-            </div>
-            <button id="resetHeaderColorBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
-          </div>
-        </details>
+          </details>
+        </section>
 
-        <!-- Bubble Colors -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            🎨 Balon Renkleri
-          </summary>
-          <div class="accordion-body">
-            <div class="form-group">
-              <label for="bubbleOutColorInput">Giden Balon Rengi</label>
-              <input type="color" id="bubbleOutColorInput" value="#005c4b">
-            </div>
-            <div class="form-group" style="margin-top: 8px;">
-              <label for="bubbleInColorInput">Gelen Balon Rengi</label>
-              <input type="color" id="bubbleInColorInput" value="#1f2c33">
-            </div>
-            <button id="resetBubbleColorsBtn" type="button" class="secondary" style="margin-top: 12px;"><span class="ui-icon" data-ui-icon="refresh"></span>Varsayılana Dön</button>
-          </div>
-        </details>
+        <!-- ===== SECTION: VERİ ===== -->
+        <section class="settings-group">
+          <h3 class="settings-group-title">Veri</h3>
 
-        <!-- Tick Status -->
-        <details class="accordion">
-          <summary class="accordion-header">
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            ✅ Tik Durumu
-          </summary>
-          <div class="accordion-body">
-            <label style="display:block; margin-bottom: 8px; color: var(--wa-text-secondary); font-size: 12px;">Varsayılan mesaj durumu</label>
-            <div class="tick-status-group" style="display: flex; gap: 6px;">
-              <button id="tickSentBtn" type="button" class="tick-btn secondary btn-sm" data-tick="sent">
-                <svg width="11" height="11" viewBox="0 0 11 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-                Gönderildi
-              </button>
-              <button id="tickDeliveredBtn" type="button" class="tick-btn secondary btn-sm" data-tick="delivered">
-                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#8696a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-                İletildi
-              </button>
-              <button id="tickReadBtn" type="button" class="tick-btn secondary btn-sm active" data-tick="read">
-                <svg width="15" height="11" viewBox="0 0 15 11"><path d="M1 5.5L4 8.5L10 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6.5 6.5L8 8.5L14 1.5" stroke="#53bdeb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-                Okundu
-              </button>
+          <!-- Usage Analytics -->
+          <details class="accordion">
+            <summary class="accordion-header">
+              <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="barChart"></span></span>
+              <span class="accordion-title">Kullanım Özeti</span>
+              <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="accordion-body">
+              <div id="analyticsSummary" class="analytics-summary">
+                <div class="analytics-empty">Henüz yerel kullanım verisi yok.</div>
+              </div>
+              <div class="form-row analytics-actions">
+                <button id="refreshAnalyticsBtn" type="button" class="secondary">Yenile</button>
+                <button id="clearAnalyticsBtn" type="button" class="secondary danger">Veriyi Temizle</button>
+              </div>
+              <p class="hint">Yerel ve anonim.</p>
             </div>
-          </div>
-        </details>
+          </details>
+        </section>
       </div>
     </section>
 

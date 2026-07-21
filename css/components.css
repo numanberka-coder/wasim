@@ -320,6 +320,76 @@ label {
   border-top: 1px solid rgba(145, 170, 182, 0.08);
 }
 
+/* ===== SETTINGS PANEL REDESIGN (scoped to #settings) ===== */
+.settings-group {
+  margin-bottom: var(--space-lg);
+}
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-group-title {
+  margin: 0 0 var(--space-sm);
+  padding: 0 2px var(--space-xs);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--wa-text-secondary);
+  border-bottom: 1px solid rgba(145, 170, 182, 0.10);
+}
+
+/* Card + header refinements — only inside the settings panel */
+.settings-panel .accordion {
+  border-radius: 10px;
+  margin-bottom: var(--space-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-panel .accordion-header {
+  gap: 11px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--wa-text);
+  background: linear-gradient(180deg, rgba(31, 44, 52, 0.55) 0%, rgba(24, 36, 44, 0.5) 100%);
+}
+.settings-panel .accordion[open] .accordion-header {
+  color: var(--wa-text);
+  border-bottom-color: rgba(37, 211, 102, 0.16);
+}
+
+/* Leading icon square (green-tinted, fills when open) */
+.accordion-lead-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(37, 211, 102, 0.12);
+  color: var(--wa-green);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.settings-panel .accordion[open] .accordion-lead-icon {
+  background: var(--wa-green);
+  color: #0b141a;
+}
+
+.accordion-title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Chevron moves to the right in the settings panel */
+.settings-panel .accordion-icon {
+  margin-left: auto;
+  color: var(--wa-text-secondary);
+}
+
 /* ===== TUTORIAL GUIDE ===== */
 .tutorial-guide {
   margin-bottom: 12px;
