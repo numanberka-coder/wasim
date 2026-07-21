@@ -102,10 +102,10 @@
   justify-content: flex-start;
   width: 100%;
   min-width: 0;
-  min-height: 54px;
-  padding: 9px 10px;
+  min-height: 56px;
+  padding: 10px 12px;
   border: 1px solid rgba(145, 170, 182, 0.13);
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--wa-text);
   text-align: left;
@@ -133,9 +133,16 @@
   width: 26px;
   height: 26px;
   flex: 0 0 26px;
-  border-radius: 8px;
+  border-radius: 9px;
   background: rgba(37, 211, 102, 0.1);
   color: var(--wa-green);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+/* Active item: fill the icon square (matches settings open state) */
+.desktop-menu-item.is-active .desktop-menu-icon {
+  background: var(--wa-green);
+  color: #0b141a;
 }
 
 .desktop-menu-icon svg {

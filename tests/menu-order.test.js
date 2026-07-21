@@ -145,11 +145,13 @@ describe('Faz 37 desktop menu and panel order', () => {
 
   it('keeps common settings before pro and technical settings', () => {
     const doc = loadIndexDocument();
-    const labels = getPanelAccordionLabels(doc, 'settings');
+    const labels = [
+      ...doc.querySelectorAll('#settings .settings-group details.accordion > summary .accordion-title'),
+    ].map((el) => el.textContent.replace(/\s+/g, ' ').trim());
 
-    expect(labels.indexOf('🌗 Tema')).toBeGreaterThan(labels.indexOf('🧭 Başlangıç Rehberi & Mod'));
-    expect(labels.indexOf('🌗 Tema')).toBeLessThan(labels.indexOf('⏱️ Mesaj Saatleri'));
-    expect(labels.indexOf('🔤 Tipografi')).toBeLessThan(labels.indexOf('⏱️ Mesaj Saatleri'));
+    expect(labels.indexOf('Tema')).toBeGreaterThan(labels.indexOf('Mod & Rehber'));
+    expect(labels.indexOf('Tema')).toBeLessThan(labels.indexOf('Mesaj Saatleri'));
+    expect(labels.indexOf('Tipografi')).toBeLessThan(labels.indexOf('Mesaj Saatleri'));
   });
 });
 

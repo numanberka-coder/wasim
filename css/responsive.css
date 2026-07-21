@@ -338,12 +338,19 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 }
 
 .mobile-action-sheet .hd-item {
-  min-height: 50px;
-  padding: 9px 11px;
+  min-height: 52px;
+  padding: 10px 12px;
   border: 1px solid rgba(145, 170, 182, 0.12);
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   font-size: 14px;
+}
+
+.mobile-action-sheet .hd-item:hover,
+.mobile-action-sheet .hd-item:focus-visible {
+  border-color: rgba(37, 211, 102, 0.28);
+  background: rgba(37, 211, 102, 0.08);
+  outline: none;
 }
 
 .mobile-action-sheet .hd-menu-group-playback .hd-group-items {
