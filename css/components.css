@@ -1534,3 +1534,83 @@ label {
     width: 100%;
   }
 }
+
+/* ===== APP MODAL (themed dialog — export sheet, confirm, shortcuts) ===== */
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: appModalFade 0.16s ease-out;
+}
+.app-modal-overlay.is-closing {
+  animation: appModalFadeOut 0.16s ease-in forwards;
+}
+
+.app-modal {
+  width: 100%;
+  max-width: 360px;
+  max-height: 86vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #17242c, #121e26);
+  border: 1px solid rgba(145, 170, 182, 0.16);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  animation: appModalPop 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.app-modal.export-modal {
+  max-width: 420px;
+}
+
+.app-modal-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--wa-text);
+}
+.app-modal-body {
+  margin-bottom: 16px;
+}
+.app-modal-message {
+  margin: 0;
+  color: var(--wa-text-secondary);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.app-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.export-modal .app-modal-actions {
+  justify-content: stretch;
+}
+.export-modal .app-modal-actions button {
+  flex: 1;
+  justify-content: center;
+}
+
+.export-preview {
+  display: block;
+  width: 100%;
+  max-height: 46vh;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(145, 170, 182, 0.14);
+  background: #0b141a;
+}
+
+@keyframes appModalFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes appModalFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes appModalPop {
+  from { transform: translateY(8px) scale(0.98); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
