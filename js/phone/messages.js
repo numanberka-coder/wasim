@@ -783,6 +783,30 @@ function addMessage({ speaker, text, replyTo = null, time = null, kind = null, s
 
 
 /**
+ * Bir mesajı düzenle (WYSIWYG). Değişikliği state'e yazar ve sohbeti
+ * yeniden çizerek gruplama/saat/gönderen güncellemelerini uygular.
+ * @param {number} id
+ * @param {Object} patch  { text, time, speaker, ... }
+ * @returns {Object|null}
+ */
+function editMessage(id, patch = {}) {
+  const updated = state.updateMessage(id, patch);
+  if (updated) rebuildChat();
+  return updated;
+}
+
+/**
+ * Bir mesajı sil (WYSIWYG). State'ten kaldırır ve sohbeti yeniden çizer.
+ * @param {number} id
+ * @returns {boolean}
+ */
+function removeMessage(id) {
+  const ok = state.removeMessage(id);
+  if (ok) rebuildChat();
+  return ok;
+}
+
+/**
  * Find a message by a "target" token (reuses resolveReplyTarget)
  */
 function findMessageByTarget(target) {
@@ -1110,6 +1134,8 @@ export {
   materializeAllMessages,
   scrollToBottom,
   findMessageByTarget,
+  editMessage,
+  removeMessage,
   applyReactionToMessage,
   updateMessageTimesInDOM,
   regenerateMessageTimes,

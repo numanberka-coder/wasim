@@ -564,6 +564,35 @@ export class StateManager {
   }
 
   /**
+   * Update a message by id (partial patch). WYSIWYG düzenleme için.
+   * @param {number} id
+   * @param {Object} patch
+   * @returns {Object|null} güncellenmiş mesaj
+   */
+  updateMessage(id, patch = {}) {
+    const target = this.data.messages.find((m) => String(m.id) === String(id));
+    if (!target) return null;
+    Object.assign(target, patch);
+    this.syncActiveConversationFromLegacy();
+    this.notify('messages');
+    return target;
+  }
+
+  /**
+   * Remove a message by id.
+   * @param {number} id
+   * @returns {boolean}
+   */
+  removeMessage(id) {
+    const idx = this.data.messages.findIndex((m) => String(m.id) === String(id));
+    if (idx === -1) return false;
+    this.data.messages.splice(idx, 1);
+    this.syncActiveConversationFromLegacy();
+    this.notify('messages');
+    return true;
+  }
+
+  /**
    * Clear messages
    */
   clearMessages() {

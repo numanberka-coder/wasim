@@ -1636,3 +1636,46 @@ label {
   from { transform: translateY(8px) scale(0.98); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
+
+/* ========================================
+   MESSAGE EDITOR (WYSIWYG)
+   ======================================== */
+.msg-row[data-msg-id] {
+  cursor: pointer;
+}
+.msg-row[data-msg-id] .msg-bubble {
+  transition: box-shadow 0.15s ease, outline-color 0.15s ease;
+  outline: 1px solid transparent;
+}
+.msg-row[data-msg-id]:hover .msg-bubble {
+  outline-color: rgba(37, 211, 102, 0.55);
+}
+
+.msg-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.msg-edit-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--wa-text-secondary);
+  margin-top: 6px;
+}
+.msg-edit-form .msg-edit-text,
+.msg-edit-form .msg-edit-time,
+.msg-edit-form .msg-edit-speaker {
+  width: 100%;
+  background: var(--wa-input, #1f2c34);
+  color: var(--wa-text);
+  border: 1px solid var(--wa-divider);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: var(--font-size-md);
+  font-family: inherit;
+}
+.msg-edit-form .msg-edit-text {
+  resize: vertical;
+  min-height: 60px;
+}
