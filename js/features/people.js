@@ -34,6 +34,27 @@ function renderPeopleList() {
 
   listEl.replaceChildren();
 
+  if (names.length === 0) {
+    const cta = createElement('button', {
+      className: 'empty-state-cta',
+      type: 'button',
+      onClick: () => {
+        const input = $('pName');
+        if (input) { input.focus(); input.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+      },
+    }, ['Kişi ekleyerek başla']);
+    listEl.appendChild(
+      createElement('div', { className: 'empty-state' }, [
+        createElement('div', { className: 'empty-state-title' }, ['Henüz kişi yok']),
+        createElement('div', { className: 'empty-state-desc' }, ['Sohbete katılacak kişileri ekleyin.']),
+        cta,
+      ])
+    );
+    if (jsonEl) jsonEl.value = JSON.stringify(people, null, 2);
+    refreshManualSenderOptions();
+    return;
+  }
+
   for (const name of names) {
     const avatar = (people[name]?.avatar || '').trim();
     const isOnline = active.has(name);

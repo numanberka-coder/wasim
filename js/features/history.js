@@ -33,6 +33,10 @@ export function captureSnapshot() {
   return deepClone(state.export());
 }
 
+/** Ctrl+Z için geri-al yığını (en fazla son N anlık görüntü) */
+const undoStack = [];
+const MAX_STACK = 30;
+
 /**
  * Bir anlık görüntüyü geri yükle ve render/save kancasını tetikle.
  * @param {Object} snapshot
@@ -45,7 +49,8 @@ export function restoreSnapshot(snapshot) {
 
 /**
  * Yıkıcı bir işlemi geri alınabilir yap: işlemden ÖNCE snapshot al,
- * işlemi çalıştır, sonra "Geri Al" butonlu toast göster.
+ * işlemi çalıştır, sonra "Geri Al" butonlu toast göster. Anlık görüntü
+ * ayrıca Ctrl+Z yığınına eklenir.
  * @param {Object} opts
  * @param {() => void} opts.action  yıkıcı işlem
  * @param {string} opts.message  toast metni (ör. "Kişi silindi")
@@ -54,5 +59,29 @@ export function restoreSnapshot(snapshot) {
 export function runUndoable({ action, message, duration }) {
   const snapshot = captureSnapshot();
   action();
-  showToast(message, { duration, actionLabel: 'Geri Al', onAction: () => restoreSnapshot(snapshot) });
+  undoStack.push(snapshot);
+  if (undoStack.length > MAX_STACK) undoStack.shift();
+
+  showToast(message, {
+    duration,
+    actionLabel: 'Geri Al',
+    onAction: () => {
+      const idx = undoStack.lastIndexOf(snapshot);
+      if (idx !== -1) undoStack.splice(idx); // bu ve sonrası geçersiz
+      restoreSnapshot(snapshot);
+    },
+  });
+}
+
+/**
+ * En son geri-alınabilir işlemi geri al (Ctrl+Z). Geri alınacak bir şey
+ * yoksa false döner.
+ * @returns {boolean}
+ */
+export function undoLast() {
+  const snapshot = undoStack.pop();
+  if (!snapshot) return false;
+  restoreSnapshot(snapshot);
+  showToast('Geri alındı');
+  return true;
 }
