@@ -13,6 +13,8 @@ import { renderPeopleList } from '../features/people.js';
 import { syncHeader } from '../phone/header.js';
 import { rebuildChat } from '../phone/messages.js';
 import { applyWallpaper } from '../phone/wallpaper.js';
+import { confirmModal } from '../ui/modal.js';
+import { runUndoable } from '../features/history.js';
 import { applyAllTypography } from '../phone/typography.js';
 import {
   MENU_MODE_EVENT,
@@ -525,8 +527,12 @@ function handleMobileAction(action) {
       triggerMobileFileLoad();
       break;
     case 'clear':
-      if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz? Bu işlem senaryo, kişiler ve ayarları temizler.')) return;
-      mobileClearAll();
+      confirmModal({
+        title: 'Tüm veriyi sil',
+        message: 'Tüm veriyi silmek istediğinizden emin misiniz? Bu işlem senaryo, kişiler ve ayarları temizler.',
+        confirmLabel: 'Sil',
+        danger: true,
+      }).then((ok) => { if (ok) mobileClearAll(); });
       break;
   }
 }
@@ -561,11 +567,15 @@ function triggerMobileFileLoad() {
 
 /** Clear all data */
 function mobileClearAll() {
-  if (storage.clear) storage.clear();
-  state.reset();
-  state.set('player.script', DEFAULT_SCRIPT);
-  mobileRefreshAll();
-  showSuccess('Tüm veri silindi!');
+  runUndoable({
+    message: 'Tüm veri silindi',
+    action: () => {
+      if (storage.clear) storage.clear();
+      state.reset();
+      state.set('player.script', DEFAULT_SCRIPT);
+      mobileRefreshAll();
+    },
+  });
 }
 
 /** Refresh all UI after data change */
