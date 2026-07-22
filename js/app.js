@@ -19,7 +19,8 @@ import { initMobile, registerMobileCallback } from './ui/mobile.js';
 import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
-import { openModal } from './ui/modal.js';
+import { openModal, confirmModal } from './ui/modal.js';
+import { runUndoable, setRestoreHook } from './features/history.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
@@ -118,6 +119,13 @@ function init() {
   const savedTheme = state.get('settings.theme') || 'dark';
   try { applyTheme(savedTheme); } catch (e) { Logger.error('applyTheme hatası:', e); }
   updateThemeButtons(savedTheme);
+
+  // Geri Al (undo) — snapshot geri yüklendiğinde yeniden çiz + kaydet
+  setRestoreHook(() => {
+    applyFullState();
+    renderSceneUx();
+    storage.save();
+  });
 
   // Bind event handlers — KRİTİK: bu satıra ulaşılmazsa hiçbir buton çalışmaz
   bindEventHandlers();
@@ -727,13 +735,23 @@ function bindEventHandlers() {
     }
   });
 
-  bindClick('clearAllBtn', () => {
-    if (!confirm('Tüm veriyi silmek istediğinizden emin misiniz? Bu işlem senaryo, kişiler ve ayarları temizler.')) return;
-    storage.clear();
-    state.reset();
-    state.set('player.script', DEFAULT_SCRIPT);
-    applyFullState();
-    showSuccess('Tüm veri silindi!');
+  bindClick('clearAllBtn', async () => {
+    const ok = await confirmModal({
+      title: 'Tüm veriyi sil',
+      message: 'Tüm veriyi silmek istediğinizden emin misiniz? Bu işlem senaryo, kişiler ve ayarları temizler.',
+      confirmLabel: 'Sil',
+      danger: true,
+    });
+    if (!ok) return;
+    runUndoable({
+      message: 'Tüm veri silindi',
+      action: () => {
+        storage.clear();
+        state.reset();
+        state.set('player.script', DEFAULT_SCRIPT);
+        applyFullState();
+      },
+    });
   });
 }
 
@@ -1106,16 +1124,25 @@ function createSceneBadge(scene) {
   return createElement('span', { className: 'scene-category' }, [scene.category || 'Genel']);
 }
 
-function loadSceneById(id, source = 'list') {
+async function loadSceneById(id, source = 'list') {
   if (!Number.isFinite(id)) return;
-  if (!confirm('Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.')) return;
-  const ok = sceneManager.load(id);
-  if (ok) {
-    applyFullState();
-    renderSceneUx();
-    trackUsage('scene_load', { source });
-    showSuccess('Sahne yüklendi!');
-  }
+  const ok = await confirmModal({
+    title: 'Sahneyi yükle',
+    message: 'Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.',
+    confirmLabel: 'Yükle',
+  });
+  if (!ok) return;
+  runUndoable({
+    message: 'Sahne yüklendi',
+    action: () => {
+      const loaded = sceneManager.load(id);
+      if (loaded) {
+        applyFullState();
+        renderSceneUx();
+        trackUsage('scene_load', { source });
+      }
+    },
+  });
 }
 
 function createQuickSceneButton(scene) {
@@ -1217,25 +1244,23 @@ function initSceneListDelegation() {
   const container = $('sceneList');
   if (!container) return;
 
-  container.addEventListener('click', (e) => {
+  container.addEventListener('click', async (e) => {
     const loadBtn = e.target.closest('.scene-load-btn');
     if (loadBtn) {
-      const id = Number(loadBtn.dataset.sceneId);
-      if (!confirm('Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.')) return;
-      const ok = sceneManager.load(id);
-      if (ok) {
-        applyFullState();
-        renderSceneUx();
-        trackUsage('scene_load', { source: 'list' });
-        showSuccess('Sahne yüklendi!');
-      }
+      loadSceneById(Number(loadBtn.dataset.sceneId), 'list');
       return;
     }
 
     const deleteBtn = e.target.closest('.scene-delete-btn');
     if (deleteBtn) {
       const id = Number(deleteBtn.dataset.sceneId);
-      if (!confirm('Bu sahneyi silmek istediğinizden emin misiniz?')) return;
+      const ok = await confirmModal({
+        title: 'Sahneyi sil',
+        message: 'Bu sahneyi silmek istediğinizden emin misiniz?',
+        confirmLabel: 'Sil',
+        danger: true,
+      });
+      if (!ok) return;
       sceneManager.delete(id);
       trackUsage('scene_delete', { source: 'list' });
       renderSceneUx();
@@ -1294,9 +1319,8 @@ function initOnboardingAndMode() {
 
   const hasSeenOnboarding = safeStorageGet(ONBOARDING_KEY) === '1';
   if (!hasSeenOnboarding) {
-    // İlk yüklemede web önizleme ekranını tamamen kapatmamak için otomatik açma yerine
-    // ayarlardan tekrar açılabilen rehbere yönlendiriyoruz.
-    showToast('📖 Başlangıç rehberi hazır: Ayarlar > Başlangıç Rehberi & Mod', 3200);
+    // İlk açılışta rehberi otomatik aç (kullanıcı Atla/Başla ile kapatabilir).
+    openOnboarding();
   }
 }
 

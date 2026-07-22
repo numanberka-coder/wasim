@@ -725,6 +725,28 @@ label {
   animation: toastSlide 0.3s ease-out;
   z-index: var(--z-toast);
   border: 1px solid var(--wa-divider);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toast-action {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--wa-green);
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  padding: 4px 6px;
+  margin: -4px -2px -4px 0;
+  border-radius: var(--radius-sm);
+}
+
+.toast-action:hover {
+  background: rgba(37, 211, 102, 0.14);
 }
 
 @keyframes toastSlide {

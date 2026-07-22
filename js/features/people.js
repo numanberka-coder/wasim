@@ -7,6 +7,8 @@ import { state } from '../state.js';
 import { showError, showSuccess } from '../ui/toast.js';
 import { markInvalid, clearInvalid } from '../ui/validation.js';
 import { BUILDER_TYPES, BUILDER_FIELDS, buildLineFromValues, addLine } from './script-builder.js';
+import { confirmModal } from '../ui/modal.js';
+import { runUndoable } from './history.js';
 
 
 
@@ -559,24 +561,34 @@ function savePerson() {
 /**
  * Delete person
  */
-function deletePerson() {
+async function deletePerson() {
   const nameInput = $('pName');
   const name = state.data.editingName || nameInput?.value?.trim();
   const people = state.get('people');
 
   if (!name || !people[name]) return;
-  if (!confirm(`"${name}" kişisini silmek istediğinizden emin misiniz?`)) return;
+  const ok = await confirmModal({
+    title: 'Kişiyi sil',
+    message: `"${name}" kişisini silmek istediğinizden emin misiniz?`,
+    confirmLabel: 'Sil',
+    danger: true,
+  });
+  if (!ok) return;
 
-  const wasSelf = state.isSelf(name);
-  delete people[name];
-  state.get('active').delete(name);
-  if (wasSelf) state.data.selfName = '';
-  state.recomputeColors();
-  state.set('people', people);
+  runUndoable({
+    message: `"${name}" silindi`,
+    action: () => {
+      const wasSelf = state.isSelf(name);
+      delete people[name];
+      state.get('active').delete(name);
+      if (wasSelf) state.data.selfName = '';
+      state.recomputeColors();
+      state.set('people', people);
 
-  clearPersonForm();
-  renderPeopleList();
-  showSuccess('Kişi silindi!');
+      clearPersonForm();
+      renderPeopleList();
+    },
+  });
 }
 
 /**
