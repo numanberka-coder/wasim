@@ -19,6 +19,7 @@ import { initMobile, registerMobileCallback } from './ui/mobile.js';
 import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
+import { openModal } from './ui/modal.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
@@ -948,42 +949,115 @@ function syncScaleButtons(scale) {
 
 // === SCREENSHOT ===
 
-async function takeScreenshot() {
+/** Render the phone preview to a canvas (materialize + scale-reset). */
+async function renderPhoneCanvas() {
   const phone = document.querySelector('.phone');
-  if (!phone) return;
+  if (!phone) return null;
 
+  // Virtualize edilmiş mesajları materialize et
+  materializeAllMessages();
+
+  const html2canvas = window.html2canvas;
+
+  // Geçici olarak ölçeği sıfırla — export temiz olsun
+  const currentScale = phone.style.transform;
+  phone.style.transform = 'none';
   try {
-    showSuccess('Ekran görüntüsü hazırlanıyor...');
-
-    // Virtualize edilmiş mesajları materialize et
-    materializeAllMessages();
-
-    const html2canvas = window.html2canvas;
-
-    // Geçici olarak ölçeği sıfırla — export temiz olsun
-    const currentScale = phone.style.transform;
-    phone.style.transform = 'none';
-
-    const canvas = await html2canvas(phone, {
+    return await html2canvas(phone, {
       backgroundColor: null,
       scale: 2, // Retina kalite
       useCORS: true,
       allowTaint: true,
       logging: false,
     });
-
-    // Ölçeği geri koy
+  } finally {
     phone.style.transform = currentScale;
+  }
+}
 
-    // PNG olarak indir
-    const link = document.createElement('a');
-    link.download = `whatsapp_screenshot_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+function canvasToBlob(canvas) {
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+}
 
-    markOnboardingGoal('firstScreenshot');
+/** Can the browser share an image file via the Web Share API? */
+function canShareImageFile() {
+  try {
+    return !!(navigator.canShare && navigator.canShare({
+      files: [new File([new Blob()], 'wa.png', { type: 'image/png' })],
+    }));
+  } catch {
+    return false;
+  }
+}
+
+function downloadCanvas(canvas) {
+  const link = document.createElement('a');
+  link.download = `whatsapp_screenshot_${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showSuccess('İndirildi');
+  trackUsage('screenshot', { action: 'download' });
+}
+
+async function copyCanvasToClipboard(canvas) {
+  try {
+    if (!navigator.clipboard || typeof window.ClipboardItem === 'undefined') {
+      throw new Error('clipboard unsupported');
+    }
+    const blob = await canvasToBlob(canvas);
+    await navigator.clipboard.write([new window.ClipboardItem({ 'image/png': blob })]);
+    showSuccess('Panoya kopyalandı');
+    trackUsage('screenshot', { action: 'copy' });
+  } catch {
+    showError('Panoya kopyalanamadı, indiriliyor');
+    downloadCanvas(canvas);
+  }
+}
+
+async function shareCanvas(canvas) {
+  try {
+    const blob = await canvasToBlob(canvas);
+    const file = new File([blob], 'whatsapp.png', { type: 'image/png' });
+    await navigator.share({ files: [file] });
+    trackUsage('screenshot', { action: 'share' });
+  } catch (err) {
+    if (err && err.name === 'AbortError') return; // kullanıcı iptal etti
+    showError('Paylaşılamadı');
+  }
+}
+
+/** Export sheet: preview + Kopyala / Paylaş / İndir. */
+function openExportModal(canvas) {
+  markOnboardingGoal('firstScreenshot');
+
+  const wrap = document.createElement('div');
+  const img = document.createElement('img');
+  img.className = 'export-preview';
+  img.alt = 'Ekran görüntüsü önizleme';
+  img.src = canvas.toDataURL('image/png');
+  wrap.appendChild(img);
+
+  const buttons = [
+    { label: 'Panoya Kopyala', icon: 'copy', className: '', onClick: () => copyCanvasToClipboard(canvas) },
+  ];
+  if (canShareImageFile()) {
+    buttons.push({ label: 'Paylaş', icon: 'share', className: 'secondary', onClick: () => shareCanvas(canvas) });
+  }
+  buttons.push({ label: 'İndir', icon: 'download', className: 'secondary', onClick: () => downloadCanvas(canvas) });
+
+  const res = openModal({ title: 'Ekran Görüntüsü', bodyNode: wrap, buttons });
+  res.card.classList.add('export-modal');
+}
+
+async function takeScreenshot() {
+  const phone = document.querySelector('.phone');
+  if (!phone) return;
+  try {
+    showToast('Ekran görüntüsü hazırlanıyor...');
+    const canvas = await renderPhoneCanvas();
+    if (!canvas) return;
     trackUsage('screenshot', { source: phoneOnlyActive ? 'phone_only' : 'action_bar' });
-    showSuccess('Ekran görüntüsü indirildi!');
+    openExportModal(canvas);
   } catch (err) {
     console.error('Screenshot error:', err);
     showError('Ekran görüntüsü alınamadı: ' + err.message);
