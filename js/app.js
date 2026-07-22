@@ -20,7 +20,8 @@ import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
 import { openModal, confirmModal } from './ui/modal.js';
-import { runUndoable, setRestoreHook } from './features/history.js';
+import { runUndoable, setRestoreHook, undoLast } from './features/history.js';
+import { initSaveIndicator } from './ui/save-indicator.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
@@ -128,6 +129,10 @@ function init() {
     renderSceneUx();
     storage.save();
   });
+
+  // Otomatik kayıt göstergesi + global klavye kısayolları (Faz 3D)
+  initSaveIndicator();
+  initKeyboardShortcuts();
 
   // Bind event handlers — KRİTİK: bu satıra ulaşılmazsa hiçbir buton çalışmaz
   bindEventHandlers();
@@ -1308,6 +1313,69 @@ function playWithGoal() {
     const player = state.get('player') || {};
     trackUsage('play', { source: 'main_controls', eventCount: player.queue?.length || 0 });
   }
+}
+
+/** Space kısayolu — oynatmayı başlat/duraklat */
+function togglePlayPause() {
+  const player = state.get('player') || {};
+  if (player.playTimer && !player.paused) {
+    pause();
+  } else {
+    playWithGoal();
+  }
+}
+
+/** Kısayol kartı modalı (? tuşu) */
+function openShortcutsModal() {
+  if (document.querySelector('.shortcuts-modal')) return;
+  const rows = [
+    ['Space', 'Oynat / Duraklat'],
+    ['Ctrl / ⌘ + Z', 'Son işlemi geri al'],
+    ['?', 'Bu kısayol kartını aç'],
+    ['Esc', 'Açık pencereyi kapat'],
+  ];
+  const list = createElement('div', { className: 'shortcuts-list' },
+    rows.map(([key, desc]) => createElement('div', { className: 'shortcuts-row' }, [
+      createElement('kbd', { className: 'shortcuts-key' }, [key]),
+      createElement('span', { className: 'shortcuts-desc' }, [desc]),
+    ]))
+  );
+  const res = openModal({ title: 'Klavye Kısayolları', bodyNode: list, buttons: [{ label: 'Kapat' }] });
+  res.card.classList.add('shortcuts-modal');
+}
+
+/** Global klavye kısayolları */
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const t = e.target;
+    const inEditable = t && (
+      t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' ||
+      t.isContentEditable || t.tagName === 'BUTTON'
+    );
+
+    // Ctrl/Cmd+Z — geri al (editör alanları hariç, native undo korunur)
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+      if (inEditable) return;
+      e.preventDefault();
+      undoLast();
+      return;
+    }
+
+    if (inEditable) return;
+
+    // Space — oynat/duraklat
+    if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      togglePlayPause();
+      return;
+    }
+
+    // ? — kısayol kartı
+    if (e.key === '?') {
+      e.preventDefault();
+      openShortcutsModal();
+    }
+  });
 }
 
 function initOnboardingAndMode() {

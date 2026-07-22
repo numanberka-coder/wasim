@@ -153,6 +153,7 @@ export const storage = {
       const data = state.export();
       localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
       Logger.info('💾 State saved');
+      try { window.dispatchEvent(new CustomEvent('wa:saved')); } catch { /* noop */ }
     } catch (e) {
       Logger.warn('LocalStorage save error:', e);
     }
