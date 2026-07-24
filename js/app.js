@@ -21,7 +21,6 @@ import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
 import { openModal, confirmModal } from './ui/modal.js';
 import { runUndoable, setRestoreHook, undoLast } from './features/history.js';
-import { initSaveIndicator } from './ui/save-indicator.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
@@ -130,8 +129,7 @@ function init() {
     storage.save();
   });
 
-  // Otomatik kayıt göstergesi + global klavye kısayolları (Faz 3D)
-  initSaveIndicator();
+  // Global klavye kısayolları (Faz 3D)
   initKeyboardShortcuts();
 
   // Bind event handlers — KRİTİK: bu satıra ulaşılmazsa hiçbir buton çalışmaz
