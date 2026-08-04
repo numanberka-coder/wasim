@@ -76,10 +76,12 @@ Senaryoyu oynatin ve telefon onizlemesinde sonucu kontrol edin. Ilk basarili den
 | `css/components.css` | Ortak UI bilesenleri. |
 | `tasks/` | Plan, faz notlari ve lessons dosyalari. |
 | `ROADMAP4.md` | Faz 28-35 urunlesme ve onboarding yol haritasi. |
+| `ROADMAP6.md` | Faz 53-59 mobil uretim UX donusumu yol haritasi. |
 
 ## Nerede Ne Var?
 
 - Urunlesme hedefleri ve faz sirasi: `ROADMAP4.md`
+- Mobil menu, Hazirla, Ayarlar ve Senaryo Editoru UX plani: `ROADMAP6.md`
 - Ilk kullanim rehberi: Bu README icindeki `Hizli Baslangic` bolumu
 - Moduller ve sorumluluklar: Bu README icindeki `Dosya Haritasi` bolumu
 - Yaygin script hatalari: Bu README icindeki `Sik Yapilan Hatalar` bolumu

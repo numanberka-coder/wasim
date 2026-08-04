@@ -133,6 +133,9 @@ export function applyStatusBarLayout() {
   const fontSize = clamp(settings.statusBarFontSize ?? 11, 10, 16);
   const iconScale = clamp(settings.statusBarIconScale ?? 1, 0.8, 1.5);
 
+  // Tam ekran mobil paneller .phone elemanının kardeşidir. Yüksekliği kökte
+  // de tutarak overlay ve sahte status bar geometrisini tek kaynaktan besle.
+  document.documentElement.style.setProperty('--phone-status-bar-height', `${height}px`);
   phoneEl.style.setProperty('--phone-status-bar-height', `${height}px`);
   phoneEl.style.setProperty('--status-bar-font-size', `${fontSize}px`);
   phoneEl.style.setProperty('--status-bar-icon-scale', iconScale);

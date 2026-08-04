@@ -1,5 +1,9 @@
 # Lessons Learned
 
+## GitHub yayınında mevcut bağlantıyı önce kontrol et
+- **Hata:** GitHub CLI bulunmayınca, repo için hazır GitHub uygulaması ve doğrudan `git push` erişimini kontrol etmeden kullanıcıdan CLI kurulumu istendi.
+- **Kural:** Önce GitHub connector araçlarını, remote push yetkisini ve workflow erişimini doğrula. Erişilebilir connector varken kullanıcıya gereksiz CLI kurulumu yükleme.
+
 ## 1. Plan onayi ZORUNLU - scope kucuk olsa bile
 - **Hata:** Faz 19'da "kucuk scope" diye plani sunmadan implementasyona gectim.
 - **Kural:** CLAUDE.md acik: "Onay almadan implementasyona baslama - once plan sun".
