@@ -389,4 +389,32 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(css).toContain('min-height: 0');
     expect(css).toContain('touch-action: pan-y');
   });
+
+  it('keeps full-screen mobile panels below the status bar and inside safe areas', () => {
+    const css = loadResponsiveCss();
+    const mobileModule = readFileSync(
+      join(process.cwd(), 'js', 'ui', 'mobile.js'),
+      'utf8',
+    );
+    const overlayRule = css.match(/\.mobile-overlay\s*\{([^}]*)\}/)?.[1] ?? '';
+    const overlayBodyRule = css.match(/\.mobile-overlay-body\s*\{([^}]*)\}/)?.[1] ?? '';
+    const closeRule = css.match(/\.hd-menu-close\s*\{([^}]*)\}/)?.[1] ?? '';
+    const actionRule = css.match(/\.mo-action-btn\s*\{([^}]*)\}/)?.[1] ?? '';
+
+    expect(overlayRule).toContain(
+      'top: max(var(--phone-status-bar-height, 28px), env(safe-area-inset-top, 0px))',
+    );
+    expect(overlayRule).toContain('bottom: 0');
+    expect(overlayBodyRule).toContain('env(safe-area-inset-bottom, 0px)');
+    expect(closeRule).toContain('width: 44px');
+    expect(closeRule).toContain('height: 44px');
+    expect(actionRule).toContain('width: 44px');
+    expect(actionRule).toContain('height: 44px');
+    expect(css).toContain(
+      '(max-width: 900px) and (max-height: 500px) and (orientation: landscape)',
+    );
+    expect(css).toContain('min-height: 0 !important');
+    expect(mobileModule).toContain('const MOBILE_LANDSCAPE_QUERY =');
+    expect(mobileModule).toContain('window.matchMedia(MOBILE_LANDSCAPE_QUERY).matches');
+  });
 });

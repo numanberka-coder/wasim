@@ -636,6 +636,20 @@ describe('Faz 41 phone app shell', () => {
     expect(responsiveCss).toContain('pointer-events: auto');
   });
 
+  it('shares the adjustable status bar height with mobile panel geometry', () => {
+    const statusBarModule = readFileSync(
+      join(process.cwd(), 'js', 'phone', 'statusbar.js'),
+      'utf8',
+    );
+
+    expect(statusBarModule).toContain(
+      "document.documentElement.style.setProperty('--phone-status-bar-height'",
+    );
+    expect(statusBarModule).toContain(
+      "phoneEl.style.setProperty('--phone-status-bar-height'",
+    );
+  });
+
   it('defines the Faz 47 shared icon sizing and contrast CSS contract', () => {
     const phoneCss = loadPhoneCss();
     const phoneShellCss = loadPhoneShellCss();

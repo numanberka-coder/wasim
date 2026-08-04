@@ -224,7 +224,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 
 .mobile-action-sheet .hd-menu-header {
   display: grid;
-  grid-template-columns: 32px 1fr 32px;
+  grid-template-columns: 44px 1fr 44px;
   align-items: center;
   gap: 6px;
   padding: 4px 4px 10px;
@@ -277,10 +277,10 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   grid-column: 3;
   grid-row: 2;
   justify-self: end;
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   border: 1px solid rgba(145, 170, 182, 0.14);
   border-radius: 8px;
@@ -436,7 +436,10 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 
 .mobile-overlay {
   position: fixed;
-  inset: 0;
+  top: max(var(--phone-status-bar-height, 28px), env(safe-area-inset-top, 0px));
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 600;
   background: linear-gradient(180deg, #0f1923 0%, #0d1720 100%);
   flex-direction: column;
@@ -496,10 +499,10 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 }
 
 .mo-action-btn {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border: none;
   border-radius: 50%;
   background: rgba(255,255,255,0.08);
@@ -526,7 +529,12 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
   padding: var(--space-lg);
-  padding-bottom: calc(var(--space-lg) + 20px + var(--keyboard-height, 0px));
+  padding-bottom: calc(
+    var(--space-lg)
+    + 20px
+    + env(safe-area-inset-bottom, 0px)
+    + var(--keyboard-height, 0px)
+  );
 }
 
 /* Overlay içindeki form elemanları optimize */
@@ -645,11 +653,12 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 }
 
 /* ==========================================================
-   MOBILE — ≤ 768px
+   MOBILE — ≤ 768px veya kompakt telefon landscape
    Sol panel tamamen gizlenir, telefon tam ekran olur,
    3 nokta FAB menü + overlay panel sistemi aktif olur
    ========================================================== */
-@media (max-width: 768px) {
+@media (max-width: 768px),
+       (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
   /* --- Genel ---
      Üst inset html'e değil status bar'a verilir (phone.css): böylece çentik
      alanı boş kalmaz, bar'ın kendi rengiyle dolar. */
@@ -704,6 +713,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   .phone {
     width: 100% !important;
     height: 100dvh !important;
+    min-height: 0 !important;
     max-width: none !important;
     max-height: none !important;
     border-radius: 0 !important;
@@ -916,7 +926,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 }
 
 /* ===== LANDSCAPE MOBILE ===== */
-@media (max-height: 500px) and (max-width: 768px) and (orientation: landscape) {
+@media (max-height: 500px) and (max-width: 900px) and (orientation: landscape) {
   .mobile-overlay-header {
     height: 44px;
     min-height: 44px;

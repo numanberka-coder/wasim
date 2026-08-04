@@ -1,3 +1,47 @@
+# Mobil Üretim UX Dönüşümü — Aktif Plan
+
+> Tarih: 2026-08-04 · Kaynak: `ROADMAP6.md` · Faz 53 tamamlandı.
+
+## Dalga 1 — Doğruluk ve hızlı kazanım
+
+- [x] Faz 53 — Baseline, mobil geometri ve safe-area
+- [ ] Faz 54 — Overlay, focus, history ve surface güvenilirliği
+- [ ] Faz 55 — Mobil menü ve bağlamsal aksiyonlar
+- [ ] Dalga 1 kullanıcı değerlendirmesi: yeni 1.png–3.png karşılıklarını karşılaştır
+
+## Dalga 2 — Görev akışları
+
+- [ ] Faz 56 — Hazırla ve kişi yönetimi akışı
+- [ ] Faz 57 — Ayarlar bilgi mimarisi
+- [ ] Faz 58 — Mobil Senaryo Editörü görev akışı
+- [ ] Dalga 2 kullanıcı değerlendirmesi: görev adımı ve kullanılabilirlik kontrolü
+
+## Dalga 3 — Sağlamlaştırma
+
+- [ ] Faz 59 — Surface konsolidasyonu, görsel cila ve release
+- [ ] Full test, PWA/portable build ve üç viewport kanıt paketi
+
+## Uygulama kararı
+
+- Sonraki uygulanacak kapsam: Faz 54
+- Her faz ayrı branch/commit
+- Faz kapısı geçmeden sonraki faza ilerleme
+- Ayrı mobil renderer: yalnız Faz 56–58 sonunda gerekirse
+
+## Faz 53 Review
+
+- Overlay üst sınırı ayarlanabilir status bar yüksekliği ve safe-area ile senkronlandı.
+- Overlay body alt safe-area padding'i aldı; header, oynatma ve menü kapatma hedefleri 44px oldu.
+- Kompakt landscape telefon görünümü `900×500` sınırına kadar mobil sözleşmede tutuldu.
+- Mobilde masaüstünden kalan `500px` telefon minimum yüksekliği kaldırıldı.
+- Test: 11 dosya, 274 test geçti.
+- Build: PWA üretim build'i geçti.
+- Browser: `360×640`, `390×844`, `844×390`; clipping ve yatay overflow yok, status bar 0–28px ve overlay 28px'den başlıyor.
+
+---
+
+## Arşiv — Önceki tamamlanan görev
+
 # Telefon Home Shell — Düzeltmeler, Eksik Akışlar & Türkçe Sweep
 
 > Tarih: 2026-06-09 · Branch: codex/final-polish · AGENTS.md kapsam dışı · toast yok.

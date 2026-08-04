@@ -36,9 +36,12 @@ export function registerMobileCallback(name, fn) {
 }
 
 const MOBILE_BREAKPOINT = 768;
+const MOBILE_LANDSCAPE_QUERY =
+  '(max-width: 900px) and (max-height: 500px) and (orientation: landscape)';
 
 function isMobileView() {
-  return window.innerWidth <= MOBILE_BREAKPOINT;
+  return window.innerWidth <= MOBILE_BREAKPOINT ||
+    window.matchMedia(MOBILE_LANDSCAPE_QUERY).matches;
 }
 
 /** Mobile UI state */
