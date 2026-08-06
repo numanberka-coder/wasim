@@ -49,14 +49,15 @@ const mobileState = {
   menuOpen: false,
   menuTrigger: null,
   overlayOpen: false,
+  overlayTrigger: null,
   currentPanel: null,
   // Panel move referansları
-  _movedPanel: null,
-  _panelParent: null,
-  _panelNextSibling: null,
-  _panelOriginalDisplay: null,
-  _panelOriginalAriaHidden: null,
+  _panelSnapshot: null,
+  _backgroundInertSnapshots: [],
+  _historyToken: null,
 };
+
+let overlayHistorySequence = 0;
 
 /** Panel key → real panel ID eşleştirmesi */
 const PANEL_MAP = Object.fromEntries(
@@ -179,7 +180,7 @@ function bindMobileEvents() {
         closeMobileMenu();
         return;
       }
-      closeMobileOverlay();
+      requestMobileOverlayClose();
     });
   }
 
@@ -188,7 +189,7 @@ function bindMobileEvents() {
     backBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      closeMobileOverlay();
+      requestMobileOverlayClose();
     });
   }
 
@@ -197,7 +198,7 @@ function bindMobileEvents() {
   const moResetBtn = $('moResetBtn');
   if (moPlayBtn) {
     moPlayBtn.addEventListener('click', () => {
-      closeMobileOverlay();
+      requestMobileOverlayClose();
       setTimeout(() => {
         loadScript();
         play();
@@ -225,7 +226,7 @@ function bindMobileEvents() {
     if (mobileState.menuOpen) syncPreviewSheetBounds($('headerDropdown'));
     if (!isMobileView()) {
       closeMobileMenu();
-      if (mobileState.overlayOpen) closeMobileOverlay();
+      if (mobileState.overlayOpen) requestMobileOverlayClose({ restoreFocus: false });
     }
   }, 250));
 
@@ -233,12 +234,14 @@ function bindMobileEvents() {
   window.addEventListener('popstate', (e) => {
     if (mobileState.overlayOpen) {
       e.preventDefault();
-      closeMobileOverlay();
+      requestMobileOverlayClose({ fromHistory: true });
     } else if (mobileState.menuOpen) {
       e.preventDefault();
       closeMobileMenu();
     }
   });
+
+  document.addEventListener('keydown', handleMobileOverlayKeydown);
 }
 
 /* ========================================
@@ -493,18 +496,19 @@ function handleMobileAction(action) {
   const menuItem = findMenuItemByAction(action);
   if (!menuItem) return;
 
+  const overlayTrigger = mobileState.menuTrigger;
   closeMobileMenu();
 
   // Panel overlay açanlar
   if (menuItem.type === 'panel') {
-    openMobileOverlay(menuItem.panelKey || menuItem.action);
+    openMobileOverlay(menuItem.panelKey || menuItem.action, { trigger: overlayTrigger });
     return;
   }
 
   // Direkt aksiyonlar
   switch (menuItem.target) {
     case 'play':
-      if (mobileState.overlayOpen) closeMobileOverlay();
+      if (mobileState.overlayOpen) requestMobileOverlayClose();
       setTimeout(() => {
         loadScript();
         play();
@@ -514,7 +518,7 @@ function handleMobileAction(action) {
       pause();
       break;
     case 'reset':
-      if (mobileState.overlayOpen) closeMobileOverlay();
+      if (mobileState.overlayOpen) requestMobileOverlayClose();
       reset();
       break;
     case 'save':
@@ -598,7 +602,75 @@ function mobileRefreshAll() {
    Böylece ID'ler ve mevcut event listener'lar korunur.
    ======================================== */
 
-function openMobileOverlay(panelKey) {
+function getOverlayFocusableElements() {
+  const overlay = $('mobileOverlay');
+  if (!overlay) return [];
+  return [...overlay.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )].filter((element) => {
+    for (let current = element; current && current !== overlay; current = current.parentElement) {
+      if (current.hidden || current.getAttribute('aria-hidden') === 'true') return false;
+      const style = window.getComputedStyle(current);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+    }
+    return true;
+  });
+}
+
+function handleMobileOverlayKeydown(event) {
+  if (!mobileState.overlayOpen) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    requestMobileOverlayClose();
+    return;
+  }
+
+  if (event.key !== 'Tab') return;
+  const focusable = getOverlayFocusableElements();
+  if (!focusable.length) {
+    event.preventDefault();
+    $('mobileOverlay')?.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const focusOutside = !$('mobileOverlay')?.contains(document.activeElement);
+  if (event.shiftKey && (document.activeElement === first || focusOutside)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function setOverlayBackgroundInert(enabled) {
+  const container = document.querySelector('.app-container');
+  if (!container) return;
+
+  if (enabled) {
+    mobileState._backgroundInertSnapshots = [...container.children]
+      .filter((element) => element.id !== 'mobileOverlay' && element.id !== 'mobileOverlayBackdrop')
+      .map((element) => ({ element, hadAttribute: element.hasAttribute('inert') }));
+    mobileState._backgroundInertSnapshots.forEach(({ element }) => {
+      element.inert = true;
+      element.setAttribute('inert', '');
+    });
+    return;
+  }
+
+  mobileState._backgroundInertSnapshots.forEach(({ element, hadAttribute }) => {
+    if (!hadAttribute) {
+      element.inert = false;
+      element.removeAttribute('inert');
+    }
+  });
+  mobileState._backgroundInertSnapshots = [];
+}
+
+function openMobileOverlay(panelKey, options = {}) {
   const overlay = $('mobileOverlay');
   const backdrop = $('mobileOverlayBackdrop');
   const titleEl = $('mobileOverlayTitle');
@@ -610,6 +682,16 @@ function openMobileOverlay(panelKey) {
   const sourcePanel = $(sourcePanelId);
   if (!sourcePanel) return;
 
+  if (mobileState.overlayOpen && mobileState.currentPanel === panelKey) {
+    $('mobileOverlayBack')?.focus();
+    return;
+  }
+
+  const replacingPanel = mobileState.overlayOpen;
+  if (replacingPanel) {
+    closeMobileOverlay({ preserveHistory: true, restoreFocus: false });
+  }
+
   // Başlık
   if (titleEl) titleEl.textContent = PANEL_TITLES[panelKey] || panelKey;
 
@@ -617,11 +699,15 @@ function openMobileOverlay(panelKey) {
   body.replaceChildren();
 
   // Referansları sakla — geri taşımak için
-  mobileState._movedPanel = sourcePanel;
-  mobileState._panelParent = sourcePanel.parentNode;
-  mobileState._panelNextSibling = sourcePanel.nextSibling;
-  mobileState._panelOriginalDisplay = sourcePanel.style.display || '';
-  mobileState._panelOriginalAriaHidden = sourcePanel.getAttribute('aria-hidden');
+  mobileState._panelSnapshot = {
+    panel: sourcePanel,
+    parent: sourcePanel.parentNode,
+    nextSibling: sourcePanel.nextSibling,
+    style: sourcePanel.getAttribute('style'),
+    ariaHidden: sourcePanel.getAttribute('aria-hidden'),
+    wasActive: sourcePanel.classList.contains('active'),
+    scrollTop: sourcePanel.scrollTop,
+  };
 
   // Paneli overlay body'ye taşı
   body.appendChild(sourcePanel);
@@ -633,52 +719,71 @@ function openMobileOverlay(panelKey) {
 
   // State güncelle
   mobileState.overlayOpen = true;
+  mobileState.overlayTrigger = options.trigger || document.activeElement;
   mobileState.currentPanel = panelKey;
 
   // Aç
   overlay.classList.add('is-open');
+  overlay.setAttribute('aria-hidden', 'false');
+  setOverlayBackgroundInert(true);
   if (backdrop) {
     backdrop.classList.remove('is-menu-backdrop');
     backdrop.classList.add('is-open');
   }
 
   // History push — geri tuşu desteği
-  history.pushState({ mobileOverlay: true }, '');
+  if (!replacingPanel) {
+    mobileState._historyToken = `mobile-overlay-${++overlayHistorySequence}`;
+    history.pushState({ ...history.state, mobileOverlayToken: mobileState._historyToken }, '');
+  }
+
+  $('mobileOverlayBack')?.focus();
 }
 
-function closeMobileOverlay() {
+function requestMobileOverlayClose(options = {}) {
+  if (!mobileState.overlayOpen) return;
+  closeMobileOverlay(options);
+}
+
+function closeMobileOverlay(options = {}) {
   const overlay = $('mobileOverlay');
   const backdrop = $('mobileOverlayBackdrop');
 
   // Overlay kapalıysa bile zorla temizle
-  if (!overlay) return;
+  if (!overlay || !mobileState.overlayOpen) return;
+
+  const trigger = mobileState.overlayTrigger;
+  const historyToken = mobileState._historyToken;
 
   // Paneli eski yerine geri taşı
-  if (mobileState._movedPanel && mobileState._panelParent) {
-    const panel = mobileState._movedPanel;
+  if (mobileState._panelSnapshot?.panel && mobileState._panelSnapshot?.parent) {
+    const snapshot = mobileState._panelSnapshot;
+    const panel = snapshot.panel;
 
     // Script inner tab state'ini kaydet (taşımadan ÖNCE)
     const activeScriptTab = panel.querySelector('.script-tab.active');
     const activeScriptTabTarget = activeScriptTab ? activeScriptTab.dataset.stab : null;
 
     // Overlay'de uygulanan stil override'ları geri al
-    panel.style.overflow = '';
-    panel.style.height = '';
-    if (mobileState._panelOriginalAriaHidden === null) {
+    if (snapshot.style === null) {
+      panel.removeAttribute('style');
+    } else {
+      panel.setAttribute('style', snapshot.style);
+    }
+    if (snapshot.ariaHidden === null) {
       panel.removeAttribute('aria-hidden');
     } else {
-      panel.setAttribute('aria-hidden', mobileState._panelOriginalAriaHidden);
+      panel.setAttribute('aria-hidden', snapshot.ariaHidden);
     }
     // Orijinal display değerini geri yükle
-    panel.style.display = mobileState._panelOriginalDisplay || '';
-    panel.classList.remove('active');
+    panel.classList.toggle('active', snapshot.wasActive);
 
     // Orijinal pozisyona geri koy
     try {
-      if (mobileState._panelNextSibling && mobileState._panelNextSibling.parentNode === mobileState._panelParent) {
-        mobileState._panelParent.insertBefore(panel, mobileState._panelNextSibling);
+      if (snapshot.nextSibling && snapshot.nextSibling.parentNode === snapshot.parent) {
+        snapshot.parent.insertBefore(panel, snapshot.nextSibling);
       } else {
-        mobileState._panelParent.appendChild(panel);
+        snapshot.parent.appendChild(panel);
       }
     } catch (e) {
       // Fallback: body'ye ekle gizli olarak
@@ -697,39 +802,31 @@ function closeMobileOverlay() {
     }
 
     // Masaüstü tab aktif panel'i restore et
-    restoreDesktopActiveTab();
+    panel.scrollTop = snapshot.scrollTop;
   }
 
   // Temizle
-  mobileState._movedPanel = null;
-  mobileState._panelParent = null;
-  mobileState._panelNextSibling = null;
-  mobileState._panelOriginalDisplay = null;
-  mobileState._panelOriginalAriaHidden = null;
+  mobileState._panelSnapshot = null;
   mobileState.overlayOpen = false;
+  mobileState.overlayTrigger = null;
   mobileState.currentPanel = null;
 
   overlay.classList.remove('is-open');
+  overlay.setAttribute('aria-hidden', 'true');
+  setOverlayBackgroundInert(false);
   if (backdrop) backdrop.classList.remove('is-open');
 
   const body = $('mobileOverlayBody');
   if (body) body.replaceChildren();
-}
 
-/** Masaüstündeki tab sistemi aktif paneli restore eder */
-function restoreDesktopActiveTab() {
-  const activeTab = document.querySelector('.tab.active');
-  if (!activeTab) return;
-  const tabId = activeTab.dataset.tab;
-  if (!tabId) return;
+  if (options.restoreFocus !== false && trigger?.isConnected) trigger.focus();
 
-  document.querySelectorAll('.panel-left .panel').forEach(p => {
-    p.classList.remove('active');
-    p.style.display = '';
-  });
-
-  const panel = $(tabId);
-  if (panel) panel.classList.add('active');
+  if (!options.preserveHistory) {
+    mobileState._historyToken = null;
+    if (!options.fromHistory && history.state?.mobileOverlayToken === historyToken) {
+      history.back();
+    }
+  }
 }
 
 /* ========================================

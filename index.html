@@ -1296,12 +1296,12 @@ Destek: Bunu anlayamadım 🤔"></textarea>
     <!-- FAB ve eski mobile-menu kaldırıldı — Faz 9: Header 3 noktaya taşındı -->
 
     <!-- Mobile Overlay Backdrop -->
-    <div class="mobile-overlay-backdrop" id="mobileOverlayBackdrop"></div>
+    <div class="mobile-overlay-backdrop" id="mobileOverlayBackdrop" aria-hidden="true"></div>
 
     <!-- Mobile Panel Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay">
+    <div class="mobile-overlay" id="mobileOverlay" role="dialog" aria-modal="true" aria-labelledby="mobileOverlayTitle" aria-hidden="true" tabindex="-1">
       <div class="mobile-overlay-header">
-        <button class="mobile-overlay-back" id="mobileOverlayBack" type="button">
+        <button class="mobile-overlay-back" id="mobileOverlayBack" type="button" aria-label="Paneli kapat">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <span class="mobile-overlay-title" id="mobileOverlayTitle">Senaryo Editörü</span>

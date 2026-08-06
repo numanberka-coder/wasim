@@ -1,5 +1,9 @@
 # Lessons Learned
 
+## Doğrulamayı tekrarlayarak token ve zaman harcama
+- **Hata:** Faz 53 yayınında aynı sonucu gereğinden fazla farklı yoldan tekrar doğrulayıp süreci uzattım.
+- **Kural:** Her kabul kriteri için tek güçlü kanıt seç; hedefli test, bir tam test/build turu ve tek canlı deploy smoke kontrolü yeterliyse aynı sonucu yeniden ölçme.
+
 ## GitHub yayınında mevcut bağlantıyı önce kontrol et
 - **Hata:** GitHub CLI bulunmayınca, repo için hazır GitHub uygulaması ve doğrudan `git push` erişimini kontrol etmeden kullanıcıdan CLI kurulumu istendi.
 - **Kural:** Önce GitHub connector araçlarını, remote push yetkisini ve workflow erişimini doğrula. Erişilebilir connector varken kullanıcıya gereksiz CLI kurulumu yükleme.
