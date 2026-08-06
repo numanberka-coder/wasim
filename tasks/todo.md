@@ -1,11 +1,28 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## Faz 54 Uygulama Planı
+
+- [x] Overlay dialog/ARIA sözleşmesini ve anlamlı ilk odağı tamamla
+- [x] Focus trap, arka plan inert ve tetikleyiciye odak dönüşünü uygula
+- [x] Escape, backdrop, geri düğmesi ve history back akışını tek kapatma yolunda birleştir
+- [x] Panel taşıma snapshot/restore ve art arda açılışları idempotent yap
+- [x] Hedefli test, tam test, build ve diff kontrolünü geçir
+- [x] Commit/push/PR/merge sonrası GitHub Pages canlı smoke kontrolünü tamamla
+
+## Faz 54 Review
+
+- Overlay artık etiketli modal dialog; ilk odak geri düğmesinde, arka plan inert ve Tab odağı yüzey içinde kalıyor.
+- Escape, backdrop, header geri düğmesi ve browser back aynı idempotent kapatma hattını kullanıyor.
+- Panel parent/sibling, inline style, ARIA, aktif sınıf ve scroll durumu snapshot ile geri yükleniyor.
+- Manuel kapanış kendi history kaydını temizliyor; popstate kapanışı ikinci kez history hareketi üretmiyor.
+- Doğrulama: 12 test dosyası, 276 test ve PWA build geçti; 390×844 tarayıcı smoke kontrolünde odak dönüşü, inert, yatay overflow ve panel restore doğrulandı.
+
 > Tarih: 2026-08-04 · Kaynak: `ROADMAP6.md` · Faz 53 tamamlandı.
 
 ## Dalga 1 — Doğruluk ve hızlı kazanım
 
 - [x] Faz 53 — Baseline, mobil geometri ve safe-area
-- [ ] Faz 54 — Overlay, focus, history ve surface güvenilirliği
+- [x] Faz 54 — Overlay, focus, history ve surface güvenilirliği
 - [ ] Faz 55 — Mobil menü ve bağlamsal aksiyonlar
 - [ ] Dalga 1 kullanıcı değerlendirmesi: yeni 1.png–3.png karşılıklarını karşılaştır
 

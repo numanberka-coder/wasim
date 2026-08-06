@@ -484,6 +484,13 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.mobile-overlay-back:focus-visible,
+.mo-action-btn:focus-visible,
+.mobile-overlay-body :focus-visible {
+  outline: 2px solid var(--wa-green);
+  outline-offset: 2px;
+}
+
 .mobile-overlay-title {
   font-size: 16px;
   font-weight: 600;
