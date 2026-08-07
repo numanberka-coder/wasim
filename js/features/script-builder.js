@@ -10,10 +10,13 @@ import { state } from '../state.js';
 import { showSuccess, showError } from '../ui/toast.js';
 import { SyntaxHighlight } from '../ui/highlight.js';
 import { tokenizeCommand, validateScript } from './script-parser.js';
-import { loadScript, play } from './player.js';
+import { loadScript, play, isPlayerPlaying } from './player.js';
+import { runUndoable } from './history.js';
 import { switchTab } from '../ui/tabs.js';
 
 let blocks = [];
+let mobileScriptReorderMode = false;
+let mobileScriptEditingLine = null;
 
 /** Araya ekleme modu: null = sonuna ekle, sayı = o index'in altına ekle */
 let insertAfterIndex = null;
@@ -69,6 +72,7 @@ function makeId() {
 
 function initScriptTools() {
   setupValidation();
+  setupMobileScriptFlow();
   setupMediaInsertTool();
   setupScriptInnerTabs();
   setupInteractiveDemo();
@@ -377,7 +381,225 @@ function renderIssueCard(issue) {
     card.appendChild(createElement('code', { className: 'script-issue-example' }, [issue.example]));
   }
 
+  card.appendChild(createElement('button', {
+    type: 'button',
+    className: 'secondary btn-sm script-issue-focus',
+    onClick: () => focusScriptLine(issue.line),
+  }, [`Satır ${issue.line} üzerinde düzelt` ]));
+
   return card;
+}
+
+/* ========================================
+   MOBILE MESSAGE FLOW
+   #scriptBox remains the single source of truth; cards are a projection.
+   ======================================== */
+
+function getPhysicalScriptLines(text = '') {
+  return String(text).replace(/\r\n?/g, '\n').split('\n');
+}
+
+function getVisibleScriptLines(text = '') {
+  return getPhysicalScriptLines(text)
+    .map((raw, sourceIndex) => ({ raw, sourceIndex, lineNumber: sourceIndex + 1 }))
+    .filter((line) => line.raw.trim());
+}
+
+function parseSimpleMessage(raw = '') {
+  if (raw.trim().startsWith('@')) return null;
+  const match = raw.match(/^([^:>]+):\s*(.*)$/);
+  if (!match) return null;
+  return { sender: match[1].trim(), message: match[2] };
+}
+
+function setScriptText(value, { focusLine = null } = {}) {
+  const box = $('scriptBox');
+  if (!box) return;
+  box.value = value;
+  box.dispatchEvent(new Event('input', { bubbles: true }));
+  if (focusLine !== null) focusScriptLine(focusLine);
+}
+
+function focusScriptLine(lineNumber) {
+  const box = $('scriptBox');
+  if (!box) return;
+  const safeLine = Math.max(1, Number(lineNumber) || 1);
+  const lines = getPhysicalScriptLines(box.value);
+  const start = lines.slice(0, safeLine - 1).reduce((total, line) => total + line.length + 1, 0);
+  const end = start + (lines[safeLine - 1]?.length || 0);
+  box.focus();
+  box.setSelectionRange(start, end);
+  box.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+}
+
+function fillMobileSenderOptions(preferred = '') {
+  const select = $('mobileScriptSender');
+  if (!select) return;
+  const people = Object.keys(state.get('people') || {}).sort((a, b) => a.localeCompare(b, 'tr'));
+  const selfName = state.get('selfName');
+  const names = selfName
+    ? [selfName, ...people.filter((name) => name !== selfName)]
+    : people;
+  select.replaceChildren(...names.map((name) => createElement('option', { value: name }, [
+    state.isSelf(name) ? `${name} (Sen)` : name,
+  ])));
+  select.value = names.includes(preferred) ? preferred : (selfName || names[0] || 'Me');
+}
+
+function openMobileScriptComposer(line = null) {
+  const composer = $('mobileScriptComposer');
+  const message = $('mobileScriptMessage');
+  if (!composer || !message) return;
+  const parsed = line ? parseSimpleMessage(line.raw) : null;
+  mobileScriptEditingLine = line?.sourceIndex ?? null;
+  fillMobileSenderOptions(parsed?.sender || '');
+  message.value = parsed?.message || '';
+  $('mobileScriptComposerTitle').textContent = line ? `Satır ${line.lineNumber} düzenle` : 'Yeni mesaj';
+  $('mobileScriptSaveBtn').textContent = line ? 'Değişiklikleri Kaydet' : 'Akışa Ekle';
+  composer.hidden = false;
+  $('mobileScriptAddBtn').hidden = true;
+  message.focus();
+}
+
+function closeMobileScriptComposer({ restoreFocus = true } = {}) {
+  const composer = $('mobileScriptComposer');
+  if (composer) composer.hidden = true;
+  mobileScriptEditingLine = null;
+  const addButton = $('mobileScriptAddBtn');
+  if (addButton) {
+    addButton.hidden = false;
+    if (restoreFocus) addButton.focus();
+  }
+}
+
+function saveMobileScriptMessage() {
+  const sender = $('mobileScriptSender')?.value?.trim() || state.get('selfName') || 'Me';
+  const message = $('mobileScriptMessage')?.value?.trim() || '';
+  if (!message) {
+    showError('Mesaj boş bırakılamaz');
+    $('mobileScriptMessage')?.focus();
+    return;
+  }
+  const lines = getPhysicalScriptLines($('scriptBox')?.value || '');
+  const raw = `${sender}: ${message}`;
+  if (mobileScriptEditingLine === null) {
+    while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+    lines.push(raw);
+  } else {
+    lines[mobileScriptEditingLine] = raw;
+  }
+  setScriptText(lines.join('\n'));
+  closeMobileScriptComposer();
+}
+
+function deleteMobileScriptLine(line) {
+  runUndoable({
+    message: `Satır ${line.lineNumber} silindi`,
+    action: () => {
+      const lines = getPhysicalScriptLines($('scriptBox')?.value || '');
+      lines.splice(line.sourceIndex, 1);
+      setScriptText(lines.join('\n'));
+    },
+  });
+}
+
+function moveMobileScriptLine(line, offset) {
+  const visible = getVisibleScriptLines($('scriptBox')?.value || '');
+  const position = visible.findIndex((item) => item.sourceIndex === line.sourceIndex);
+  const target = visible[position + offset];
+  if (!target) return;
+  const lines = getPhysicalScriptLines($('scriptBox')?.value || '');
+  [lines[line.sourceIndex], lines[target.sourceIndex]] = [lines[target.sourceIndex], lines[line.sourceIndex]];
+  setScriptText(lines.join('\n'));
+}
+
+function createMobileScriptCard(line, issue) {
+  const parsed = parseSimpleMessage(line.raw);
+  const card = createElement('article', {
+    className: `mobile-script-card${issue ? ` has-${issue.severity}` : ''}`,
+    dataset: { sourceIndex: String(line.sourceIndex) },
+  });
+  const head = createElement('div', { className: 'mobile-script-card-head' }, [
+    createElement('span', { className: 'mobile-script-line-number' }, [`${line.lineNumber}. satır`]),
+  ]);
+  if (issue) head.appendChild(createElement('span', { className: `mobile-script-issue-label ${issue.severity}` }, [
+    issue.severity === 'warning' ? 'Uyarı' : 'Hata',
+  ]));
+  card.appendChild(head);
+  card.appendChild(createElement('strong', { className: 'mobile-script-sender' }, [parsed?.sender || 'Komut']));
+  card.appendChild(createElement('p', { className: 'mobile-script-message' }, [parsed?.message || line.raw]));
+  if (issue) card.appendChild(createElement('p', { className: 'mobile-script-card-issue' }, [issue.message]));
+
+  const actions = createElement('div', { className: 'mobile-script-card-actions' });
+  if (mobileScriptReorderMode) {
+    actions.append(
+      createElement('button', { type: 'button', className: 'secondary btn-sm', onClick: () => moveMobileScriptLine(line, -1), 'aria-label': `Satır ${line.lineNumber} yukarı taşı` }, ['Yukarı']),
+      createElement('button', { type: 'button', className: 'secondary btn-sm', onClick: () => moveMobileScriptLine(line, 1), 'aria-label': `Satır ${line.lineNumber} aşağı taşı` }, ['Aşağı'])
+    );
+  } else {
+    actions.append(
+      createElement('button', { type: 'button', className: 'secondary btn-sm', onClick: () => parsed ? openMobileScriptComposer(line) : focusScriptLine(line.lineNumber), 'aria-label': `Satır ${line.lineNumber} düzenle` }, [parsed ? 'Düzenle' : 'Metinde düzenle']),
+      createElement('button', { type: 'button', className: 'secondary btn-sm mobile-script-delete', onClick: () => deleteMobileScriptLine(line), 'aria-label': `Satır ${line.lineNumber} sil` }, ['Sil'])
+    );
+  }
+  card.appendChild(actions);
+  return card;
+}
+
+function syncMobileScriptPlaybackStatus() {
+  const target = $('mobileScriptPlaybackStatus');
+  if (!target) return;
+  const player = state.get('player') || {};
+  if (isPlayerPlaying()) target.textContent = 'Senaryo oynatılıyor';
+  else if (player.paused && (player.queue?.length || player.cursor)) target.textContent = 'Senaryo duraklatıldı';
+  else target.textContent = 'Oynatmaya hazır';
+}
+
+function renderMobileScriptFlow() {
+  const list = $('mobileScriptList');
+  const summary = $('mobileScriptFlowSummary');
+  const box = $('scriptBox');
+  if (!list || !summary || !box) return;
+  const lines = getVisibleScriptLines(box.value);
+  const issueByLine = new Map(validateScript(box.value).map((issue) => [issue.line, issue]));
+  list.replaceChildren(...lines.map((line) => createMobileScriptCard(line, issueByLine.get(line.lineNumber))));
+  if (!lines.length) {
+    list.appendChild(createElement('div', { className: 'mobile-script-empty' }, ['Henüz mesaj yok. İlk mesajı ekleyin.']));
+  }
+  const issueCount = issueByLine.size;
+  summary.textContent = `${lines.length} satır${issueCount ? ` · ${issueCount} geri bildirim` : ' · oynatmaya hazır'}`;
+  syncMobileScriptPlaybackStatus();
+}
+
+function setupMobileScriptFlow() {
+  const box = $('scriptBox');
+  if (!box || !$('mobileScriptFlow')) return;
+  box.addEventListener('input', renderMobileScriptFlow);
+  $('mobileScriptAddBtn')?.addEventListener('click', () => openMobileScriptComposer());
+  $('mobileScriptCancelBtn')?.addEventListener('click', () => closeMobileScriptComposer());
+  $('mobileScriptSaveBtn')?.addEventListener('click', saveMobileScriptMessage);
+  $('mobileScriptComposer')?.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMobileScriptComposer();
+    }
+  });
+  $('mobileScriptReorderBtn')?.addEventListener('click', (event) => {
+    mobileScriptReorderMode = !mobileScriptReorderMode;
+    event.currentTarget.setAttribute('aria-pressed', String(mobileScriptReorderMode));
+    event.currentTarget.textContent = mobileScriptReorderMode ? 'Sıralamayı Bitir' : 'Sırala';
+    renderMobileScriptFlow();
+  });
+  state.subscribe((path) => {
+    if (!path) {
+      box.value = state.get('player.script') || '';
+      renderMobileScriptFlow();
+    } else if (path === 'player.script') {
+      renderMobileScriptFlow();
+    }
+    if (!path || path === 'player.playback') syncMobileScriptPlaybackStatus();
+  });
+  renderMobileScriptFlow();
 }
 
 function focusHelpTarget(targetId) {

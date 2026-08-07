@@ -284,6 +284,37 @@
             <p class="hint">Yükle/Oynat bu sohbete akar.</p>
           </div>
 
+          <section class="mobile-script-flow" id="mobileScriptFlow" aria-labelledby="mobileScriptFlowTitle">
+            <div class="mobile-script-flow-head">
+              <div>
+                <h3 id="mobileScriptFlowTitle">Mesaj Akışı</h3>
+                <p id="mobileScriptFlowSummary" class="hint" role="status" aria-live="polite">Senaryo hazırlanıyor…</p>
+              </div>
+              <button id="mobileScriptReorderBtn" type="button" class="secondary btn-sm" aria-pressed="false">Sırala</button>
+            </div>
+
+            <div id="mobileScriptPlaybackStatus" class="mobile-script-playback-status" role="status" aria-live="polite">Oynatmaya hazır</div>
+            <div id="mobileScriptList" class="mobile-script-list"></div>
+
+            <div id="mobileScriptComposer" class="mobile-script-composer" hidden>
+              <h4 id="mobileScriptComposerTitle">Yeni mesaj</h4>
+              <div class="form-group">
+                <label for="mobileScriptSender">Gönderen</label>
+                <select id="mobileScriptSender"></select>
+              </div>
+              <div class="form-group">
+                <label for="mobileScriptMessage">Mesaj</label>
+                <textarea id="mobileScriptMessage" rows="3" placeholder="Mesajı yazın…"></textarea>
+              </div>
+              <div class="form-row mobile-script-composer-actions">
+                <button id="mobileScriptSaveBtn" type="button">Akışa Ekle</button>
+                <button id="mobileScriptCancelBtn" type="button" class="secondary">İptal</button>
+              </div>
+            </div>
+
+            <button id="mobileScriptAddBtn" type="button" class="mobile-script-add-btn">+ Mesaj Ekle</button>
+          </section>
+
           <!-- Rehber -->
           <details class="accordion tutorial-guide" id="tutorialSenaryo">
             <summary class="accordion-header">
