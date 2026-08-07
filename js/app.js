@@ -228,7 +228,11 @@ function populateFormFields() {
 
     // Tick status
     const tickVal = settings.tickStatus || 'read';
-    document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tick-btn').forEach(b => {
+      const isActive = b.dataset.tick === tickVal;
+      b.classList.toggle('active', isActive);
+      b.setAttribute('aria-pressed', String(isActive));
+    });
     const activeTickBtn = document.querySelector(`.tick-btn[data-tick="${tickVal}"]`);
     if (activeTickBtn) activeTickBtn.classList.add('active');
 
@@ -382,6 +386,8 @@ function updateThemeButtons(theme) {
   if (!darkBtn || !lightBtn) return;
 
   if (theme === 'light') {
+    darkBtn.setAttribute('aria-pressed', 'false');
+    lightBtn.setAttribute('aria-pressed', 'true');
     darkBtn.classList.add('secondary');
     lightBtn.classList.remove('secondary');
     // Primary style for active button
@@ -392,6 +398,8 @@ function updateThemeButtons(theme) {
     darkBtn.style.color = '';
     darkBtn.style.borderColor = '';
   } else {
+    darkBtn.setAttribute('aria-pressed', 'true');
+    lightBtn.setAttribute('aria-pressed', 'false');
     lightBtn.classList.add('secondary');
     darkBtn.classList.remove('secondary');
     // Primary style for active button
@@ -543,14 +551,14 @@ function bindEventHandlers() {
     setTheme('dark');
     updateThemeButtons('dark');
     resetThemeColors('dark');
-    showSuccess('Dark mod aktif!');
+    showSuccess('Koyu tema aktif!');
   });
 
   bindClick('themeLightBtn', () => {
     setTheme('light');
     updateThemeButtons('light');
     resetThemeColors('light');
-    showSuccess('Light mod aktif!');
+    showSuccess('Açık tema aktif!');
   });
 
   // === RESET BUTTONS ===
@@ -575,8 +583,11 @@ function bindEventHandlers() {
       const btn = $(id);
       if (!btn) return;
       state.set('settings.tickStatus', btn.dataset.tick);
-      document.querySelectorAll('.tick-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      document.querySelectorAll('.tick-btn').forEach(b => {
+        const isActive = b === btn;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+      });
       updateAllTicks();
     });
   });
@@ -1441,7 +1452,11 @@ function refreshGoalUI() {
   ];
   goalMap.forEach(([id, done]) => {
     const el = $(id);
-    if (el) el.classList.toggle('done', done);
+    if (!el) return;
+    el.classList.toggle('done', done);
+    el.setAttribute('data-status', done ? 'complete' : 'pending');
+    const status = el.querySelector('.goal-status');
+    if (status) status.textContent = done ? 'Tamamlandı' : 'Bekliyor';
   });
 }
 
@@ -1462,7 +1477,7 @@ function openOnboarding(force = false) {
     },
     {
       title: '1) Kişi ekle → Satır ekle',
-      description: 'Grup sekmesinde kişi kaydet, ardından Satır Sırası bölümünden satır ekleyip "Senaryoya Aktar" ile gönder.',
+      description: 'Hazırla ekranında kişi kaydet, ardından “Mesaj Ekle” ve “Akışa Ekle” ile ilk mesajını oluştur.',
       nextLabel: 'Devam'
     },
     {

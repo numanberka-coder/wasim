@@ -221,3 +221,39 @@ describe('Faz 56 preparation flow', () => {
     expect(document.querySelector('#groupBuilderList').textContent).toContain('Merhaba');
   });
 });
+
+describe('Faz 57 settings flow', () => {
+  beforeEach(() => {
+    mountApp();
+    state.reset();
+  });
+
+  function openSettings() {
+    initMobile();
+    document.querySelector('#headerMenuBtn').click();
+    document.querySelector('[data-action="settings"]').click();
+  }
+
+  it('opens theme first and keeps only one setting accordion open', async () => {
+    openSettings();
+    const settings = [...document.querySelectorAll('[data-setting-accordion]')];
+
+    expect(settings.filter((item) => item.open).map((item) => item.id)).toEqual(['settingsThemeAccordion']);
+    document.querySelector('#settingsHelpAccordion summary').click();
+    await vi.waitFor(() => {
+      expect(settings.filter((item) => item.open).map((item) => item.id)).toEqual(['settingsHelpAccordion']);
+    });
+  });
+
+  it('keeps theme, message time, and guide tasks within category plus control depth', () => {
+    openSettings();
+
+    expect(document.querySelector('#settingsThemeAccordion #themeDarkBtn')).not.toBeNull();
+    expect(document.querySelector('#settingsMessageTimesAccordion #autoMessageTimesToggle')).not.toBeNull();
+    expect(document.querySelector('#settingsHelpAccordion #reopenOnboardingBtn')).not.toBeNull();
+    expect(document.querySelector('#settingsScenesAccordion')?.closest('.panel-group')
+      ?.querySelector(':scope > .panel-group-title')?.textContent).toBe('Proje ve Veri');
+    expect(document.querySelector('#settingsAnalyticsAccordion')?.closest('.panel-group')
+      ?.querySelector(':scope > .panel-group-title')?.textContent).toBe('Proje ve Veri');
+  });
+});

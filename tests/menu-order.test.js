@@ -139,15 +139,29 @@ describe('Faz 37 desktop menu and panel order', () => {
     ]);
   });
 
-  it('keeps common settings before pro and technical settings', () => {
+  it('groups settings by user intent and keeps theme first', () => {
     const doc = loadIndexDocument();
-    const labels = [
-      ...doc.querySelectorAll('#settings .panel-group details.accordion > summary .accordion-title'),
-    ].map((el) => el.textContent.replace(/\s+/g, ' ').trim());
+    const groups = [...doc.querySelectorAll('#settings > .panel-group')].map((group) => ({
+      title: group.querySelector(':scope > .panel-group-title')?.textContent.trim(),
+      labels: [...group.querySelectorAll(':scope > details > summary .accordion-title')]
+        .map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
+    }));
 
-    expect(labels.indexOf('Tema')).toBeGreaterThan(labels.indexOf('Mod & Rehber'));
-    expect(labels.indexOf('Tema')).toBeLessThan(labels.indexOf('Mesaj Saatleri'));
-    expect(labels.indexOf('Tipografi')).toBeLessThan(labels.indexOf('Mesaj Saatleri'));
+    expect(groups).toEqual([
+      { title: 'Görünüm', labels: ['Tema', 'Tipografi', 'Duvar Kağıdı', 'Başlık Rengi', 'Balon Renkleri'] },
+      { title: 'Mesaj Davranışı', labels: ['Tik Durumu', 'Mesaj Saatleri', 'Durum Çubuğu'] },
+      { title: 'Proje ve Veri', labels: ['Sahneler', 'Kullanım Özeti'] },
+      { title: 'Yardım', labels: ['Arayüz Modu ve Rehber'] },
+    ]);
+
+    expect(doc.querySelector('#settingsThemeAccordion')?.open).toBe(true);
+    expect(doc.querySelector('#themeDarkBtn')?.textContent.trim()).toBe('Koyu');
+    expect(doc.querySelector('#themeDarkBtn')?.getAttribute('aria-pressed')).toBe('true');
+    expect(doc.querySelector('#themeLightBtn')?.textContent.trim()).toBe('Açık');
+    expect(doc.querySelector('#themeLightBtn')?.getAttribute('aria-pressed')).toBe('false');
+    expect(doc.querySelector('#settingsMessageTimesAccordion #autoMessageTimesToggle')).not.toBeNull();
+    expect(doc.querySelector('#settingsHelpAccordion #reopenOnboardingBtn')).not.toBeNull();
+    expect(doc.querySelector('.settings-save-note')?.textContent).toContain('otomatik kaydedilir');
   });
 });
 

@@ -732,11 +732,8 @@ function setOverlayBackgroundInert(enabled) {
   mobileState._backgroundInertSnapshots = [];
 }
 
-function configurePreparationFlow(panelKey, sourcePanel) {
-  if (panelKey !== 'group') return;
-  const steps = [...sourcePanel.querySelectorAll('[data-preparation-step]')];
+function bindExclusiveAccordions(steps) {
   if (!steps.length) return;
-
   steps.forEach((step) => {
     if (step.dataset.singleOpenBound === 'true') return;
     step.dataset.singleOpenBound = 'true';
@@ -749,9 +746,25 @@ function configurePreparationFlow(panelKey, sourcePanel) {
       });
     });
   });
+}
+
+function configurePreparationFlow(panelKey, sourcePanel) {
+  if (panelKey !== 'group') return;
+  const steps = [...sourcePanel.querySelectorAll('[data-preparation-step]')];
+  bindExclusiveAccordions(steps);
 
   const hasPeople = Object.keys(state.get('people') || {}).length > 0;
   const initial = $(hasPeople ? 'peopleListAccordion' : 'personFormAccordion');
+  steps.forEach((step) => { step.open = step === initial; });
+}
+
+function configureSettingsFlow(panelKey, sourcePanel) {
+  if (panelKey !== 'settings') return;
+  const steps = [...sourcePanel.querySelectorAll('[data-setting-accordion]')];
+  bindExclusiveAccordions(steps);
+
+  const openSteps = steps.filter((step) => step.open);
+  const initial = openSteps.length === 1 ? openSteps[0] : $('settingsThemeAccordion');
   steps.forEach((step) => { step.open = step === initial; });
 }
 
@@ -806,6 +819,7 @@ function openMobileOverlay(panelKey, options = {}) {
   sourcePanel.style.overflow = 'visible';
   sourcePanel.style.height = 'auto';
   configurePreparationFlow(panelKey, sourcePanel);
+  configureSettingsFlow(panelKey, sourcePanel);
 
   // State güncelle
   mobileState.overlayOpen = true;

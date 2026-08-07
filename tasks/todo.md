@@ -54,7 +54,15 @@
   - [x] Kişi sayacı ve yüksek kişi sayısında arama/filtre ekle
   - [x] Mesaj ekleme sonrası Mesaj Akışı bölümüne görünür geri bildirim sağla
   - [x] Hedefli test, tam test/build ve mobil geometri sözleşmelerini tamamla
-- [ ] Faz 57 — Ayarlar bilgi mimarisi
+- [x] Faz 57 — Ayarlar bilgi mimarisi
+  - [x] Ayarları Görünüm, Mesaj Davranışı, Proje ve Veri, Yardım kategorilerine ayır
+  - [x] Temayı ilk viewporta taşı; Dark/Light metinlerini Koyu/Açık yap
+  - [x] Mobil ayarlarda aynı anda yalnız bir akordeonu açık tut
+  - [x] Tema seçim durumunu ARIA ile, form kontrollerini programatik etiketlerle ifade et
+  - [x] Onboarding hedeflerini tamamlandı/bekliyor durum listesine dönüştür
+  - [x] Otomatik uygulama ve kaydetme davranışını görünür biçimde açıkla
+  - [x] Tema, mesaj saati ve rehber bulma görevlerini hedefli testlerle doğrula
+  - [x] Tam test/build ve mobil geometri sözleşmelerini tamamla
 - [ ] Faz 58 — Mobil Senaryo Editörü görev akışı
 - [ ] Dalga 2 kullanıcı değerlendirmesi: görev adımı ve kullanılabilirlik kontrolü
 
@@ -65,10 +73,20 @@
 
 ## Uygulama kararı
 
-- Sonraki uygulanacak kapsam: Faz 57
+- Sonraki uygulanacak kapsam: Faz 58
 - Her faz ayrı branch/commit
 - Faz kapısı geçmeden sonraki faza ilerleme
 - Ayrı mobil renderer: yalnız Faz 56–58 sonunda gerekirse
+
+## Faz 57 Review
+
+- Ayarlar teknik DOM sırasından çıkarılıp Görünüm, Mesaj Davranışı, Proje ve Veri, Yardım olarak dört kullanıcı odaklı kategoriye ayrıldı.
+- Tema ilk sıraya taşındı; Koyu/Açık seçenekleri `aria-pressed` ile seçimi duyuruyor. Tik durumu da erişilebilir seçim state’i kazandı.
+- Mobil ayarlarda yalnız bir akordeon açık kalıyor; yeniden açıldığında son tekil bölüm korunuyor, belirsiz durumda Tema varsayılan oluyor.
+- Tüm ayar form kontrollerinin label bağlantıları tamamlandı; anında uygulama ve otomatik kaydetme davranışı görünür notla açıklandı.
+- Başlangıç hedefleri buton benzeri chip görünümünden Bekliyor/Tamamlandı durum listesine çevrildi ve değişimler canlı bölgeyle duyuruluyor.
+- Sahneler ve Kullanım Özeti Görünüm’den ayrılıp Proje ve Veri altında toplandı; mevcut ID, state, import ve Basit/Pro sözleşmeleri korundu.
+- Doğrulama: Faz 57 hedefli 32 test, tam pakette 12 dosya/286 test ve PWA build geçti. Bilinen localhost tarayıcı politikası nedeniyle canlı viewport yeniden denenmedi; mobil sıra, tek-açık davranışı, görev derinliği ve erişilebilirlik DOM/CSS sözleşmeleriyle doğrulandı.
 
 ## Faz 56 Review
 
