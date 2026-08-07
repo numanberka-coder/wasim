@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initMobile } from '../js/ui/mobile.js';
 import { MENU_MODES } from '../js/ui/menu-model.js';
+import { state } from '../js/state.js';
+import { renderPeopleList } from '../js/features/people.js';
 
 function mountApp() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
@@ -90,5 +92,168 @@ describe('Faz 54 mobile surface lifecycle', () => {
     expect(overlay.getAttribute('aria-hidden')).toBe('true');
     expect(historyBack).toHaveBeenCalledTimes(1);
     historyBack.mockRestore();
+  });
+});
+
+describe('Faz 55 contextual controls', () => {
+  beforeEach(() => {
+    mountApp();
+    state.reset();
+  });
+
+  it('synchronizes play and pause availability with player state', () => {
+    initMobile();
+    const playItem = document.querySelector('[data-action="play"]');
+    const pauseItem = document.querySelector('[data-action="pause"]');
+
+    expect(playItem.disabled).toBe(false);
+    expect(pauseItem.disabled).toBe(true);
+
+    const timer = setTimeout(() => {}, 1000);
+    const player = state.get('player');
+    player.paused = false;
+    player.playTimer = timer;
+    state.notify('player.playback');
+
+    expect(playItem.disabled).toBe(true);
+    expect(playItem.querySelector('.hd-item-label')?.textContent).toBe('Oynatılıyor');
+    expect(pauseItem.disabled).toBe(false);
+
+    clearTimeout(timer);
+    player.playTimer = null;
+    player.paused = true;
+    state.notify('player.playback');
+  });
+
+  it('shows only panel-relevant overlay header actions', () => {
+    initMobile();
+    const trigger = document.querySelector('#headerMenuBtn');
+    const playButton = document.querySelector('#moPlayBtn');
+    const resetButton = document.querySelector('#moResetBtn');
+
+    trigger.click();
+    document.querySelector('[data-action="group"]').click();
+    expect(playButton.hidden).toBe(false);
+    expect(playButton.getAttribute('aria-label')).toBe('Hazırlanan sohbeti oynat');
+    expect(resetButton.hidden).toBe(true);
+    document.querySelector('#mobileOverlayBack').click();
+
+    trigger.click();
+    document.querySelector('[data-action="settings"]').click();
+    expect(playButton.hidden).toBe(true);
+    expect(resetButton.hidden).toBe(true);
+  });
+});
+
+describe('Faz 56 preparation flow', () => {
+  beforeEach(() => {
+    mountApp();
+    state.reset();
+  });
+
+  function openGroupOverlay() {
+    initMobile();
+    document.querySelector('#headerMenuBtn').click();
+    document.querySelector('[data-action="group"]').click();
+  }
+
+  it('opens only the people list when people exist and keeps preparation sections exclusive', async () => {
+    openGroupOverlay();
+    const steps = [...document.querySelectorAll('[data-preparation-step]')];
+
+    expect(steps.filter((step) => step.open).map((step) => step.id)).toEqual(['peopleListAccordion']);
+    document.querySelector('#groupFlowAccordion summary').click();
+    await vi.waitFor(() => {
+      expect(steps.filter((step) => step.open).map((step) => step.id)).toEqual(['groupFlowAccordion']);
+    });
+  });
+
+  it('opens the person form when the people list is empty', () => {
+    state.set('people', {});
+    openGroupOverlay();
+
+    expect(document.querySelector('#personFormAccordion').open).toBe(true);
+    expect(document.querySelectorAll('[data-preparation-step][open]')).toHaveLength(1);
+  });
+
+  it('removes URL noise and exposes contextual edit actions with accessible names', () => {
+    openGroupOverlay();
+    renderPeopleList();
+
+    expect(document.querySelector('#peopleCount').textContent).toBe('(5)');
+    expect(document.querySelector('.person-url')).toBeNull();
+    const editTarget = document.querySelector('.person-edit-target');
+    expect(editTarget.getAttribute('aria-label')).toMatch(/kişisini düzenle$/);
+    editTarget.click();
+
+    expect(document.querySelector('#personFormAccordion').open).toBe(true);
+    expect(document.querySelector('#deletePersonBtn').hidden).toBe(false);
+    expect(document.querySelector('[data-person-save-label]').textContent).toBe('Değişiklikleri Kaydet');
+  });
+
+  it('shows search only for long lists and filters people without changing state', () => {
+    const people = Object.fromEntries(
+      Array.from({ length: 20 }, (_, index) => [`Kişi ${index + 1}`, { avatar: '' }])
+    );
+    state.set('people', people);
+    renderPeopleList();
+
+    const searchGroup = document.querySelector('#peopleSearchGroup');
+    const search = document.querySelector('#peopleSearch');
+    expect(searchGroup.hidden).toBe(false);
+    expect(document.querySelector('#peopleCount').textContent).toBe('(20)');
+    search.value = 'Kişi 20';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(document.querySelectorAll('.person-card-wrapper')).toHaveLength(1);
+    expect(Object.keys(state.get('people'))).toHaveLength(20);
+  });
+
+  it('moves to the message flow after adding an inline message', () => {
+    openGroupOverlay();
+    renderPeopleList();
+    document.querySelector('[data-addline]').click();
+    const textarea = document.querySelector('.inline-builder-panel textarea');
+    textarea.value = 'Merhaba';
+    document.querySelector('.inline-add-btn').click();
+
+    expect(document.querySelector('#groupFlowAccordion').open).toBe(true);
+    expect(document.querySelector('#groupBuilderList').textContent).toContain('Merhaba');
+  });
+});
+
+describe('Faz 57 settings flow', () => {
+  beforeEach(() => {
+    mountApp();
+    state.reset();
+  });
+
+  function openSettings() {
+    initMobile();
+    document.querySelector('#headerMenuBtn').click();
+    document.querySelector('[data-action="settings"]').click();
+  }
+
+  it('opens theme first and keeps only one setting accordion open', async () => {
+    openSettings();
+    const settings = [...document.querySelectorAll('[data-setting-accordion]')];
+
+    expect(settings.filter((item) => item.open).map((item) => item.id)).toEqual(['settingsThemeAccordion']);
+    document.querySelector('#settingsHelpAccordion summary').click();
+    await vi.waitFor(() => {
+      expect(settings.filter((item) => item.open).map((item) => item.id)).toEqual(['settingsHelpAccordion']);
+    });
+  });
+
+  it('keeps theme, message time, and guide tasks within category plus control depth', () => {
+    openSettings();
+
+    expect(document.querySelector('#settingsThemeAccordion #themeDarkBtn')).not.toBeNull();
+    expect(document.querySelector('#settingsMessageTimesAccordion #autoMessageTimesToggle')).not.toBeNull();
+    expect(document.querySelector('#settingsHelpAccordion #reopenOnboardingBtn')).not.toBeNull();
+    expect(document.querySelector('#settingsScenesAccordion')?.closest('.panel-group')
+      ?.querySelector(':scope > .panel-group-title')?.textContent).toBe('Proje ve Veri');
+    expect(document.querySelector('#settingsAnalyticsAccordion')?.closest('.panel-group')
+      ?.querySelector(':scope > .panel-group-title')?.textContent).toBe('Proje ve Veri');
   });
 });

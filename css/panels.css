@@ -246,7 +246,6 @@
   border-radius: 10px;
   background: linear-gradient(135deg, rgba(42,57,66,0.7) 0%, rgba(32,44,51,0.5) 100%);
   transition: all var(--transition-fast);
-  cursor: pointer;
   position: relative;
   overflow: hidden;
 }
@@ -313,6 +312,31 @@
   min-width: 0;
 }
 
+.person-edit-target {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-md);
+  text-align: left;
+}
+
+.person-edit-target:hover,
+.person-edit-target:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+  transform: none;
+  filter: none;
+  outline: 2px solid color-mix(in srgb, var(--wa-green) 65%, transparent);
+  outline-offset: 2px;
+}
+
 .person-name {
   font-weight: 400;
   font-size: var(--font-size-lg);
@@ -356,18 +380,22 @@
   cursor: pointer;
 }
 
-.person-url {
-  font-size: var(--font-size-base);
-  color: var(--wa-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 2px;
-}
-
 .person-actions {
   display: flex;
   gap: var(--space-sm);
+}
+
+.accordion-count {
+  color: var(--wa-text-secondary);
+  font-weight: 500;
+}
+
+.people-search {
+  margin-bottom: 10px;
+}
+
+#personFormAccordion button[hidden] {
+  display: none;
 }
 
 /* ===== SCRIPT INNER TABS ===== */

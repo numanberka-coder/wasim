@@ -1,5 +1,23 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## Faz 55 Uygulama Planı
+
+- [x] Tek öğeli mobil menü gruplarını kompaktlaştır; `Diğer` grubunu `Proje` yap
+- [x] JSON ve ekran görüntüsü eylemlerini gerçek sonuçlarıyla adlandır
+- [x] Oynat/Duraklat kontrollerini player state ile senkron ve erişilebilir yap
+- [x] Ayarlar/Hazırla/Senaryo overlay header aksiyonlarını bağlama göre sınırla
+- [x] Dekoratif sheet handle'ını kaldır ve kaydırılabilir içerik için alt fade ekle
+- [x] Hedefli testler, tam test, build ve mobil tarayıcı smoke kontrolünü tamamla
+
+## Faz 55 Review
+
+- Tek öğeli grup başlıkları görsel olarak gizlenerek menü kısaltıldı; semantik grup etiketleri korundu.
+- `Proje`, `Dışa Aktar`, `İçe Aktar` ve ekran görüntüsü sonuç metinleri gerçek işlevlerle eşleştirildi.
+- Oynat/Duraklat disabled durumu player timer/paused state ile senkronlandı ve menü her açılışta tazeleniyor.
+- Ayarlar header'ında playback kaldırıldı; Hazırla yalnız oynat, Senaryo oynat+sıfırla gösteriyor.
+- Dekoratif drag handle kaldırıldı; kaydırılabilir menüde yalnız içerik devam ediyorsa alt fade oluşuyor.
+- Doğrulama: 12 test dosyası, 279 test ve PWA build geçti; 390×844 canlı smoke kontrolünde menü metinleri, disabled state, Ayarlar bağlamı ve konsol doğrulandı.
+
 ## Faz 54 Uygulama Planı
 
 - [x] Overlay dialog/ARIA sözleşmesini ve anlamlı ilk odağı tamamla
@@ -23,13 +41,28 @@
 
 - [x] Faz 53 — Baseline, mobil geometri ve safe-area
 - [x] Faz 54 — Overlay, focus, history ve surface güvenilirliği
-- [ ] Faz 55 — Mobil menü ve bağlamsal aksiyonlar
+- [x] Faz 55 — Mobil menü ve bağlamsal aksiyonlar
 - [ ] Dalga 1 kullanıcı değerlendirmesi: yeni 1.png–3.png karşılıklarını karşılaştır
 
 ## Dalga 2 — Görev akışları
 
-- [ ] Faz 56 — Hazırla ve kişi yönetimi akışı
-- [ ] Faz 57 — Ayarlar bilgi mimarisi
+- [x] Faz 56 — Hazırla ve kişi yönetimi akışı
+  - [x] Mobilde Grup Bilgileri, Kişi Ekle, Kişi Listesi ve Mesaj Akışı bölümlerinden yalnız birini açık tut
+  - [x] Boş/dolu kişi listesine göre doğru başlangıç bölümünü aç
+  - [x] Yeni kişi ve mevcut kişi düzenleme aksiyonlarını bağlama göre sadeleştir
+  - [x] Kişi kartlarından avatar URL gürültüsünü kaldır; düzenleme ve mesaj ekleme hedeflerini erişilebilir yap
+  - [x] Kişi sayacı ve yüksek kişi sayısında arama/filtre ekle
+  - [x] Mesaj ekleme sonrası Mesaj Akışı bölümüne görünür geri bildirim sağla
+  - [x] Hedefli test, tam test/build ve mobil geometri sözleşmelerini tamamla
+- [x] Faz 57 — Ayarlar bilgi mimarisi
+  - [x] Ayarları Görünüm, Mesaj Davranışı, Proje ve Veri, Yardım kategorilerine ayır
+  - [x] Temayı ilk viewporta taşı; Dark/Light metinlerini Koyu/Açık yap
+  - [x] Mobil ayarlarda aynı anda yalnız bir akordeonu açık tut
+  - [x] Tema seçim durumunu ARIA ile, form kontrollerini programatik etiketlerle ifade et
+  - [x] Onboarding hedeflerini tamamlandı/bekliyor durum listesine dönüştür
+  - [x] Otomatik uygulama ve kaydetme davranışını görünür biçimde açıkla
+  - [x] Tema, mesaj saati ve rehber bulma görevlerini hedefli testlerle doğrula
+  - [x] Tam test/build ve mobil geometri sözleşmelerini tamamla
 - [ ] Faz 58 — Mobil Senaryo Editörü görev akışı
 - [ ] Dalga 2 kullanıcı değerlendirmesi: görev adımı ve kullanılabilirlik kontrolü
 
@@ -40,10 +73,29 @@
 
 ## Uygulama kararı
 
-- Sonraki uygulanacak kapsam: Faz 54
+- Sonraki uygulanacak kapsam: Faz 58
 - Her faz ayrı branch/commit
 - Faz kapısı geçmeden sonraki faza ilerleme
 - Ayrı mobil renderer: yalnız Faz 56–58 sonunda gerekirse
+
+## Faz 57 Review
+
+- Ayarlar teknik DOM sırasından çıkarılıp Görünüm, Mesaj Davranışı, Proje ve Veri, Yardım olarak dört kullanıcı odaklı kategoriye ayrıldı.
+- Tema ilk sıraya taşındı; Koyu/Açık seçenekleri `aria-pressed` ile seçimi duyuruyor. Tik durumu da erişilebilir seçim state’i kazandı.
+- Mobil ayarlarda yalnız bir akordeon açık kalıyor; yeniden açıldığında son tekil bölüm korunuyor, belirsiz durumda Tema varsayılan oluyor.
+- Tüm ayar form kontrollerinin label bağlantıları tamamlandı; anında uygulama ve otomatik kaydetme davranışı görünür notla açıklandı.
+- Başlangıç hedefleri buton benzeri chip görünümünden Bekliyor/Tamamlandı durum listesine çevrildi ve değişimler canlı bölgeyle duyuruluyor.
+- Sahneler ve Kullanım Özeti Görünüm’den ayrılıp Proje ve Veri altında toplandı; mevcut ID, state, import ve Basit/Pro sözleşmeleri korundu.
+- Doğrulama: Faz 57 hedefli 32 test, tam pakette 12 dosya/286 test ve PWA build geçti. Bilinen localhost tarayıcı politikası nedeniyle canlı viewport yeniden denenmedi; mobil sıra, tek-açık davranışı, görev derinliği ve erişilebilirlik DOM/CSS sözleşmeleriyle doğrulandı.
+
+## Faz 56 Review
+
+- Mobil Hazırla yüzeyinde dört ana görev bölümü artık birbirini dışlıyor; kişi varsa Kişi Listesi, yoksa Kişi Ekle açılıyor.
+- Kişi kartları avatar URL metninden arındırıldı; büyük, klavye ile erişilebilir düzenleme hedefi ve açık “Mesaj Ekle” eylemi kazandı.
+- Yeni/düzenleme formu bağlama göre başlık ve aksiyon değiştiriyor; silme yalnız düzenlemede, avatar kaldırma yalnız avatar varken gösteriliyor ve mevcut avatar kaldırma geri alınabiliyor.
+- Liste başlığında kişi sayısı var; arama 10 ve üzeri kişide görünür olup 20 kişilik durumda veriyi değiştirmeden filtreliyor.
+- Inline oluşturucudaki alanlar programatik etiketlendi; “Akışa Ekle” sonrasında Mesaj Akışı açılıyor ve odağı alıyor.
+- Doğrulama: Faz 56 hedefli 30 test, tam pakette 12 dosya/284 test ve PWA build geçti. Yerel URL, uygulama tarayıcısının güvenlik politikasıyla engellendiği için canlı viewport turu çalıştırılamadı; 320–390 px kuralları responsive CSS ve DOM sözleşmeleriyle korundu.
 
 ## Faz 53 Review
 

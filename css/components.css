@@ -445,14 +445,19 @@ label {
   gap: 8px;
 }
 
-.onboarding-goals-mini,
+.onboarding-progress,
 .onboarding-goals {
   margin-top: 12px;
   display: grid;
   gap: 8px;
 }
 
-.goal-chip,
+.onboarding-progress {
+  padding: 0;
+  list-style: none;
+}
+
+.onboarding-progress li,
 .goal-item {
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 9px;
@@ -462,11 +467,38 @@ label {
   background: rgba(11,20,26,0.45);
 }
 
-.goal-chip.done,
+.onboarding-progress li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.goal-status {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.onboarding-progress li.done,
 .goal-item.done {
   border-color: rgba(37, 211, 102, 0.45);
   color: var(--wa-green);
   background: rgba(37, 211, 102, 0.08);
+}
+
+.settings-save-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(37, 211, 102, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(37, 211, 102, 0.07);
+  color: var(--wa-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
 }
 
 .analytics-summary {

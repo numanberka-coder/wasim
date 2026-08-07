@@ -64,7 +64,7 @@ describe('Faz 36 menu discipline', () => {
       'Oynat',
       'Çıktı',
       'Ayarlar',
-      'Diğer',
+      'Proje',
     ]);
   });
 
@@ -132,22 +132,36 @@ describe('Faz 37 desktop menu and panel order', () => {
 
     expect(labels).toEqual([
       'Grup Bilgileri',
-      'Kişi Ekle / Düzenle',
+      'Kişi Ekle',
       'Kişi Listesi',
-      'Satır Sırası',
+      'Mesaj Akışı',
       'JSON Düzenle',
     ]);
   });
 
-  it('keeps common settings before pro and technical settings', () => {
+  it('groups settings by user intent and keeps theme first', () => {
     const doc = loadIndexDocument();
-    const labels = [
-      ...doc.querySelectorAll('#settings .panel-group details.accordion > summary .accordion-title'),
-    ].map((el) => el.textContent.replace(/\s+/g, ' ').trim());
+    const groups = [...doc.querySelectorAll('#settings > .panel-group')].map((group) => ({
+      title: group.querySelector(':scope > .panel-group-title')?.textContent.trim(),
+      labels: [...group.querySelectorAll(':scope > details > summary .accordion-title')]
+        .map((el) => el.textContent.replace(/\s+/g, ' ').trim()),
+    }));
 
-    expect(labels.indexOf('Tema')).toBeGreaterThan(labels.indexOf('Mod & Rehber'));
-    expect(labels.indexOf('Tema')).toBeLessThan(labels.indexOf('Mesaj Saatleri'));
-    expect(labels.indexOf('Tipografi')).toBeLessThan(labels.indexOf('Mesaj Saatleri'));
+    expect(groups).toEqual([
+      { title: 'Görünüm', labels: ['Tema', 'Tipografi', 'Duvar Kağıdı', 'Başlık Rengi', 'Balon Renkleri'] },
+      { title: 'Mesaj Davranışı', labels: ['Tik Durumu', 'Mesaj Saatleri', 'Durum Çubuğu'] },
+      { title: 'Proje ve Veri', labels: ['Sahneler', 'Kullanım Özeti'] },
+      { title: 'Yardım', labels: ['Arayüz Modu ve Rehber'] },
+    ]);
+
+    expect(doc.querySelector('#settingsThemeAccordion')?.open).toBe(true);
+    expect(doc.querySelector('#themeDarkBtn')?.textContent.trim()).toBe('Koyu');
+    expect(doc.querySelector('#themeDarkBtn')?.getAttribute('aria-pressed')).toBe('true');
+    expect(doc.querySelector('#themeLightBtn')?.textContent.trim()).toBe('Açık');
+    expect(doc.querySelector('#themeLightBtn')?.getAttribute('aria-pressed')).toBe('false');
+    expect(doc.querySelector('#settingsMessageTimesAccordion #autoMessageTimesToggle')).not.toBeNull();
+    expect(doc.querySelector('#settingsHelpAccordion #reopenOnboardingBtn')).not.toBeNull();
+    expect(doc.querySelector('.settings-save-note')?.textContent).toContain('otomatik kaydedilir');
   });
 });
 
@@ -416,5 +430,34 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(css).toContain('min-height: 0 !important');
     expect(mobileModule).toContain('const MOBILE_LANDSCAPE_QUERY =');
     expect(mobileModule).toContain('window.matchMedia(MOBILE_LANDSCAPE_QUERY).matches');
+  });
+});
+
+describe('Faz 55 contextual mobile menu', () => {
+  it('uses compact single-item groups and task-oriented project labels', () => {
+    const doc = mountIndexDocument();
+
+    renderMobileMenu(MENU_MODES.PRO);
+
+    expect(doc.querySelector('[data-menu-group="prepare"]')?.classList.contains('is-single-item')).toBe(true);
+    expect(doc.querySelector('[data-menu-group="output"]')?.classList.contains('is-single-item')).toBe(true);
+    expect(doc.querySelector('[data-menu-group="settings"]')?.classList.contains('is-single-item')).toBe(true);
+    expect(doc.querySelector('[data-menu-group="playback"]')?.classList.contains('is-single-item')).toBe(false);
+    expect(doc.querySelector('[data-menu-group="data"] .hd-group-label')?.textContent).toBe('Proje');
+    expect(doc.querySelector('[data-action="save"] .hd-item-label')?.textContent).toBe('Dışa Aktar');
+    expect(doc.querySelector('[data-action="load"] .hd-item-label')?.textContent).toBe('İçe Aktar');
+    expect(doc.querySelector('[data-action="screenshot"] .hd-item-description')?.textContent)
+      .toBe('Kopyala, paylaş veya indir');
+    expect(doc.querySelector('.hd-sheet-handle')).toBeNull();
+
+    const root = doc.querySelector('[data-menu-root]');
+    Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 500 });
+    Object.defineProperty(root, 'clientHeight', { configurable: true, value: 200 });
+    root.scrollTop = 0;
+    root.dispatchEvent(new Event('scroll'));
+    expect(root.classList.contains('has-scroll-more')).toBe(true);
+    root.scrollTop = 300;
+    root.dispatchEvent(new Event('scroll'));
+    expect(root.classList.contains('has-scroll-more')).toBe(false);
   });
 });

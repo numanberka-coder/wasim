@@ -169,6 +169,7 @@ Veli: `;
     it('sets paused state', () => {
       player.pause();
       expect(state.get('player').paused).toBe(true);
+      expect(player.isPlayerPlaying()).toBe(false);
     });
   });
 
