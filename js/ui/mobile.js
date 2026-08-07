@@ -732,6 +732,29 @@ function setOverlayBackgroundInert(enabled) {
   mobileState._backgroundInertSnapshots = [];
 }
 
+function configurePreparationFlow(panelKey, sourcePanel) {
+  if (panelKey !== 'group') return;
+  const steps = [...sourcePanel.querySelectorAll('[data-preparation-step]')];
+  if (!steps.length) return;
+
+  steps.forEach((step) => {
+    if (step.dataset.singleOpenBound === 'true') return;
+    step.dataset.singleOpenBound = 'true';
+    step.querySelector('summary')?.addEventListener('click', () => {
+      queueMicrotask(() => {
+        if (!step.open || !step.closest('#mobileOverlay')) return;
+        steps.forEach((other) => {
+          if (other !== step) other.open = false;
+        });
+      });
+    });
+  });
+
+  const hasPeople = Object.keys(state.get('people') || {}).length > 0;
+  const initial = $(hasPeople ? 'peopleListAccordion' : 'personFormAccordion');
+  steps.forEach((step) => { step.open = step === initial; });
+}
+
 function openMobileOverlay(panelKey, options = {}) {
   const overlay = $('mobileOverlay');
   const backdrop = $('mobileOverlayBackdrop');
@@ -744,7 +767,11 @@ function openMobileOverlay(panelKey, options = {}) {
   const sourcePanel = $(sourcePanelId);
   if (!sourcePanel) return;
 
-  if (mobileState.overlayOpen && mobileState.currentPanel === panelKey) {
+  if (
+    mobileState.overlayOpen &&
+    mobileState.currentPanel === panelKey &&
+    body.contains(sourcePanel)
+  ) {
     $('mobileOverlayBack')?.focus();
     return;
   }
@@ -778,6 +805,7 @@ function openMobileOverlay(panelKey, options = {}) {
   sourcePanel.style.display = 'block';
   sourcePanel.style.overflow = 'visible';
   sourcePanel.style.height = 'auto';
+  configurePreparationFlow(panelKey, sourcePanel);
 
   // State güncelle
   mobileState.overlayOpen = true;

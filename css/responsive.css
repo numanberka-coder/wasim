@@ -912,9 +912,34 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
     min-height: 44px;
   }
 
+  .mobile-overlay-body .person-item {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .mobile-overlay-body .person-actions {
+    flex: 0 0 auto;
+  }
+
+  .mobile-overlay-body .person-actions button {
+    min-width: 92px;
+    padding-inline: 10px;
+  }
+
+  .mobile-overlay-body #personFormAccordion .form-row,
+  .mobile-overlay-body .builder-actions {
+    align-items: stretch;
+  }
+
+  .mobile-overlay-body #personFormAccordion .form-row > button,
+  .mobile-overlay-body .builder-actions > button {
+    flex: 1 1 130px;
+  }
+
   .mobile-overlay-body input[type="text"],
   .mobile-overlay-body input[type="number"],
   .mobile-overlay-body input[type="url"],
+  .mobile-overlay-body input[type="search"],
   .mobile-overlay-body input[type="time"],
   .mobile-overlay-body textarea,
   .mobile-overlay-body select {

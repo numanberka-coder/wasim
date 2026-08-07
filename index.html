@@ -106,7 +106,7 @@
           <h3 class="panel-group-title">Grup</h3>
 
         <!-- Group Info -->
-        <details class="accordion" open>
+        <details class="accordion" id="groupInfoAccordion" data-preparation-step open>
           <summary class="accordion-header">
             <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="users"></span></span>
             <span class="accordion-title">Grup Bilgileri</span>
@@ -156,10 +156,10 @@
           <h3 class="panel-group-title">Kişiler</h3>
 
         <!-- Person Form (merged from Kişiler) -->
-        <details class="accordion" open>
+        <details class="accordion" id="personFormAccordion" data-preparation-step open>
           <summary class="accordion-header">
             <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="userPlus"></span></span>
-            <span class="accordion-title">Kişi Ekle / Düzenle</span>
+            <span class="accordion-title" id="personFormTitle">Kişi Ekle</span>
             <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
@@ -186,22 +186,26 @@
               </div>
             </div>
             <div class="form-row" style="margin-top: 16px; gap: 8px;">
-              <button id="savePersonBtn" type="button"><span class="ui-icon" data-ui-icon="save"></span>Kaydet</button>
-              <button id="newPersonBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="plus"></span>Yeni</button>
-              <button id="clearAvatarBtn" type="button" class="secondary"><span class="ui-icon" data-ui-icon="imageOff"></span>Avatar Sil</button>
-              <button id="deletePersonBtn" type="button" class="danger"><span class="ui-icon" data-ui-icon="trash"></span>Sil</button>
+              <button id="savePersonBtn" type="button"><span class="ui-icon" data-ui-icon="save"></span><span data-person-save-label>Kişi Ekle</span></button>
+              <button id="newPersonBtn" type="button" class="secondary" hidden><span class="ui-icon" data-ui-icon="plus"></span>Yeni Kişi</button>
+              <button id="clearAvatarBtn" type="button" class="secondary" hidden><span class="ui-icon" data-ui-icon="imageOff"></span>Avatarı Kaldır</button>
+              <button id="deletePersonBtn" type="button" class="danger" hidden><span class="ui-icon" data-ui-icon="trash"></span>Kişiyi Sil</button>
             </div>
           </div>
         </details>
 
         <!-- People List -->
-        <details class="accordion" open>
+        <details class="accordion" id="peopleListAccordion" data-preparation-step open>
           <summary class="accordion-header">
             <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="list"></span></span>
-            <span class="accordion-title">Kişi Listesi</span>
+            <span class="accordion-title">Kişi Listesi <span id="peopleCount" class="accordion-count" aria-live="polite"></span></span>
             <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">
+            <div id="peopleSearchGroup" class="form-group people-search" hidden>
+              <label for="peopleSearch">Kişilerde ara</label>
+              <input type="search" id="peopleSearch" placeholder="İsme göre ara" autocomplete="off">
+            </div>
             <div id="peopleList" class="people-list">
               <!-- Rendered dynamically -->
             </div>
@@ -214,10 +218,10 @@
           <h3 class="panel-group-title">Akış</h3>
 
         <!-- Satır Sırası -->
-        <details class="accordion" open>
+        <details class="accordion" id="groupFlowAccordion" data-preparation-step open>
           <summary class="accordion-header">
             <span class="accordion-lead-icon"><span class="ui-icon" data-ui-icon="listOrdered"></span></span>
-            <span class="accordion-title">Satır Sırası</span>
+            <span class="accordion-title">Mesaj Akışı</span>
             <svg class="accordion-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </summary>
           <div class="accordion-body">

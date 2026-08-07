@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initMobile } from '../js/ui/mobile.js';
 import { MENU_MODES } from '../js/ui/menu-model.js';
 import { state } from '../js/state.js';
+import { renderPeopleList } from '../js/features/people.js';
 
 function mountApp() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
@@ -141,5 +142,82 @@ describe('Faz 55 contextual controls', () => {
     document.querySelector('[data-action="settings"]').click();
     expect(playButton.hidden).toBe(true);
     expect(resetButton.hidden).toBe(true);
+  });
+});
+
+describe('Faz 56 preparation flow', () => {
+  beforeEach(() => {
+    mountApp();
+    state.reset();
+  });
+
+  function openGroupOverlay() {
+    initMobile();
+    document.querySelector('#headerMenuBtn').click();
+    document.querySelector('[data-action="group"]').click();
+  }
+
+  it('opens only the people list when people exist and keeps preparation sections exclusive', async () => {
+    openGroupOverlay();
+    const steps = [...document.querySelectorAll('[data-preparation-step]')];
+
+    expect(steps.filter((step) => step.open).map((step) => step.id)).toEqual(['peopleListAccordion']);
+    document.querySelector('#groupFlowAccordion summary').click();
+    await vi.waitFor(() => {
+      expect(steps.filter((step) => step.open).map((step) => step.id)).toEqual(['groupFlowAccordion']);
+    });
+  });
+
+  it('opens the person form when the people list is empty', () => {
+    state.set('people', {});
+    openGroupOverlay();
+
+    expect(document.querySelector('#personFormAccordion').open).toBe(true);
+    expect(document.querySelectorAll('[data-preparation-step][open]')).toHaveLength(1);
+  });
+
+  it('removes URL noise and exposes contextual edit actions with accessible names', () => {
+    openGroupOverlay();
+    renderPeopleList();
+
+    expect(document.querySelector('#peopleCount').textContent).toBe('(5)');
+    expect(document.querySelector('.person-url')).toBeNull();
+    const editTarget = document.querySelector('.person-edit-target');
+    expect(editTarget.getAttribute('aria-label')).toMatch(/kişisini düzenle$/);
+    editTarget.click();
+
+    expect(document.querySelector('#personFormAccordion').open).toBe(true);
+    expect(document.querySelector('#deletePersonBtn').hidden).toBe(false);
+    expect(document.querySelector('[data-person-save-label]').textContent).toBe('Değişiklikleri Kaydet');
+  });
+
+  it('shows search only for long lists and filters people without changing state', () => {
+    const people = Object.fromEntries(
+      Array.from({ length: 20 }, (_, index) => [`Kişi ${index + 1}`, { avatar: '' }])
+    );
+    state.set('people', people);
+    renderPeopleList();
+
+    const searchGroup = document.querySelector('#peopleSearchGroup');
+    const search = document.querySelector('#peopleSearch');
+    expect(searchGroup.hidden).toBe(false);
+    expect(document.querySelector('#peopleCount').textContent).toBe('(20)');
+    search.value = 'Kişi 20';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(document.querySelectorAll('.person-card-wrapper')).toHaveLength(1);
+    expect(Object.keys(state.get('people'))).toHaveLength(20);
+  });
+
+  it('moves to the message flow after adding an inline message', () => {
+    openGroupOverlay();
+    renderPeopleList();
+    document.querySelector('[data-addline]').click();
+    const textarea = document.querySelector('.inline-builder-panel textarea');
+    textarea.value = 'Merhaba';
+    document.querySelector('.inline-add-btn').click();
+
+    expect(document.querySelector('#groupFlowAccordion').open).toBe(true);
+    expect(document.querySelector('#groupBuilderList').textContent).toContain('Merhaba');
   });
 });

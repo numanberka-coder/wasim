@@ -132,9 +132,9 @@ describe('Faz 37 desktop menu and panel order', () => {
 
     expect(labels).toEqual([
       'Grup Bilgileri',
-      'Kişi Ekle / Düzenle',
+      'Kişi Ekle',
       'Kişi Listesi',
-      'Satır Sırası',
+      'Mesaj Akışı',
       'JSON Düzenle',
     ]);
   });

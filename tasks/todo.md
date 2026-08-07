@@ -46,7 +46,14 @@
 
 ## Dalga 2 — Görev akışları
 
-- [ ] Faz 56 — Hazırla ve kişi yönetimi akışı
+- [x] Faz 56 — Hazırla ve kişi yönetimi akışı
+  - [x] Mobilde Grup Bilgileri, Kişi Ekle, Kişi Listesi ve Mesaj Akışı bölümlerinden yalnız birini açık tut
+  - [x] Boş/dolu kişi listesine göre doğru başlangıç bölümünü aç
+  - [x] Yeni kişi ve mevcut kişi düzenleme aksiyonlarını bağlama göre sadeleştir
+  - [x] Kişi kartlarından avatar URL gürültüsünü kaldır; düzenleme ve mesaj ekleme hedeflerini erişilebilir yap
+  - [x] Kişi sayacı ve yüksek kişi sayısında arama/filtre ekle
+  - [x] Mesaj ekleme sonrası Mesaj Akışı bölümüne görünür geri bildirim sağla
+  - [x] Hedefli test, tam test/build ve mobil geometri sözleşmelerini tamamla
 - [ ] Faz 57 — Ayarlar bilgi mimarisi
 - [ ] Faz 58 — Mobil Senaryo Editörü görev akışı
 - [ ] Dalga 2 kullanıcı değerlendirmesi: görev adımı ve kullanılabilirlik kontrolü
@@ -58,10 +65,19 @@
 
 ## Uygulama kararı
 
-- Sonraki uygulanacak kapsam: Faz 54
+- Sonraki uygulanacak kapsam: Faz 57
 - Her faz ayrı branch/commit
 - Faz kapısı geçmeden sonraki faza ilerleme
 - Ayrı mobil renderer: yalnız Faz 56–58 sonunda gerekirse
+
+## Faz 56 Review
+
+- Mobil Hazırla yüzeyinde dört ana görev bölümü artık birbirini dışlıyor; kişi varsa Kişi Listesi, yoksa Kişi Ekle açılıyor.
+- Kişi kartları avatar URL metninden arındırıldı; büyük, klavye ile erişilebilir düzenleme hedefi ve açık “Mesaj Ekle” eylemi kazandı.
+- Yeni/düzenleme formu bağlama göre başlık ve aksiyon değiştiriyor; silme yalnız düzenlemede, avatar kaldırma yalnız avatar varken gösteriliyor ve mevcut avatar kaldırma geri alınabiliyor.
+- Liste başlığında kişi sayısı var; arama 10 ve üzeri kişide görünür olup 20 kişilik durumda veriyi değiştirmeden filtreliyor.
+- Inline oluşturucudaki alanlar programatik etiketlendi; “Akışa Ekle” sonrasında Mesaj Akışı açılıyor ve odağı alıyor.
+- Doğrulama: Faz 56 hedefli 30 test, tam pakette 12 dosya/284 test ve PWA build geçti. Yerel URL, uygulama tarayıcısının güvenlik politikasıyla engellendiği için canlı viewport turu çalıştırılamadı; 320–390 px kuralları responsive CSS ve DOM sözleşmeleriyle korundu.
 
 ## Faz 53 Review
 

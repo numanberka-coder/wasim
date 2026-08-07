@@ -19,6 +19,69 @@ let expandedPerson = null;
 
 /** Inline builder'daki aktif mesaj tipi */
 let inlineActiveType = 'message';
+let inlineFieldSequence = 0;
+
+const PREPARATION_STEP_IDS = [
+  'groupInfoAccordion',
+  'personFormAccordion',
+  'peopleListAccordion',
+  'groupFlowAccordion',
+];
+
+function openPreparationStep(id, { focus = false } = {}) {
+  const target = $(id);
+  if (!target) return;
+  if (target.closest('#mobileOverlay')) {
+    PREPARATION_STEP_IDS.forEach((stepId) => {
+      const step = $(stepId);
+      if (step) step.open = step === target;
+    });
+  } else {
+    target.open = true;
+  }
+  if (focus) {
+    const summary = target.querySelector('summary');
+    summary?.focus({ preventScroll: true });
+    target.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+  }
+}
+
+function syncPersonFormMode() {
+  const editingName = state.data.editingName;
+  const avatarInput = $('pAvatar');
+  const fileInput = $('pAvatarFile');
+  const hasAvatar = Boolean(
+    state.data.pendingPersonAvatarDataUrl ||
+    avatarInput?.value?.trim() ||
+    fileInput?.files?.length
+  );
+  const title = $('personFormTitle');
+  const saveLabel = document.querySelector('[data-person-save-label]');
+  const newButton = $('newPersonBtn');
+  const clearAvatarButton = $('clearAvatarBtn');
+  const deleteButton = $('deletePersonBtn');
+
+  if (title) title.textContent = editingName ? 'Kişiyi Düzenle' : 'Kişi Ekle';
+  if (saveLabel) saveLabel.textContent = editingName ? 'Değişiklikleri Kaydet' : 'Kişi Ekle';
+  if (newButton) newButton.hidden = !editingName;
+  if (clearAvatarButton) clearAvatarButton.hidden = !hasAvatar;
+  if (deleteButton) deleteButton.hidden = !editingName;
+}
+
+function bindPeopleControls() {
+  const searchInput = $('peopleSearch');
+  if (searchInput && searchInput.dataset.peopleSearchBound !== 'true') {
+    searchInput.dataset.peopleSearchBound = 'true';
+    searchInput.addEventListener('input', renderPeopleList);
+  }
+  ['pAvatar', 'pAvatarFile'].forEach((id) => {
+    const input = $(id);
+    if (input && input.dataset.personModeBound !== 'true') {
+      input.dataset.personModeBound = 'true';
+      input.addEventListener(id === 'pAvatar' ? 'input' : 'change', syncPersonFormMode);
+    }
+  });
+}
 
 /**
  * Render people list in panel
@@ -31,6 +94,17 @@ function renderPeopleList() {
   const people = state.get('people');
   const active = state.get('active');
   const names = Object.keys(people).sort((a, b) => a.localeCompare(b, 'tr'));
+  const query = ($('peopleSearch')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  const visibleNames = query
+    ? names.filter((name) => name.toLocaleLowerCase('tr-TR').includes(query))
+    : names;
+  const count = $('peopleCount');
+  const searchGroup = $('peopleSearchGroup');
+
+  bindPeopleControls();
+  syncPersonFormMode();
+  if (count) count.textContent = `(${names.length})`;
+  if (searchGroup) searchGroup.hidden = names.length < 10;
 
   listEl.replaceChildren();
 
@@ -39,6 +113,7 @@ function renderPeopleList() {
       className: 'empty-state-cta',
       type: 'button',
       onClick: () => {
+        openPreparationStep('personFormAccordion');
         const input = $('pName');
         if (input) { input.focus(); input.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
       },
@@ -55,7 +130,14 @@ function renderPeopleList() {
     return;
   }
 
-  for (const name of names) {
+  if (visibleNames.length === 0) {
+    listEl.appendChild(createElement('div', { className: 'empty-state' }, [
+      createElement('div', { className: 'empty-state-title' }, ['Eşleşen kişi yok']),
+      createElement('div', { className: 'empty-state-desc' }, ['Farklı bir isim arayın.']),
+    ]));
+  }
+
+  for (const name of visibleNames) {
     const avatar = (people[name]?.avatar || '').trim();
     const isOnline = active.has(name);
     const isSelf = state.isSelf(name);
@@ -78,18 +160,28 @@ function renderPeopleList() {
     const wrapper = document.createElement('div');
     wrapper.className = 'person-card-wrapper';
 
-    const div = createElement('div', { className: 'person-item' + (expandedPerson === name ? ' expanded' : '') }, [
+    const editTarget = createElement('button', {
+      className: 'person-edit-target',
+      type: 'button',
+      dataset: { edit: name },
+      'aria-label': `${name} kişisini düzenle`,
+    }, [
       avatarDiv,
-      createElement('div', { className: 'person-info' }, [
+      createElement('span', { className: 'person-info' }, [
         createElement('div', { className: 'person-name' }, nameChildren),
-        createElement('div', { className: 'person-url' }, [
-          isSelf ? 'Sizin mesajlarınız (sağ taraf)' :
-          avatar ? avatar.slice(0, 40) + (avatar.length > 40 ? '...' : '') : 'avatar yok'
-        ])
       ]),
+    ]);
+
+    const div = createElement('div', { className: 'person-item' + (expandedPerson === name ? ' expanded' : '') }, [
+      editTarget,
       createElement('div', { className: 'person-actions' }, [
-        createElement('button', { className: 'secondary btn-sm', type: 'button', dataset: { edit: name } }, ['✏️']),
-        createElement('button', { className: 'btn-sm', type: 'button', dataset: { addline: name } }, ['➕ Satır'])
+        createElement('button', {
+          className: 'btn-sm',
+          type: 'button',
+          dataset: { addline: name },
+          'aria-expanded': expandedPerson === name ? 'true' : 'false',
+          'aria-label': `${name} için mesaj ekle`,
+        }, ['Mesaj Ekle'])
       ])
     ]);
 
@@ -458,7 +550,7 @@ function createInlineBuilderPanel(defaultName) {
   const addBtn = createElement('button', {
     type: 'button',
     className: 'inline-add-btn'
-  }, ['➕ Satır Ekle']);
+  }, ['Akışa Ekle']);
 
   addBtn.addEventListener('click', () => {
     const values = {};
@@ -470,7 +562,16 @@ function createInlineBuilderPanel(defaultName) {
       addLine(raw);
       expandedPerson = null;
       renderPeopleList();
+      openPreparationStep('groupFlowAccordion', { focus: true });
     }
+  });
+
+  panel.querySelectorAll('.inline-form-group').forEach((group) => {
+    const label = group.querySelector('label');
+    const control = group.querySelector('input, select, textarea');
+    if (!label || !control) return;
+    control.id = control.id || `inlinePersonField${++inlineFieldSequence}`;
+    label.htmlFor = control.id;
   });
 
   panel.appendChild(addBtn);
@@ -496,6 +597,9 @@ function startEditPerson(name) {
   if (avatarInput) avatarInput.value = people[name]?.avatar || '';
   if (fileInput) fileInput.value = '';
   if (selfCheckbox) selfCheckbox.checked = state.isSelf(name);
+  syncPersonFormMode();
+  openPreparationStep('personFormAccordion');
+  nameInput?.focus();
 }
 
 /**
@@ -516,6 +620,7 @@ function clearPersonForm() {
   if (selfCheckbox) selfCheckbox.checked = false;
   clearInvalid('pName');
   clearInvalid('pAvatar');
+  syncPersonFormMode();
 }
 
 /**
@@ -576,6 +681,7 @@ function savePerson() {
 
   clearPersonForm();
   renderPeopleList();
+  openPreparationStep('peopleListAccordion', { focus: true });
   showSuccess('Kişi kaydedildi!');
 }
 
@@ -623,17 +729,24 @@ function clearPersonAvatar() {
   const name = state.data.editingName || nameInput?.value?.trim();
   const people = state.get('people');
 
-  state.data.pendingPersonAvatarDataUrl = null;
-  if (avatarInput) avatarInput.value = '';
-  if (fileInput) fileInput.value = '';
+  const clearAvatar = () => {
+    state.data.pendingPersonAvatarDataUrl = null;
+    if (avatarInput) avatarInput.value = '';
+    if (fileInput) fileInput.value = '';
+    if (name && people[name]) {
+      people[name].avatar = '';
+      state.set('people', people);
+    }
+    renderPeopleList();
+    syncPersonFormMode();
+  };
 
-  if (name && people[name]) {
-    people[name].avatar = '';
-    state.set('people', people);
+  if (name && people[name]?.avatar) {
+    runUndoable({ action: clearAvatar, message: 'Avatar kaldırıldı' });
+  } else {
+    clearAvatar();
+    showSuccess('Avatar kaldırıldı!');
   }
-
-  renderPeopleList();
-  showSuccess('Avatar kaldırıldı!');
 }
 
 /**
