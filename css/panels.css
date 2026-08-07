@@ -460,6 +460,11 @@
   line-height: 1.6;
 }
 
+/* Faz 58: desktop keeps the technical editor; the task-first flow appears in mobile overlay. */
+.mobile-script-flow {
+  display: none;
+}
+
 /* ===== PLAYER CONTROLS ===== */
 .player-controls {
   display: flex;

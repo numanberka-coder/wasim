@@ -63,20 +63,39 @@
   - [x] Otomatik uygulama ve kaydetme davranışını görünür biçimde açıkla
   - [x] Tema, mesaj saati ve rehber bulma görevlerini hedefli testlerle doğrula
   - [x] Tam test/build ve mobil geometri sözleşmelerini tamamla
-- [ ] Faz 58 — Mobil Senaryo Editörü görev akışı
+- [x] Faz 58 — Mobil Senaryo Editörü görev akışı
+  - [x] Senaryoyu mobilde mesaj kartları olarak göster; uzun akışlarda eylemleri erişilebilir tut
+  - [x] Kişi seçerek mesaj ekleme ve satır üzerinde düzenleme/silme akışı ekle
+  - [x] Silmeyi geri alınabilir yap; sıralama tutamaçlarını yalnız sıralama modunda göster
+  - [x] Hata özetinden sorunlu satıra odaklanmayı ve oynatma durumunun canlı duyurusunu ekle
+  - [x] İç sekme, hazırlanmış mesaj ve script biçimi uyumluluğunu hedefli testlerle doğrula
+  - [x] Faz 58 hedefli test, tam test ve PWA build kapısını geç
 - [ ] Dalga 2 kullanıcı değerlendirmesi: görev adımı ve kullanılabilirlik kontrolü
 
 ## Dalga 3 — Sağlamlaştırma
 
 - [ ] Faz 59 — Surface konsolidasyonu, görsel cila ve release
-- [ ] Full test, PWA/portable build ve üç viewport kanıt paketi
+  - [ ] SurfaceManager ile backdrop, focus, inert, Escape, scroll lock ve history sahipliğini merkezileştir
+  - [ ] Mobil overlay ve kalan yüzeyleri ortak lifecycle sözleşmesine taşı
+  - [ ] Responsive katmanlar, odak halkaları, kontrast ve reduced-motion cilasını tamamla
+  - [ ] Tekrarlı aç/kapat akışlarını ve stale-state risklerini hedefli testlerle doğrula
+- [ ] Full test, coverage, PWA/portable build ve üç viewport sözleşme kanıt paketi
 
 ## Uygulama kararı
 
-- Sonraki uygulanacak kapsam: Faz 58
+- Sonraki uygulanacak kapsam: Faz 59
 - Her faz ayrı branch/commit
 - Faz kapısı geçmeden sonraki faza ilerleme
 - Ayrı mobil renderer: yalnız Faz 56–58 sonunda gerekirse
+
+## Faz 58 Review
+
+- `#scriptBox` ve `state.player.script` tek doğruluk kaynağı kalırken mobil overlay'e mesaj kartlarından oluşan görev odaklı akış eklendi; script biçimi ve masaüstü editörü değişmedi.
+- Kişi seçerek mesaj ekleme, normal mesajı satır üzerinde düzenleme, komutu ham metinde açma ve düşük ağırlıklı silme eylemleri tamamlandı.
+- Silme mevcut history snapshot altyapısıyla geri alınabiliyor; sıralama eylemleri yalnız ayrı Sırala modunda görünerek klavye ve dokunmatik kullanım için Yukarı/Aşağı hedefleri sunuyor.
+- Parser hata/uyarıları kartlarda metinsel etiket ve açıklamayla gösteriliyor; doğrulama özetindeki eylem hatalı fiziksel satırı seçip editöre odaklıyor.
+- Oynatmaya hazır, oynatılıyor ve duraklatıldı durumları mobil senaryo içinde canlı bölgede duyuruluyor; Hazırla'dan aktarılan mesajlar aynı anda kartlara yansıyor.
+- Doğrulama: Faz 58 hedefli parser/player/interactive paketi 94 test, tam pakette 13 dosya/294 test ve PWA build geçti. Mobil geometri sticky CTA ve overlay görünürlük sözleşmeleriyle test edildi.
 
 ## Faz 57 Review
 
