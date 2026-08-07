@@ -55,8 +55,14 @@
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
   --wa-danger-hover: #c5002f;
-  --z-index-header: 100;
-  --z-toast: 1000;
+  --z-phone-content: 10;
+  --z-app-header: 500;
+  --z-surface-backdrop: 599;
+  --z-surface: 600;
+  --z-popover: 680;
+  --z-modal: 800;
+  --z-toast: 900;
+  --z-index-header: var(--z-app-header);
   --panel-width: 410px;         /* Sol listenin standart genişliği */
 
   /* ===== TEMA DESTEĞİ (THEME) ===== */

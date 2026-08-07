@@ -20,6 +20,7 @@ import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
 import { openModal, confirmModal } from './ui/modal.js';
+import { surfaceManager } from './ui/surface-manager.js';
 import { runUndoable, setRestoreHook, undoLast } from './features/history.js';
 
 // Phone Modules
@@ -41,6 +42,7 @@ import { initAutocomplete } from './features/autocomplete.js';
 
 const APP_MODE_KEY = 'wa_sim_app_mode';
 const ONBOARDING_KEY = 'wa_sim_onboarding_seen_v1';
+const ONBOARDING_SURFACE_ID = 'onboarding';
 const GOAL_KEY = 'wa_sim_onboarding_goals_v1';
 const ANALYTICS_SUMMARY_DAYS = 7;
 const ONBOARDING_STATUS_TEXT = {
@@ -1467,7 +1469,9 @@ function openOnboarding(force = false) {
   const stepEl = $('onboardingStepNo');
   const nextBtn = $('onboardingNextBtn');
   const skipBtn = $('onboardingSkipBtn');
+  const card = overlay?.querySelector('.onboarding-card');
   if (!overlay || !titleEl || !descEl || !stepEl || !nextBtn || !skipBtn) return;
+  const trigger = document.activeElement;
 
   const steps = [
     {
@@ -1502,9 +1506,11 @@ function openOnboarding(force = false) {
     trackOnboardingStep(currentStep + 1, action);
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
+    surfaceManager.close(ONBOARDING_SURFACE_ID);
     safeStorageSet(ONBOARDING_KEY, '1');
     nextBtn.onclick = null;
     skipBtn.onclick = null;
+    overlay.onclick = null;
   };
 
   nextBtn.onclick = () => {
@@ -1517,10 +1523,24 @@ function openOnboarding(force = false) {
     renderStep();
   };
   skipBtn.onclick = () => close('skipped');
+  overlay.onclick = (event) => {
+    if (event.target === overlay && surfaceManager.isTop(ONBOARDING_SURFACE_ID)) {
+      close('dismissed');
+    }
+  };
 
   if (force) safeStorageRemove(ONBOARDING_KEY);
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
+  surfaceManager.open({
+    id: ONBOARDING_SURFACE_ID,
+    root: overlay,
+    dialog: card,
+    trigger,
+    initialFocus: nextBtn,
+    backdrop: overlay,
+    requestClose: () => close('dismissed'),
+  });
   trackOnboardingStep(1, 'opened');
   renderStep();
 }

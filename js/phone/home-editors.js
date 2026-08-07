@@ -4,6 +4,9 @@
 
 import { $, readFileAsDataURL } from '../utils.js';
 import { state } from '../state.js';
+import { surfaceManager } from '../ui/surface-manager.js';
+
+const PHONE_EDITOR_SURFACE_ID = 'phone-editor';
 
 function sanitizeImageValue(value) {
   return String(value || '').replace(/["\r\n\\]/g, '');
@@ -491,6 +494,16 @@ export function openPhoneEditorSheet(editorKey, options = {}) {
   renderFields(config);
   setSheetOpen(true);
   syncIcons();
+  const { layer, sheet, backdrop } = getElements();
+  surfaceManager.open({
+    id: PHONE_EDITOR_SURFACE_ID,
+    root: layer,
+    dialog: sheet,
+    trigger: lastTrigger,
+    backdrop,
+    initialFocus: () => sheet?.querySelector('input, textarea, select, button'),
+    requestClose: () => closePhoneEditorSheet({ restoreFocus: true }),
+  });
   focusFirstField();
   return true;
 }
@@ -499,9 +512,7 @@ export function closePhoneEditorSheet(options = {}) {
   setError('');
   setSheetOpen(false);
   activeEditorKey = null;
-  if (options.restoreFocus && lastTrigger && typeof lastTrigger.focus === 'function') {
-    lastTrigger.focus();
-  }
+  surfaceManager.close(PHONE_EDITOR_SURFACE_ID, { restoreFocus: options.restoreFocus });
   lastTrigger = null;
 }
 
@@ -540,11 +551,8 @@ function bindEditorShellEvents() {
 
   closeButton?.addEventListener('click', () => closePhoneEditorSheet({ restoreFocus: true }));
   cancelButton?.addEventListener('click', () => closePhoneEditorSheet({ restoreFocus: true }));
-  backdrop?.addEventListener('click', () => closePhoneEditorSheet({ restoreFocus: true }));
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && isPhoneEditorSheetOpen()) {
-      event.preventDefault();
+  backdrop?.addEventListener('click', () => {
+    if (surfaceManager.isTop(PHONE_EDITOR_SURFACE_ID)) {
       closePhoneEditorSheet({ restoreFocus: true });
     }
   });
