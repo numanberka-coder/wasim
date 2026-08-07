@@ -24,16 +24,16 @@
 }
 
 .mobile-overlay-backdrop.is-menu-backdrop {
-  z-index: 500;
+  z-index: var(--z-surface-backdrop);
   pointer-events: auto;
 }
 
 body.mobile-menu-open .chat-header {
-  z-index: 602;
+  z-index: calc(var(--z-surface) + 2);
 }
 
 body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
-  z-index: 603;
+  z-index: calc(var(--z-surface) + 3 + var(--surface-depth, 0));
   pointer-events: auto;
 }
 
@@ -63,7 +63,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   background: #233138;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  z-index: 501;
+  z-index: calc(var(--z-surface) + 1 + var(--surface-depth, 0));
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.5),
     0 4px 12px rgba(0, 0, 0, 0.3);
@@ -212,7 +212,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 .header-dropdown.mobile-action-sheet.is-preview-sheet {
   position: fixed;
   top: auto;
-  z-index: 601;
+  z-index: calc(var(--z-surface) + 1 + var(--surface-depth, 0));
   margin: 0;
   animation: mobileSheetIn 0.22s ease-out;
 }
@@ -431,7 +431,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 599;
+  z-index: var(--z-surface-backdrop);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -446,7 +446,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 600;
+  z-index: calc(var(--z-surface) + var(--surface-depth, 0));
   background: linear-gradient(180deg, #0f1923 0%, #0d1720 100%);
   flex-direction: column;
   overflow: hidden;
@@ -936,7 +936,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
     left: 12px;
     width: auto;
     max-height: min(64dvh, 520px);
-    z-index: 603;
+    z-index: calc(var(--z-surface) + 3 + var(--surface-depth, 0));
     pointer-events: auto;
     overflow: hidden;
     animation: mobileSheetIn 0.22s ease-out;
@@ -1211,7 +1211,12 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 
   .header-dropdown,
   .mobile-overlay,
-  .mobile-overlay-backdrop {
+  .mobile-overlay-backdrop,
+  .app-modal-overlay,
+  .app-modal,
+  .onboarding-overlay,
+  .onboarding-card,
+  .phone-editor-sheet {
     animation: none !important;
   }
 }
@@ -1231,6 +1236,31 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   .mobile-script-composer,
   .mobile-script-playback-status {
     border-width: 2px;
+  }
+}
+
+@media (forced-colors: active) {
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="dialog"]:focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  .mobile-overlay,
+  .header-dropdown,
+  .mobile-script-card,
+  .mobile-script-composer {
+    border: 1px solid CanvasText;
+  }
+
+  [aria-pressed="true"],
+  [aria-selected="true"],
+  .active {
+    forced-color-adjust: none;
+    border-color: Highlight;
   }
 }
 

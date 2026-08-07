@@ -88,7 +88,11 @@
 .phone-home-icon-btn:hover,
 .phone-home-icon-btn:focus-visible {
   background: rgba(255, 255, 255, 0.08);
-  outline: none;
+}
+
+.phone-home-icon-btn:focus-visible {
+  outline: 2px solid rgba(37, 211, 102, 0.85);
+  outline-offset: 2px;
 }
 
 /* [hidden] özniteliği display:grid'i ezemesin — kamera/arama sekmeye göre gizlenir */
@@ -1023,7 +1027,7 @@
 .phone-editor-layer {
   position: absolute;
   inset: 0;
-  z-index: 24;
+  z-index: calc(var(--z-surface) + var(--surface-depth, 0));
   display: none;
   pointer-events: none;
 }
@@ -1095,8 +1099,8 @@
 }
 
 .phone-editor-close {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 50%;
   display: grid;
@@ -1316,6 +1320,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .phone-editor-secondary,

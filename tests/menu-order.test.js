@@ -398,7 +398,8 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(css).toContain('body.mobile-menu-open .chat-header');
     expect(css).toContain('.header-dropdown.mobile-action-sheet.is-preview-sheet');
     expect(css).toContain('.hd-menu-close');
-    expect(css).toContain('z-index: 602');
+    expect(css).toContain('z-index: calc(var(--z-surface) + 2)');
+    expect(css).toContain('var(--surface-depth, 0)');
     expect(css).toContain('.mobile-overlay-body');
     expect(css).toContain('min-height: 0');
     expect(css).toContain('touch-action: pan-y');

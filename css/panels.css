@@ -350,11 +350,11 @@
 }
 
 .person-me-badge {
-  font-size: 10px;
-  font-weight: 600;
-  background: #00a884;
+  font-size: 11px;
+  font-weight: 700;
+  background: #087f5b;
   color: #fff;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 8px;
   flex-shrink: 0;
   letter-spacing: 0.3px;

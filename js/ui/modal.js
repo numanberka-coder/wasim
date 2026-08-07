@@ -6,6 +6,9 @@
    ======================================== */
 
 import { syncUiIcons } from './ui-icons.js';
+import { surfaceManager } from './surface-manager.js';
+
+let modalSequence = 0;
 
 /**
  * Generic themed modal.
@@ -18,7 +21,7 @@ import { syncUiIcons } from './ui-icons.js';
  * @returns {{ close: Function, overlay: HTMLElement, card: HTMLElement }}
  */
 export function openModal({ title = '', bodyNode = null, buttons = [], onClose = null, dismissable = true } = {}) {
-  const previousFocus = document.activeElement;
+  const surfaceId = `app-modal-${++modalSequence}`;
 
   const overlay = document.createElement('div');
   overlay.className = 'app-modal-overlay';
@@ -27,13 +30,15 @@ export function openModal({ title = '', bodyNode = null, buttons = [], onClose =
   card.className = 'app-modal';
   card.setAttribute('role', 'dialog');
   card.setAttribute('aria-modal', 'true');
-  if (title) card.setAttribute('aria-label', title);
+  card.tabIndex = -1;
 
   if (title) {
     const h = document.createElement('h3');
     h.className = 'app-modal-title';
+    h.id = `${surfaceId}-title`;
     h.textContent = title;
     card.appendChild(h);
+    card.setAttribute('aria-labelledby', h.id);
   }
 
   if (bodyNode) {
@@ -47,12 +52,9 @@ export function openModal({ title = '', bodyNode = null, buttons = [], onClose =
   const close = (reason) => {
     if (closed) return;
     closed = true;
-    document.removeEventListener('keydown', onKey, true);
+    surfaceManager.close(surfaceId);
     overlay.classList.add('is-closing');
     setTimeout(() => overlay.remove(), 160);
-    if (previousFocus && typeof previousFocus.focus === 'function') {
-      try { previousFocus.focus(); } catch { /* noop */ }
-    }
     if (onClose) onClose(reason);
   };
 
@@ -87,17 +89,9 @@ export function openModal({ title = '', bodyNode = null, buttons = [], onClose =
 
   if (dismissable) {
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) close('backdrop');
+      if (e.target === overlay && surfaceManager.isTop(surfaceId)) close('backdrop');
     });
   }
-
-  const onKey = (e) => {
-    if (e.key === 'Escape' && dismissable) {
-      e.stopPropagation();
-      close('escape');
-    }
-  };
-  document.addEventListener('keydown', onKey, true);
 
   document.body.appendChild(overlay);
   syncUiIcons(overlay);
@@ -105,9 +99,18 @@ export function openModal({ title = '', bodyNode = null, buttons = [], onClose =
   // Focus first primary action (or the card) for accessibility.
   const firstBtn = card.querySelector('.app-modal-actions button:not(.secondary)')
     || card.querySelector('.app-modal-actions button');
-  if (firstBtn) firstBtn.focus();
+  surfaceManager.open({
+    id: surfaceId,
+    root: overlay,
+    dialog: card,
+    trigger: document.activeElement,
+    initialFocus: firstBtn || card,
+    backdrop: overlay,
+    dismissable,
+    requestClose: (reason) => close(reason),
+  });
 
-  return { close, overlay, card };
+  return { close, overlay, card, surfaceId };
 }
 
 /**

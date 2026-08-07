@@ -16,6 +16,8 @@ import { applyWallpaper } from '../phone/wallpaper.js';
 import { confirmModal } from '../ui/modal.js';
 import { runUndoable } from '../features/history.js';
 import { applyAllTypography } from '../phone/typography.js';
+import { surfaceManager } from './surface-manager.js';
+import { createPanelPortal } from './panel-portal.js';
 import {
   MENU_MODE_EVENT,
   MENU_ICON_SVG,
@@ -52,8 +54,7 @@ const mobileState = {
   overlayTrigger: null,
   currentPanel: null,
   // Panel move referansları
-  _panelSnapshot: null,
-  _backgroundInertSnapshots: [],
+  _panelPortal: null,
   _historyToken: null,
 };
 
@@ -179,11 +180,13 @@ function bindMobileEvents() {
   // Backdrop → close active mobile surface
   if (backdrop) {
     backdrop.addEventListener('click', () => {
-      if (mobileState.menuOpen) {
+      if (mobileState.menuOpen && surfaceManager.isTop('mobile-menu')) {
         closeMobileMenu();
         return;
       }
-      requestMobileOverlayClose();
+      if (mobileState.overlayOpen && surfaceManager.isTop('mobile-overlay')) {
+        requestMobileOverlayClose();
+      }
     });
   }
 
@@ -247,7 +250,6 @@ function bindMobileEvents() {
     }
   });
 
-  document.addEventListener('keydown', handleMobileOverlayKeydown);
 }
 
 /* ========================================
@@ -285,6 +287,16 @@ function openMobileMenu(options = {}) {
   if (isMobileView() && backdrop) {
     backdrop.classList.add('is-open', 'is-menu-backdrop');
   }
+  surfaceManager.open({
+    id: 'mobile-menu',
+    root: dd,
+    dialog: dd,
+    trigger: mobileState.menuTrigger,
+    backdrop: isMobileView() ? backdrop : null,
+    autoFocus: Boolean(options.focusFirst),
+    initialFocus: () => getFocusableMenuItems(dd)[0],
+    requestClose: () => closeMobileMenu({ restoreFocus: true }),
+  });
   syncMobileMenuScrollCue();
   window.requestAnimationFrame?.(() => syncMobileMenuScrollCue());
   if (options.focusFirst) focusFirstMobileMenuItem(dd);
@@ -306,11 +318,7 @@ function closeMobileMenu(options = {}) {
     backdrop.classList.remove('is-menu-backdrop');
     if (!mobileState.overlayOpen) backdrop.classList.remove('is-open');
   }
-  if (options.restoreFocus) {
-    const visibleTrigger = triggers.find((trigger) => trigger.offsetParent !== null);
-    const focusTarget = mobileState.menuTrigger || visibleTrigger || triggers[0];
-    focusTarget?.focus();
-  }
+  surfaceManager.close('mobile-menu', { restoreFocus: options.restoreFocus === true });
   mobileState.menuTrigger = null;
 }
 
@@ -664,74 +672,6 @@ function mobileRefreshAll() {
    Böylece ID'ler ve mevcut event listener'lar korunur.
    ======================================== */
 
-function getOverlayFocusableElements() {
-  const overlay = $('mobileOverlay');
-  if (!overlay) return [];
-  return [...overlay.querySelectorAll(
-    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-  )].filter((element) => {
-    for (let current = element; current && current !== overlay; current = current.parentElement) {
-      if (current.hidden || current.getAttribute('aria-hidden') === 'true') return false;
-      const style = window.getComputedStyle(current);
-      if (style.display === 'none' || style.visibility === 'hidden') return false;
-    }
-    return true;
-  });
-}
-
-function handleMobileOverlayKeydown(event) {
-  if (!mobileState.overlayOpen) return;
-
-  if (event.key === 'Escape') {
-    event.preventDefault();
-    requestMobileOverlayClose();
-    return;
-  }
-
-  if (event.key !== 'Tab') return;
-  const focusable = getOverlayFocusableElements();
-  if (!focusable.length) {
-    event.preventDefault();
-    $('mobileOverlay')?.focus();
-    return;
-  }
-
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  const focusOutside = !$('mobileOverlay')?.contains(document.activeElement);
-  if (event.shiftKey && (document.activeElement === first || focusOutside)) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault();
-    first.focus();
-  }
-}
-
-function setOverlayBackgroundInert(enabled) {
-  const container = document.querySelector('.app-container');
-  if (!container) return;
-
-  if (enabled) {
-    mobileState._backgroundInertSnapshots = [...container.children]
-      .filter((element) => element.id !== 'mobileOverlay' && element.id !== 'mobileOverlayBackdrop')
-      .map((element) => ({ element, hadAttribute: element.hasAttribute('inert') }));
-    mobileState._backgroundInertSnapshots.forEach(({ element }) => {
-      element.inert = true;
-      element.setAttribute('inert', '');
-    });
-    return;
-  }
-
-  mobileState._backgroundInertSnapshots.forEach(({ element, hadAttribute }) => {
-    if (!hadAttribute) {
-      element.inert = false;
-      element.removeAttribute('inert');
-    }
-  });
-  mobileState._backgroundInertSnapshots = [];
-}
-
 function bindExclusiveAccordions(steps) {
   if (!steps.length) return;
   steps.forEach((step) => {
@@ -800,19 +740,8 @@ function openMobileOverlay(panelKey, options = {}) {
   // Body temizle (önceki overlay kalıntısı)
   body.replaceChildren();
 
-  // Referansları sakla — geri taşımak için
-  mobileState._panelSnapshot = {
-    panel: sourcePanel,
-    parent: sourcePanel.parentNode,
-    nextSibling: sourcePanel.nextSibling,
-    style: sourcePanel.getAttribute('style'),
-    ariaHidden: sourcePanel.getAttribute('aria-hidden'),
-    wasActive: sourcePanel.classList.contains('active'),
-    scrollTop: sourcePanel.scrollTop,
-  };
-
-  // Paneli overlay body'ye taşı
-  body.appendChild(sourcePanel);
+  mobileState._panelPortal = createPanelPortal(sourcePanel);
+  mobileState._panelPortal.mount(body);
   sourcePanel.classList.add('active');
   sourcePanel.setAttribute('aria-hidden', 'false');
   sourcePanel.style.display = 'block';
@@ -830,19 +759,28 @@ function openMobileOverlay(panelKey, options = {}) {
   // Aç
   overlay.classList.add('is-open');
   overlay.setAttribute('aria-hidden', 'false');
-  setOverlayBackgroundInert(true);
   if (backdrop) {
     backdrop.classList.remove('is-menu-backdrop');
     backdrop.classList.add('is-open');
   }
 
-  // History push — geri tuşu desteği
   if (!replacingPanel) {
     mobileState._historyToken = `mobile-overlay-${++overlayHistorySequence}`;
-    history.pushState({ ...history.state, mobileOverlayToken: mobileState._historyToken }, '');
   }
-
-  $('mobileOverlayBack')?.focus();
+  surfaceManager.open({
+    id: 'mobile-overlay',
+    root: overlay,
+    dialog: overlay,
+    trigger: mobileState.overlayTrigger,
+    initialFocus: $('mobileOverlayBack'),
+    backdrop,
+    requestClose: () => requestMobileOverlayClose(),
+    history: {
+      key: 'mobileOverlayToken',
+      token: mobileState._historyToken,
+      push: !replacingPanel,
+    },
+  });
 }
 
 function requestMobileOverlayClose(options = {}) {
@@ -857,61 +795,10 @@ function closeMobileOverlay(options = {}) {
   // Overlay kapalıysa bile zorla temizle
   if (!overlay || !mobileState.overlayOpen) return;
 
-  const trigger = mobileState.overlayTrigger;
-  const historyToken = mobileState._historyToken;
-
-  // Paneli eski yerine geri taşı
-  if (mobileState._panelSnapshot?.panel && mobileState._panelSnapshot?.parent) {
-    const snapshot = mobileState._panelSnapshot;
-    const panel = snapshot.panel;
-
-    // Script inner tab state'ini kaydet (taşımadan ÖNCE)
-    const activeScriptTab = panel.querySelector('.script-tab.active');
-    const activeScriptTabTarget = activeScriptTab ? activeScriptTab.dataset.stab : null;
-
-    // Overlay'de uygulanan stil override'ları geri al
-    if (snapshot.style === null) {
-      panel.removeAttribute('style');
-    } else {
-      panel.setAttribute('style', snapshot.style);
-    }
-    if (snapshot.ariaHidden === null) {
-      panel.removeAttribute('aria-hidden');
-    } else {
-      panel.setAttribute('aria-hidden', snapshot.ariaHidden);
-    }
-    // Orijinal display değerini geri yükle
-    panel.classList.toggle('active', snapshot.wasActive);
-
-    // Orijinal pozisyona geri koy
-    try {
-      if (snapshot.nextSibling && snapshot.nextSibling.parentNode === snapshot.parent) {
-        snapshot.parent.insertBefore(panel, snapshot.nextSibling);
-      } else {
-        snapshot.parent.appendChild(panel);
-      }
-    } catch (e) {
-      // Fallback: body'ye ekle gizli olarak
-      document.body.appendChild(panel);
-      panel.style.display = 'none';
-    }
-
-    // Script inner tab state'ini restore et
-    if (activeScriptTabTarget) {
-      panel.querySelectorAll('.script-tab').forEach(t => t.classList.remove('active'));
-      panel.querySelectorAll('.script-tab-panel').forEach(p => p.classList.remove('active'));
-      const targetTab = panel.querySelector(`.script-tab[data-stab="${activeScriptTabTarget}"]`);
-      const targetPanel = document.getElementById(activeScriptTabTarget);
-      if (targetTab) targetTab.classList.add('active');
-      if (targetPanel) targetPanel.classList.add('active');
-    }
-
-    // Masaüstü tab aktif panel'i restore et
-    panel.scrollTop = snapshot.scrollTop;
-  }
+  mobileState._panelPortal?.restore();
 
   // Temizle
-  mobileState._panelSnapshot = null;
+  mobileState._panelPortal = null;
   mobileState.overlayOpen = false;
   mobileState.overlayTrigger = null;
   mobileState.currentPanel = null;
@@ -919,20 +806,13 @@ function closeMobileOverlay(options = {}) {
 
   overlay.classList.remove('is-open');
   overlay.setAttribute('aria-hidden', 'true');
-  setOverlayBackgroundInert(false);
   if (backdrop) backdrop.classList.remove('is-open');
 
   const body = $('mobileOverlayBody');
   if (body) body.replaceChildren();
 
-  if (options.restoreFocus !== false && trigger?.isConnected) trigger.focus();
-
-  if (!options.preserveHistory) {
-    mobileState._historyToken = null;
-    if (!options.fromHistory && history.state?.mobileOverlayToken === historyToken) {
-      history.back();
-    }
-  }
+  surfaceManager.close('mobile-overlay', options);
+  if (!options.preserveHistory) mobileState._historyToken = null;
 }
 
 /* ========================================

@@ -267,7 +267,7 @@ label {
 }
 
 .accordion[open] {
-  border-color: rgba(37,211,102,0.24);
+  border-color: rgba(145, 170, 182, 0.22);
   background: rgba(17, 30, 38, 0.88);
 }
 
@@ -298,7 +298,7 @@ label {
 
 .accordion[open] .accordion-header {
   color: var(--wa-text);
-  border-bottom: 1px solid rgba(37,211,102,0.16);
+  border-bottom: 1px solid rgba(145, 170, 182, 0.14);
 }
 
 /* Leading icon square (green-tinted, fills when open) */
@@ -407,7 +407,7 @@ label {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 5000;
+  z-index: calc(var(--z-modal) + var(--surface-depth, 0));
   padding: 16px;
 }
 
@@ -443,6 +443,7 @@ label {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .onboarding-progress,
@@ -1061,7 +1062,7 @@ label {
 /* Context Menu */
 .builder-context-menu {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--z-popover);
   background: var(--wa-panel);
   border: 1px solid var(--wa-divider);
   border-radius: var(--radius-lg);
@@ -1359,7 +1360,7 @@ label {
 /* ===== AUTOCOMPLETE ===== */
 .autocomplete-dropdown {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--z-popover);
   background: var(--wa-panel);
   border: 1px solid var(--wa-divider);
   border-radius: var(--radius-md);
@@ -1416,7 +1417,7 @@ label {
 /* Parametre ipucu */
 .autocomplete-hint {
   position: fixed;
-  z-index: 9998;
+  z-index: calc(var(--z-popover) - 1);
   background: var(--wa-header);
   border: 1px solid var(--wa-divider);
   border-radius: var(--radius-sm);
@@ -1593,7 +1594,7 @@ label {
 .app-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 5000;
+  z-index: calc(var(--z-modal) + var(--surface-depth, 0));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1610,7 +1611,7 @@ label {
 .app-modal {
   width: 100%;
   max-width: 360px;
-  max-height: 86vh;
+  max-height: 86dvh;
   overflow-y: auto;
   background: linear-gradient(180deg, #17242c, #121e26);
   border: 1px solid rgba(145, 170, 182, 0.16);

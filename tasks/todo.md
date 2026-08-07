@@ -74,19 +74,28 @@
 
 ## Dalga 3 — Sağlamlaştırma
 
-- [ ] Faz 59 — Surface konsolidasyonu, görsel cila ve release
-  - [ ] SurfaceManager ile backdrop, focus, inert, Escape, scroll lock ve history sahipliğini merkezileştir
-  - [ ] Mobil overlay ve kalan yüzeyleri ortak lifecycle sözleşmesine taşı
-  - [ ] Responsive katmanlar, odak halkaları, kontrast ve reduced-motion cilasını tamamla
-  - [ ] Tekrarlı aç/kapat akışlarını ve stale-state risklerini hedefli testlerle doğrula
-- [ ] Full test, coverage, PWA/portable build ve üç viewport sözleşme kanıt paketi
+- [x] Faz 59 — Surface konsolidasyonu, görsel cila ve release
+  - [x] SurfaceManager ile backdrop, focus, inert, Escape, scroll lock ve history sahipliğini merkezileştir
+  - [x] Mobil overlay ve kalan yüzeyleri ortak lifecycle sözleşmesine taşı
+  - [x] Responsive katmanlar, odak halkaları, kontrast ve reduced-motion cilasını tamamla
+  - [x] Tekrarlı aç/kapat akışlarını ve stale-state risklerini hedefli testlerle doğrula
+- [x] Full test, coverage, PWA/portable build ve üç viewport sözleşme kanıt paketi
 
 ## Uygulama kararı
 
-- Sonraki uygulanacak kapsam: Faz 59
+- Sonraki uygulanacak kapsam: planlanan Faz 53–59 tamamlandı
 - Her faz ayrı branch/commit
 - Faz kapısı geçmeden sonraki faza ilerleme
 - Ayrı mobil renderer: yalnız Faz 56–58 sonunda gerekirse
+
+## Faz 59 Review
+
+- Yeni `SurfaceManager` tüm yüzeyler için LIFO stack, tek üst yüzey Escape/Tab yönetimi, backdrop sahipliği, focus dönüşü, arka plan `inert`, body scroll lock ve history sözleşmesini merkezileştirdi.
+- Mobil menü/action sheet, tam mobil overlay, telefon içerik editörü, generic modal ve onboarding mevcut dış API'leri korunarak ortak yaşam döngüsüne taşındı.
+- Yeni `PanelPortal`, taşınan panelin anchor, parent, tam style/ARIA/class ve scroll durumunu idempotent biçimde geri yüklüyor; paneli `body` altına atan eski fallback kaldırıldı.
+- Z-index sayıları semantik tokenlara toplandı; accordion açık durumundaki gereksiz yeşil ağırlık azaltıldı, Sen rozeti kontrast/boyut kazandı ve telefon editörü kapatma hedefi 44 px oldu.
+- Forced colors, belirgin odak halkaları, reduced-motion yüzey kapsamı, `dvh` modal sınırı ve sarılabilir eylem satırları eklendi.
+- Doğrulama: hedefli yüzey/adaptör paketi 6 dosya/61 test; tam paket 16 dosya/300 test geçti. Coverage `%60,47` statement / `%62,42` line; PWA ve portable üretim buildleri başarılı. `360×640`, `390×844`, `844×390` davranışları mevcut responsive/landscape, scroll, sticky eylem ve safe-area sözleşme testleriyle korundu; localhost tarayıcı politikası nedeniyle canlı viewport turu tekrarlanmadı.
 
 ## Faz 58 Review
 

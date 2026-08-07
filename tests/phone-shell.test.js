@@ -564,7 +564,7 @@ describe('Faz 41 phone app shell', () => {
     expect(isPhoneEditorSheetOpen()).toBe(false);
 
     expect(phoneShellCss).toContain('.phone-editor-layer');
-    expect(phoneShellCss).toContain('z-index: 24');
+    expect(phoneShellCss).toContain('z-index: calc(var(--z-surface) + var(--surface-depth, 0))');
     expect(phoneShellCss).toContain('body.phone-editor-open .header-dropdown.mobile-action-sheet.is-open');
     expect(phoneShellCss).toContain('pointer-events: none');
 
@@ -632,7 +632,7 @@ describe('Faz 41 phone app shell', () => {
     expect(phoneShellCss).toContain('.phone-tab-panel[data-phone-tab-panel="updates"]');
     expect(phoneShellCss).toContain('@media (max-width: 380px)');
     expect(responsiveCss).toContain('body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open');
-    expect(responsiveCss).toContain('z-index: 603');
+    expect(responsiveCss).toContain('z-index: calc(var(--z-surface) + 3 + var(--surface-depth, 0))');
     expect(responsiveCss).toContain('pointer-events: auto');
   });
 
