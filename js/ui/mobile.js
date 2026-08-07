@@ -8,7 +8,7 @@ import { showSuccess, showError } from '../ui/toast.js';
 import { state } from '../state.js';
 import { storage } from '../storage.js';
 import { DEFAULT_SCRIPT } from '../config.js';
-import { loadScript, play, pause, reset } from '../features/player.js';
+import { isPlayerPlaying, loadScript, play, pause, reset } from '../features/player.js';
 import { renderPeopleList } from '../features/people.js';
 import { syncHeader } from '../phone/header.js';
 import { rebuildChat } from '../phone/messages.js';
@@ -76,6 +76,9 @@ const PANEL_TITLES = Object.fromEntries(
 function initMobile() {
   renderMobileMenu();
   bindMobileEvents();
+  state.subscribe((path) => {
+    if (path === 'player.playback') syncMobilePlaybackUi();
+  });
   initCommandCopy();
   if (isMobileView()) {
     setupVisualViewport();
@@ -223,7 +226,10 @@ function bindMobileEvents() {
 
   // Resize: masaüstüne geçince mobil UI'ları kapat
   window.addEventListener('resize', debounce(() => {
-    if (mobileState.menuOpen) syncPreviewSheetBounds($('headerDropdown'));
+    if (mobileState.menuOpen) {
+      syncPreviewSheetBounds($('headerDropdown'));
+      syncMobileMenuScrollCue();
+    }
     if (!isMobileView()) {
       closeMobileMenu();
       if (mobileState.overlayOpen) requestMobileOverlayClose({ restoreFocus: false });
@@ -269,6 +275,7 @@ function openMobileMenu(options = {}) {
     triggers.includes(document.activeElement) ? document.activeElement : null
   );
   dd.classList.add('is-open');
+  syncMobilePlaybackUi();
   document.body.classList.add('mobile-menu-open');
   syncPreviewSheetBounds(dd);
   triggers.forEach((trigger) => {
@@ -278,6 +285,8 @@ function openMobileMenu(options = {}) {
   if (isMobileView() && backdrop) {
     backdrop.classList.add('is-open', 'is-menu-backdrop');
   }
+  syncMobileMenuScrollCue();
+  window.requestAnimationFrame?.(() => syncMobileMenuScrollCue());
   if (options.focusFirst) focusFirstMobileMenuItem(dd);
 }
 
@@ -357,12 +366,25 @@ export function renderMobileMenu(mode = getCurrentMenuMode()) {
   }
 
   root.replaceChildren(...getMobileMenuGroups(safeMode).map(createMenuGroupElement));
+  if (!root.dataset.scrollCueBound) {
+    root.addEventListener('scroll', () => syncMobileMenuScrollCue(root), { passive: true });
+    root.dataset.scrollCueBound = 'true';
+  }
   menu.dataset.menuMode = safeMode;
+  syncMobilePlaybackUi();
+  syncMobileMenuScrollCue(root);
+}
+
+function syncMobileMenuScrollCue(root = $('headerDropdown')?.querySelector('[data-menu-root]')) {
+  if (!root) return;
+  const hasMore = root.scrollHeight - root.scrollTop - root.clientHeight > 4;
+  root.classList.toggle('has-scroll-more', hasMore);
 }
 
 function createMenuGroupElement(group) {
   const groupEl = document.createElement('div');
   groupEl.className = `hd-menu-group hd-menu-group-${group.id}`;
+  groupEl.classList.toggle('is-single-item', group.items.length === 1);
   groupEl.dataset.menuGroup = group.id;
   groupEl.setAttribute('role', 'group');
 
@@ -431,6 +453,46 @@ function createMenuItemElement(item) {
   }
 
   return button;
+}
+
+function syncMobilePlaybackUi() {
+  const playing = isPlayerPlaying();
+  const playItem = $('headerDropdown')?.querySelector('[data-action="play"]');
+  const pauseItem = $('headerDropdown')?.querySelector('[data-action="pause"]');
+
+  if (playItem) {
+    playItem.disabled = playing;
+    playItem.setAttribute('aria-disabled', String(playing));
+    playItem.dataset.playerState = playing ? 'playing' : 'ready';
+    playItem.classList.toggle('is-playing', playing);
+    const label = playItem.querySelector('.hd-item-label');
+    if (label) label.textContent = playing ? 'Oynatılıyor' : 'Oynat';
+    playItem.setAttribute('aria-label', playing ? 'Oynatılıyor' : 'Oynat - aksiyonu çalıştır');
+  }
+
+  if (pauseItem) {
+    pauseItem.disabled = !playing;
+    pauseItem.setAttribute('aria-disabled', String(!playing));
+    pauseItem.dataset.playerState = playing ? 'available' : 'paused';
+  }
+
+  syncMobileOverlayActions(mobileState.currentPanel);
+}
+
+function syncMobileOverlayActions(panelKey) {
+  const playButton = $('moPlayBtn');
+  const resetButton = $('moResetBtn');
+  if (!playButton || !resetButton) return;
+
+  const showPlay = panelKey === 'group' || panelKey === 'scriptEditor';
+  const showReset = panelKey === 'scriptEditor';
+  const playLabel = panelKey === 'group' ? 'Hazırlanan sohbeti oynat' : 'Senaryoyu oynat';
+
+  playButton.hidden = !showPlay;
+  playButton.disabled = showPlay && isPlayerPlaying();
+  playButton.setAttribute('aria-label', playLabel);
+  playButton.title = playLabel;
+  resetButton.hidden = !showReset;
 }
 
 function getFocusableMenuItems(menu = $('headerDropdown')) {
@@ -721,6 +783,7 @@ function openMobileOverlay(panelKey, options = {}) {
   mobileState.overlayOpen = true;
   mobileState.overlayTrigger = options.trigger || document.activeElement;
   mobileState.currentPanel = panelKey;
+  syncMobileOverlayActions(panelKey);
 
   // Aç
   overlay.classList.add('is-open');
@@ -810,6 +873,7 @@ function closeMobileOverlay(options = {}) {
   mobileState.overlayOpen = false;
   mobileState.overlayTrigger = null;
   mobileState.currentPanel = null;
+  syncMobileOverlayActions(null);
 
   overlay.classList.remove('is-open');
   overlay.setAttribute('aria-hidden', 'true');

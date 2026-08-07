@@ -15,7 +15,7 @@ export const MENU_GROUPS = Object.freeze([
   { id: 'playback', label: 'Oynat' },
   { id: 'output', label: 'Çıktı' },
   { id: 'settings', label: 'Ayarlar' },
-  { id: 'data', label: 'Diğer' },
+  { id: 'data', label: 'Proje' },
 ]);
 
 export const MENU_ICON_SVG = Object.freeze({
@@ -96,7 +96,7 @@ export const MENU_ITEMS = Object.freeze([
     id: 'output-screenshot',
     group: 'output',
     label: 'Ekran Görüntüsü',
-    description: 'Telefon ekranını indir',
+    description: 'Kopyala, paylaş veya indir',
     icon: 'camera',
     action: 'screenshot',
     type: 'output',
@@ -106,8 +106,8 @@ export const MENU_ITEMS = Object.freeze([
   {
     id: 'output-save',
     group: 'data',
-    label: 'Kaydet',
-    description: 'JSON dosyası indir',
+    label: 'Dışa Aktar',
+    description: 'Proje JSON dosyasını indir',
     icon: 'save',
     action: 'save',
     type: 'output',
@@ -117,8 +117,8 @@ export const MENU_ITEMS = Object.freeze([
   {
     id: 'output-load',
     group: 'data',
-    label: 'Yükle',
-    description: 'JSON dosyası içe aktar',
+    label: 'İçe Aktar',
+    description: 'Proje JSON dosyasını yükle',
     icon: 'load',
     action: 'load',
     type: 'output',

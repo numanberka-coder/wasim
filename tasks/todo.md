@@ -1,5 +1,23 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## Faz 55 Uygulama Planı
+
+- [x] Tek öğeli mobil menü gruplarını kompaktlaştır; `Diğer` grubunu `Proje` yap
+- [x] JSON ve ekran görüntüsü eylemlerini gerçek sonuçlarıyla adlandır
+- [x] Oynat/Duraklat kontrollerini player state ile senkron ve erişilebilir yap
+- [x] Ayarlar/Hazırla/Senaryo overlay header aksiyonlarını bağlama göre sınırla
+- [x] Dekoratif sheet handle'ını kaldır ve kaydırılabilir içerik için alt fade ekle
+- [x] Hedefli testler, tam test, build ve mobil tarayıcı smoke kontrolünü tamamla
+
+## Faz 55 Review
+
+- Tek öğeli grup başlıkları görsel olarak gizlenerek menü kısaltıldı; semantik grup etiketleri korundu.
+- `Proje`, `Dışa Aktar`, `İçe Aktar` ve ekran görüntüsü sonuç metinleri gerçek işlevlerle eşleştirildi.
+- Oynat/Duraklat disabled durumu player timer/paused state ile senkronlandı ve menü her açılışta tazeleniyor.
+- Ayarlar header'ında playback kaldırıldı; Hazırla yalnız oynat, Senaryo oynat+sıfırla gösteriyor.
+- Dekoratif drag handle kaldırıldı; kaydırılabilir menüde yalnız içerik devam ediyorsa alt fade oluşuyor.
+- Doğrulama: 12 test dosyası, 279 test ve PWA build geçti; 390×844 canlı smoke kontrolünde menü metinleri, disabled state, Ayarlar bağlamı ve konsol doğrulandı.
+
 ## Faz 54 Uygulama Planı
 
 - [x] Overlay dialog/ARIA sözleşmesini ve anlamlı ilk odağı tamamla
@@ -23,7 +41,7 @@
 
 - [x] Faz 53 — Baseline, mobil geometri ve safe-area
 - [x] Faz 54 — Overlay, focus, history ve surface güvenilirliği
-- [ ] Faz 55 — Mobil menü ve bağlamsal aksiyonlar
+- [x] Faz 55 — Mobil menü ve bağlamsal aksiyonlar
 - [ ] Dalga 1 kullanıcı değerlendirmesi: yeni 1.png–3.png karşılıklarını karşılaştır
 
 ## Dalga 2 — Görev akışları

@@ -15,6 +15,15 @@ import { interactive, disableInteractiveMode, handleInteractiveInput } from './i
 // Aktif tik durumu — senaryo içinde @sent/@delivered/@read ile değişir
 let activeTickStatus = null;
 
+function isPlayerPlaying() {
+  const player = state.get('player');
+  return Boolean(!player.paused && (player.playTimer || player.typingTimer));
+}
+
+function notifyPlaybackState() {
+  state.notify('player.playback');
+}
+
 function notifyScriptIssues(result) {
   const summary = result?.summary;
   if (!summary) return;
@@ -77,6 +86,8 @@ function pause() {
     clearTimeout(player.typingTimer);
     player.typingTimer = null;
   }
+
+  notifyPlaybackState();
 }
 
 /**
@@ -217,6 +228,7 @@ function play() {
   };
 
   tick();
+  notifyPlaybackState();
   return true;
 }
 
@@ -574,4 +586,5 @@ export {
   sendLiveMediaFile,
   updateMainActionButton,
   initPlayer,
+  isPlayerPlaying,
 };

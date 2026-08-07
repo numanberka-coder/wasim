@@ -233,20 +233,10 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   flex-shrink: 0;
 }
 
-.mobile-action-sheet .hd-sheet-handle {
-  grid-column: 1 / -1;
-  justify-self: center;
-  width: 42px;
-  height: 4px;
-  margin-bottom: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-}
-
 .hd-menu-title {
   display: grid;
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 1;
   gap: 3px;
   justify-items: center;
   min-width: 0;
@@ -275,7 +265,7 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 
 .hd-menu-close {
   grid-column: 3;
-  grid-row: 2;
+  grid-row: 1;
   justify-self: end;
   width: 44px;
   height: 44px;
@@ -315,10 +305,26 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
   padding-right: 2px;
 }
 
+.mobile-action-sheet .hd-menu-groups.has-scroll-more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 28px), transparent 100%);
+}
+
 .mobile-action-sheet .hd-menu-group {
   padding: 0;
   border-radius: 0;
   background: transparent;
+}
+
+.mobile-action-sheet .hd-menu-group.is-single-item .hd-group-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
 }
 
 .mobile-action-sheet .hd-menu-group + .hd-menu-group {
@@ -525,6 +531,21 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
 
 .mo-action-btn:active {
   background: rgba(37, 211, 102, 0.2);
+}
+
+.mobile-action-sheet .hd-item:disabled {
+  cursor: default;
+  opacity: 0.48;
+  filter: saturate(0.65);
+}
+
+.mobile-action-sheet .hd-item:disabled:hover {
+  border-color: rgba(145, 170, 182, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mo-action-btn[hidden] {
+  display: none;
 }
 
 .mobile-overlay-body {
@@ -777,15 +798,6 @@ body.mobile-menu-open .header-dropdown.mobile-action-sheet.is-open {
     padding: 4px 4px 10px;
     color: var(--wa-text);
     text-align: left;
-  }
-
-  .hd-sheet-handle {
-    justify-self: center;
-    width: 42px;
-    height: 4px;
-    margin-bottom: 4px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.22);
   }
 
   .hd-menu-header strong {
@@ -1105,10 +1117,6 @@ body.theme-light .hd-divider {
 
 body.theme-light .hd-menu-group {
   background: rgba(0, 0, 0, 0.035);
-}
-
-body.theme-light .hd-sheet-handle {
-  background: rgba(0, 0, 0, 0.2);
 }
 
 /* Mobile Overlay — light */

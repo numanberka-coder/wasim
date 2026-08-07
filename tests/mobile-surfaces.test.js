@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initMobile } from '../js/ui/mobile.js';
 import { MENU_MODES } from '../js/ui/menu-model.js';
+import { state } from '../js/state.js';
 
 function mountApp() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
@@ -90,5 +91,55 @@ describe('Faz 54 mobile surface lifecycle', () => {
     expect(overlay.getAttribute('aria-hidden')).toBe('true');
     expect(historyBack).toHaveBeenCalledTimes(1);
     historyBack.mockRestore();
+  });
+});
+
+describe('Faz 55 contextual controls', () => {
+  beforeEach(() => {
+    mountApp();
+    state.reset();
+  });
+
+  it('synchronizes play and pause availability with player state', () => {
+    initMobile();
+    const playItem = document.querySelector('[data-action="play"]');
+    const pauseItem = document.querySelector('[data-action="pause"]');
+
+    expect(playItem.disabled).toBe(false);
+    expect(pauseItem.disabled).toBe(true);
+
+    const timer = setTimeout(() => {}, 1000);
+    const player = state.get('player');
+    player.paused = false;
+    player.playTimer = timer;
+    state.notify('player.playback');
+
+    expect(playItem.disabled).toBe(true);
+    expect(playItem.querySelector('.hd-item-label')?.textContent).toBe('Oynatılıyor');
+    expect(pauseItem.disabled).toBe(false);
+
+    clearTimeout(timer);
+    player.playTimer = null;
+    player.paused = true;
+    state.notify('player.playback');
+  });
+
+  it('shows only panel-relevant overlay header actions', () => {
+    initMobile();
+    const trigger = document.querySelector('#headerMenuBtn');
+    const playButton = document.querySelector('#moPlayBtn');
+    const resetButton = document.querySelector('#moResetBtn');
+
+    trigger.click();
+    document.querySelector('[data-action="group"]').click();
+    expect(playButton.hidden).toBe(false);
+    expect(playButton.getAttribute('aria-label')).toBe('Hazırlanan sohbeti oynat');
+    expect(resetButton.hidden).toBe(true);
+    document.querySelector('#mobileOverlayBack').click();
+
+    trigger.click();
+    document.querySelector('[data-action="settings"]').click();
+    expect(playButton.hidden).toBe(true);
+    expect(resetButton.hidden).toBe(true);
   });
 });

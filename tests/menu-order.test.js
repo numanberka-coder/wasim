@@ -64,7 +64,7 @@ describe('Faz 36 menu discipline', () => {
       'Oynat',
       'Çıktı',
       'Ayarlar',
-      'Diğer',
+      'Proje',
     ]);
   });
 
@@ -416,5 +416,34 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     expect(css).toContain('min-height: 0 !important');
     expect(mobileModule).toContain('const MOBILE_LANDSCAPE_QUERY =');
     expect(mobileModule).toContain('window.matchMedia(MOBILE_LANDSCAPE_QUERY).matches');
+  });
+});
+
+describe('Faz 55 contextual mobile menu', () => {
+  it('uses compact single-item groups and task-oriented project labels', () => {
+    const doc = mountIndexDocument();
+
+    renderMobileMenu(MENU_MODES.PRO);
+
+    expect(doc.querySelector('[data-menu-group="prepare"]')?.classList.contains('is-single-item')).toBe(true);
+    expect(doc.querySelector('[data-menu-group="output"]')?.classList.contains('is-single-item')).toBe(true);
+    expect(doc.querySelector('[data-menu-group="settings"]')?.classList.contains('is-single-item')).toBe(true);
+    expect(doc.querySelector('[data-menu-group="playback"]')?.classList.contains('is-single-item')).toBe(false);
+    expect(doc.querySelector('[data-menu-group="data"] .hd-group-label')?.textContent).toBe('Proje');
+    expect(doc.querySelector('[data-action="save"] .hd-item-label')?.textContent).toBe('Dışa Aktar');
+    expect(doc.querySelector('[data-action="load"] .hd-item-label')?.textContent).toBe('İçe Aktar');
+    expect(doc.querySelector('[data-action="screenshot"] .hd-item-description')?.textContent)
+      .toBe('Kopyala, paylaş veya indir');
+    expect(doc.querySelector('.hd-sheet-handle')).toBeNull();
+
+    const root = doc.querySelector('[data-menu-root]');
+    Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 500 });
+    Object.defineProperty(root, 'clientHeight', { configurable: true, value: 200 });
+    root.scrollTop = 0;
+    root.dispatchEvent(new Event('scroll'));
+    expect(root.classList.contains('has-scroll-more')).toBe(true);
+    root.scrollTop = 300;
+    root.dispatchEvent(new Event('scroll'));
+    expect(root.classList.contains('has-scroll-more')).toBe(false);
   });
 });
