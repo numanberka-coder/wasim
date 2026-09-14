@@ -56,18 +56,20 @@ const mobileState = {
   // Panel move referansları
   _panelPortal: null,
   _historyToken: null,
+  panelScroll: new Map(),
+  initializedPanels: new WeakSet(),
 };
 
 let overlayHistorySequence = 0;
 
 /** Panel key → real panel ID eşleştirmesi */
 const PANEL_MAP = Object.fromEntries(
-  getPanelMenuItems(MENU_MODES.PRO).map((item) => [item.panelKey, item.target])
+  [...getPanelMenuItems(MENU_MODES.PRO).map((item) => [item.panelKey, item.target]), ['project', 'project'], ['help', 'help']]
 );
 
 /** Panel key → overlay başlık */
 const PANEL_TITLES = Object.fromEntries(
-  getPanelMenuItems(MENU_MODES.PRO).map((item) => [item.panelKey, item.shortLabel || item.label])
+  [...getPanelMenuItems(MENU_MODES.PRO).map((item) => [item.panelKey, item.shortLabel || item.label]), ['project', 'Proje'], ['help', 'Yardım']]
 );
 
 /* ========================================
@@ -261,6 +263,7 @@ function toggleMobileMenu(trigger = null) {
 }
 
 function getMobileMenuTriggers() {
+  if (document.querySelector('[data-workspace-shell]')) return [];
   const triggers = [...document.querySelectorAll('[data-mobile-menu-trigger]')];
   const headerMenuBtn = $('headerMenuBtn');
   if (headerMenuBtn && !triggers.includes(headerMenuBtn)) triggers.push(headerMenuBtn);
@@ -492,9 +495,9 @@ function syncMobileOverlayActions(panelKey) {
   const resetButton = $('moResetBtn');
   if (!playButton || !resetButton) return;
 
-  const showPlay = panelKey === 'group' || panelKey === 'scriptEditor';
-  const showReset = panelKey === 'scriptEditor';
-  const playLabel = panelKey === 'group' ? 'Hazırlanan sohbeti oynat' : 'Senaryoyu oynat';
+  const showPlay = panelKey === 'scriptEditor';
+  const showReset = false;
+  const playLabel = 'Önizlemeyi Oynat';
 
   playButton.hidden = !showPlay;
   playButton.disabled = showPlay && isPlayerPlaying();
@@ -690,6 +693,8 @@ function bindExclusiveAccordions(steps) {
 
 function configurePreparationFlow(panelKey, sourcePanel) {
   if (panelKey !== 'group') return;
+  if (mobileState.initializedPanels.has(sourcePanel)) return;
+  mobileState.initializedPanels.add(sourcePanel);
   const steps = [...sourcePanel.querySelectorAll('[data-preparation-step]')];
   bindExclusiveAccordions(steps);
 
@@ -700,6 +705,8 @@ function configurePreparationFlow(panelKey, sourcePanel) {
 
 function configureSettingsFlow(panelKey, sourcePanel) {
   if (panelKey !== 'settings') return;
+  if (mobileState.initializedPanels.has(sourcePanel)) return;
+  mobileState.initializedPanels.add(sourcePanel);
   const steps = [...sourcePanel.querySelectorAll('[data-setting-accordion]')];
   bindExclusiveAccordions(steps);
 
@@ -781,6 +788,8 @@ function openMobileOverlay(panelKey, options = {}) {
       push: !replacingPanel,
     },
   });
+  body.scrollTop = mobileState.panelScroll.get(panelKey) || 0;
+  document.dispatchEvent(new CustomEvent('workspace:opened', { detail: { key: panelKey } }));
 }
 
 function requestMobileOverlayClose(options = {}) {
@@ -794,6 +803,8 @@ function closeMobileOverlay(options = {}) {
 
   // Overlay kapalıysa bile zorla temizle
   if (!overlay || !mobileState.overlayOpen) return;
+
+  mobileState.panelScroll.set(mobileState.currentPanel, $('mobileOverlayBody')?.scrollTop || 0);
 
   mobileState._panelPortal?.restore();
 
@@ -813,6 +824,14 @@ function closeMobileOverlay(options = {}) {
 
   surfaceManager.close('mobile-overlay', options);
   if (!options.preserveHistory) mobileState._historyToken = null;
+  document.dispatchEvent(new CustomEvent('workspace:closed'));
+}
+
+export function openWorkspacePanel(key, trigger) {
+  openMobileOverlay(key, { trigger });
+}
+export function returnToPreview() {
+  requestMobileOverlayClose();
 }
 
 /* ========================================
@@ -932,10 +951,12 @@ function setupVisualViewport() {
     const isKeyboardOpen = heightDiff > 100;
     // Keyboard açıkken gerekirse overlay'i ayarla
     document.documentElement.style.setProperty('--keyboard-height', isKeyboardOpen ? `${heightDiff}px` : '0px');
+    document.documentElement.style.setProperty('--visual-viewport-height', `${vv.height}px`);
   }, 50);
 
   vv.addEventListener('resize', onViewportChange);
   vv.addEventListener('scroll', onViewportChange);
+  onViewportChange();
 }
 
 export { initMobile };

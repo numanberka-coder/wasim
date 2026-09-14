@@ -133,8 +133,8 @@ describe('Faz 55 contextual controls', () => {
 
     trigger.click();
     document.querySelector('[data-action="group"]').click();
-    expect(playButton.hidden).toBe(false);
-    expect(playButton.getAttribute('aria-label')).toBe('Hazırlanan sohbeti oynat');
+    expect(playButton.hidden).toBe(true);
+    expect(playButton.getAttribute('aria-label')).toBe('Önizlemeyi Oynat');
     expect(resetButton.hidden).toBe(true);
     document.querySelector('#mobileOverlayBack').click();
 

@@ -1,5 +1,17 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## Faz 60–64 — Onaylanan mobil kullanım kolaylığı planı
+
+- [x] Faz 60: Ortak gezinme modeli, dış çalışma çubukları, taslak/kaydırma koruma; 29 hedefli test geçti. Ayrı commit ve main birleştirmesi.
+- [ ] Faz 61: Tek player.script kaynağı, kartlar/mesaj türleri, geri al/yinele, açık oynatma eylemleri; test ve ayrı branch/commit.
+- [ ] Faz 62: Görev odaklı ayarlar, yerel Gelişmiş alanları, değer özetleri ve canlı örnek; test ve ayrı branch/commit.
+- [ ] Faz 63: Gerçek kayıt durumları, proje/çıktı ayrımı, tercih geçişi ve kısa yardım; test ve ayrı branch/commit.
+- [ ] Faz 64: Tam test/ilgili coverage/PWA/portable; gerçek tarayıcı görevleri ve viewport matrisi; main üzerinden Pages doğrulaması.
+
+### Kabul kapısı
+
+Tarayıcı doğrulaması testlerle ikame edilmeyecek. Engellenen cihaz/klavye/erişilebilirlik maddeleri açık bırakılacak; tamamlanmış gibi raporlanmayacak. Eski dosyalar, sahneler ve sohbet hedefleri korunacak.
+
 ## Faz 55 Uygulama Planı
 
 - [x] Tek öğeli mobil menü gruplarını kompaktlaştır; `Diğer` grubunu `Proje` yap

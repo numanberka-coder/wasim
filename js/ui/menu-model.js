@@ -9,6 +9,23 @@ export const MENU_MODES = Object.freeze({
 
 export const MENU_MODE_EVENT = 'wa-menu-mode-change';
 
+export const WORKSPACE_SECTIONS = Object.freeze([
+  { key: 'scriptEditor', target: 'script', label: 'Konuşma', icon: 'scenario' },
+  { key: 'group', target: 'group', label: 'Kişiler', icon: 'people' },
+  { key: 'settings', target: 'settings', label: 'Görünüm', icon: 'settings' },
+]);
+export const WORKSPACE_ACTIONS = Object.freeze([
+  { key: 'project', target: 'project', label: 'Proje', icon: 'save' },
+  { key: 'output', label: 'Çıktı Al', icon: 'camera' },
+  { key: 'help', target: 'help', label: 'Yardım', icon: 'scenario' },
+]);
+export const ADVANCED_SECTIONS = Object.freeze({
+  playback: 'Oynatma ayrıntıları', chat: 'Sohbet ayrıntıları', people: 'Fotoğraf bağlantısı',
+  typography: 'Balon ölçüleri ve satır aralığı', appearance: 'Özel renkler',
+  statusbar: 'Telefon üst çubuğu ayrıntıları', messages: 'Saat ayrıntıları',
+  project: 'JSON araçları', help: 'Komutlar ve kullanım özeti',
+});
+
 export const MENU_GROUPS = Object.freeze([
   { id: 'prepare', label: 'Hazırla' },
   { id: 'scenario', label: 'Senaryo' },
@@ -35,9 +52,9 @@ export const MENU_ITEMS = Object.freeze([
   {
     id: 'prepare-panel',
     group: 'prepare',
-    label: 'Grup & Kişiler',
-    shortLabel: 'Hazırla',
-    description: 'Grup, kişiler ve sıra',
+    label: 'Kişiler',
+    shortLabel: 'Kişiler',
+    description: 'Kişi ekle ve düzenle',
     icon: 'people',
     action: 'group',
     type: 'panel',
@@ -48,15 +65,15 @@ export const MENU_ITEMS = Object.freeze([
   {
     id: 'scenario-editor',
     group: 'scenario',
-    label: 'Senaryo Editörü',
-    shortLabel: 'Senaryo',
+    label: 'Konuşma',
+    shortLabel: 'Konuşma',
     description: 'Akış ve mesajlar',
     icon: 'scenario',
     action: 'scriptEditor',
     type: 'panel',
     target: 'script',
     panelKey: 'scriptEditor',
-    mode: MENU_MODES.PRO,
+    mode: MENU_MODES.SIMPLE,
   },
   {
     id: 'playback-play',
@@ -128,8 +145,8 @@ export const MENU_ITEMS = Object.freeze([
   {
     id: 'settings-panel',
     group: 'settings',
-    label: 'Ayarlar',
-    shortLabel: 'Ayarlar',
+    label: 'Görünüm',
+    shortLabel: 'Görünüm',
     description: 'Görünüm ve kontroller',
     icon: 'settings',
     action: 'settings',
@@ -182,7 +199,7 @@ export function getMobileMenuGroups(mode = MENU_MODES.PRO) {
 }
 
 export function getPanelMenuItems(mode = MENU_MODES.PRO) {
-  return MENU_ITEMS.filter((item) => item.type === 'panel' && isMenuItemVisible(item, mode));
+  return WORKSPACE_SECTIONS.map((section) => MENU_ITEMS.find((item) => item.target === section.target && item.type === 'panel'));
 }
 
 export function findMenuItemByAction(action) {

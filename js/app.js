@@ -12,6 +12,7 @@ import { storage, sceneManager, analyticsManager, initAutoSave, SCENE_CATEGORIES
 // UI Modules
 import { showToast, showSuccess, showError } from './ui/toast.js';
 import { initTabs } from './ui/tabs.js';
+import { initWorkspaceShell } from './ui/workspace-shell.js';
 import { initAccordions } from './ui/accordion.js';
 import { initForms } from './ui/forms.js';
 import { markInvalid, clearInvalid } from './ui/validation.js';
@@ -92,6 +93,7 @@ function init() {
   }
 
   // Initialize UI modules
+  initWorkspaceShell();
   initTabs();
   initAccordions();
   initUiIcons();
