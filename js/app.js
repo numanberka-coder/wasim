@@ -12,7 +12,8 @@ import { storage, sceneManager, analyticsManager, initAutoSave, SCENE_CATEGORIES
 // UI Modules
 import { showToast, showSuccess, showError } from './ui/toast.js';
 import { initTabs } from './ui/tabs.js';
-import { initWorkspaceShell } from './ui/workspace-shell.js';
+import { initWorkspaceShell, navigateWorkspace } from './ui/workspace-shell.js';
+import { initTaskSettings } from './ui/task-settings.js';
 import { initAccordions } from './ui/accordion.js';
 import { initForms } from './ui/forms.js';
 import { markInvalid, clearInvalid } from './ui/validation.js';
@@ -159,6 +160,10 @@ function init() {
   // Initialize mobile module (Faz 8)
   initMobile();
   initConversationPlayback();
+  initTaskSettings({
+    onPreview: () => { returnToPreview(); document.querySelector('.phone')?.scrollIntoView({ block: 'nearest' }); },
+    onNavigate: (panel) => navigateWorkspace(panel === 'script' ? 'scriptEditor' : panel),
+  });
 
   // Start auto-save
   initAutoSave();
@@ -569,8 +574,13 @@ function bindEventHandlers() {
   // === RESET BUTTONS ===
   bindClick('resetHeaderColorBtn', () => {
     const theme = state.get('settings.theme') || 'dark';
-    resetThemeColors(theme);
-    showSuccess('Header rengi sıfırlandı!');
+    const colors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+    setHeaderColor(colors.headerColor);
+    setHeaderTextColor(null);
+    setHeaderIconColor(null);
+    setInputValue('headerColorInput', colors.headerColor);
+    setInputValue('headerTextColorInput', colors.headerTextColor);
+    setInputValue('headerIconColorInput', colors.headerIconColor);
   });
 
   bindClick('resetBubbleColorsBtn', () => {
