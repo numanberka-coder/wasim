@@ -4,13 +4,42 @@
 
 import { state } from './state.js';
 import { CONFIG } from './config.js';
-import { debounce, safeJsonParse, downloadFile, Logger } from './utils.js';
+import { safeJsonParse, downloadFile, Logger } from './utils.js';
 
 export const SCENE_CATEGORIES = ['Genel', 'Reklam', 'Eğitim', 'Müşteri Destek', 'Topluluk'];
 const DEFAULT_SCENE_CATEGORY = SCENE_CATEGORIES[0];
 const LAST_SCENE_KEY = `${CONFIG.SCENES_KEY}_last_loaded`;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const METADATA_DENYLIST = /text|message|script|content|raw|body|data|avatar|url|file|photo|image/i;
+const saveStatusListeners = new Set();
+let saveTimer = null;
+let saveStatus = Object.freeze({ status: 'idle', error: null, savedAt: null });
+
+function publishSaveStatus(status, error = null) {
+  saveStatus = Object.freeze({
+    status,
+    error: error ? String(error.message || error) : null,
+    savedAt: status === 'saved' ? new Date().toISOString() : saveStatus.savedAt,
+  });
+  saveStatusListeners.forEach(listener => {
+    try { listener(saveStatus); } catch (e) { Logger.warn('Save status listener error:', e); }
+  });
+}
+
+function writeState() {
+  if (saveTimer !== null) clearTimeout(saveTimer);
+  saveTimer = null;
+  try {
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.export()));
+    publishSaveStatus('saved');
+    Logger.info('💾 State saved');
+    return true;
+  } catch (e) {
+    publishSaveStatus('error', e);
+    Logger.warn('LocalStorage save error:', e);
+    return false;
+  }
+}
 
 function normalizeSceneCategory(category) {
   const value = String(category || '').trim();
@@ -148,15 +177,33 @@ export const storage = {
   /**
    * Save state to localStorage (debounced)
    */
-  save: debounce(() => {
-    try {
-      const data = state.export();
-      localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
-      Logger.info('💾 State saved');
-    } catch (e) {
-      Logger.warn('LocalStorage save error:', e);
-    }
-  }, 1000),
+  save() {
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    publishSaveStatus('saving');
+    saveTimer = setTimeout(writeState, 1000);
+  },
+
+  /** Subscribe to actual persistence results, including the initial idle state. */
+  subscribeSaveStatus(listener) {
+    saveStatusListeners.add(listener);
+    listener(saveStatus);
+    return () => saveStatusListeners.delete(listener);
+  },
+
+  getSaveStatus() {
+    return saveStatus;
+  },
+
+  /** Explicit save/retry; true means the localStorage write succeeded. */
+  saveNow() {
+    publishSaveStatus('saving');
+    return writeState();
+  },
+
+  /** Flush pending work synchronously before a page is hidden or unloaded. */
+  flush() {
+    return saveTimer !== null ? writeState() : saveStatus.status === 'saved';
+  },
 
   /**
    * Load state from localStorage
@@ -170,9 +217,12 @@ export const storage = {
       if (!data) return false;
 
       state.import(data);
+      // Import subscribers may have scheduled a normalized-state write.
+      if (saveTimer === null) publishSaveStatus('saved');
       Logger.info('📂 State loaded');
       return true;
     } catch (e) {
+      publishSaveStatus('error', e);
       Logger.warn('LocalStorage load error:', e);
       return false;
     }
@@ -182,11 +232,18 @@ export const storage = {
    * Clear localStorage
    */
   clear() {
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    saveTimer = null;
     try {
       localStorage.removeItem(CONFIG.STORAGE_KEY);
+      saveStatus = Object.freeze({ status: 'idle', error: null, savedAt: null });
+      publishSaveStatus('idle');
       Logger.info('🗑️ Storage cleared');
+      return true;
     } catch (e) {
+      publishSaveStatus('error', e);
       Logger.warn('LocalStorage clear error:', e);
+      return false;
     }
   },
 
@@ -269,8 +326,11 @@ export const sceneManager = {
   _save(scenes) {
     try {
       localStorage.setItem(CONFIG.SCENES_KEY, JSON.stringify(scenes.map(normalizeScene)));
+      return true;
     } catch (e) {
+      publishSaveStatus('error', e);
       Logger.warn('Scene save error:', e);
+      return false;
     }
   },
 
@@ -289,7 +349,7 @@ export const sceneManager = {
       data: state.export()
     };
     scenes.unshift(scene);
-    this._save(scenes);
+    if (!this._save(scenes)) return false;
     Logger.info('🎬 Scene saved:', name);
     return scene;
   },
@@ -343,7 +403,9 @@ export const sceneManager = {
     try {
       localStorage.setItem(LAST_SCENE_KEY, String(id));
     } catch (e) {
+      publishSaveStatus('error', e);
       Logger.warn('Last scene save error:', e);
+      return false;
     }
     return true;
   },
@@ -360,7 +422,7 @@ export const sceneManager = {
       scene.lastAccessedAt = patch.lastAccessedAt || scene.lastAccessedAt;
     }
 
-    this._save(scenes);
+    if (!this._save(scenes)) return false;
     return scene;
   },
 
@@ -370,7 +432,7 @@ export const sceneManager = {
   delete(id) {
     const scenes = this.getAll();
     const filtered = scenes.filter(s => s.id !== id);
-    this._save(filtered);
+    if (!this._save(filtered)) return false;
     if (this.getLastLoaded()?.id === id) {
       try {
         localStorage.removeItem(LAST_SCENE_KEY);
@@ -390,8 +452,7 @@ export const sceneManager = {
     const scene = scenes.find(s => s.id === id);
     if (!scene) return false;
     scene.name = newName.trim();
-    this._save(scenes);
-    return true;
+    return this._save(scenes);
   }
 };
 
@@ -541,14 +602,28 @@ export const analyticsManager = {
  */
 export function initAutoSave() {
   // Subscribe to state changes
-  state.subscribe(() => {
+  const unsubscribe = state.subscribe(() => {
     storage.save();
   });
 
   // Periodic save as backup
-  setInterval(() => {
+  const interval = setInterval(() => {
     storage.save();
   }, CONFIG.AUTO_SAVE_INTERVAL);
 
+  const flushWhenHidden = () => {
+    if (document.visibilityState === 'hidden') storage.flush();
+  };
+  const flush = () => storage.flush();
+  document.addEventListener('visibilitychange', flushWhenHidden);
+  window.addEventListener('pagehide', flush);
+
   Logger.info('⚡ Auto-save initialized');
+  return () => {
+    unsubscribe?.();
+    clearInterval(interval);
+    document.removeEventListener('visibilitychange', flushWhenHidden);
+    window.removeEventListener('pagehide', flush);
+    storage.flush();
+  };
 }

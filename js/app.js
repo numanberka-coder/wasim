@@ -14,11 +14,11 @@ import { showToast, showSuccess, showError } from './ui/toast.js';
 import { initTabs } from './ui/tabs.js';
 import { initWorkspaceShell, navigateWorkspace } from './ui/workspace-shell.js';
 import { initTaskSettings } from './ui/task-settings.js';
+import { initProjectFeedback, migrateAdvancedPreferences } from './ui/project-feedback.js';
 import { initAccordions } from './ui/accordion.js';
 import { initForms } from './ui/forms.js';
-import { markInvalid, clearInvalid } from './ui/validation.js';
+import { markInvalid, clearInvalid, showHint } from './ui/validation.js';
 import { initMobile, registerMobileCallback, returnToPreview } from './ui/mobile.js';
-import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
 import { openModal, confirmModal } from './ui/modal.js';
@@ -164,6 +164,7 @@ function init() {
     onPreview: () => { returnToPreview(); document.querySelector('.phone')?.scrollIntoView({ block: 'nearest' }); },
     onNavigate: (panel) => navigateWorkspace(panel === 'script' ? 'scriptEditor' : panel),
   });
+  initProjectFeedback();
 
   // Start auto-save
   initAutoSave();
@@ -175,10 +176,11 @@ function init() {
   initAutocomplete();
 
   // Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
-  initTutorials();
+  document.querySelectorAll('.tutorial-guide').forEach((guide) => { guide.open = false; });
 
   // Onboarding + Basit/Pro mod (Faz 29)
   initOnboardingAndMode();
+  if (!hasData) storage.save();
 
   trackUsage('app_open', {
     hasSavedState: Boolean(hasData),
@@ -730,14 +732,20 @@ function bindEventHandlers() {
     const input = $('sceneNameInput');
     const name = input?.value?.trim();
     if (!name) {
-      showError('Sahne adı boş bırakılamaz.');
+      markInvalid('sceneNameInput', 'Projeye bir ad verin.');
+      input?.focus();
       return;
     }
+    clearInvalid('sceneNameInput');
     const scene = sceneManager.save(name, { category: $('sceneCategoryInput')?.value });
+    if (!scene) {
+      markInvalid('sceneNameInput', 'Proje kaydedilemedi. Dosya indirerek yedekleyebilirsiniz.');
+      return;
+    }
     trackUsage('scene_save', { category: scene.category });
     input.value = '';
     renderSceneUx();
-    showSuccess('Sahne kaydedildi!');
+    showHint('sceneNameInput', 'Proje bu cihazda kaydedildi.');
   });
 
   bindInput('sceneSearchInput', renderSceneList);
@@ -1158,13 +1166,13 @@ function createSceneBadge(scene) {
 async function loadSceneById(id, source = 'list') {
   if (!Number.isFinite(id)) return;
   const ok = await confirmModal({
-    title: 'Sahneyi yükle',
-    message: 'Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.',
+    title: 'Projeyi aç',
+    message: 'Bu kayıtlı proje açılsın mı? Mevcut çalışma değiştirilecek; Geri Al ile dönebilirsiniz.',
     confirmLabel: 'Yükle',
   });
   if (!ok) return;
   runUndoable({
-    message: 'Sahne yüklendi',
+    message: 'Proje açıldı',
     action: () => {
       const loaded = sceneManager.load(id);
       if (loaded) {
@@ -1201,7 +1209,7 @@ function renderRecentScenes() {
 
   container.hidden = false;
   container.replaceChildren(
-    createElement('div', { className: 'scene-section-label' }, ['Son 5 sahne']),
+    createElement('div', { className: 'scene-section-label' }, ['Son 5 proje']),
     createElement('div', { className: 'scene-quick-items' }, recent.map(createQuickSceneButton))
   );
 }
@@ -1220,7 +1228,7 @@ function renderLastScenePrompt() {
   container.hidden = false;
   container.replaceChildren(
     createElement('div', { className: 'scene-last-info' }, [
-      createElement('span', { className: 'scene-last-label' }, ['Son yüklenen sahne']),
+      createElement('span', { className: 'scene-last-label' }, ['Son açılan proje']),
       createElement('strong', {}, [scene.name]),
       createElement('span', { className: 'scene-last-date' }, [formatSceneTimestamp(scene.lastAccessedAt)])
     ]),
@@ -1241,12 +1249,12 @@ function renderSceneList() {
   const filteredScenes = scenes.filter(scene => sceneMatchesQuery(scene, query));
 
   if (scenes.length === 0) {
-    container.replaceChildren(createElement('p', { className: 'hint' }, ['Henüz kaydedilmiş sahne yok.']));
+    container.replaceChildren(createElement('p', { className: 'hint' }, ['Henüz kayıtlı proje yok.']));
     return;
   }
 
   if (filteredScenes.length === 0) {
-    container.replaceChildren(createElement('p', { className: 'hint' }, ['Aramayla eşleşen sahne yok.']));
+    container.replaceChildren(createElement('p', { className: 'hint' }, ['Aramayla eşleşen proje yok.']));
     return;
   }
 
@@ -1286,16 +1294,16 @@ function initSceneListDelegation() {
     if (deleteBtn) {
       const id = Number(deleteBtn.dataset.sceneId);
       const ok = await confirmModal({
-        title: 'Sahneyi sil',
-        message: 'Bu sahneyi silmek istediğinizden emin misiniz?',
+        title: 'Kayıtlı projeyi sil',
+        message: 'Bu kayıtlı proje silinsin mi? İndirilmiş dosyalar etkilenmez.',
         confirmLabel: 'Sil',
         danger: true,
       });
       if (!ok) return;
-      sceneManager.delete(id);
+      if (!sceneManager.delete(id)) return;
       trackUsage('scene_delete', { source: 'list' });
       renderSceneUx();
-      showSuccess('Sahne silindi!');
+      showHint('sceneNameInput', 'Kayıtlı proje silindi.');
     }
   });
 }
@@ -1449,37 +1457,9 @@ function initKeyboardShortcuts() {
 }
 
 function initOnboardingAndMode() {
-  const savedMode = safeStorageGet(APP_MODE_KEY) || 'simple';
-  applyAppMode(savedMode);
-
-  bindChange('appModeToggle', (e) => applyAppMode(e.target.value, true));
-  bindClick('reopenOnboardingBtn', () => openOnboarding(true));
-
+  migrateAdvancedPreferences();
+  bindClick('reopenOnboardingBtn', () => navigateWorkspace('help'));
   refreshGoalUI();
-
-  const hasSeenOnboarding = safeStorageGet(ONBOARDING_KEY) === '1';
-  if (!hasSeenOnboarding) {
-    // İlk açılışta rehberi otomatik aç (kullanıcı Atla/Başla ile kapatabilir).
-    openOnboarding();
-  }
-}
-
-function applyAppMode(mode, shouldTrack = false) {
-  const safeMode = normalizeMenuMode(mode);
-  safeStorageSet(APP_MODE_KEY, safeMode);
-  document.body.classList.toggle('simple-mode', safeMode === 'simple');
-  setInputValue('appModeToggle', safeMode);
-  if (shouldTrack) {
-    trackUsage('mode_change', { mode: safeMode });
-  }
-  setTextContent('modeBadge', safeMode === 'simple' ? '✨ Basit Mod' : '🛠️ Pro Mod');
-
-  const activeTab = document.querySelector('.tab.active');
-  if (safeMode === 'simple' && activeTab?.dataset.tab === 'script') {
-    document.querySelector('.tab[data-tab="group"]')?.click();
-  }
-
-  window.dispatchEvent(new CustomEvent(MENU_MODE_EVENT, { detail: { mode: safeMode } }));
 }
 
 function getOnboardingGoals() {
