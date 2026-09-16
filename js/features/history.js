@@ -35,7 +35,22 @@ export function captureSnapshot() {
 
 /** Ctrl+Z için geri-al yığını (en fazla son N anlık görüntü) */
 const undoStack = [];
+const redoStack = [];
 const MAX_STACK = 30;
+
+function notifyHistory() {
+  if (typeof document !== 'undefined') document.dispatchEvent(new CustomEvent('history:change'));
+}
+
+export function getHistoryStatus() {
+  return { canUndo: undoStack.length > 0, canRedo: redoStack.length > 0 };
+}
+
+export function clearHistory() {
+  undoStack.length = 0;
+  redoStack.length = 0;
+  notifyHistory();
+}
 
 /**
  * Bir anlık görüntüyü geri yükle ve render/save kancasını tetikle.
@@ -56,19 +71,23 @@ export function restoreSnapshot(snapshot) {
  * @param {string} opts.message  toast metni (ör. "Kişi silindi")
  * @param {number} [opts.duration]
  */
-export function runUndoable({ action, message, duration }) {
-  const snapshot = captureSnapshot();
+export function runUndoable({ action, message, duration, capture = captureSnapshot, restore = restoreSnapshot, silent = false }) {
+  const before = capture();
   action();
-  undoStack.push(snapshot);
+  const after = capture();
+  const entry = { before, after, restore };
+  undoStack.push(entry);
+  redoStack.length = 0;
   if (undoStack.length > MAX_STACK) undoStack.shift();
+  notifyHistory();
 
-  showToast(message, {
+  if (!silent) showToast(message, {
     duration,
     actionLabel: 'Geri Al',
     onAction: () => {
-      const idx = undoStack.lastIndexOf(snapshot);
-      if (idx !== -1) undoStack.splice(idx); // bu ve sonrası geçersiz
-      restoreSnapshot(snapshot);
+      const idx = undoStack.lastIndexOf(entry);
+      if (idx === -1) return;
+      while (undoStack.length > idx) undoLast({ silent: true });
     },
   });
 }
@@ -78,10 +97,22 @@ export function runUndoable({ action, message, duration }) {
  * yoksa false döner.
  * @returns {boolean}
  */
-export function undoLast() {
-  const snapshot = undoStack.pop();
-  if (!snapshot) return false;
-  restoreSnapshot(snapshot);
-  showToast('Geri alındı');
+export function undoLast({ silent = false } = {}) {
+  const entry = undoStack.pop();
+  if (!entry) return false;
+  entry.restore(entry.before);
+  redoStack.push(entry);
+  notifyHistory();
+  if (!silent) showToast('Geri alındı');
+  return true;
+}
+
+export function redoLast({ silent = false } = {}) {
+  const entry = redoStack.pop();
+  if (!entry) return false;
+  entry.restore(entry.after);
+  undoStack.push(entry);
+  notifyHistory();
+  if (!silent) showToast('Yinelendi');
   return true;
 }

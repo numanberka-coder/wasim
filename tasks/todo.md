@@ -3,7 +3,7 @@
 ## Faz 60–64 — Onaylanan mobil kullanım kolaylığı planı
 
 - [x] Faz 60: Ortak gezinme modeli, dış çalışma çubukları, taslak/kaydırma koruma; 29 hedefli test geçti. Ayrı commit ve main birleştirmesi.
-- [ ] Faz 61: Tek player.script kaynağı, kartlar/mesaj türleri, geri al/yinele, açık oynatma eylemleri; test ve ayrı branch/commit.
+- [x] Faz 61: Tek player.script kaynağı, 16 tür/kartlar, geri al/yinele, oynatma ve yanlış sohbet koruması; 365 test geçti, ayrı branch/commit.
 - [ ] Faz 62: Görev odaklı ayarlar, yerel Gelişmiş alanları, değer özetleri ve canlı örnek; test ve ayrı branch/commit.
 - [ ] Faz 63: Gerçek kayıt durumları, proje/çıktı ayrımı, tercih geçişi ve kısa yardım; test ve ayrı branch/commit.
 - [ ] Faz 64: Tam test/ilgili coverage/PWA/portable; gerçek tarayıcı görevleri ve viewport matrisi; main üzerinden Pages doğrulaması.

@@ -1,0 +1,29 @@
+/* The card editor is shared by desktop and mobile; all chrome stays outside .phone. */
+.mobile-script-flow { display: block; }
+#groupFlowAccordion[hidden], #mobileScriptComposer[hidden],
+#mobileScriptComposer [hidden], #mobileScriptAddBtn[hidden] { display: none !important; }
+.conversation-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-block: 8px; }
+.conversation-toolbar button, .conversation-card-menu button { min-height: 44px; }
+.conversation-card-edit {
+  display: flex; flex-direction: column; gap: 6px; width: 100%; min-height: 64px;
+  padding: 8px 0; text-align: start; background: transparent; color: inherit;
+  border: 0; box-shadow: none; white-space: normal; overflow-wrap: anywhere;
+}
+.conversation-card-edit:hover { background: var(--panel-2, rgba(128, 128, 128, .08)); }
+.conversation-card-edit:focus-visible, .conversation-card-menu summary:focus-visible,
+.conversation-advanced summary:focus-visible { outline: 2px solid var(--accent, #25d366); outline-offset: 3px; }
+.conversation-card-menu { margin-inline-start: auto; }
+.conversation-card-menu summary { cursor: pointer; padding: 12px 4px; font-size: 12px; }
+.conversation-card-menu[open] { display: flex; flex-wrap: wrap; gap: 6px; }
+.conversation-card-menu button { margin: 3px; }
+.conversation-advanced { margin-block: 16px; border: 1px solid var(--border, #40515a); border-radius: 10px; padding: 12px; }
+.conversation-advanced > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.conversation-inline-error { color: var(--danger, #e26370); font-size: 13px; }
+.conversation-inline-error:empty, #conversationEditStatus:empty { display: none; }
+.mobile-script-composer { scroll-margin-bottom: 90px; }
+.mobile-script-composer-actions { position: sticky; bottom: 0; padding-block: 8px; background: var(--panel, #17242b); z-index: 1; flex-wrap: wrap; }
+@media (max-width: 768px), (max-height: 500px) and (max-width: 900px) {
+  .mobile-script-flow { margin-bottom: 16px; }
+  .mobile-script-card { min-width: 0; }
+  .mobile-script-composer textarea { font-size: 16px; }
+}

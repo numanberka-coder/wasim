@@ -206,6 +206,7 @@ function bindMobileEvents() {
   const moResetBtn = $('moResetBtn');
   if (moPlayBtn) {
     moPlayBtn.addEventListener('click', () => {
+      if (appCallbacks.previewConversation) { appCallbacks.previewConversation(); return; }
       requestMobileOverlayClose();
       setTimeout(() => {
         loadScript();

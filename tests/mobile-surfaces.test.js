@@ -5,6 +5,7 @@ import { initMobile } from '../js/ui/mobile.js';
 import { MENU_MODES } from '../js/ui/menu-model.js';
 import { state } from '../js/state.js';
 import { renderPeopleList } from '../js/features/people.js';
+import { initScriptTools } from '../js/features/script-builder.js';
 
 function mountApp() {
   const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
@@ -209,16 +210,17 @@ describe('Faz 56 preparation flow', () => {
     expect(Object.keys(state.get('people'))).toHaveLength(20);
   });
 
-  it('moves to the message flow after adding an inline message', () => {
+  it('adds from People into the canonical conversation without transfer', () => {
+    initScriptTools();
     openGroupOverlay();
     renderPeopleList();
     document.querySelector('[data-addline]').click();
-    const textarea = document.querySelector('.inline-builder-panel textarea');
+    const textarea = document.querySelector('#mobileScriptMessage');
     textarea.value = 'Merhaba';
-    document.querySelector('.inline-add-btn').click();
+    document.querySelector('#mobileScriptSaveBtn').click();
 
-    expect(document.querySelector('#groupFlowAccordion').open).toBe(true);
-    expect(document.querySelector('#groupBuilderList').textContent).toContain('Merhaba');
+    expect(state.get('player.script')).toContain('Merhaba');
+    expect(document.querySelector('#mobileScriptList').textContent).toContain('Merhaba');
   });
 });
 
