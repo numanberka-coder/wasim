@@ -14,6 +14,59 @@ import { interactive, disableInteractiveMode, handleInteractiveInput } from './i
 
 // Aktif tik durumu — senaryo içinde @sent/@delivered/@read ile değişir
 let activeTickStatus = null;
+let playbackGeneration = 0;
+let playbackTarget = null;
+let playbackOwner = null;
+let running = false;
+const pendingTimers = new Set();
+const typingRows = new Set();
+
+function currentTarget() {
+  return state.get('conversations.activeId');
+}
+
+function scheduleTyping(callback, delay, row = null) {
+  const owner = state.get('player');
+  const target = currentTarget();
+  const generation = playbackGeneration;
+  if (row) typingRows.add(row);
+  const timer = setTimeout(() => {
+    pendingTimers.delete(timer);
+    if (owner.typingTimer === timer) owner.typingTimer = null;
+    if (row) {
+      removeTypingBubble(row);
+      typingRows.delete(row);
+    }
+    if (generation !== playbackGeneration) return;
+    if (owner !== state.get('player') || target !== currentTarget()) {
+      pause();
+      return;
+    }
+    callback();
+  }, delay);
+  pendingTimers.add(timer);
+  owner.typingTimer = timer;
+}
+
+// Conversation switches and project imports must cancel work before a timer can
+// append its message to the newly selected conversation.
+state.subscribe(path => {
+  if (path === 'player.playback') return;
+  if (!path) {
+    pause();
+    // Imports mutate the existing player object; its previous queue is no longer
+    // a valid continuation even when the imported conversation has the same ID.
+    playbackOwner = null;
+    playbackTarget = null;
+    state.get('player').queue = [];
+    state.get('player').cursor = 0;
+    notifyPlaybackState();
+    return;
+  }
+  if ((running || pendingTimers.size) &&
+      playbackOwner &&
+      (playbackOwner !== state.get('player') || playbackTarget !== currentTarget())) pause();
+});
 
 function isPlayerPlaying() {
   const player = state.get('player');
@@ -74,6 +127,19 @@ function getTypingDuration(text) {
  * Pause playback
  */
 function pause() {
+  playbackGeneration++;
+  running = false;
+  pendingTimers.forEach(timer => clearTimeout(timer));
+  pendingTimers.clear();
+  typingRows.forEach(row => removeTypingBubble(row));
+  typingRows.clear();
+  if (playbackOwner && playbackOwner !== state.get('player')) {
+    clearTimeout(playbackOwner.playTimer);
+    clearTimeout(playbackOwner.typingTimer);
+    playbackOwner.playTimer = null;
+    playbackOwner.typingTimer = null;
+    playbackOwner.paused = true;
+  }
   const player = state.get('player');
   player.paused = true;
 
@@ -104,11 +170,14 @@ function reset() {
   const player = state.get('player');
   player.queue = [];
   player.cursor = 0;
+  playbackTarget = null;
+  playbackOwner = null;
 
   state.clearActive();
   state.clearMessages();
   clearChat();
   syncHeader();
+  notifyPlaybackState();
 }
 
 /**
@@ -127,9 +196,9 @@ function loadScript() {
   const jitterInput = $('jitter');
   const player = state.get('player');
 
-  if (scriptBox) {
-    player.script = scriptBox.value;
-    const parseResult = parseScriptDetailed(scriptBox.value);
+  {
+    player.script = scriptBox ? scriptBox.value : player.script;
+    const parseResult = parseScriptDetailed(player.script || '');
     player.queue = parseResult.events;
     player.lastParseIssues = parseResult.issues;
     notifyScriptIssues(parseResult);
@@ -144,7 +213,9 @@ function loadScript() {
   }
 
   player.cursor = 0;
-  player.paused = false;
+  player.paused = true;
+  playbackTarget = currentTarget();
+  playbackOwner = player;
   activeTickStatus = null;
 
   state.clearActive();
@@ -167,6 +238,7 @@ function loadScript() {
     renderPeopleList();
   }
 
+  notifyPlaybackState();
   return {
     events: player.queue || [],
     issues: player.lastParseIssues || [],
@@ -182,37 +254,58 @@ function loadScript() {
  * Execute a single step
  */
 function step() {
+  pause();
   const player = state.get('player');
 
   if (!player.queue.length) {
     loadScript();
   }
 
-  if (player.cursor >= player.queue.length) return false;
+  if (!canResumeTarget() || player.cursor >= player.queue.length) return false;
 
   const event = player.queue[player.cursor];
-  player.cursor++;
-
-  handleEvent(event);
+  const generation = playbackGeneration;
+  handleEvent(event, () => {
+    if (generation !== playbackGeneration) return;
+    player.cursor++;
+    notifyPlaybackState();
+  });
+  notifyPlaybackState();
   return true;
+}
+
+function canResumeTarget() {
+  if (playbackOwner === state.get('player') && playbackTarget === currentTarget()) return true;
+  showError('Devam etmek için önce oynatılan sohbete dönün veya Önizlemeyi Oynat ile bu sohbeti başlatın.');
+  return false;
 }
 
 /**
  * Start playback
  */
 function play() {
+  if (running) return true;
   const player = state.get('player');
 
   if (!player.queue.length) {
     loadScript();
   }
 
-  if (!player.queue.length) return false;
+  if (!player.queue.length || !canResumeTarget() || player.cursor >= player.queue.length) return false;
 
+  // Cancel an unfinished single-step before restarting that same event.
+  pause();
   player.paused = false;
+  running = true;
+  const generation = playbackGeneration;
 
   const tick = () => {
-    if (player.paused) return;
+    player.playTimer = null;
+    if (player.paused || generation !== playbackGeneration) return;
+    if (player !== state.get('player') || playbackTarget !== currentTarget()) {
+      pause();
+      return;
+    }
 
     if (player.cursor >= player.queue.length) {
       pause();
@@ -220,10 +313,11 @@ function play() {
     }
 
     const event = player.queue[player.cursor];
-    player.cursor++;
-
     handleEvent(event, () => {
+      if (generation !== playbackGeneration || player.paused) return;
+      player.cursor++;
       player.playTimer = setTimeout(tick, getBaseDelay());
+      notifyPlaybackState();
     });
   };
 
@@ -322,10 +416,7 @@ function handleTypingEvent(event, onComplete) {
 
   const row = addTypingBubble(who);
 
-  player.typingTimer = setTimeout(() => {
-    removeTypingBubble(row);
-    onComplete();
-  }, Math.max(120, event.ms || 800));
+  scheduleTyping(onComplete, Math.max(120, event.ms || 800), row);
 }
 
 /**
@@ -357,7 +448,7 @@ function handleMessageEvent(event, onComplete) {
   // Gerçek WhatsApp'ta kendi typing göstergenizi görmezsiniz
   if (isSelf) {
     const shortDelay = 80 + Math.random() * 120;
-    player.typingTimer = setTimeout(addMsg, shortDelay);
+    scheduleTyping(addMsg, shortDelay);
     return;
   }
 
@@ -365,10 +456,7 @@ function handleMessageEvent(event, onComplete) {
   const typingMs = event.kind === 'voice' ? 650 : getTypingDuration(typingSeedText);
   const row = addTypingBubble(who);
 
-  player.typingTimer = setTimeout(() => {
-    removeTypingBubble(row);
-    addMsg();
-  }, typingMs);
+  scheduleTyping(addMsg, typingMs, row);
 }
 
 /**

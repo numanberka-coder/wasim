@@ -5,7 +5,7 @@
 import { $$, Logger } from '../utils.js';
 import { MENU_ICON_SVG, MENU_MODES, getPanelMenuItems } from './menu-model.js';
 
-export let activeTab = 'group';
+export let activeTab = 'script';
 const tabListeners = new Set();
 
 /**
@@ -47,6 +47,7 @@ function syncTabsWithMenuModel(tabs) {
     tab.dataset.menuGroup = item.group;
     tab.dataset.actionType = item.type;
     tab.style.order = String(index);
+    tab.parentElement?.append(tab);
     if (!tab.id) tab.id = `tab-${item.target}`;
     tab.setAttribute('aria-label', `${item.shortLabel || item.label} paneli`);
     tab.setAttribute('aria-controls', item.target);
@@ -160,6 +161,10 @@ export function switchTab(tabId) {
   const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
   if (tab) {
     tab.click();
+  } else if (document.getElementById(tabId)?.classList.contains('panel')) {
+    syncTabAriaState(tabId, $$('.tab'), $$('.panel'));
+    activeTab = tabId;
+    notifyTabChange(tabId);
   }
 }
 

@@ -1,5 +1,34 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## Faz 60–64 — Onaylanan mobil kullanım kolaylığı planı
+
+- [x] Faz 60: Ortak gezinme modeli, dış çalışma çubukları, taslak/kaydırma koruma; 29 hedefli test geçti. Ayrı commit ve main birleştirmesi.
+- [x] Faz 61: Tek player.script kaynağı, 16 tür/kartlar, geri al/yinele, oynatma ve yanlış sohbet koruması; 365 test geçti, ayrı branch/commit.
+- [x] Faz 62: Görev odaklı ayarlar, yerel Gelişmiş alanları, değer özetleri ve canlı örnek; 51 ilgili test geçti, ayrı branch/commit.
+- [x] Faz 63: Gerçek kayıt durumları, proje/çıktı ayrımı, tercih geçişi ve kısa yardım; 375 test geçti, ayrı branch/commit.
+- [ ] Faz 64: Tam test/ilgili coverage/PWA/portable; gerçek tarayıcı görevleri ve viewport matrisi; main üzerinden Pages doğrulaması.
+
+### Kabul kapısı
+
+Tarayıcı doğrulaması testlerle ikame edilmeyecek. Engellenen cihaz/klavye/erişilebilirlik maddeleri açık bırakılacak; tamamlanmış gibi raporlanmayacak. Eski dosyalar, sahneler ve sohbet hedefleri korunacak.
+
+### Faz 64 — Doğrulama ve review (2026-09-17)
+
+- [x] Gerçek index + app açılışı, kartlar varsayılanı, depolama hatası/yeniden deneme, sohbet hedefi, yazıyor sırasında duraklatma ve eski JSON dosyasını açıp oynatma entegrasyon testleri.
+- [x] Tam coverage: 23 dosya / 397 test; satır %73,83, dal %58,11. UI ve kart editörü kapsamdan çıkarılmıyor. Son CSS katman regresyon testi ayrıca eklendi.
+- [x] PWA ve portable üretim build'leri.
+- [x] Gerçek tarayıcı: Ayşe Test/Bora Test iki mesajı oluşturma ve oynatma; açık tema ve saat değiştirme; adlandırılmış projeyi kaydedip yeniden açma (16 Eylül).
+- [x] Gerçek tarayıcı: 360×640, 390×844, 844×390 ve 1440×900 viewport; yatay sayfa taşması yok. Yatay ekranda formun son eylemleri klavyeyle erişilebilir. Paneli kapatıp açınca mesaj taslağı korundu.
+- [x] Gerçek tarayıcı: PNG önizlemesi 720×1040 üretildi, çalışma çubukları ve kayıt bildirimi görsele girmedi. Konsolda uygulama hatası görülmedi.
+- [x] Canlı kontrolde bulunan telefon saat/pil katmanı taşması isolation ile düzeltildi; açık tema çalışma çubuğu ve canlı örnek metin kontrastı düzeltildi.
+- [x] Çok katmanlı modal inert/odak yönetimi ve localhost service worker geliştirme önbelleği düzeltildi; codex/* branch'leri CI kapsamına alındı.
+- [ ] GitHub testleri ve birleşmiş main commit'inden Pages yayını doğrulaması.
+- [ ] Fiziksel iOS/Android cihaz ve gerçek yazılım klavyesi açıkken son eyleme erişim. Viewport testi fiziksel cihaz testi değildir.
+- [ ] Gerçek ekran okuyucu ve tarayıcıda %200 yakınlaştırma. ARIA/klavye testleri bunların yerine sayılmadı.
+- [ ] PNG indirme dosyasının tamamlanması: görsel üretildi, İndir eylemi çalıştırıldı ancak bağlı tarayıcı download olayı zaman aşımına uğradı; diske teslim doğrulanmadı. Paylaşım/pano platform izinleri ayrıca denenmeli.
+
+Faz 64 bu açık kabul maddeleri nedeniyle bütünüyle tamamlandı sayılmayacak. Doğrulanmış uygulama değişiklikleri yayınlanabilir; yukarıdaki sınırlar yayın özetinde korunacak.
+
 ## Faz 55 Uygulama Planı
 
 - [x] Tek öğeli mobil menü gruplarını kompaktlaştır; `Diğer` grubunu `Proje` yap

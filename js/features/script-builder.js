@@ -11,10 +11,12 @@ import { showSuccess, showError } from '../ui/toast.js';
 import { SyntaxHighlight } from '../ui/highlight.js';
 import { tokenizeCommand, validateScript } from './script-parser.js';
 import { loadScript, play, isPlayerPlaying } from './player.js';
-import { runUndoable } from './history.js';
+import { runUndoable, undoLast, redoLast, getHistoryStatus, clearHistory } from './history.js';
 import { switchTab } from '../ui/tabs.js';
 
-let blocks = [];
+let unsubscribeScript = null;
+let editingSource = null;
+let editingConversation = null;
 let mobileScriptReorderMode = false;
 let mobileScriptEditingLine = null;
 
@@ -61,16 +63,16 @@ const BUILDER_FIELDS = {
   leave:    ['personName'],
 };
 
-function makeId() {
-  const hasCrypto = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function';
-  return hasCrypto ? crypto.randomUUID() : String(Date.now()) + Math.random();
-}
 
 /* ========================================
    INIT
    ======================================== */
 
 function initScriptTools() {
+  unsubscribeScript?.();
+  mobileScriptReorderMode = false;
+  mobileScriptEditingLine = null;
+  clearHistory();
   setupValidation();
   setupMobileScriptFlow();
   setupMediaInsertTool();
@@ -141,39 +143,39 @@ function quoteForce(s) {
  * @returns {string|null} Üretilen satır veya hata durumunda null
  */
 function buildLineFromValues(type, values) {
-  const v = (key) => (values[key] ?? '').trim();
+  const v = (key) => String(values[key] ?? '').trim();
   const sender = quoteToken(v('who') || state.get('selfName') || 'Me');
 
   switch (type) {
     case 'message': {
       const text = v('text');
-      if (!text) { showError('Mesaj boş olamaz'); return null; }
+      if (!text) return null;
       const who = v('who') || state.get('selfName') || 'Me';
       return `${who}: ${text}`;
     }
     case 'reply': {
       const text = v('text');
       const replyTo = v('replyTo');
-      if (!text) { showError('Mesaj boş olamaz'); return null; }
-      if (!replyTo) { showError('Yanıtlanan kişi gerekli'); return null; }
+      if (!text) return null;
+      if (!replyTo) return null;
       const who = v('who') || state.get('selfName') || 'Me';
       return `${who} > ${replyTo}: ${text}`;
     }
     case 'photo': {
       const url = v('url');
-      if (!url) { showError('URL gerekli'); return null; }
+      if (!url) return null;
       const cap = v('caption');
       return `@photo ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'gif': {
       const url = v('url');
-      if (!url) { showError('URL gerekli'); return null; }
+      if (!url) return null;
       const cap = v('caption');
       return `@gif ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'video': {
       const url = v('url');
-      if (!url) { showError('URL gerekli'); return null; }
+      if (!url) return null;
       const cap = v('caption');
       return `@video ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
@@ -184,7 +186,7 @@ function buildLineFromValues(type, values) {
     }
     case 'location': {
       const name = v('placeName');
-      if (!name) { showError('Yer adı gerekli'); return null; }
+      if (!name) return null;
       const info = v('placeInfo');
       return `@location ${sender} ${quoteForce(name)}${info ? ' ' + quoteForce(info) : ''}`;
     }
@@ -199,7 +201,7 @@ function buildLineFromValues(type, values) {
     }
     case 'link': {
       const title = v('linkTitle');
-      if (!title) { showError('Başlık gerekli'); return null; }
+      if (!title) return null;
       const url = v('linkUrl');
       return `@link ${sender} ${quoteForce(title)}${url ? ' ' + quoteForce(url) : ''}`;
     }
@@ -214,23 +216,23 @@ function buildLineFromValues(type, values) {
     case 'reaction': {
       const emoji = v('emoji');
       const target = v('reactTarget');
-      if (!emoji) { showError('Emoji gerekli'); return null; }
-      if (!target) { showError('Hedef gerekli'); return null; }
+      if (!emoji) return null;
+      if (!target) return null;
       return `@reaction ${sender} ${emoji} ${target}`;
     }
     case 'system': {
       const text = v('systemText');
-      if (!text) { showError('Sistem mesajı boş olamaz'); return null; }
+      if (!text) return null;
       return `@system ${text}`;
     }
     case 'add': {
       const name = v('personName');
-      if (!name) { showError('Kişi adı gerekli'); return null; }
+      if (!name) return null;
       return `@add ${name}`;
     }
     case 'leave': {
       const name = v('personName');
-      if (!name) { showError('Kişi adı gerekli'); return null; }
+      if (!name) return null;
       return `@leave ${name}`;
     }
     default:
@@ -243,62 +245,41 @@ function buildLineFromValues(type, values) {
    ======================================== */
 
 function setupGroupBuilderList() {
-  blocks = [];
-  renderBlocks();
-
+  // Legacy preparation controls are retired. People add directly to player.script.
+  const legacyFlow = $('groupFlowAccordion');
+  if (legacyFlow) legacyFlow.hidden = true;
   const pushBtn = $('groupBuilderPushBtn');
-  const playBtn = $('groupBuilderPlayBtn');
-  const clearBtn = $('groupBuilderClearBtn');
-
-  pushBtn?.addEventListener('click', pushBlocksToScriptBox);
-
-  playBtn?.addEventListener('click', () => {
-    if (!blocks.length) { showError('Satır listesi boş'); return; }
-    const text = blocks.map(b => b.raw).join('\n');
-    setScriptBox(text);
-    loadScript();
-    play();
-  });
-
-  clearBtn?.addEventListener('click', () => {
-    blocks = [];
-    clearInsertMode();
-    renderBlocks();
-  });
-
-  // Senaryo yönlendirme banner'ı
-  const hint = $('scenarioHint');
-  if (hint) {
-    hint.addEventListener('click', () => switchTab('script'));
-  }
+  if (pushBtn) pushBtn.hidden = true;
+  $('groupBuilderPlayBtn')?.addEventListener('click', () => { loadScript(); play(); });
+  $('groupBuilderClearBtn')?.addEventListener('click', () => commitScript('', 'Konuşma temizlendi'));
+  $('scenarioHint')?.addEventListener('click', () => switchTab('script'));
 }
 
-/**
- * Dışarıdan satır ekleme (inline builder'dan çağrılır)
- */
+/** Every editor operation commits the canonical script; there is no staging list. */
+function commitScript(value, message = 'Konuşma güncellendi') {
+  const before = state.get('player.script') || '';
+  if (before === value) return;
+  runUndoable({
+    message,
+    silent: true,
+    capture: () => state.get('player.script') || '',
+    restore: value => setScriptText(value),
+    action: () => setScriptText(value),
+  });
+  const status = $('conversationEditStatus');
+  if (status) status.textContent = message;
+}
+
 function addLine(raw) {
-  const newBlock = { id: makeId(), raw };
-
-  if (insertAfterIndex !== null && insertAfterIndex >= 0 && insertAfterIndex < blocks.length) {
-    blocks.splice(insertAfterIndex + 1, 0, newBlock);
-    showSuccess(`Satır ${insertAfterIndex + 2}. sıraya eklendi`);
+  if (!String(raw || '').trim()) return;
+  const existing = state.get('player.script') || '';
+  const lines = getPhysicalScriptLines(existing);
+  if (insertAfterIndex !== null && insertAfterIndex >= 0 && insertAfterIndex < lines.length) {
+    lines.splice(insertAfterIndex + 1, 0, raw);
+    commitScript(lines.join('\n'), 'Mesaj konuşmaya eklendi');
   } else {
-    blocks.push(newBlock);
-    showSuccess('Satır eklendi');
+    commitScript(existing + (existing && !existing.endsWith('\n') ? '\n' : '') + raw, 'Mesaj konuşmaya eklendi');
   }
-
-  clearInsertMode();
-  renderBlocks();
-}
-
-/** Araya ekleme modunu aktifle */
-function setInsertMode(index) {
-  insertAfterIndex = index;
-  renderBlocks();
-}
-
-/** Araya ekleme modunu iptal et */
-function clearInsertMode() {
   insertAfterIndex = null;
 }
 
@@ -314,7 +295,7 @@ function setupValidation() {
     const issues = validateScript(scriptBox.value || '');
     SyntaxHighlight.setIssues('scriptBox', issues);
     renderValidationPanel(issues, validationBox);
-    state.set('player.script', scriptBox.value || '');
+    if (state.get('player.script') !== (scriptBox.value || '')) state.set('player.script', scriptBox.value || '');
   };
   scriptBox.addEventListener('input', run);
   run();
@@ -414,9 +395,15 @@ function parseSimpleMessage(raw = '') {
 
 function setScriptText(value, { focusLine = null } = {}) {
   const box = $('scriptBox');
-  if (!box) return;
-  box.value = value;
-  box.dispatchEvent(new Event('input', { bubbles: true }));
+  if (box && box.value !== value) box.value = value;
+  state.set('player.script', value);
+  if (box) {
+    const issues = validateScript(value);
+    SyntaxHighlight.setIssues('scriptBox', issues);
+    renderValidationPanel(issues, $('scriptValidation'));
+    box.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  renderMobileScriptFlow();
   if (focusLine !== null) focusScriptLine(focusLine);
 }
 
@@ -427,6 +414,9 @@ function focusScriptLine(lineNumber) {
   const lines = getPhysicalScriptLines(box.value);
   const start = lines.slice(0, safeLine - 1).reduce((total, line) => total + line.length + 1, 0);
   const end = start + (lines[safeLine - 1]?.length || 0);
+  for (let ancestor = box.parentElement; ancestor; ancestor = ancestor.parentElement) {
+    if (ancestor.tagName === 'DETAILS') ancestor.open = true;
+  }
   box.focus();
   box.setSelectionRange(start, end);
   box.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
@@ -440,31 +430,156 @@ function fillMobileSenderOptions(preferred = '') {
   const names = selfName
     ? [selfName, ...people.filter((name) => name !== selfName)]
     : people;
+  if (preferred && !names.includes(preferred)) names.push(preferred);
   select.replaceChildren(...names.map((name) => createElement('option', { value: name }, [
     state.isSelf(name) ? `${name} (Sen)` : name,
   ])));
   select.value = names.includes(preferred) ? preferred : (selfName || names[0] || 'Me');
 }
 
+function composeMessageForPerson(sender, trigger = null) {
+  document.dispatchEvent(new CustomEvent('workspace:navigate', { detail: { key: 'scriptEditor', trigger } }));
+  const composer = $('mobileScriptComposer');
+  // Reusing the workspace navigation must not discard an unfinished new message.
+  if (composer?.hidden || mobileScriptEditingLine !== null) openMobileScriptComposer();
+  fillMobileSenderOptions(sender);
+  $('mobileScriptMessage')?.focus();
+}
+
+const FIELD_LABELS = {
+  replyTo: 'Yanıtlanan kişi', url: 'Görsel veya video bağlantısı', caption: 'Açıklama (isteğe bağlı)',
+  duration: 'Ses süresi', placeName: 'Yer adı', placeInfo: 'Adres / alt bilgi',
+  fileName: 'Dosya adı', fileSize: 'Dosya boyutu / türü', stickerVal: 'Çıkartma veya emoji',
+  linkTitle: 'Bağlantı başlığı', linkUrl: 'Bağlantı adresi', voMediaType: 'Medya türü',
+  typingMs: 'Yazıyor süresi (ms)', emoji: 'Tepki emojisi', reactTarget: 'Hedef kişi',
+  systemText: 'Sistem mesajı', personName: 'Kişi adı',
+};
+
+function parseEditableLine(raw = '') {
+  const message = parseSimpleMessage(raw);
+  if (message) return { type: 'message', values: { who: message.sender, text: message.message } };
+  const reply = raw.match(/^([^:>]+)\s*>\s*([^:]+):\s*(.*)$/);
+  if (reply) return { type: 'reply', values: { who: reply[1].trim(), replyTo: reply[2].trim(), text: reply[3] } };
+  const tokens = tokenizeCommand(raw);
+  const type = tokens[0]?.replace(/^@/, '');
+  if (!raw.trim().startsWith('@') || !BUILDER_FIELDS[type]) return null;
+  if (validateScript(raw).some(issue => issue.severity === 'error')) return null;
+  if (['system', 'add', 'leave'].includes(type)) {
+    return { type, values: { [type === 'system' ? 'systemText' : 'personName']: raw.trim().slice(type.length + 2) } };
+  }
+  const values = { who: tokens[1] || '' };
+  const fields = BUILDER_FIELDS[type].filter(field => field !== 'who');
+  fields.forEach((field, index) => {
+    values[field] = index === fields.length - 1 ? tokens.slice(index + 2).join(' ') : (tokens[index + 2] || '');
+  });
+  return { type, values };
+}
+
+function composerError(message = '', control = $('mobileScriptMessage')) {
+  const error = $('conversationComposerError');
+  if (error) error.textContent = message;
+  $('mobileScriptComposer')?.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+  if (message && control) {
+    control.setAttribute('aria-invalid', 'true');
+    control.setAttribute('aria-describedby', 'conversationComposerError');
+    control.focus();
+  }
+}
+
+function syncComposerFields() {
+  const fields = BUILDER_FIELDS[$('conversationMessageType')?.value || 'message'] || [];
+  const sender = $('mobileScriptSender');
+  const message = $('mobileScriptMessage');
+  if (sender) (sender.closest('.form-group') || sender).hidden = !fields.includes('who');
+  if (message) (message.closest('.form-group') || message).hidden = !fields.includes('text');
+  document.querySelectorAll('[data-conversation-field]').forEach(group => {
+    group.hidden = !fields.includes(group.dataset.conversationField);
+  });
+  const upload = $('conversationMediaUpload');
+  if (upload) upload.hidden = !['photo', 'gif', 'sticker'].includes($('conversationMessageType')?.value);
+}
+
+function setupComposerTypes() {
+  const composer = $('mobileScriptComposer');
+  if (!composer || $('conversationMessageType')) return;
+  const type = createElement('select', { id: 'conversationMessageType', onChange: syncComposerFields },
+    BUILDER_TYPES.map(item => createElement('option', { value: item.id }, [item.label])));
+  const typeGroup = createElement('div', { className: 'form-group' }, [
+    createElement('label', { for: type.id }, ['Mesaj türü']), type,
+  ]);
+  const message = $('mobileScriptMessage');
+  (message.closest('.form-group') || message).after(typeGroup);
+  const fields = createElement('div', { id: 'conversationTypeFields' });
+  for (const [field, label] of Object.entries(FIELD_LABELS)) {
+    const input = field === 'voMediaType'
+      ? createElement('select', { id: 'conversationField_' + field }, [
+        createElement('option', { value: 'photo' }, ['Fotoğraf']),
+        createElement('option', { value: 'video' }, ['Video']),
+      ])
+      : createElement('input', { type: field === 'typingMs' ? 'number' : 'text', id: 'conversationField_' + field });
+    fields.append(createElement('div', { className: 'form-group', dataset: { conversationField: field } }, [
+      createElement('label', { for: input.id }, [label]), input,
+    ]));
+  }
+  typeGroup.after(fields);
+  const uploadInput = createElement('input', { id: 'conversationMediaFile', type: 'file', accept: 'image/*' });
+  fields.prepend(createElement('div', { id: 'conversationMediaUpload', className: 'form-group' }, [
+    createElement('label', { for: uploadInput.id }, ['Cihazdan görsel seç']), uploadInput,
+  ]));
+  uploadInput.addEventListener('change', async () => {
+    const file = uploadInput.files?.[0];
+    if (!file) return;
+    const selectedType = type.value;
+    const selectedSource = editingSource;
+    try {
+      const data = await readFileAsDataURL(file);
+      if (composer.hidden || type.value !== selectedType || selectedSource !== editingSource) return;
+      $('conversationField_' + (selectedType === 'sticker' ? 'stickerVal' : 'url')).value = data;
+      composerError();
+    } catch {
+      composerError('Görsel okunamadı. Başka bir dosya seçin.', uploadInput);
+    }
+  });
+  fields.after(createElement('p', { id: 'conversationComposerError', role: 'alert', className: 'conversation-inline-error' }));
+  syncComposerFields();
+}
+
 function openMobileScriptComposer(line = null) {
   const composer = $('mobileScriptComposer');
   const message = $('mobileScriptMessage');
   if (!composer || !message) return;
-  const parsed = line ? parseSimpleMessage(line.raw) : null;
+  const parsed = line ? parseEditableLine(line.raw) : { type: 'message', values: {} };
+  if (!parsed) { focusScriptLine(line.lineNumber); return; }
   mobileScriptEditingLine = line?.sourceIndex ?? null;
-  fillMobileSenderOptions(parsed?.sender || '');
-  message.value = parsed?.message || '';
-  $('mobileScriptComposerTitle').textContent = line ? `Satır ${line.lineNumber} düzenle` : 'Yeni mesaj';
-  $('mobileScriptSaveBtn').textContent = line ? 'Değişiklikleri Kaydet' : 'Akışa Ekle';
+  editingSource = state.get('player.script') || '';
+  editingConversation = state.get('conversations.activeId');
+  fillMobileSenderOptions(parsed.values.who || '');
+  if (parsed.values.who && !$('mobileScriptSender').value) {
+    $('mobileScriptSender').append(createElement('option', { value: parsed.values.who }, [parsed.values.who]));
+    $('mobileScriptSender').value = parsed.values.who;
+  }
+  message.value = parsed.values.text || '';
+  $('conversationMessageType').value = parsed.type;
+  if ($('conversationMediaFile')) $('conversationMediaFile').value = '';
+  for (const field of Object.keys(FIELD_LABELS)) {
+    $('conversationField_' + field).value = parsed.values[field] || (field === 'voMediaType' ? 'photo' : '');
+  }
+  syncComposerFields();
+  composerError();
+  $('mobileScriptComposerTitle').textContent = line ? 'Mesajı düzenle' : 'Yeni mesaj';
+  $('mobileScriptSaveBtn').textContent = line ? 'Değişiklikleri Kaydet' : 'Konuşmaya Ekle';
   composer.hidden = false;
   $('mobileScriptAddBtn').hidden = true;
-  message.focus();
+  const focusTarget = BUILDER_FIELDS[parsed.type].includes('text') ? message : composer.querySelector('[data-conversation-field]:not([hidden]) input');
+  focusTarget?.focus();
 }
 
 function closeMobileScriptComposer({ restoreFocus = true } = {}) {
   const composer = $('mobileScriptComposer');
   if (composer) composer.hidden = true;
   mobileScriptEditingLine = null;
+  editingSource = null;
+  editingConversation = null;
   const addButton = $('mobileScriptAddBtn');
   if (addButton) {
     addButton.hidden = false;
@@ -473,74 +588,110 @@ function closeMobileScriptComposer({ restoreFocus = true } = {}) {
 }
 
 function saveMobileScriptMessage() {
-  const sender = $('mobileScriptSender')?.value?.trim() || state.get('selfName') || 'Me';
-  const message = $('mobileScriptMessage')?.value?.trim() || '';
-  if (!message) {
-    showError('Mesaj boş bırakılamaz');
-    $('mobileScriptMessage')?.focus();
+  // Retain the draft, but never silently apply it to a different or reordered conversation.
+  if (editingConversation !== state.get('conversations.activeId') ||
+      (mobileScriptEditingLine !== null && editingSource !== (state.get('player.script') || ''))) {
+    composerError('Konuşma değişti. Taslağı kopyalayıp doğru mesajı yeniden açın.');
     return;
   }
-  const lines = getPhysicalScriptLines($('scriptBox')?.value || '');
-  const raw = `${sender}: ${message}`;
-  if (mobileScriptEditingLine === null) {
-    while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
-    lines.push(raw);
-  } else {
-    lines[mobileScriptEditingLine] = raw;
+  const type = $('conversationMessageType')?.value || 'message';
+  const values = {
+    who: $('mobileScriptSender')?.value?.trim() || state.get('selfName') || 'Me',
+    text: $('mobileScriptMessage')?.value?.trim() || '',
+  };
+  for (const field of Object.keys(FIELD_LABELS)) values[field] = $('conversationField_' + field)?.value || '';
+  const required = { message: ['text'], reply: ['text', 'replyTo'], photo: ['url'], gif: ['url'], video: ['url'],
+    location: ['placeName'], link: ['linkTitle'], reaction: ['emoji', 'reactTarget'], system: ['systemText'], add: ['personName'], leave: ['personName'] };
+  for (const field of (required[type] || [])) {
+    if (!values[field].trim()) {
+      composerError((FIELD_LABELS[field] || 'Mesaj') + ' boş bırakılamaz.', field === 'text' ? $('mobileScriptMessage') : $('conversationField_' + field));
+      return;
+    }
   }
-  setScriptText(lines.join('\n'));
+  if ((BUILDER_FIELDS[type] || []).some(field => /[\r\n]/.test(values[field]))) {
+    composerError('Bir karta tek mesaj yazın. Ayrı mesajlar için yeni kart ekleyin.');
+    return;
+  }
+  const raw = buildLineFromValues(type, values);
+  if (!raw) { composerError('Mesaj türünü ve gerekli alanları kontrol edin.'); return; }
+  const errors = validateScript(raw).filter(issue => issue.severity === 'error');
+  if (errors.length) { composerError(errors[0].message); return; }
+  if (mobileScriptEditingLine === null) addLine(raw);
+  else {
+    const lines = getPhysicalScriptLines(state.get('player.script') || '');
+    lines[mobileScriptEditingLine] = raw;
+    commitScript(lines.join('\n'), 'Mesaj güncellendi');
+  }
   closeMobileScriptComposer();
 }
 
 function deleteMobileScriptLine(line) {
-  runUndoable({
-    message: `Satır ${line.lineNumber} silindi`,
-    action: () => {
-      const lines = getPhysicalScriptLines($('scriptBox')?.value || '');
-      lines.splice(line.sourceIndex, 1);
-      setScriptText(lines.join('\n'));
-    },
-  });
+  const lines = getPhysicalScriptLines(state.get('player.script') || '');
+  lines.splice(line.sourceIndex, 1);
+  commitScript(lines.join('\n'), 'Mesaj silindi');
 }
 
 function moveMobileScriptLine(line, offset) {
-  const visible = getVisibleScriptLines($('scriptBox')?.value || '');
+  const visible = getVisibleScriptLines(state.get('player.script') || '');
   const position = visible.findIndex((item) => item.sourceIndex === line.sourceIndex);
   const target = visible[position + offset];
   if (!target) return;
-  const lines = getPhysicalScriptLines($('scriptBox')?.value || '');
+  const lines = getPhysicalScriptLines(state.get('player.script') || '');
   [lines[line.sourceIndex], lines[target.sourceIndex]] = [lines[target.sourceIndex], lines[line.sourceIndex]];
-  setScriptText(lines.join('\n'));
+  commitScript(lines.join('\n'), 'Mesaj sırası değiştirildi');
+  $('mobileScriptList')?.querySelector('[data-source-index="' + target.sourceIndex + '"] button')?.focus();
 }
 
 function createMobileScriptCard(line, issue) {
   const parsed = parseSimpleMessage(line.raw);
+  const editable = parseEditableLine(line.raw);
   const card = createElement('article', {
-    className: `mobile-script-card${issue ? ` has-${issue.severity}` : ''}`,
+    className: 'mobile-script-card' + (issue ? ' has-' + issue.severity : ''),
     dataset: { sourceIndex: String(line.sourceIndex) },
   });
   const head = createElement('div', { className: 'mobile-script-card-head' }, [
-    createElement('span', { className: 'mobile-script-line-number' }, [`${line.lineNumber}. satır`]),
+    createElement('span', { className: 'mobile-script-line-number' }, [line.lineNumber + '. satır']),
   ]);
-  if (issue) head.appendChild(createElement('span', { className: `mobile-script-issue-label ${issue.severity}` }, [
+  if (issue) head.appendChild(createElement('span', { className: 'mobile-script-issue-label ' + issue.severity }, [
     issue.severity === 'warning' ? 'Uyarı' : 'Hata',
   ]));
   card.appendChild(head);
-  card.appendChild(createElement('strong', { className: 'mobile-script-sender' }, [parsed?.sender || 'Komut']));
-  card.appendChild(createElement('p', { className: 'mobile-script-message' }, [parsed?.message || line.raw]));
+  const edit = createElement('button', {
+    type: 'button', className: 'conversation-card-edit',
+    onClick: () => editable ? openMobileScriptComposer(line) : focusScriptLine(line.lineNumber),
+    'aria-label': 'Satır ' + line.lineNumber + ' düzenle',
+  }, [
+    createElement('strong', { className: 'mobile-script-sender' }, [editable?.values.who || parsed?.sender || 'Konuşma olayı']),
+    createElement('span', { className: 'mobile-script-message' }, [parsed?.message || summaryText(line)]),
+    createElement('span', { className: 'hint' }, [editable ? 'Düzenle' : 'Metinde düzelt']),
+  ]);
+  card.appendChild(edit);
   if (issue) card.appendChild(createElement('p', { className: 'mobile-script-card-issue' }, [issue.message]));
-
   const actions = createElement('div', { className: 'mobile-script-card-actions' });
   if (mobileScriptReorderMode) {
-    actions.append(
-      createElement('button', { type: 'button', className: 'secondary btn-sm', onClick: () => moveMobileScriptLine(line, -1), 'aria-label': `Satır ${line.lineNumber} yukarı taşı` }, ['Yukarı']),
-      createElement('button', { type: 'button', className: 'secondary btn-sm', onClick: () => moveMobileScriptLine(line, 1), 'aria-label': `Satır ${line.lineNumber} aşağı taşı` }, ['Aşağı'])
-    );
+    for (const [offset, label, accessible] of [[-1, 'Yukarı', 'yukarı'], [1, 'Aşağı', 'aşağı']]) {
+      const button = createElement('button', {
+        type: 'button', className: 'secondary btn-sm', onClick: () => moveMobileScriptLine(line, offset),
+        'aria-label': 'Satır ' + line.lineNumber + ' ' + accessible + ' taşı',
+      }, [label]);
+      const visible = getVisibleScriptLines(state.get('player.script') || '');
+      const index = visible.findIndex(item => item.sourceIndex === line.sourceIndex);
+      button.disabled = !visible[index + offset];
+      actions.append(button);
+    }
   } else {
-    actions.append(
-      createElement('button', { type: 'button', className: 'secondary btn-sm', onClick: () => parsed ? openMobileScriptComposer(line) : focusScriptLine(line.lineNumber), 'aria-label': `Satır ${line.lineNumber} düzenle` }, [parsed ? 'Düzenle' : 'Metinde düzenle']),
-      createElement('button', { type: 'button', className: 'secondary btn-sm mobile-script-delete', onClick: () => deleteMobileScriptLine(line), 'aria-label': `Satır ${line.lineNumber} sil` }, ['Sil'])
-    );
+    const menu = createElement('details', { className: 'conversation-card-menu' }, [
+      createElement('summary', { 'aria-label': 'Satır ' + line.lineNumber + ' diğer işlemler' }, ['Diğer işlemler']),
+      createElement('button', {
+        type: 'button', className: 'secondary btn-sm',
+        onClick: () => { $('mobileScriptReorderBtn')?.click(); },
+      }, ['Sıralamayı değiştir']),
+      createElement('button', {
+        type: 'button', className: 'secondary btn-sm mobile-script-delete',
+        onClick: () => deleteMobileScriptLine(line), 'aria-label': 'Satır ' + line.lineNumber + ' sil',
+      }, ['Sil']),
+    ]);
+    actions.append(menu);
   }
   card.appendChild(actions);
   return card;
@@ -560,7 +711,7 @@ function renderMobileScriptFlow() {
   const summary = $('mobileScriptFlowSummary');
   const box = $('scriptBox');
   if (!list || !summary || !box) return;
-  const lines = getVisibleScriptLines(box.value);
+  const lines = getVisibleScriptLines(state.get('player.script') || '');
   const issueByLine = new Map(validateScript(box.value).map((issue) => [issue.line, issue]));
   list.replaceChildren(...lines.map((line) => createMobileScriptCard(line, issueByLine.get(line.lineNumber))));
   if (!lines.length) {
@@ -574,6 +725,9 @@ function renderMobileScriptFlow() {
 function setupMobileScriptFlow() {
   const box = $('scriptBox');
   if (!box || !$('mobileScriptFlow')) return;
+  setupComposerTypes();
+  setupConversationToolbar();
+  setupRawTextDisclosure();
   box.addEventListener('input', renderMobileScriptFlow);
   $('mobileScriptAddBtn')?.addEventListener('click', () => openMobileScriptComposer());
   $('mobileScriptCancelBtn')?.addEventListener('click', () => closeMobileScriptComposer());
@@ -590,11 +744,13 @@ function setupMobileScriptFlow() {
     event.currentTarget.textContent = mobileScriptReorderMode ? 'Sıralamayı Bitir' : 'Sırala';
     renderMobileScriptFlow();
   });
-  state.subscribe((path) => {
-    if (!path) {
-      box.value = state.get('player.script') || '';
-      renderMobileScriptFlow();
-    } else if (path === 'player.script') {
+  unsubscribeScript = state.subscribe((path) => {
+    if (!path || path === 'player.script') {
+      const next = state.get('player.script') || '';
+      if (box.value !== next) box.value = next;
+      const issues = validateScript(next);
+      SyntaxHighlight.setIssues('scriptBox', issues);
+      renderValidationPanel(issues, $('scriptValidation'));
       renderMobileScriptFlow();
     }
     if (!path || path === 'player.playback') syncMobileScriptPlaybackStatus();
@@ -602,15 +758,48 @@ function setupMobileScriptFlow() {
   renderMobileScriptFlow();
 }
 
+function setupConversationToolbar() {
+  const flow = $('mobileScriptFlow');
+  if (!flow || $('conversationHistory')) return;
+  const undo = createElement('button', { type: 'button', id: 'conversationUndo', className: 'secondary btn-sm', onClick: () => undoLast({ silent: true }) }, ['Geri Al']);
+  const redo = createElement('button', { type: 'button', id: 'conversationRedo', className: 'secondary btn-sm', onClick: () => redoLast({ silent: true }) }, ['Yinele']);
+  const controls = createElement('div', { id: 'conversationHistory', className: 'conversation-toolbar', 'aria-label': 'Konuşma düzenleme geçmişi' }, [undo, redo]);
+  const update = () => {
+    if (!controls.isConnected) { document.removeEventListener('history:change', update); return; }
+    const status = getHistoryStatus();
+    undo.disabled = !status.canUndo;
+    redo.disabled = !status.canRedo;
+  };
+  flow.prepend(controls);
+  controls.after(createElement('p', { id: 'conversationEditStatus', role: 'status', 'aria-live': 'polite', className: 'hint' }));
+  document.addEventListener('history:change', update);
+  update();
+}
+
+function setupRawTextDisclosure() {
+  const box = $('scriptBox');
+  if (!box || $('conversationTextAdvanced')) return;
+  const wrapper = box.closest('.sh-wrapper') || box;
+  const advanced = createElement('details', { id: 'conversationTextAdvanced', className: 'conversation-advanced', dataset: { advancedGroup: 'conversation-text' } }, [
+    createElement('summary', {}, ['Gelişmiş · Metin düzenleyici']),
+  ]);
+  wrapper.before(advanced);
+  advanced.append(wrapper);
+  box.setAttribute('aria-label', 'Konuşma metin düzenleyicisi');
+  advanced.append(createElement('p', { className: 'hint' }, ['Kartlar ve metin aynı konuşmayı düzenler. Metin alanında klavyenin doğal geri alma işlevi kullanılır.']));
+}
+
 function focusHelpTarget(targetId) {
   const target = $(targetId);
   if (!target) return;
-
-  if (target.tagName === 'DETAILS') {
-    target.open = true;
+  if (target.closest('#help')) {
+    document.dispatchEvent(new CustomEvent('workspace:navigate', { detail: { key: 'help', trigger: document.activeElement } }));
   }
-
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  for (let ancestor = target; ancestor; ancestor = ancestor.parentElement) {
+    if (ancestor.tagName === 'DETAILS') ancestor.open = true;
+  }
+  target.querySelector(':scope > summary')?.focus({ preventScroll: true });
+  target.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   target.classList.add('focus-flash');
   window.setTimeout(() => target.classList.remove('focus-flash'), 1200);
 }
@@ -644,10 +833,12 @@ function setupMediaInsertTool() {
     const after = value.slice(end);
     const needsNlBefore = before.length > 0 && !before.endsWith('\n');
     const prefix = needsNlBefore ? '\n' : '';
-    box.value = before + prefix + line + '\n' + after;
+    commitScript(before + prefix + line + '\n' + after, 'Mesaj konuşmaya eklendi');
     const newPos = (before + prefix + line + '\n').length;
     box.selectionStart = box.selectionEnd = newPos;
-    box.dispatchEvent(new Event('input', { bubbles: true }));
+    for (let ancestor = box.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      if (ancestor.tagName === 'DETAILS') ancestor.open = true;
+    }
     box.focus();
   };
 
@@ -807,119 +998,8 @@ function setupMediaInsertTool() {
    ======================================== */
 
 function renderBlocks() {
-  const list = $('groupBuilderList');
-  if (!list) return;
-  list.replaceChildren();
-
-  if (!blocks.length) {
-    list.appendChild(createElement('div', { className: 'empty' }, ['Henüz satır eklenmedi. Kişi kartına tıklayarak ekleyin.']));
-    return;
-  }
-
-  blocks.forEach((block, index) => {
-    const isInsertTarget = insertAfterIndex === index;
-
-    const insertBtn = createElement('button', {
-      className: 'icon-btn builder-insert-btn',
-      title: 'Altına satır ekle',
-      onClick: (e) => { e.stopPropagation(); setInsertMode(index); }
-    }, ['+']);
-
-    const summaryEl = createElement('div', {
-      className: 'builder-summary',
-      onClick: (e) => { e.stopPropagation(); showContextMenu(e, index); }
-    }, [summaryText(block)]);
-
-    const item = createElement('div', {
-      className: 'builder-item' + (isInsertTarget ? ' insert-target' : ''),
-      draggable: true,
-      dataset: { id: block.id }
-    }, [
-      createElement('div', { className: 'builder-handle', title: 'Sürükle-bırak' }, ['↕']),
-      summaryEl,
-      insertBtn,
-      createElement('button', { className: 'icon-btn', onClick: () => removeBlock(block.id), title: 'Sil' }, ['✖'])
-    ]);
-    attachDragEvents(item, index);
-    list.appendChild(item);
-  });
-}
-
-/* ========================================
-   CONTEXT MENU — Hızlı Komut Menüsü
-   ======================================== */
-
-const CONTEXT_MENU_ITEMS = [
-  { type: 'message',  label: '💬 Mesaj' },
-  { type: 'photo',    label: '📷 Fotoğraf' },
-  { type: 'typing',   label: '⏳ Yazıyor' },
-  { type: 'reaction', label: '😂 Tepki' },
-  { type: 'voice',    label: '🎤 Ses' },
-  { type: 'system',   label: '⚙️ Sistem' },
-  { type: 'sticker',  label: '🏷️ Sticker' },
-  { type: 'reply',    label: '↩️ Yanıt' },
-];
-
-function showContextMenu(event, index) {
-  closeContextMenu();
-
-  const menu = document.createElement('div');
-  menu.className = 'builder-context-menu';
-  menu.id = 'builderContextMenu';
-
-  CONTEXT_MENU_ITEMS.forEach(item => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'builder-context-item';
-    btn.textContent = item.label;
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      setInsertMode(index);
-      closeContextMenu();
-    });
-    menu.appendChild(btn);
-  });
-
-  // Pozisyonlama
-  document.body.appendChild(menu);
-  const rect = event.currentTarget.getBoundingClientRect();
-  const menuRect = menu.getBoundingClientRect();
-
-  let top = rect.bottom + 4;
-  let left = rect.left;
-
-  // Ekranın dışına taşma kontrolü
-  if (top + menuRect.height > window.innerHeight) {
-    top = rect.top - menuRect.height - 4;
-  }
-  if (left + menuRect.width > window.innerWidth) {
-    left = window.innerWidth - menuRect.width - 8;
-  }
-
-  menu.style.top = top + 'px';
-  menu.style.left = left + 'px';
-
-  // Dışına tıklayınca kapat
-  setTimeout(() => {
-    document.addEventListener('click', handleContextMenuClose);
-    document.addEventListener('keydown', handleContextMenuEsc);
-  }, 10);
-}
-
-function closeContextMenu() {
-  const existing = $('builderContextMenu');
-  if (existing) existing.remove();
-  document.removeEventListener('click', handleContextMenuClose);
-  document.removeEventListener('keydown', handleContextMenuEsc);
-}
-
-function handleContextMenuClose(e) {
-  const menu = $('builderContextMenu');
-  if (menu && !menu.contains(e.target)) closeContextMenu();
-}
-
-function handleContextMenuEsc(e) {
-  if (e.key === 'Escape') closeContextMenu();
+  // Compatibility export: the only list is the card projection of player.script.
+  renderMobileScriptFlow();
 }
 
 function summaryText(block) {
@@ -945,82 +1025,14 @@ function summaryText(block) {
   return raw.slice(0, 50);
 }
 
-function attachDragEvents(el, index) {
-  el.addEventListener('dragstart', (e) => {
-    e.dataTransfer.setData('text/plain', index.toString());
-    el.classList.add('dragging');
-  });
-  el.addEventListener('dragend', () => el.classList.remove('dragging'));
-  el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
-  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-  el.addEventListener('drop', (e) => {
-    e.preventDefault();
-    el.classList.remove('drag-over');
-    const fromIndex = Number(e.dataTransfer.getData('text/plain'));
-    const toIndex = Array.from(el.parentElement.children).indexOf(el);
-    moveBlock(fromIndex, toIndex);
-  });
-}
-
-function moveBlock(from, to) {
-  if (from === to || from < 0 || to < 0) return;
-  const [item] = blocks.splice(from, 1);
-  blocks.splice(to, 0, item);
-  clearInsertMode();
-  renderBlocks();
-}
-
-function removeBlock(id) {
-  const removedIndex = blocks.findIndex(b => b.id === id);
-  blocks = blocks.filter(b => b.id !== id);
-
-  // insertAfterIndex düzelt
-  if (insertAfterIndex !== null) {
-    if (removedIndex === insertAfterIndex) {
-      clearInsertMode();
-    } else if (removedIndex < insertAfterIndex) {
-      insertAfterIndex--;
-    }
-  }
-
-  renderBlocks();
-}
-
-/* ========================================
-   SCRIPT SYNC
-   ======================================== */
-
-/** Satır listesini Senaryo textarea'sına aktar */
-function pushBlocksToScriptBox() {
-  if (blocks.length === 0) {
-    showError('Eklenecek satır yok');
-    return;
-  }
-
-  const lines = blocks.map(b => b.raw).join('\n');
-
-  // Senaryo textarea'sına APPEND et
-  const box = $('scriptBox');
-  if (!box) return;
-  const existing = box.value.trim();
-  box.value = existing ? existing + '\n\n' + lines : lines;
-  box.dispatchEvent(new Event('input', { bubbles: true }));
-  showSuccess('Senaryoya aktarıldı!');
-}
-
-function setScriptBox(value) {
-  const box = $('scriptBox');
-  if (!box) return;
-  box.value = value;
-  state.set('player.script', value);
-  box.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
 export {
   initScriptTools,
   BUILDER_TYPES,
   BUILDER_FIELDS,
   buildLineFromValues,
   addLine,
-  renderBlocks
+  renderBlocks,
+  commitScript,
+  parseEditableLine,
+  composeMessageForPerson,
 };

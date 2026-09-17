@@ -115,7 +115,8 @@ describe('Faz 37 desktop menu and panel order', () => {
   });
 
   it('keeps desktop panel tabs in the shared model order', () => {
-    const doc = loadIndexDocument();
+    const doc = mountIndexDocument();
+    initTabs();
     const tabBridge = doc.querySelector('.tabs');
     const tabIds = [...doc.querySelectorAll('.tabs .tab')].map((tab) => tab.dataset.tab);
     const modelPanelIds = getPanelMenuItems(MENU_MODES.PRO).map((item) => item.target);
@@ -189,7 +190,7 @@ describe('Faz 38 mobile menu and overlay contract', () => {
   it('keeps mobile panel actions bound to the overlay panel move model', () => {
     const doc = loadIndexDocument();
 
-    expect(getMobilePanelActions()).toEqual(['group', 'scriptEditor', 'settings']);
+    expect(getMobilePanelActions()).toEqual(['scriptEditor', 'group', 'settings']);
     expect(doc.querySelector('#mobileOverlayBody')).not.toBeNull();
     expect(doc.querySelector('#mobileOverlayBackdrop')).not.toBeNull();
   });
@@ -200,8 +201,8 @@ describe('Faz 39 shared menu model and Simple/Pro rules', () => {
     const simpleActions = getHeaderMenuGroups(MENU_MODES.SIMPLE).flatMap((group) => group.actions);
     const proActions = getHeaderMenuGroups(MENU_MODES.PRO).flatMap((group) => group.actions);
 
-    expect(simpleActions).toEqual(['group', 'play', 'pause', 'reset', 'screenshot', 'settings', 'save', 'load']);
-    expect(simpleActions).not.toContain('scriptEditor');
+    expect(simpleActions).toEqual(['group', 'scriptEditor', 'play', 'pause', 'reset', 'screenshot', 'settings', 'save', 'load']);
+    expect(simpleActions).toContain('scriptEditor');
     expect(simpleActions).not.toContain('clear');
     expect(proActions).toEqual([
       'group',
@@ -222,7 +223,7 @@ describe('Faz 39 shared menu model and Simple/Pro rules', () => {
       type: 'panel',
       target: 'script',
       panelKey: 'scriptEditor',
-      mode: MENU_MODES.PRO,
+      mode: MENU_MODES.SIMPLE,
     });
     expect(findMenuItemByAction('clear')).toMatchObject({
       type: 'data',
@@ -237,8 +238,8 @@ describe('Faz 39 shared menu model and Simple/Pro rules', () => {
     const simplePanels = getPanelMenuItems(MENU_MODES.SIMPLE).map((item) => item.target);
     const proPanels = getPanelMenuItems(MENU_MODES.PRO).map((item) => item.target);
 
-    expect(simplePanels).toEqual(['group', 'settings']);
-    expect(proPanels).toEqual(['group', 'script', 'settings']);
+    expect(simplePanels).toEqual(['script', 'group', 'settings']);
+    expect(proPanels).toEqual(simplePanels);
     expect(doc.querySelector('.tabs .tab[data-tab="script"]')?.dataset.mode).toBe(MENU_MODES.PRO);
     expect(doc.querySelector('.action-group[data-action-group="data"]')?.dataset.mode).toBe(MENU_MODES.PRO);
   });
@@ -265,6 +266,7 @@ describe('Faz 39 shared menu model and Simple/Pro rules', () => {
     renderMobileMenu(MENU_MODES.SIMPLE);
     expect([...doc.querySelectorAll('#headerDropdown .hd-item')].map((item) => item.dataset.action)).toEqual([
       'group',
+      'scriptEditor',
       'play',
       'pause',
       'reset',
@@ -291,21 +293,21 @@ describe('Faz 40 menu accessibility and keyboard checks', () => {
     const desktopScriptItem = desktopRoot?.querySelector('[data-action="scriptEditor"]');
     const desktopItems = [...(desktopRoot?.querySelectorAll('.desktop-menu-item') || [])];
 
-    expect(groupTab?.getAttribute('aria-selected')).toBe('true');
-    expect(groupTab?.getAttribute('tabindex')).toBe('0');
+    expect(groupTab?.getAttribute('aria-selected')).toBe('false');
+    expect(groupTab?.getAttribute('tabindex')).toBe('-1');
     expect(groupTab?.getAttribute('aria-controls')).toBe('group');
     expect(groupPanel?.getAttribute('role')).toBe('tabpanel');
     expect(groupPanel?.getAttribute('aria-labelledby')).toBe(desktopGroupItem?.id);
-    expect(scriptTab?.getAttribute('aria-selected')).toBe('false');
-    expect(scriptTab?.getAttribute('tabindex')).toBe('-1');
-    expect(scriptPanel?.getAttribute('aria-hidden')).toBe('true');
+    expect(scriptTab?.getAttribute('aria-selected')).toBe('true');
+    expect(scriptTab?.getAttribute('tabindex')).toBe('0');
+    expect(scriptPanel?.getAttribute('aria-hidden')).toBe('false');
     expect(desktopGroupItem?.getAttribute('aria-controls')).toBe('group');
     expect(desktopScriptItem?.getAttribute('aria-controls')).toBe('script');
-    expect(desktopItems.map((item) => item.dataset.action)).toEqual(['group', 'scriptEditor', 'settings']);
+    expect(desktopItems.map((item) => item.dataset.action)).toEqual(['scriptEditor', 'group', 'settings']);
     expect(desktopRoot?.querySelector('[data-menu-group="playback"]')).toBeNull();
     expect(desktopRoot?.querySelector('[data-action="play"]')).toBeNull();
-    expect(desktopGroupItem?.getAttribute('aria-current')).toBe('page');
-    expect(desktopScriptItem?.getAttribute('aria-current')).toBe('false');
+    expect(desktopGroupItem?.getAttribute('aria-current')).toBe('false');
+    expect(desktopScriptItem?.getAttribute('aria-current')).toBe('page');
 
     scriptTab.click();
 

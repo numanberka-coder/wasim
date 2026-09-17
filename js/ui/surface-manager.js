@@ -6,14 +6,20 @@ const FOCUSABLE_SELECTOR = [
   'input:not([disabled])',
   'select:not([disabled])',
   'textarea:not([disabled])',
+  'summary',
+  '[contenteditable="true"]',
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
-function isVisible(element, root) {
-  for (let current = element; current && current !== root; current = current.parentElement) {
-    if (current.hidden || current.getAttribute('aria-hidden') === 'true') return false;
+function isVisible(element) {
+  for (let current = element; current; current = current.parentElement) {
+    if (current.hidden || current.inert || current.hasAttribute('inert') || current.getAttribute('aria-hidden') === 'true') return false;
+    if (current.tagName === 'DETAILS' && !current.open) {
+      const summary = [...current.children].find(child => child.tagName === 'SUMMARY');
+      if (!summary?.contains(element)) return false;
+    }
     const style = window.getComputedStyle?.(current);
-    if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
+    if (style && (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse')) return false;
   }
   return true;
 }
@@ -21,7 +27,8 @@ function isVisible(element, root) {
 function collectFocusable(dialog) {
   if (!dialog) return [];
   return [...dialog.querySelectorAll(FOCUSABLE_SELECTOR)]
-    .filter((element) => isVisible(element, dialog));
+    .filter((element) => !element.matches(':disabled, input[type="hidden"]') &&
+      (!element.hasAttribute('tabindex') || Number(element.getAttribute('tabindex')) >= 0) && isVisible(element));
 }
 
 function inertOutside(root, exempt = []) {
@@ -31,8 +38,8 @@ function inertOutside(root, exempt = []) {
   while (current?.parentElement) {
     const parent = current.parentElement;
     [...parent.children].forEach((sibling) => {
-      if (sibling === current || exemptSet.has(sibling) || sibling.contains(current)) return;
-      if (!sibling.hasAttribute('inert')) {
+      if (sibling === current || [...exemptSet].some(element => sibling === element || sibling.contains(element))) return;
+      if (!sibling.inert && !sibling.hasAttribute('inert')) {
         sibling.inert = true;
         sibling.setAttribute('inert', '');
         snapshots.push(sibling);
@@ -47,9 +54,26 @@ function inertOutside(root, exempt = []) {
 export function createSurfaceManager() {
   const stack = [];
   const managedBackdrops = new Set();
+  let ownedInert = [];
   let scrollSnapshot = null;
 
   const top = () => stack[stack.length - 1] || null;
+
+  function syncInertOwnership() {
+    // Recompute from the active modal instead of accumulating per-surface
+    // snapshots: a pre-mounted child/sibling dialog may have been inerted by
+    // the previous surface. Only release attributes this manager applied.
+    ownedInert.forEach(element => {
+      element.inert = false;
+      element.removeAttribute('inert');
+    });
+    ownedInert = [];
+    const modalIndex = stack.findLastIndex(entry => entry.modal);
+    if (modalIndex < 0) return;
+    const modal = stack[modalIndex];
+    const exemptions = [modal.backdrop, ...stack.slice(modalIndex + 1).flatMap(entry => [entry.root, entry.backdrop])];
+    ownedInert = inertOutside(modal.root, exemptions);
+  }
 
   function syncBackdropOwnership() {
     stack.forEach((entry) => { if (entry.backdrop) managedBackdrops.add(entry.backdrop); });
@@ -103,15 +127,14 @@ export function createSurfaceManager() {
       backdrop: config.backdrop || null,
       history: config.history || null,
       ...config,
-      inertSnapshots: [],
     };
     entry.root.dataset.surfaceId = entry.id;
     entry.root.style.setProperty('--surface-depth', String(stack.length));
     if (entry.modal) {
       lockScroll();
-      entry.inertSnapshots = inertOutside(entry.root, [entry.backdrop]);
     }
     stack.push(entry);
+    syncInertOwnership();
     if (entry.history?.push) {
       history.pushState({ ...history.state, [entry.history.key]: entry.history.token }, '');
     }
@@ -129,19 +152,24 @@ export function createSurfaceManager() {
     const index = stack.findIndex((entry) => entry.id === id);
     if (index === -1) return false;
     const entry = stack[index];
+    const wasTop = entry === top();
     stack.splice(index, 1);
-    entry.inertSnapshots.forEach((element) => {
-      element.inert = false;
-      element.removeAttribute('inert');
-    });
+    syncInertOwnership();
     entry.root.style.removeProperty('--surface-depth');
     delete entry.root.dataset.surfaceId;
+    stack.forEach((surface, depth) => surface.root.style.setProperty('--surface-depth', String(depth)));
     syncBackdropOwnership();
     unlockScroll();
     if (!options.preserveHistory && !options.fromHistory && entry.history) {
       if (history.state?.[entry.history.key] === entry.history.token) history.back();
     }
-    if (options.restoreFocus !== false && entry.trigger?.isConnected) entry.trigger.focus?.();
+    if (wasTop && options.restoreFocus !== false) {
+      const remaining = top();
+      const triggerAllowed = entry.trigger?.isConnected && isVisible(entry.trigger) &&
+        (!remaining?.modal || remaining.dialog.contains(entry.trigger));
+      if (triggerAllowed) entry.trigger.focus?.();
+      else if (remaining) (collectFocusable(remaining.dialog)[0] || remaining.dialog)?.focus?.();
+    }
     return true;
   }
 
@@ -170,7 +198,7 @@ export function createSurfaceManager() {
     }
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    const outside = !entry.dialog.contains(document.activeElement);
+    const outside = !focusable.includes(document.activeElement);
     if (event.shiftKey && (outside || document.activeElement === first)) {
       event.preventDefault();
       last.focus();
@@ -190,7 +218,10 @@ export function createSurfaceManager() {
     ownsBackdrop: (id, backdrop) => top()?.id === id && top()?.backdrop === backdrop,
     requestTopClose,
     size: () => stack.length,
-    destroy: () => document.removeEventListener('keydown', handleKeydown, true),
+    destroy: () => {
+      [...stack].reverse().forEach(entry => close(entry.id, { restoreFocus: false, preserveHistory: true }));
+      document.removeEventListener('keydown', handleKeydown, true);
+    },
   };
 }
 

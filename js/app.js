@@ -12,21 +12,23 @@ import { storage, sceneManager, analyticsManager, initAutoSave, SCENE_CATEGORIES
 // UI Modules
 import { showToast, showSuccess, showError } from './ui/toast.js';
 import { initTabs } from './ui/tabs.js';
+import { initWorkspaceShell, navigateWorkspace } from './ui/workspace-shell.js';
+import { initTaskSettings } from './ui/task-settings.js';
+import { initProjectFeedback, migrateAdvancedPreferences } from './ui/project-feedback.js';
 import { initAccordions } from './ui/accordion.js';
 import { initForms } from './ui/forms.js';
-import { markInvalid, clearInvalid } from './ui/validation.js';
-import { initMobile, registerMobileCallback } from './ui/mobile.js';
-import { MENU_MODE_EVENT, normalizeMenuMode } from './ui/menu-model.js';
+import { markInvalid, clearInvalid, showHint } from './ui/validation.js';
+import { initMobile, registerMobileCallback, returnToPreview } from './ui/mobile.js';
 import { initHighlight, SyntaxHighlight } from './ui/highlight.js';
 import { initUiIcons } from './ui/ui-icons.js';
 import { openModal, confirmModal } from './ui/modal.js';
 import { surfaceManager } from './ui/surface-manager.js';
-import { runUndoable, setRestoreHook, undoLast } from './features/history.js';
+import { runUndoable, setRestoreHook, undoLast, redoLast } from './features/history.js';
 
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
 import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible, setStatusBarHeight, setStatusBarFontSize, setStatusBarIconScale, setStatusBarColor } from './phone/statusbar.js';
-import { initPhoneShell } from './phone/app-shell.js';
+import { initPhoneShell, showPhoneChatDetail } from './phone/app-shell.js';
 import { initMessageEditor } from './phone/message-editor.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
@@ -92,6 +94,7 @@ function init() {
   }
 
   // Initialize UI modules
+  initWorkspaceShell();
   initTabs();
   initAccordions();
   initUiIcons();
@@ -156,6 +159,12 @@ function init() {
 
   // Initialize mobile module (Faz 8)
   initMobile();
+  initConversationPlayback();
+  initTaskSettings({
+    onPreview: () => { returnToPreview(); document.querySelector('.phone')?.scrollIntoView({ block: 'nearest' }); },
+    onNavigate: (panel) => navigateWorkspace(panel === 'script' ? 'scriptEditor' : panel),
+  });
+  initProjectFeedback();
 
   // Start auto-save
   initAutoSave();
@@ -167,10 +176,11 @@ function init() {
   initAutocomplete();
 
   // Tutorial rehberleri — ilk açılış kontrolü (Faz 16)
-  initTutorials();
+  document.querySelectorAll('.tutorial-guide').forEach((guide) => { guide.open = false; });
 
   // Onboarding + Basit/Pro mod (Faz 29)
   initOnboardingAndMode();
+  if (!hasData) storage.save();
 
   trackUsage('app_open', {
     hasSavedState: Boolean(hasData),
@@ -428,9 +438,9 @@ const CLICK_MAP = [
   // Player
   ['loadBtn',           loadScriptWithAnalytics],
   ['stepBtn',           step],
-  ['playBtn',           playWithGoal],
-  ['pauseBtn',          pause],
-  ['resetBtn',          reset],
+  ['playBtn',           previewConversation],
+  ['pauseBtn',          togglePlayPause],
+  ['resetBtn',          previewConversation],
   // Phone-only mode
   ['phoneOnlyBtn',      togglePhoneOnlyMode],
   ['phoneOnlyExitBtn',  togglePhoneOnlyMode],
@@ -553,21 +563,24 @@ function bindEventHandlers() {
     setTheme('dark');
     updateThemeButtons('dark');
     resetThemeColors('dark');
-    showSuccess('Koyu tema aktif!');
   });
 
   bindClick('themeLightBtn', () => {
     setTheme('light');
     updateThemeButtons('light');
     resetThemeColors('light');
-    showSuccess('Açık tema aktif!');
   });
 
   // === RESET BUTTONS ===
   bindClick('resetHeaderColorBtn', () => {
     const theme = state.get('settings.theme') || 'dark';
-    resetThemeColors(theme);
-    showSuccess('Header rengi sıfırlandı!');
+    const colors = THEME_DEFAULTS[theme] || THEME_DEFAULTS.dark;
+    setHeaderColor(colors.headerColor);
+    setHeaderTextColor(null);
+    setHeaderIconColor(null);
+    setInputValue('headerColorInput', colors.headerColor);
+    setInputValue('headerTextColorInput', colors.headerTextColor);
+    setInputValue('headerIconColorInput', colors.headerIconColor);
   });
 
   bindClick('resetBubbleColorsBtn', () => {
@@ -717,14 +730,20 @@ function bindEventHandlers() {
     const input = $('sceneNameInput');
     const name = input?.value?.trim();
     if (!name) {
-      showError('Sahne adı boş bırakılamaz.');
+      markInvalid('sceneNameInput', 'Projeye bir ad verin.');
+      input?.focus();
       return;
     }
+    clearInvalid('sceneNameInput');
     const scene = sceneManager.save(name, { category: $('sceneCategoryInput')?.value });
+    if (!scene) {
+      markInvalid('sceneNameInput', 'Proje kaydedilemedi. Dosya indirerek yedekleyebilirsiniz.');
+      return;
+    }
     trackUsage('scene_save', { category: scene.category });
     input.value = '';
     renderSceneUx();
-    showSuccess('Sahne kaydedildi!');
+    showHint('sceneNameInput', 'Proje bu cihazda kaydedildi.');
   });
 
   bindInput('sceneSearchInput', renderSceneList);
@@ -1145,13 +1164,13 @@ function createSceneBadge(scene) {
 async function loadSceneById(id, source = 'list') {
   if (!Number.isFinite(id)) return;
   const ok = await confirmModal({
-    title: 'Sahneyi yükle',
-    message: 'Bu sahneyi yüklemek istediğinizden emin misiniz? Mevcut değişiklikler kaybolacak.',
+    title: 'Projeyi aç',
+    message: 'Bu kayıtlı proje açılsın mı? Mevcut çalışma değiştirilecek; Geri Al ile dönebilirsiniz.',
     confirmLabel: 'Yükle',
   });
   if (!ok) return;
   runUndoable({
-    message: 'Sahne yüklendi',
+    message: 'Proje açıldı',
     action: () => {
       const loaded = sceneManager.load(id);
       if (loaded) {
@@ -1188,7 +1207,7 @@ function renderRecentScenes() {
 
   container.hidden = false;
   container.replaceChildren(
-    createElement('div', { className: 'scene-section-label' }, ['Son 5 sahne']),
+    createElement('div', { className: 'scene-section-label' }, ['Son 5 proje']),
     createElement('div', { className: 'scene-quick-items' }, recent.map(createQuickSceneButton))
   );
 }
@@ -1207,7 +1226,7 @@ function renderLastScenePrompt() {
   container.hidden = false;
   container.replaceChildren(
     createElement('div', { className: 'scene-last-info' }, [
-      createElement('span', { className: 'scene-last-label' }, ['Son yüklenen sahne']),
+      createElement('span', { className: 'scene-last-label' }, ['Son açılan proje']),
       createElement('strong', {}, [scene.name]),
       createElement('span', { className: 'scene-last-date' }, [formatSceneTimestamp(scene.lastAccessedAt)])
     ]),
@@ -1228,12 +1247,12 @@ function renderSceneList() {
   const filteredScenes = scenes.filter(scene => sceneMatchesQuery(scene, query));
 
   if (scenes.length === 0) {
-    container.replaceChildren(createElement('p', { className: 'hint' }, ['Henüz kaydedilmiş sahne yok.']));
+    container.replaceChildren(createElement('p', { className: 'hint' }, ['Henüz kayıtlı proje yok.']));
     return;
   }
 
   if (filteredScenes.length === 0) {
-    container.replaceChildren(createElement('p', { className: 'hint' }, ['Aramayla eşleşen sahne yok.']));
+    container.replaceChildren(createElement('p', { className: 'hint' }, ['Aramayla eşleşen proje yok.']));
     return;
   }
 
@@ -1273,16 +1292,16 @@ function initSceneListDelegation() {
     if (deleteBtn) {
       const id = Number(deleteBtn.dataset.sceneId);
       const ok = await confirmModal({
-        title: 'Sahneyi sil',
-        message: 'Bu sahneyi silmek istediğinizden emin misiniz?',
+        title: 'Kayıtlı projeyi sil',
+        message: 'Bu kayıtlı proje silinsin mi? İndirilmiş dosyalar etkilenmez.',
         confirmLabel: 'Sil',
         danger: true,
       });
       if (!ok) return;
-      sceneManager.delete(id);
+      if (!sceneManager.delete(id)) return;
       trackUsage('scene_delete', { source: 'list' });
       renderSceneUx();
-      showSuccess('Sahne silindi!');
+      showHint('sceneNameInput', 'Kayıtlı proje silindi.');
     }
   });
 }
@@ -1327,9 +1346,48 @@ function playWithGoal() {
 }
 
 /** Space kısayolu — oynatmayı başlat/duraklat */
+function previewConversation() {
+  loadScript();
+  returnToPreview();
+  showPhoneChatDetail();
+  playWithGoal();
+}
+
+function initConversationPlayback() {
+  const names = { playBtn: 'Önizlemeyi Oynat', pauseBtn: 'Devam Et', resetBtn: 'Baştan Oynat' };
+  Object.entries(names).forEach(([id, label]) => { const button = $(id); if (button) button.textContent = label; });
+  const advanced = $('conversationTextAdvanced');
+  ['loadBtn', 'stepBtn'].forEach((id) => { if ($(id) && advanced) advanced.append($(id)); });
+  const media = $('mediaInsertBtn')?.closest('.form-group');
+  if (media && advanced && !media.contains(advanced)) advanced.append(media);
+  const interactivePanel = $('tabInteractive');
+  if (interactivePanel) {
+    const interactiveTools = document.createElement('details');
+    interactiveTools.id = 'conversationInteractiveAdvanced';
+    interactiveTools.className = 'conversation-advanced';
+    interactiveTools.innerHTML = '<summary>Gelişmiş · İnteraktif araçlar</summary>';
+    $('script').append(interactiveTools);
+    interactivePanel.classList.remove('script-tab-panel');
+    interactiveTools.append(interactivePanel);
+    const manual = $('manualSender')?.closest('details');
+    if (manual) interactiveTools.append(manual);
+  }
+  document.querySelector('#script .script-tabs')?.setAttribute('hidden', '');
+  if ($('mobileScriptFlow') && $('normalPlayerControls')) $('mobileScriptFlow').after($('normalPlayerControls'));
+  const refresh = () => {
+    const player = state.get('player');
+    const button = $('pauseBtn');
+    if (!button) return;
+    button.textContent = player.paused ? 'Devam Et' : 'Duraklat';
+    button.disabled = !player.queue?.length || (player.paused && player.cursor >= player.queue.length);
+  };
+  state.subscribe((path) => { if (!path || path === 'player.playback') refresh(); });
+  refresh();
+}
+
 function togglePlayPause() {
   const player = state.get('player') || {};
-  if (player.playTimer && !player.paused) {
+  if (!player.paused && (player.playTimer || player.typingTimer)) {
     pause();
   } else {
     playWithGoal();
@@ -1364,6 +1422,13 @@ function initKeyboardShortcuts() {
       t.isContentEditable || t.tagName === 'BUTTON'
     );
 
+    if ((e.ctrlKey || e.metaKey) && ((e.shiftKey && e.key.toLowerCase() === 'z') || e.key.toLowerCase() === 'y')) {
+      if (inEditable) return;
+      e.preventDefault();
+      redoLast();
+      return;
+    }
+
     // Ctrl/Cmd+Z — geri al (editör alanları hariç, native undo korunur)
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
       if (inEditable) return;
@@ -1390,37 +1455,9 @@ function initKeyboardShortcuts() {
 }
 
 function initOnboardingAndMode() {
-  const savedMode = safeStorageGet(APP_MODE_KEY) || 'simple';
-  applyAppMode(savedMode);
-
-  bindChange('appModeToggle', (e) => applyAppMode(e.target.value, true));
-  bindClick('reopenOnboardingBtn', () => openOnboarding(true));
-
+  migrateAdvancedPreferences();
+  bindClick('reopenOnboardingBtn', () => navigateWorkspace('help'));
   refreshGoalUI();
-
-  const hasSeenOnboarding = safeStorageGet(ONBOARDING_KEY) === '1';
-  if (!hasSeenOnboarding) {
-    // İlk açılışta rehberi otomatik aç (kullanıcı Atla/Başla ile kapatabilir).
-    openOnboarding();
-  }
-}
-
-function applyAppMode(mode, shouldTrack = false) {
-  const safeMode = normalizeMenuMode(mode);
-  safeStorageSet(APP_MODE_KEY, safeMode);
-  document.body.classList.toggle('simple-mode', safeMode === 'simple');
-  setInputValue('appModeToggle', safeMode);
-  if (shouldTrack) {
-    trackUsage('mode_change', { mode: safeMode });
-  }
-  setTextContent('modeBadge', safeMode === 'simple' ? '✨ Basit Mod' : '🛠️ Pro Mod');
-
-  const activeTab = document.querySelector('.tab.active');
-  if (safeMode === 'simple' && activeTab?.dataset.tab === 'script') {
-    document.querySelector('.tab[data-tab="group"]')?.click();
-  }
-
-  window.dispatchEvent(new CustomEvent(MENU_MODE_EVENT, { detail: { mode: safeMode } }));
 }
 
 function getOnboardingGoals() {
@@ -1548,6 +1585,7 @@ function openOnboarding(force = false) {
 // Register mobile callbacks for app-level functions
 registerMobileCallback('populateFormFields', populateFormFields);
 registerMobileCallback('takeScreenshot', takeScreenshot);
+registerMobileCallback('previewConversation', previewConversation);
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
@@ -1557,7 +1595,7 @@ if (document.readyState === 'loading') {
 }
 
 // PWA service worker kaydi — yalnizca http/https altinda (file:// portable build'de atlanir).
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+if (!import.meta.env.DEV && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
