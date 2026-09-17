@@ -22,7 +22,7 @@ Tarayıcı doğrulaması testlerle ikame edilmeyecek. Engellenen cihaz/klavye/er
 - [x] Gerçek tarayıcı: PNG önizlemesi 720×1040 üretildi, çalışma çubukları ve kayıt bildirimi görsele girmedi. Konsolda uygulama hatası görülmedi.
 - [x] Canlı kontrolde bulunan telefon saat/pil katmanı taşması isolation ile düzeltildi; açık tema çalışma çubuğu ve canlı örnek metin kontrastı düzeltildi.
 - [x] Çok katmanlı modal inert/odak yönetimi ve localhost service worker geliştirme önbelleği düzeltildi; codex/* branch'leri CI kapsamına alındı.
-- [ ] GitHub testleri ve birleşmiş main commit'inden Pages yayını doğrulaması.
+- [x] GitHub testleri ve birleşmiş main commit'inden Pages yayını: PR #69, main `007d16cc783ac25f4b38f3bb88e2e829802385d7`; Test koşusu `35269578431` ve Pages koşusu `35269578497` başarılı (17 Eylül). Beş faz branch'i GitHub'a gönderildi, yerel main eşitlendi.
 - [ ] Fiziksel iOS/Android cihaz ve gerçek yazılım klavyesi açıkken son eyleme erişim. Viewport testi fiziksel cihaz testi değildir.
 - [ ] Gerçek ekran okuyucu ve tarayıcıda %200 yakınlaştırma. ARIA/klavye testleri bunların yerine sayılmadı.
 - [ ] PNG indirme dosyasının tamamlanması: görsel üretildi, İndir eylemi çalıştırıldı ancak bağlı tarayıcı download olayı zaman aşımına uğradı; diske teslim doğrulanmadı. Paylaşım/pano platform izinleri ayrıca denenmeli.
