@@ -9,9 +9,10 @@ export default defineConfig({
       include: ['js/**/*.js'],
       exclude: [
         'js/app.js',
-        'js/ui/**',
+        'js/ui/autocomplete.js',
+        'js/ui/highlight.js',
+        'js/ui/ui-icons.js',
         'js/features/autocomplete.js',
-        'js/features/script-builder.js',
         'js/features/interactive-engine.js',
         'js/phone/statusbar.js',
         'js/phone/typography.js',

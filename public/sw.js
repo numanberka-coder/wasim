@@ -24,6 +24,8 @@ function isNavigation(req) {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  // Development source URLs are unversioned; never serve an older editor/style.
+  if (['localhost', '127.0.0.1', '[::1]'].includes(self.location.hostname)) return;
 
   const sameOrigin = new URL(req.url).origin === self.location.origin;
 

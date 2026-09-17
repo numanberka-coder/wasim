@@ -563,14 +563,12 @@ function bindEventHandlers() {
     setTheme('dark');
     updateThemeButtons('dark');
     resetThemeColors('dark');
-    showSuccess('Koyu tema aktif!');
   });
 
   bindClick('themeLightBtn', () => {
     setTheme('light');
     updateThemeButtons('light');
     resetThemeColors('light');
-    showSuccess('Açık tema aktif!');
   });
 
   // === RESET BUTTONS ===
@@ -1389,7 +1387,7 @@ function initConversationPlayback() {
 
 function togglePlayPause() {
   const player = state.get('player') || {};
-  if (player.playTimer && !player.paused) {
+  if (!player.paused && (player.playTimer || player.typingTimer)) {
     pause();
   } else {
     playWithGoal();
@@ -1597,7 +1595,7 @@ if (document.readyState === 'loading') {
 }
 
 // PWA service worker kaydi — yalnizca http/https altinda (file:// portable build'de atlanir).
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+if (!import.meta.env.DEV && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });

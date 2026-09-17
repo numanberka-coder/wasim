@@ -2,8 +2,18 @@
 
 Tarayici tabanli WhatsApp simulatoru. Sosyal medya icerik uretimi, egitim, destek, satis ve topluluk senaryolari icin gercekci WhatsApp gorunumu saglar. Senaryo yazilir, telefon simulatorunde oynatilir ve PNG export alinabilir.
 
-Son guncelleme: 2026-04-27  
-Roadmap kapsami: Faz 27 sonrasi urunlesme, onboarding, kesfedilebilirlik ve kullanim kolayligi
+Son güncelleme: 2026-09-17
+Güncel çalışma: Faz 60–64 mobil kullanım kolaylığı. Doğrulama sonuçları ve açık kabul maddeleri: [tasks/todo.md](tasks/todo.md).
+
+## Yeni çalışma akışı
+
+1. **Kişiler** bölümünde kişileri ekleyin ve kendinizi “Ben” olarak seçin.
+2. **Konuşma → Mesaj Ekle** ile göndereni ve metni seçin. Kartlar doğrudan ortak konuşmayı değiştirir; ayrı aktarım adımı yoktur. Diğer mesaj türleri formdan, metin düzenleyici ve interaktif araçlar yerel **Gelişmiş** alanlarından açılır.
+3. **Önizlemeyi Oynat** güncel konuşmayı başlatır. **Duraklat/Devam Et** konumu korur; **Baştan Oynat** yeniden başlatır.
+4. **Görünüm** ile tema, duvar kâğıdı, yazı boyutu ve telefon üst çubuğunu değiştirin. Küçük canlı örnek değişiklikleri gösterir.
+5. **Proje** kayıtlı projeleri ve düzenlenebilir JSON dosyalarını yönetir. **Çıktı Al** görsel üretir; uygulamanın çalışma çubukları görsele girmez.
+
+Üst çubuktaki kayıt durumu gerçek cihaz depolama sonucunu gösterir. “Bu cihazda kaydedildi” bulut yedeği değildir; önemli çalışmalarınızın proje dosyasını indirin. Genel Basit/Pro ayrımı kaldırılmıştır; bütün özellikler ilgili bölümde erişilebilir.
 
 ## Kimler Icin?
 
@@ -13,7 +23,7 @@ Roadmap kapsami: Faz 27 sonrasi urunlesme, onboarding, kesfedilebilirlik ve kull
 
 ## Mevcut Durum
 
-Faz 1-26 tamamlandi. Proje production-ready gorsel kaliteye yakindir ve Faz 27 sonrasi yol haritasi urunlesme, onboarding ve kullanici basarisina odaklanir.
+Faz 60–63 uygulanmıştır. Faz 64 otomatik testler ve tarayıcı doğrulamasını kapsar; fiziksel cihaz, ekran okuyucu ve yakınlaştırma kabul kontrolleri ayrıca takip edilir. Aşağıdaki liste eski altyapı kilometre taşlarının özetidir.
 
 - Faz 22: Build Sistemi - Vite + ES modules gecisi, tek bundle.
 - Faz 23: Test Altyapisi - Vitest + unit testler, CI entegrasyonu, coverage raporu.

@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { state } from '../js/state.js';
 import { addLine, initScriptTools, parseEditableLine, buildLineFromValues, composeMessageForPerson } from '../js/features/script-builder.js';
 import { undoLast, redoLast, clearHistory, getHistoryStatus, runUndoable } from '../js/features/history.js';
-import { renderPeopleList } from '../js/features/people.js';
+import { renderPeopleList, savePerson, applyPeopleFromJson } from '../js/features/people.js';
+import * as toasts from '../js/ui/toast.js';
 
 const el = id => document.getElementById(id);
 function mount(script = '') {
@@ -210,5 +211,83 @@ describe('Faz 61 canonical conversation editor', () => {
     runUndoable({ action: () => state.set('group.title', 'Yeni'), message: 'Başlık', silent: true });
     undoLast({ silent: true }); expect(state.get('group.title')).toBe(previous);
     redoLast({ silent: true }); expect(state.get('group.title')).toBe('Yeni');
+  });
+
+  it.each([
+    ['message', 'text'], ['reply', 'replyTo'], ['photo', 'url'], ['gif', 'url'], ['video', 'url'],
+    ['location', 'placeName'], ['link', 'linkTitle'], ['reaction', 'emoji'],
+    ['system', 'systemText'], ['add', 'personName'], ['leave', 'personName'],
+  ])('reports required %s fields inline without an error toast', (type, missing) => {
+    mount(); el('mobileScriptAddBtn').click();
+    const toast = vi.spyOn(toasts, 'showError');
+    el('mobileScriptMessage').value = missing === 'text' ? '' : 'Dolu';
+    el('conversationMessageType').value = type;
+    el('conversationMessageType').dispatchEvent(new Event('change'));
+    el('mobileScriptSaveBtn').click();
+    const control = missing === 'text' ? el('mobileScriptMessage') : el('conversationField_' + missing);
+    expect(control.getAttribute('aria-invalid')).toBe('true');
+    expect(el('conversationComposerError').textContent).toContain('boş bırakılamaz');
+    expect(state.get('player.script')).toBe('');
+    expect(toast).not.toHaveBeenCalled();
+    toast.mockRestore();
+  });
+
+  it('navigates to Help before expanding its advanced ancestors and focuses command help', () => {
+    mount('@unknown invalid');
+    let help = el('help');
+    if (!help) { help = document.createElement('div'); help.id = 'help'; document.body.append(help); }
+    const advanced = document.createElement('details');
+    advanced.append(document.createElement('summary'), el('commandHelpAccordion')); help.append(advanced);
+    el('commandHelpAccordion').open = false;
+    const navigation = vi.fn(event => {
+      expect(event.detail.key).toBe('help');
+      expect(advanced.open).toBe(false);
+      expect(el('commandHelpAccordion').open).toBe(false);
+    });
+    document.addEventListener('workspace:navigate', navigation, { once: true });
+    document.querySelector('.script-feedback-header button').click();
+    expect(navigation).toHaveBeenCalledOnce();
+    expect(advanced.open).toBe(true);
+    expect(el('commandHelpAccordion').open).toBe(true);
+    expect(document.activeElement).toBe(el('commandHelpAccordion').querySelector('summary'));
+  });
+
+  it('commits legacy media insertion through exactly one shared undo operation', () => {
+    const initial = 'Diogenes: Önce';
+    const box = mount(initial); renderPeopleList();
+    box.setSelectionRange(initial.length, initial.length);
+    el('mediaTypeSelect').value = 'photo'; el('mediaSenderSelect').value = 'Diogenes';
+    el('mediaUrlInput').value = 'https://example.com/image.jpg';
+    el('mediaCaptionInput').value = 'Açıklama'; el('mediaInsertBtn').click();
+    const after = box.value;
+    expect(after).toContain('@photo Diogenes "https://example.com/image.jpg" "Açıklama"');
+    expect(state.get('player.script')).toBe(after);
+    expect(el('conversationTextAdvanced').open).toBe(true);
+    undoLast({ silent: true }); expect(box.value).toBe(initial);
+    expect(undoLast({ silent: true })).toBe(false);
+    redoLast({ silent: true }); expect(box.value).toBe(after);
+  });
+
+  it('reports people saves in the visible list and validation alongside the relevant field', () => {
+    mount();
+    const success = vi.spyOn(toasts, 'showSuccess');
+    el('pName').value = 'Yeni Kişi'; savePerson();
+    expect(state.get('people')['Yeni Kişi']).toBeDefined();
+    const hint = el('peopleList').parentElement.querySelector('.field-hint');
+    expect(hint.textContent).toContain('Yeni Kişi');
+    expect(hint.getAttribute('role')).toBe('status');
+    expect(el('peopleListAccordion').open).toBe(true);
+    expect(success).not.toHaveBeenCalled();
+    savePerson();
+    expect(el('pName').getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(el('pName'));
+    success.mockRestore();
+  });
+
+  it('keeps invalid people JSON errors inline without a blocking alert', () => {
+    mount(); const alert = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    el('peopleJson').value = '{broken'; applyPeopleFromJson();
+    expect(el('peopleJson').getAttribute('aria-invalid')).toBe('true');
+    expect(alert).not.toHaveBeenCalled(); alert.mockRestore();
   });
 });

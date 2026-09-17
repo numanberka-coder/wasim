@@ -4,8 +4,7 @@
 
 import { $, isValidUrl, createElement } from '../utils.js';
 import { state } from '../state.js';
-import { showError, showSuccess } from '../ui/toast.js';
-import { markInvalid, clearInvalid } from '../ui/validation.js';
+import { markInvalid, clearInvalid, showHint } from '../ui/validation.js';
 import { composeMessageForPerson } from './script-builder.js';
 import { confirmModal } from '../ui/modal.js';
 import { runUndoable } from './history.js';
@@ -20,6 +19,14 @@ const PREPARATION_STEP_IDS = [
   'peopleListAccordion',
   'groupFlowAccordion',
 ];
+
+function peopleFeedback(id, message) {
+  showHint(id, message);
+  const node = $(id);
+  const hint = (node?.closest('.form-group') || node?.parentElement)?.querySelector('.field-hint');
+  hint?.setAttribute('role', 'status');
+  hint?.setAttribute('aria-live', 'polite');
+}
 
 function openPreparationStep(id, { focus = false } = {}) {
   const target = $(id);
@@ -265,14 +272,16 @@ function savePerson() {
 
   if (!name) {
     markInvalid('pName', 'İsim boş olamaz');
-    showError('İsim boş olamaz.');
+    nameInput?.focus();
     return;
   }
 
   const avatar = state.data.pendingPersonAvatarDataUrl || avatarInput?.value?.trim() || '';
   if (avatar && !avatar.startsWith('data:') && !isValidUrl(avatar)) {
     markInvalid('pAvatar', 'Geçerli bir bağlantı girin veya dosya yükleyin');
-    showError('Avatar bağlantısı okunamadı.');
+    const advanced = avatarInput?.closest('details');
+    if (advanced) advanced.open = true;
+    avatarInput?.focus();
     return;
   }
   const editingName = state.data.editingName;
@@ -311,7 +320,7 @@ function savePerson() {
   clearPersonForm();
   renderPeopleList();
   openPreparationStep('peopleListAccordion', { focus: true });
-  showSuccess('Kişi kaydedildi!');
+  peopleFeedback('peopleList', `${name} kişi listesine kaydedildi.`);
 }
 
 /**
@@ -374,7 +383,7 @@ function clearPersonAvatar() {
     runUndoable({ action: clearAvatar, message: 'Avatar kaldırıldı' });
   } else {
     clearAvatar();
-    showSuccess('Avatar kaldırıldı!');
+    peopleFeedback('pName', 'Kişi fotoğrafı kaldırıldı.');
   }
 }
 
@@ -384,6 +393,7 @@ function clearPersonAvatar() {
 function applyPeopleFromJson() {
   const jsonEl = $('peopleJson');
   if (!jsonEl) return;
+  clearInvalid('peopleJson');
 
   try {
     const parsed = JSON.parse(jsonEl.value);
@@ -392,9 +402,10 @@ function applyPeopleFromJson() {
     }
     state.set('people', parsed);
     renderPeopleList();
-    showSuccess('JSON uygulandı!');
+    peopleFeedback('peopleJson', 'Kişi listesi JSON verisinden güncellendi.');
   } catch (err) {
-    alert('❌ JSON hatalı: ' + err.message);
+    markInvalid('peopleJson', 'JSON okunamadı: ' + err.message);
+    jsonEl.focus();
   }
 }
 
@@ -406,7 +417,8 @@ function refreshPeopleJson() {
   if (jsonEl) {
     jsonEl.value = JSON.stringify(state.get('people'), null, 2);
   }
-  showSuccess('JSON yenilendi!');
+  clearInvalid('peopleJson');
+  peopleFeedback('peopleJson', 'JSON güncel kişi listesini gösteriyor.');
 }
 
 /**

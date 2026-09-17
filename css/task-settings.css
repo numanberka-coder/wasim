@@ -9,6 +9,7 @@
 .task-appearance-sample { margin: 0 0 16px; }
 .task-sample-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
 .task-sample-toolbar button { min-height: 44px; }
+body.theme-light .task-sample-toolbar { color: #24363e; }
 .task-sample-phone { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color, #34434b); }
 .task-sample-header { padding: 8px 12px; display: flex; justify-content: space-between; background: var(--sample-header); color: var(--sample-header-text); font-size: 12px; }
 .task-sample-chat { background: var(--sample-wallpaper); padding: 10px; display: flow-root; color: var(--sample-text); }

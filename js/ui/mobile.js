@@ -83,9 +83,7 @@ function initMobile() {
     if (path === 'player.playback') syncMobilePlaybackUi();
   });
   initCommandCopy();
-  if (isMobileView()) {
-    setupVisualViewport();
-  }
+  setupVisualViewport();
   setupImmersiveFullscreen();
 }
 

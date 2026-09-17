@@ -11,10 +11,15 @@
 .workspace-project-files { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .workspace-app .panel-left { height: calc(100dvh - var(--workspace-top)); }
 .workspace-app .stage { min-height: calc(100dvh - var(--workspace-top)); }
+.workspace-app .phone { isolation: isolate; }
 .workspace-app .mobile-overlay { top: 0; padding-top: env(safe-area-inset-top, 0px); max-height: 100dvh; }
 .workspace-app [hidden] { display: none !important; }
 .workspace-app .workspace-topbar :focus-visible, .workspace-workbar :focus-visible { outline: 2px solid var(--wa-green); outline-offset: 2px; }
 body.theme-light .workspace-topbar, body.theme-light .workspace-workbar { background: #f0f4f3; }
+body.theme-light .workspace-topbar button:not([data-workspace-action="output"]),
+body.theme-light .workspace-workbar button { color: #24363e; }
+body.theme-light .workspace-workbar button[aria-current="page"] { color: #006b53; }
+body.theme-light .project-save-status { color: #51646e; }
 @media (max-width: 768px), (max-width: 900px) and (max-height: 500px) {
   .workspace-app .app-container { padding-bottom: var(--workspace-bottom); }
   .workspace-app .stage { flex: 1; height: auto; min-height: 0; }

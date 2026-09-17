@@ -143,39 +143,39 @@ function quoteForce(s) {
  * @returns {string|null} Üretilen satır veya hata durumunda null
  */
 function buildLineFromValues(type, values) {
-  const v = (key) => (values[key] ?? '').trim();
+  const v = (key) => String(values[key] ?? '').trim();
   const sender = quoteToken(v('who') || state.get('selfName') || 'Me');
 
   switch (type) {
     case 'message': {
       const text = v('text');
-      if (!text) { showError('Mesaj boş olamaz'); return null; }
+      if (!text) return null;
       const who = v('who') || state.get('selfName') || 'Me';
       return `${who}: ${text}`;
     }
     case 'reply': {
       const text = v('text');
       const replyTo = v('replyTo');
-      if (!text) { showError('Mesaj boş olamaz'); return null; }
-      if (!replyTo) { showError('Yanıtlanan kişi gerekli'); return null; }
+      if (!text) return null;
+      if (!replyTo) return null;
       const who = v('who') || state.get('selfName') || 'Me';
       return `${who} > ${replyTo}: ${text}`;
     }
     case 'photo': {
       const url = v('url');
-      if (!url) { showError('URL gerekli'); return null; }
+      if (!url) return null;
       const cap = v('caption');
       return `@photo ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'gif': {
       const url = v('url');
-      if (!url) { showError('URL gerekli'); return null; }
+      if (!url) return null;
       const cap = v('caption');
       return `@gif ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
     case 'video': {
       const url = v('url');
-      if (!url) { showError('URL gerekli'); return null; }
+      if (!url) return null;
       const cap = v('caption');
       return `@video ${sender} ${quoteForce(url)}${cap ? ' ' + quoteForce(cap) : ''}`;
     }
@@ -186,7 +186,7 @@ function buildLineFromValues(type, values) {
     }
     case 'location': {
       const name = v('placeName');
-      if (!name) { showError('Yer adı gerekli'); return null; }
+      if (!name) return null;
       const info = v('placeInfo');
       return `@location ${sender} ${quoteForce(name)}${info ? ' ' + quoteForce(info) : ''}`;
     }
@@ -201,7 +201,7 @@ function buildLineFromValues(type, values) {
     }
     case 'link': {
       const title = v('linkTitle');
-      if (!title) { showError('Başlık gerekli'); return null; }
+      if (!title) return null;
       const url = v('linkUrl');
       return `@link ${sender} ${quoteForce(title)}${url ? ' ' + quoteForce(url) : ''}`;
     }
@@ -216,23 +216,23 @@ function buildLineFromValues(type, values) {
     case 'reaction': {
       const emoji = v('emoji');
       const target = v('reactTarget');
-      if (!emoji) { showError('Emoji gerekli'); return null; }
-      if (!target) { showError('Hedef gerekli'); return null; }
+      if (!emoji) return null;
+      if (!target) return null;
       return `@reaction ${sender} ${emoji} ${target}`;
     }
     case 'system': {
       const text = v('systemText');
-      if (!text) { showError('Sistem mesajı boş olamaz'); return null; }
+      if (!text) return null;
       return `@system ${text}`;
     }
     case 'add': {
       const name = v('personName');
-      if (!name) { showError('Kişi adı gerekli'); return null; }
+      if (!name) return null;
       return `@add ${name}`;
     }
     case 'leave': {
       const name = v('personName');
-      if (!name) { showError('Kişi adı gerekli'); return null; }
+      if (!name) return null;
       return `@leave ${name}`;
     }
     default:
@@ -613,7 +613,7 @@ function saveMobileScriptMessage() {
     return;
   }
   const raw = buildLineFromValues(type, values);
-  if (!raw) return;
+  if (!raw) { composerError('Mesaj türünü ve gerekli alanları kontrol edin.'); return; }
   const errors = validateScript(raw).filter(issue => issue.severity === 'error');
   if (errors.length) { composerError(errors[0].message); return; }
   if (mobileScriptEditingLine === null) addLine(raw);
@@ -792,12 +792,14 @@ function setupRawTextDisclosure() {
 function focusHelpTarget(targetId) {
   const target = $(targetId);
   if (!target) return;
-
-  if (target.tagName === 'DETAILS') {
-    target.open = true;
+  if (target.closest('#help')) {
+    document.dispatchEvent(new CustomEvent('workspace:navigate', { detail: { key: 'help', trigger: document.activeElement } }));
   }
-
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  for (let ancestor = target; ancestor; ancestor = ancestor.parentElement) {
+    if (ancestor.tagName === 'DETAILS') ancestor.open = true;
+  }
+  target.querySelector(':scope > summary')?.focus({ preventScroll: true });
+  target.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   target.classList.add('focus-flash');
   window.setTimeout(() => target.classList.remove('focus-flash'), 1200);
 }
@@ -834,7 +836,9 @@ function setupMediaInsertTool() {
     commitScript(before + prefix + line + '\n' + after, 'Mesaj konuşmaya eklendi');
     const newPos = (before + prefix + line + '\n').length;
     box.selectionStart = box.selectionEnd = newPos;
-    box.dispatchEvent(new Event('input', { bubbles: true }));
+    for (let ancestor = box.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      if (ancestor.tagName === 'DETAILS') ancestor.open = true;
+    }
     box.focus();
   };
 

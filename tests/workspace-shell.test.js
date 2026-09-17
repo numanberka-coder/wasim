@@ -16,6 +16,10 @@ beforeEach(() => {
 afterEach(() => { returnToPreview(); vi.restoreAllMocks(); });
 
 describe('Faz 60 preview workspace', () => {
+  it('contains phone layers below editing surfaces', () => {
+    const css = fs.readFileSync('css/workspace.css', 'utf8');
+    expect(css).toMatch(/\.workspace-app \.phone\s*\{\s*isolation:\s*isolate;/);
+  });
   it('builds common navigation outside the capture and separates phone menu', () => {
     const nav = document.querySelector('.workspace-workbar');
     expect([...nav.querySelectorAll('button')].map(b => b.textContent)).toEqual(WORKSPACE_SECTIONS.map(s => s.label));
