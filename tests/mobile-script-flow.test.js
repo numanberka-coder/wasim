@@ -27,9 +27,8 @@ describe('Faz 58 mobile script flow', () => {
     const cards = [...document.querySelectorAll('.mobile-script-card')];
 
     expect(cards).toHaveLength(3);
-    expect(cards.map((card) => card.querySelector('.mobile-script-line-number').textContent)).toEqual([
-      '1. satır', '3. satır', '4. satır',
-    ]);
+    expect(cards.map((card) => Number(card.querySelector('.mobile-script-line-number').textContent))).toEqual([1, 3, 4]);
+    expect(document.querySelector('[aria-label="Satır 3 düzenle"]')).not.toBeNull();
     expect(box.value).toBe(source);
     expect(state.get('player.script')).toBe(source);
   });
