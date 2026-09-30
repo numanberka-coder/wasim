@@ -649,23 +649,23 @@ function createMobileScriptCard(line, issue) {
     className: 'mobile-script-card' + (issue ? ' has-' + issue.severity : ''),
     dataset: { sourceIndex: String(line.sourceIndex) },
   });
-  const head = createElement('div', { className: 'mobile-script-card-head' }, [
-    createElement('span', { className: 'mobile-script-line-number' }, [line.lineNumber + '. satır']),
-  ]);
+  const head = createElement('div', { className: 'mobile-script-card-head' });
   if (issue) head.appendChild(createElement('span', { className: 'mobile-script-issue-label ' + issue.severity }, [
     issue.severity === 'warning' ? 'Uyarı' : 'Hata',
   ]));
-  card.appendChild(head);
   const edit = createElement('button', {
     type: 'button', className: 'conversation-card-edit',
     onClick: () => editable ? openMobileScriptComposer(line) : focusScriptLine(line.lineNumber),
     'aria-label': 'Satır ' + line.lineNumber + ' düzenle',
   }, [
-    createElement('strong', { className: 'mobile-script-sender' }, [editable?.values.who || parsed?.sender || 'Konuşma olayı']),
+    createElement('span', { className: 'conversation-card-sender-row' }, [
+      createElement('span', { className: 'mobile-script-line-number' }, [String(line.lineNumber)]),
+      createElement('strong', { className: 'mobile-script-sender' }, [editable?.values.who || parsed?.sender || 'Konuşma olayı']),
+    ]),
     createElement('span', { className: 'mobile-script-message' }, [parsed?.message || summaryText(line)]),
-    createElement('span', { className: 'hint' }, [editable ? 'Düzenle' : 'Metinde düzelt']),
   ]);
   card.appendChild(edit);
+  card.appendChild(head);
   if (issue) card.appendChild(createElement('p', { className: 'mobile-script-card-issue' }, [issue.message]));
   const actions = createElement('div', { className: 'mobile-script-card-actions' });
   if (mobileScriptReorderMode) {
@@ -681,19 +681,22 @@ function createMobileScriptCard(line, issue) {
     }
   } else {
     const menu = createElement('details', { className: 'conversation-card-menu' }, [
-      createElement('summary', { 'aria-label': 'Satır ' + line.lineNumber + ' diğer işlemler' }, ['Diğer işlemler']),
-      createElement('button', {
-        type: 'button', className: 'secondary btn-sm',
-        onClick: () => { $('mobileScriptReorderBtn')?.click(); },
-      }, ['Sıralamayı değiştir']),
-      createElement('button', {
-        type: 'button', className: 'secondary btn-sm mobile-script-delete',
-        onClick: () => deleteMobileScriptLine(line), 'aria-label': 'Satır ' + line.lineNumber + ' sil',
-      }, ['Sil']),
+      createElement('summary', { 'aria-label': 'Satır ' + line.lineNumber + ' diğer işlemler', title: 'Diğer işlemler' }, ['⋯']),
+      createElement('div', { className: 'conversation-card-options' }, [
+        createElement('button', {
+          type: 'button', className: 'secondary btn-sm',
+          onClick: () => { $('mobileScriptReorderBtn')?.click(); },
+        }, ['Sıralamayı değiştir']),
+        createElement('button', {
+          type: 'button', className: 'secondary btn-sm mobile-script-delete',
+          onClick: () => deleteMobileScriptLine(line), 'aria-label': 'Satır ' + line.lineNumber + ' sil',
+        }, ['Sil']),
+      ]),
     ]);
     actions.append(menu);
   }
-  card.appendChild(actions);
+  if (mobileScriptReorderMode) card.appendChild(actions);
+  else head.appendChild(actions);
   return card;
 }
 

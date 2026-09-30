@@ -1,5 +1,10 @@
 # Lessons Learned
 
+## 30 Eylül — Bütün ekran akışını doğrula
+- Yeni çalışma çubuklarını telefon-only/Fullscreen API/kayıt görünümünde de dene. PNG dışında ekran kaydı da kullanıcı çıktısıdır; temiz önizlemede uygulama kontrolleri görünmemeli.
+- Konuşma düzenleme kartları telefonun mesaj balonları değildir. Kart şikâyetinde balon ölçülerini veya kullanıcının tipografi ayarlarını değiştirme.
+- Yeni bileşenlerin açık tema renklerini ve genel button kurallarından miras aldığı hizalamayı canlı tarayıcıda kontrol et. Dar/geniş ekranın arasındaki tablet boyutunu da dene.
+
 ## Doğrulamayı tekrarlayarak token ve zaman harcama
 - **Hata:** Faz 53 yayınında aynı sonucu gereğinden fazla farklı yoldan tekrar doğrulayıp süreci uzattım.
 - **Kural:** Her kabul kriteri için tek güçlü kanıt seç; hedefli test, bir tam test/build turu ve tek canlı deploy smoke kontrolü yeterliyse aynı sonucu yeniden ölçme.

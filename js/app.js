@@ -13,6 +13,7 @@ import { storage, sceneManager, analyticsManager, initAutoSave, SCENE_CATEGORIES
 import { showToast, showSuccess, showError } from './ui/toast.js';
 import { initTabs } from './ui/tabs.js';
 import { initWorkspaceShell, navigateWorkspace } from './ui/workspace-shell.js';
+import { initRecordingView, toggleRecordingView, isRecordingViewActive } from './ui/recording-view.js';
 import { initTaskSettings } from './ui/task-settings.js';
 import { initProjectFeedback, migrateAdvancedPreferences } from './ui/project-feedback.js';
 import { initAccordions } from './ui/accordion.js';
@@ -159,6 +160,11 @@ function init() {
 
   // Initialize mobile module (Faz 8)
   initMobile();
+  initRecordingView({
+    beforeEnter: returnToPreview,
+    onExit: () => { setPhoneScale(1); syncScaleButtons(1); },
+  });
+  document.addEventListener('workspace:record', togglePhoneOnlyMode);
   initConversationPlayback();
   initTaskSettings({
     onPreview: () => { returnToPreview(); document.querySelector('.phone')?.scrollIntoView({ block: 'nearest' }); },
@@ -973,26 +979,8 @@ function renderAnalyticsPanel() {
 
 // === PHONE-ONLY MODE ===
 
-let phoneOnlyActive = false;
-
 function togglePhoneOnlyMode() {
-  const container = document.querySelector('.app-container');
-  const scaleControls = $('scaleControls');
-  if (!container) return;
-
-  phoneOnlyActive = !phoneOnlyActive;
-  container.classList.toggle('phone-only-mode', phoneOnlyActive);
-
-  // Action bar'daki ölçek kontrollerini göster/gizle
-  if (scaleControls) {
-    scaleControls.style.display = phoneOnlyActive ? 'inline-flex' : 'none';
-  }
-
-  // Phone-only moddan çıkınca ölçeği sıfırla
-  if (!phoneOnlyActive) {
-    setPhoneScale(1);
-    syncScaleButtons(1);
-  }
+  void toggleRecordingView();
 }
 
 /** Tüm scale butonlarını (action bar + toolbar) senkronize et */
@@ -1111,7 +1099,7 @@ async function takeScreenshot() {
     showToast('Ekran görüntüsü hazırlanıyor...');
     const canvas = await renderPhoneCanvas();
     if (!canvas) return;
-    trackUsage('screenshot', { source: phoneOnlyActive ? 'phone_only' : 'action_bar' });
+    trackUsage('screenshot', { source: isRecordingViewActive() ? 'phone_only' : 'action_bar' });
     openExportModal(canvas);
   } catch (err) {
     console.error('Screenshot error:', err);
@@ -1374,12 +1362,26 @@ function initConversationPlayback() {
   }
   document.querySelector('#script .script-tabs')?.setAttribute('hidden', '');
   if ($('mobileScriptFlow') && $('normalPlayerControls')) $('mobileScriptFlow').after($('normalPlayerControls'));
+  const previewControls = document.createElement('div');
+  previewControls.className = 'workspace-preview-controls';
+  previewControls.setAttribute('role', 'group');
+  previewControls.setAttribute('aria-label', 'Önizleme oynatma kontrolleri');
+  previewControls.dataset.html2canvasIgnore = 'true';
+  const previewStatus = createElement('span', { role: 'status' });
+  const previewPause = createElement('button', { id: 'previewPauseBtn', type: 'button', onClick: togglePlayPause }, ['Duraklat']);
+  const previewRestart = createElement('button', { type: 'button', onClick: previewConversation }, ['Baştan']);
+  previewControls.append(previewStatus, previewPause, previewRestart);
+  document.querySelector('.workspace-workbar')?.prepend(previewControls);
   const refresh = () => {
     const player = state.get('player');
     const button = $('pauseBtn');
     if (!button) return;
     button.textContent = player.paused ? 'Devam Et' : 'Duraklat';
     button.disabled = !player.queue?.length || (player.paused && player.cursor >= player.queue.length);
+    previewControls.hidden = !player.queue?.length || player.cursor >= player.queue.length;
+    previewPause.textContent = button.textContent;
+    previewPause.disabled = button.disabled;
+    previewStatus.textContent = player.paused ? 'Duraklatıldı' : 'Oynatılıyor';
   };
   state.subscribe((path) => { if (!path || path === 'player.playback') refresh(); });
   refresh();
