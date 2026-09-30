@@ -7,7 +7,7 @@
 - [x] Açık tema başlık/menü kontrastını ve tablet önizleme yerleşimini düzelt.
 - [x] Önizlemede oynatma kontrolünü erişilebilir tut; kayıt görünümüne dahil etme.
 - [x] Gerçek tarayıcıda kayıt görünümü, kartlar, tema ve ara genişlik; ilgili testler/build doğrulaması.
-- [ ] Düzeltmeleri commit/push/main/Pages üzerinden yayınla ve sonucu kaydet.
+- [x] Düzeltmeleri commit/push/main/Pages üzerinden yayınla ve sonucu kaydet. PR #70 main'e birleştirildi (`4f9d8ac`); main test koşusu `36775260603` ve Pages koşusu `36775260661` başarılı. Canlı JS/CSS dosyaları HTTP 200 ile doğrulandı.
 
 ### 30 Eylül review
 
@@ -15,7 +15,7 @@
 - Temiz kayıt görünümünde 360×640, 390×844 ve 844×390 telefon sınırları viewport ile eşit; Proje/Çıktı/Yardım, bölüm çubukları, kayıt durumu ve oynatma kontrolleri gizli. Durum çubuğuna çift dokunma düzenlemeye döndürdü. Native API desteklenmediğinde CSS fallback tarayıcıda doğrulandı; gerçek cihaz OS ekran kaydı ayrıca açık kabul maddesidir.
 - 900×700 tablette önizleme 86–596 px içinde; eski 757 px başlangıcı giderildi. 1280×900 masaüstünde panel ve telefon yan yana.
 - Açık tema başlık rengi #111b21, menü #52636d; önizlemede Duraklat/Devam Et erişimi canlı tarayıcıda doğrulandı.
-- Tam paket 24 dosya/409 test ve PWA/portable build geçti. Son kart yerleşimi ayrıca hedefli test/build turuyla doğrulanır. Yeni kayıt denetleyicisinde native giriş/çıkış, reddedilen API ve bekleyen istek iptali test edildi.
+- Tam paket 24 dosya/409 test ve PWA/portable build geçti. Son kart yerleşimiyle 67 ilgili test ve ardından tam 409 test tekrar geçti; CI'nin yakaladığı eski “1. satır” metin beklentisi fiziksel satır numarası ve erişilebilir düzenleme adı denetimine güncellendi. Yeni kayıt denetleyicisinde native giriş/çıkış, reddedilen API ve bekleyen istek iptali test edildi.
 
 ## Faz 60–64 — Onaylanan mobil kullanım kolaylığı planı
 
