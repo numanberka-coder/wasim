@@ -1,5 +1,22 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## 30 Eylül — Kullanıcı incelemesi sonrası UX düzeltmeleri
+
+- [x] Kayıt/tam ekran görünümünde tüm uygulama çubuklarını gizle; tam ekran çıkışını güvenilir yap.
+- [x] Konuşma çalışma kartlarını küçült; mesaj balonlarının ayarlarını değiştirme.
+- [x] Açık tema başlık/menü kontrastını ve tablet önizleme yerleşimini düzelt.
+- [x] Önizlemede oynatma kontrolünü erişilebilir tut; kayıt görünümüne dahil etme.
+- [x] Gerçek tarayıcıda kayıt görünümü, kartlar, tema ve ara genişlik; ilgili testler/build doğrulaması.
+- [ ] Düzeltmeleri commit/push/main/Pages üzerinden yayınla ve sonucu kaydet.
+
+### 30 Eylül review
+
+- Kısa çalışma kartları canlı ölçümde 188,5 px yerine 68 px; uzun metinler doğal biçimde uzar. Metin sola hizalı; düzenleme ana hedef, diğer işlemler 44 px menüde. Kullanıcının telefon mesaj balonu ayarları değişmedi.
+- Temiz kayıt görünümünde 360×640, 390×844 ve 844×390 telefon sınırları viewport ile eşit; Proje/Çıktı/Yardım, bölüm çubukları, kayıt durumu ve oynatma kontrolleri gizli. Durum çubuğuna çift dokunma düzenlemeye döndürdü. Native API desteklenmediğinde CSS fallback tarayıcıda doğrulandı; gerçek cihaz OS ekran kaydı ayrıca açık kabul maddesidir.
+- 900×700 tablette önizleme 86–596 px içinde; eski 757 px başlangıcı giderildi. 1280×900 masaüstünde panel ve telefon yan yana.
+- Açık tema başlık rengi #111b21, menü #52636d; önizlemede Duraklat/Devam Et erişimi canlı tarayıcıda doğrulandı.
+- Tam paket 24 dosya/409 test ve PWA/portable build geçti. Son kart yerleşimi ayrıca hedefli test/build turuyla doğrulanır. Yeni kayıt denetleyicisinde native giriş/çıkış, reddedilen API ve bekleyen istek iptali test edildi.
+
 ## Faz 60–64 — Onaylanan mobil kullanım kolaylığı planı
 
 - [x] Faz 60: Ortak gezinme modeli, dış çalışma çubukları, taslak/kaydırma koruma; 29 hedefli test geçti. Ayrı commit ve main birleştirmesi.

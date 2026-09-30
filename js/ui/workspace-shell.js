@@ -2,12 +2,14 @@ import { WORKSPACE_SECTIONS, WORKSPACE_ACTIONS, MENU_ICON_SVG } from './menu-mod
 import { switchTab, onTabChange } from './tabs.js';
 import { openWorkspacePanel, returnToPreview } from './mobile.js';
 
-export const isCompactWorkspace = () => window.innerWidth <= 768 || (window.innerWidth <= 900 && window.innerHeight <= 500);
+export const isCompactWorkspace = () => window.innerWidth <= 980;
 
 export function navigateWorkspace(key, trigger) {
   const item = [...WORKSPACE_SECTIONS, ...WORKSPACE_ACTIONS].find((entry) => entry.key === key);
   if (!item) return;
-  if (key === 'output') {
+  if (key === 'record') {
+    document.dispatchEvent(new CustomEvent('workspace:record'));
+  } else if (key === 'output') {
     returnToPreview();
     document.getElementById('screenshotBtn')?.click();
   } else if (isCompactWorkspace()) {
@@ -21,6 +23,10 @@ function makeButton(item) {
   const button = document.createElement('button');
   button.type = 'button';
   button.dataset.workspaceAction = item.key;
+  if (item.key === 'record') {
+    button.setAttribute('aria-label', item.label);
+    button.title = 'Tam ekran kayıt görünümü. Çıkmak için üstteki saate çift dokunun veya Esc tuşuna basın.';
+  }
   if (item.target) button.setAttribute('aria-controls', item.target);
   button.innerHTML = `<span class="workspace-icon" aria-hidden="true">${MENU_ICON_SVG[item.icon] || ''}</span><span>${item.label}</span>`;
   button.addEventListener('click', () => navigateWorkspace(item.key, button));
@@ -70,6 +76,12 @@ export function initWorkspaceShell() {
     files.append(button);
   });
   project.append(files);
+  const recordingHelp = document.createElement('p');
+  recordingHelp.id = 'recordingViewHelp';
+  recordingHelp.className = 'hint';
+  recordingHelp.textContent = 'Tam ekran, ekran kaydı için yalnız telefonu gösterir. Çıkmak için telefonun üstündeki saate çift dokunun veya Esc tuşuna basın.';
+  project.append(recordingHelp);
+  top.querySelector('[data-workspace-action="record"]')?.setAttribute('aria-describedby', recordingHelp.id);
   // The phone's own three-dot controls no longer open editing tools.
   document.querySelectorAll('[data-mobile-menu-trigger], #headerMenuBtn').forEach((button) => {
     button.removeAttribute('data-mobile-menu-trigger');
@@ -79,7 +91,7 @@ export function initWorkspaceShell() {
     button.setAttribute('aria-disabled', 'true');
     button.setAttribute('tabindex', '-1');
   });
-  const sync = (key) => bottom.querySelectorAll('button').forEach((button) => {
+  const sync = (key) => bottom.querySelectorAll('button[data-workspace-action]').forEach((button) => {
     button.setAttribute('aria-current', button.dataset.workspaceAction === key ? 'page' : 'false');
   });
   document.addEventListener('workspace:opened', (event) => sync(event.detail.key));

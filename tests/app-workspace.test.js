@@ -93,19 +93,24 @@ describe('full application workspace composition', () => {
     expect(byId('pauseBtn').disabled).toBe(true);
   });
 
-  it('pauses from the actual control during typing and resumes without losing the message', () => {
+  it('pauses from the preview control during typing and resumes without reopening the editor', () => {
     byId('scriptBox').value = 'Ali: Bekleyen yanıt';
     byId('scriptBox').dispatchEvent(new Event('input', { bubbles: true }));
     byId('playBtn').click();
     expect(state.get('player').typingTimer).toBeTruthy();
-    byId('pauseBtn').click();
+    const controls = document.querySelector('.workspace-preview-controls');
+    expect(controls.hidden).toBe(false);
+    expect(controls.closest('.phone')).toBeNull();
+    byId('previewPauseBtn').click();
     expect(state.get('player').paused).toBe(true);
     expect(byId('pauseBtn').textContent).toBe('Devam Et');
+    expect(byId('previewPauseBtn').textContent).toBe('Devam Et');
     vi.advanceTimersByTime(5000);
     expect(state.get('messages')).toEqual([]);
-    byId('pauseBtn').click();
+    byId('previewPauseBtn').click();
     vi.advanceTimersByTime(5000);
     expect(state.get('messages').map(message => message.text)).toEqual(['Bekleyen yanıt']);
+    expect(controls.hidden).toBe(true);
   });
 
   it('keeps a failed named-project save inline without adding a fake saved project', () => {
@@ -144,5 +149,15 @@ describe('full application workspace composition', () => {
     vi.advanceTimersByTime(5000);
     expect(state.get('messages').map(message => message.text)).toEqual(['Dosyadan yeni mesaj']);
     expect(consoleErrors.mock.calls).toEqual([]);
+  });
+
+  it('enters recording view from the workspace and exits without changing conversation data', () => {
+    const script = state.get('player.script');
+    document.querySelector('[data-workspace-action="record"]').click();
+    expect(document.body.classList.contains('recording-view')).toBe(true);
+    expect(document.querySelector('.app-container').classList.contains('phone-only-mode')).toBe(true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(document.body.classList.contains('recording-view')).toBe(false);
+    expect(state.get('player.script')).toBe(script);
   });
 });

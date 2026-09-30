@@ -18,6 +18,7 @@ export const WORKSPACE_ACTIONS = Object.freeze([
   { key: 'project', target: 'project', label: 'Proje', icon: 'save' },
   { key: 'output', label: 'Çıktı Al', icon: 'camera' },
   { key: 'help', target: 'help', label: 'Yardım', icon: 'scenario' },
+  { key: 'record', label: 'Tam ekran', icon: 'fullscreen' },
 ]);
 export const ADVANCED_SECTIONS = Object.freeze({
   playback: 'Oynatma ayrıntıları', chat: 'Sohbet ayrıntıları', people: 'Fotoğraf bağlantısı',
@@ -36,6 +37,7 @@ export const MENU_GROUPS = Object.freeze([
 ]);
 
 export const MENU_ICON_SVG = Object.freeze({
+  fullscreen: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></svg>',
   people: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-3.2-6.4A4.8 4.8 0 0 1 14 8a4.8 4.8 0 0 1-1.2 3.2c.9.3 1.7.8 2.4 1.5.3-.9.4-1.4.8-1.7Z"/><path d="M8.5 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M8.5 13.5c-3.8 0-6.5 2-6.5 4.6V20h13v-1.9c0-2.6-2.7-4.6-6.5-4.6Z"/><path d="M16.5 13.5c-.5 0-1 .1-1.5.2 1.1 1 1.7 2.4 1.7 4.1V20H22v-1.8c0-2.7-2.2-4.7-5.5-4.7Z"/></svg>',
   scenario: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm3 4h8M8 12h8M8 16h5"/></svg>',
   play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7-11-7Z"/></svg>',

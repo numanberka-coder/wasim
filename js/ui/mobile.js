@@ -37,7 +37,7 @@ export function registerMobileCallback(name, fn) {
   appCallbacks[name] = fn;
 }
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 980;
 const MOBILE_LANDSCAPE_QUERY =
   '(max-width: 900px) and (max-height: 500px) and (orientation: landscape)';
 
@@ -84,42 +84,6 @@ function initMobile() {
   });
   initCommandCopy();
   setupVisualViewport();
-  setupImmersiveFullscreen();
-}
-
-/* ========================================
-   IMMERSIVE FULLSCREEN (kurulu PWA)
-   ======================================== */
-
-/**
- * Kurulu PWA'da OS status bar'ı, sahte status bar'ımızın üstünde ayrı bir
- * (siyaha yakın) şerit bırakıyor. Manifest `display: fullscreen` bunu her
- * cihazda/tarayıcıda gizleyemiyor. Fullscreen API ile ilk kullanıcı
- * dokunuşunda tam ekrana geçerek OS status bar'ını gizleriz; böylece sahte
- * status bar fiziksel ekranın en tepesine oturur ve üstteki şerit kaybolur.
- * Yalnızca kurulu/standalone modda çalışır; tarayıcı sekmesini etkilemez.
- */
-function setupImmersiveFullscreen() {
-  const isInstalled =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.matchMedia('(display-mode: fullscreen)').matches ||
-    window.matchMedia('(display-mode: minimal-ui)').matches ||
-    window.navigator.standalone === true;
-  if (!isInstalled) return;
-
-  const el = document.documentElement;
-  if (!el.requestFullscreen) return;
-
-  const enterFullscreen = () => {
-    // Zaten tam ekransa tekrar isteme (kullanıcı çıkarsa sonraki dokunuşta yine dener).
-    if (document.fullscreenElement) return;
-    const req = el.requestFullscreen({ navigationUI: 'hide' });
-    if (req && typeof req.catch === 'function') req.catch(() => {});
-  };
-
-  // Fullscreen API bir kullanıcı hareketi gerektirir → ilk dokunuş/tıklamada tetikle.
-  window.addEventListener('pointerdown', enterFullscreen, { passive: true });
-  window.addEventListener('keydown', enterFullscreen);
 }
 
 /* ========================================
