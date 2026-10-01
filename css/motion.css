@@ -1,7 +1,7 @@
 /* Shared mobile motion: transform/opacity only, no animated layout dimensions. */
 :root {
-  --motion-screen-duration: 240ms;
-  --motion-content-duration: 160ms;
+  --motion-screen-duration: 300ms;
+  --motion-content-duration: 200ms;
   --motion-touch-duration: 100ms;
   --motion-ease: cubic-bezier(.22, 1, .36, 1);
 }

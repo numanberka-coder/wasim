@@ -196,7 +196,7 @@ export function setActivePhoneTab(tab, options = {}) {
   if (hasChanged && options.animate !== false && shellState.view === 'home') {
     const direction = PHONE_TABS.indexOf(activeTab) > PHONE_TABS.indexOf(previousTab) ? 1 : -1;
     animateShellEntry(tabPanels.find((panel) => panel.dataset.phoneTabPanel === activeTab),
-      direction * 18, '--motion-content-duration', 160);
+      direction * 18, '--motion-content-duration', 200);
   }
 
   return activeTab;
@@ -231,7 +231,7 @@ export function showPhoneHome(options = {}) {
   }
   if (detail) detail.setAttribute('aria-hidden', 'true');
   if (hasChanged && options.animate !== false) {
-    animateShellEntry(home, -18, '--motion-screen-duration', 240);
+    animateShellEntry(home, -18, '--motion-screen-duration', 300);
   }
 }
 
@@ -245,7 +245,7 @@ export function showPhoneChatDetail(options = {}) {
   if (detail) detail.removeAttribute('aria-hidden');
   if (options.focus && backButton) backButton.focus();
   if (hasChanged && options.animate !== false) {
-    animateShellEntry(detail, 24, '--motion-screen-duration', 240);
+    animateShellEntry(detail, 24, '--motion-screen-duration', 300);
   }
 }
 

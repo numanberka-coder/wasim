@@ -1,5 +1,20 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## 1 Ekim — Kurulu mobil uygulama: klavye ve geçiş temposu
+
+- [x] Kullanıcının açıklaması: Konuşma bölümündeki mesaj ekleme formu. VisualViewport yüksekliği/konumu ve odaktaki alan + eylem satırının görünürlüğünü bu yüzeyde düzelt; zoom, masaüstü ve kayıt yerleşimini koru.
+- [x] Düzenleme formunun klavye açılırken görünür/erişilebilir kalmasını test et; klavye kapanınca yerleşimi geri yükle.
+- [x] Ekran geçişini 240→300 ms, sekme geçişini 160→200 ms yavaşlat; dokunma geri bildirimi 100 ms kalacak.
+- [x] Hedefli ve tam testler, PWA/portable build; gerçek tarayıcı kontrolü ve fiziksel cihaz doğrulama sınırını açıkça belirt.
+- [ ] Ayrı branch/commit, main birleştirmesi ve Pages yayını.
+
+### Klavye düzeltmesi review
+
+- Eski leading-only throttle son klavye resize olayını atlayabiliyordu. Yeni rAF eşlemesi son boyutu ve offsetTop'u uygular; yalnız editörün kendi scroll alanını odaktaki kontrol için kaydırır, eylem satırı ve alt padding'i ayırır. Pinch zoom klavye olarak yorumlanmaz; listener ve bekleyen frame temizliği tekildir.
+- Mesaj kutusu dar görünür alana sığar, metin/odak korunur. Genel transition:all'ın yükseklik animasyonu ölçümü bozduğu canlı tarayıcıda bulundu ve form alanlarında border-color/box-shadow geçişiyle sınırlandı. Masaüstü, telefon balonları ve kayıt görünümü değişmedi.
+- 7 yeni viewport testi; tam paket 27 dosya / 430 test, coverage satır %75,22 (viewport modülü %100 satır). İlk yüksek paralellik turunda eski görev-ayarları testi 5 s zaman aşımına girdi; kaynak/test timeout'u değiştirmeden maxWorkers=2 tam turu geçti. PWA ve portable build başarılı.
+- Tarayıcıda görünür alan 390×844→390×480 ve 844×200: mesaj alanı eylemlerin üstünde, eylemler ekran içinde; taslak ekran görüntüsünde korunuyor, yeniden açılış formu açık tutuyor, konsol hatası yok. Gerçek OS klavyesi/fiziksel cihaz burada denenmedi; viewport daraltması bu kabul maddesinin yerine geçmez.
+
 ## 1 Ekim — Mobil hareket ve geçişler
 
 - [x] Ortak süre/eğri modeli: kısa dokunma geri bildirimi, yönlü ekran açılışı ve geri dönüş; yalnız transform/opacity animasyonu.
