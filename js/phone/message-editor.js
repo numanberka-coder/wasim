@@ -59,7 +59,7 @@ function openEditor(msg) {
   ]);
 
   let focusTimer = null;
-  openModal({
+  const modal = openModal({
     title: 'Mesajı Düzenle',
     bodyNode: body,
     onClose: () => clearTimeout(focusTimer),
@@ -91,6 +91,8 @@ function openEditor(msg) {
       },
     ],
   });
+  modal.overlay.classList.add('message-edit-overlay');
+  modal.card.classList.add('message-edit-modal');
   // A quick cancellation must not refocus a detached editor.
   focusTimer = setTimeout(() => { if (textArea.isConnected) textArea.focus(); }, 50);
 }

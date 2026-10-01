@@ -1729,6 +1729,42 @@ label {
   min-height: 60px;
 }
 
+/* Only the phone message editor: keep actions outside the keyboard's scroll area. */
+@media (max-width: 980px) {
+  .workspace-app .message-edit-overlay {
+    top: var(--visual-viewport-top, 0px);
+    bottom: auto;
+    height: var(--visual-viewport-height, 100dvh);
+    padding: 12px;
+  }
+  .workspace-app .message-edit-modal {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding: 16px;
+  }
+  .message-edit-modal .app-modal-title,
+  .message-edit-modal .app-modal-actions { flex-shrink: 0; }
+  .message-edit-modal .app-modal-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 12px;
+  }
+  .message-edit-modal .app-modal-actions button { min-height: 44px; }
+  .message-edit-modal .msg-edit-form :is(input, textarea, select) {
+    font-size: 16px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .message-edit-modal .msg-edit-text {
+    min-height: 42px;
+    height: min(90px, max(42px, calc(var(--visual-viewport-height, 100dvh) - 176px)));
+    max-height: min(90px, max(42px, calc(var(--visual-viewport-height, 100dvh) - 176px)));
+  }
+}
+
 /* ========================================
    SHORTCUTS MODAL
    ======================================== */
