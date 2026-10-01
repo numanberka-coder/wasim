@@ -58,6 +58,10 @@ body.recording-view .app-container.phone-only-mode .phone {
   transform: none !important;
 }
 @media (max-width: 980px) {
+  body.recording-view .app-container.phone-only-mode {
+    position: absolute;
+    height: 100%;
+  }
   body.recording-view .app-container.phone-only-mode .phone {
     width: 100% !important;
     height: 100% !important;

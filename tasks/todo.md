@@ -1,5 +1,20 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## 1 Ekim — Cihaz görselleri: telefon mesaj alanı ve kayıt görünümü
+
+- [x] Mobil çalışma yerleşimini VisualViewport yüksekliği ve offsetTop'una tek kökten bağla; sabit çubukların ayrı koordinatlarla kaymasını önle.
+- [x] Klavye/telefon alanı odaktayken uygulama çubuklarını geçici gizle; sohbet başlığı, mesaj alanı ve gönderme hedefi görünür olsun. Düzenleme formu, kayıt ve zoom davranışını koru.
+- [x] Klavye kapanışı, pan/resize, dar/yatay ekran ve temiz kayıt için regresyon testleri ve tarayıcı geometri kontrolü; fiziksel cihaz kabulünü açık bırak.
+- [ ] Tam test/PWA/portable build, ayrı branch/commit ve main üzerinden Pages yayını.
+
+### Telefon klavyesi review
+
+- Mobil body'nin VisualViewport ölçülerine uyması için eski min-height:100vh kaldırıldı; üst/alt çalışma çubukları aynı köke bağlandı. Temiz kayıt yüzeyi de kökün yüksekliğini kullanır. Mesaj satırı küçülmez, yalnız sohbet gövdesi daralır. Canlı input en az 16 px; sohbet balonlarının kullanıcı ayarı değişmez.
+- Klavye yüksekliğinden offsetTop çıkarılmaz: pan klavye kapanışı değildir. Telefon mesajı odakta + klavye açıkken çalışma çubukları gizlenir; Gönder'e geçişte zıplamaz; kapanış/editör/masaüstü/zoom durumunda geri yüklenir.
+- 11 viewport testi; tam paket 27 dosya / 434 test başarılı. Coverage satır %75,25; viewport %100 satır. PWA ve portable build başarılı.
+- Vite-only tests/fixtures/phone-keyboard.html gerçek index/app/CSS ile VisualViewport-only resize/pan sağlar (layout viewport değişmez). Tarayıcı: 390×844 içinde height420/top120 → başlık148–209, mesaj474–540; kayıt görünümünde height420/top0 → mesaj354–420, çalışma çubukları gizli. 844×390 içinde height200 → başlık28–89, mesaj134–200; dar 360×640 → çubuklar0–86 ve582–640. Kapanışta kök ve çubuklar geri döner.
+- Bu düzenek gerçek OS klavyesi veya ana ekrana kurulu fiziksel cihaz değildir; cihaz kabulü kullanıcı tekrar testiyle açık kalır. Üretim build girişine test düzeneği eklenmez.
+
 ## 1 Ekim — Kurulu mobil uygulama: klavye ve geçiş temposu
 
 - [x] Kullanıcının açıklaması: Konuşma bölümündeki mesaj ekleme formu. VisualViewport yüksekliği/konumu ve odaktaki alan + eylem satırının görünürlüğünü bu yüzeyde düzelt; zoom, masaüstü ve kayıt yerleşimini koru.
