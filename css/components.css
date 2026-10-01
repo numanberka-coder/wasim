@@ -1683,6 +1683,22 @@ label {
 .msg-row[data-msg-id]:hover .msg-bubble {
   outline-color: rgba(37, 211, 102, 0.55);
 }
+.msg-row[data-msg-id] .msg-bubble:focus-visible {
+  outline: 2px solid var(--wa-green);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .msg-row[data-msg-id] .msg-bubble {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .msg-row[data-msg-id] .msg-bubble a {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
 
 .msg-edit-form {
   display: flex;

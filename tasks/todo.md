@@ -1,5 +1,18 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## 1 Ekim — Önizleme mesajını bilinçli düzenleme
+
+- [x] Mesaj balonunda kısa dokunuş düzenleme açmasın; 500 ms basılı tutma açsın. Kaydırma, 10 px üstü hareket, bırakma/iptal ve çoklu dokunuş bekleyen işlemi iptal etsin; medya/bağlantı düğmelerine dokunma.
+- [x] Mesaj düzenleme penceresine “Vazgeç” ekle; taslak hiçbir state/kayıt değişikliği yapmadan kapansın. Kaydet ve Sil davranışını koru; klavyeyle düzenleme erişimi sağla.
+- [ ] Jest ve vazgeç/kaydet/sil regresyonları, tam test/build ve mobil tarayıcı kontrolü; ayrı branch/commit, main ve Pages yayını.
+
+### Basılı tutma review
+
+- Normal click düzenleme tetiklemez; yalnız balonda 500 ms birincil pointer hold veya balonun Enter/Space eylemi açar. Kaydırma/hareket/bırakma/cancel/ikinci pointer/pencere odağı kaybı iptal eder; avatar, medya/link/düğmeler etkilenmez. Tekrar init ve disposer listener/timer temizliği yapar; kaybolan mesaj açılmaz.
+- “Vazgeç” yalnız modalı kapatır; metin/saat/gönderen taslağı state'e yazılmaz. Hızlı iptalde gecikmeli autofocus da temizlenir. Kaydet/Sil işlemleri korunur. Balonlar klavye odağı ve erişilebilir düzenleme açıklaması taşır; mobil native callout balonda engellenir, linkte korunur.
+- 13 mesaj editörü regresyonu geçti. İlk tam coverage turu 28 dosya / 446 test başarılı; ardından hızlı iptal autofocus düzeltmesi + ek test hedefli doğrulandı. Son kaynak CI'da tekrar tam testlenecek. PWA/portable build başarılı.
+- Gerçek tarayıcı 390×844: kısa click sonrası modal sayısı 0; Enter ile açılan pencerede Vazgeç/Sil/Kaydet görünür. Metni değiştirip Vazgeç sonrası önizleme balonu aynı kaldı; konsol hatası yok. Fiziksel cihaz basılı tutma/OS callout kontrolü burada yapılmadı.
+
 ## 1 Ekim — Cihaz görselleri: telefon mesaj alanı ve kayıt görünümü
 
 - [x] Mobil çalışma yerleşimini VisualViewport yüksekliği ve offsetTop'una tek kökten bağla; sabit çubukların ayrı koordinatlarla kaymasını önle.
