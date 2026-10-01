@@ -49,7 +49,7 @@ describe('Phone navigation motion', () => {
     const [detail, forwardFrames, forwardOptions] = motion.animate.mock.calls[0];
     expect(detail.id).toBe('phoneChatDetail');
     expect(forwardFrames[0].transform).toBe('translate3d(24px, 0, 0)');
-    expect(forwardOptions.duration).toBe(240);
+    expect(forwardOptions.duration).toBe(300);
     expect(document.querySelector('.phone').dataset.phoneView).toBe('chat');
     expect(document.getElementById('phoneHomeShell').getAttribute('aria-hidden')).toBe('true');
     expect(document.getElementById('phoneChatDetail').getAttribute('aria-hidden')).toBeNull();
@@ -83,7 +83,7 @@ describe('Phone navigation motion', () => {
     const [calls, forwardFrames, options] = motion.animate.mock.calls[0];
     expect(calls.dataset.phoneTabPanel).toBe('calls');
     expect(forwardFrames[0].transform).toBe('translate3d(18px, 0, 0)');
-    expect(options.duration).toBe(160);
+    expect(options.duration).toBe(200);
     setActivePhoneTab('updates');
     expect(motion.animate.mock.calls[1][1][0].transform).toBe('translate3d(-18px, 0, 0)');
 

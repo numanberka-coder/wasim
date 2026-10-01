@@ -9,7 +9,7 @@ export function animateElement(element, keyframes, options = {}) {
   const timing = options.duration ?? '--motion-screen-duration';
   const value = typeof timing === 'string' ? styles.getPropertyValue(timing).trim() : timing;
   const duration = typeof value === 'number' ? value
-    : value ? parseFloat(value) * (value.endsWith('ms') ? 1 : 1000) : 240;
+    : value ? parseFloat(value) * (value.endsWith('ms') ? 1 : 1000) : 300;
   const easing = options.easing || styles.getPropertyValue('--motion-ease').trim() || 'cubic-bezier(.22, 1, .36, 1)';
   const animation = element.animate(keyframes, { duration, easing, fill: 'both' });
   let active = true;

@@ -3,7 +3,7 @@
    Faz 8: Mobil Altyapı & Responsive
    ======================================== */
 
-import { $, debounce, throttle } from '../utils.js';
+import { $, debounce } from '../utils.js';
 import { showSuccess, showError } from '../ui/toast.js';
 import { state } from '../state.js';
 import { storage } from '../storage.js';
@@ -19,6 +19,7 @@ import { applyAllTypography } from '../phone/typography.js';
 import { surfaceManager } from './surface-manager.js';
 import { createPanelPortal } from './panel-portal.js';
 import { animateElement } from './motion.js';
+import { initVisualViewport } from './visual-viewport.js';
 import {
   MENU_MODE_EVENT,
   MENU_ICON_SVG,
@@ -66,6 +67,7 @@ const mobileState = {
 };
 
 let overlayHistorySequence = 0;
+let disposeVisualViewport = () => {};
 
 /** Panel key → real panel ID eşleştirmesi */
 const PANEL_MAP = Object.fromEntries(
@@ -964,21 +966,8 @@ function initCommandCopy() {
    ======================================== */
 
 function setupVisualViewport() {
-  if (!window.visualViewport) return;
-
-  const vv = window.visualViewport;
-
-  const onViewportChange = throttle(() => {
-    const heightDiff = window.innerHeight - vv.height;
-    const isKeyboardOpen = heightDiff > 100;
-    // Keyboard açıkken gerekirse overlay'i ayarla
-    document.documentElement.style.setProperty('--keyboard-height', isKeyboardOpen ? `${heightDiff}px` : '0px');
-    document.documentElement.style.setProperty('--visual-viewport-height', `${vv.height}px`);
-  }, 50);
-
-  vv.addEventListener('resize', onViewportChange);
-  vv.addEventListener('scroll', onViewportChange);
-  onViewportChange();
+  disposeVisualViewport();
+  disposeVisualViewport = initVisualViewport();
 }
 
 export { initMobile };

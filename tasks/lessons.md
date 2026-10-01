@@ -1,5 +1,12 @@
 # Lessons Learned
 
+## 1 Ekim — Kurulu uygulamada yazılım klavyesi
+- “Mesaj satırı” belirsiz olduğunda telefonun canlı Mesaj alanı ile Konuşma mesaj ekleme formunu ayırt et; kullanıcı bu turda ekleme formunu kastetti. İlgisiz telefon yerleşimini değiştirme.
+- VisualViewport yüksekliği tek başına yetmez: offsetTop, son resize olayı ve odaktaki alan/eylem satırının görünürlüğü birlikte kontrol edilmeli.
+- Genel `transition: all` formun min/max yüksekliğini de animasyonla değiştirir; klavye yeniden yerleşiminde alanları yalnız renk/odak özellikleriyle animasyonla.
+- Masaüstü viewport küçültmesi gerçek iOS/Android klavyesinin yerine geçmez. Zoom/viewport pan ayrımını test et ve fiziksel cihaz kontrolünü açık kabul maddesi olarak bırak.
+- Geçiş temposu kullanıcı geri bildirimiyle ayarlanmalı; ortak süre tokenları ve fallback değerleri birlikte güncellenmeli.
+
 ## 30 Eylül — Bütün ekran akışını doğrula
 - Yeni çalışma çubuklarını telefon-only/Fullscreen API/kayıt görünümünde de dene. PNG dışında ekran kaydı da kullanıcı çıktısıdır; temiz önizlemede uygulama kontrolleri görünmemeli.
 - Konuşma düzenleme kartları telefonun mesaj balonları değildir. Kart şikâyetinde balon ölçülerini veya kullanıcının tipografi ayarlarını değiştirme.

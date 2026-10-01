@@ -119,11 +119,11 @@ describe('cancellable mobile navigation', () => {
 describe('motion primitive', () => {
   it('uses the shared timing and releases the filled effect before completion', () => {
     const element = byId('mobileOverlay');
-    element.style.setProperty('--motion-screen-duration', '0.24s');
+    element.style.setProperty('--motion-screen-duration', '0.3s');
     element.style.setProperty('--motion-ease', 'ease-out');
     const finish = vi.fn(() => expect(animations[0].cancel).toHaveBeenCalled());
     animateElement(element, [{ opacity: 0 }, { opacity: 1 }], { onFinish: finish });
-    expect(animations[0].options).toEqual({ duration: 240, easing: 'ease-out', fill: 'both' });
+    expect(animations[0].options).toEqual({ duration: 300, easing: 'ease-out', fill: 'both' });
     animations[0].onfinish();
     expect(finish).toHaveBeenCalledTimes(1);
   });
