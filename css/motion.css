@@ -1,0 +1,45 @@
+/* Shared mobile motion: transform/opacity only, no animated layout dimensions. */
+:root {
+  --motion-screen-duration: 240ms;
+  --motion-content-duration: 160ms;
+  --motion-touch-duration: 100ms;
+  --motion-ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Full-page editors navigate horizontally; JS retains the portal through exit. */
+.workspace-app .mobile-overlay.is-open { animation: none; }
+.workspace-app .mobile-overlay:is(.is-entering, .is-closing) { will-change: transform; }
+.workspace-app .mobile-overlay.is-closing .mobile-overlay-body { pointer-events: none; }
+
+@media (max-width: 980px) {
+  .workspace-app :is(.workspace-topbar, .workspace-workbar, .mobile-overlay)
+    :is(button, summary, .person-edit-target) {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: transform var(--motion-touch-duration) var(--motion-ease),
+      background-color var(--motion-content-duration) ease,
+      color var(--motion-content-duration) ease;
+  }
+  .workspace-app :is(.workspace-topbar, .workspace-workbar, .mobile-overlay)
+    :is(button, summary, .person-edit-target):active:not(:disabled) {
+    transform: scale(.97);
+  }
+  .workspace-app .mobile-overlay-body { overscroll-behavior-y: contain; }
+  .workspace-app .mobile-overlay :is(.accordion-icon, summary > svg) {
+    transition: transform var(--motion-content-duration) var(--motion-ease);
+  }
+}
+@media (hover: none) {
+  .workspace-app :is(.workspace-topbar, .workspace-workbar, .mobile-overlay) button:hover {
+    transform: none;
+    filter: none;
+  }
+  .workspace-app :is(.workspace-topbar, .workspace-workbar, .mobile-overlay) button:active:not(:disabled) {
+    transform: scale(.97);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-screen-duration: 0ms; --motion-content-duration: 0ms; --motion-touch-duration: 0ms; }
+  .workspace-app :is(.workspace-topbar, .workspace-workbar, .mobile-overlay)
+    :is(button, summary, .person-edit-target):active:not(:disabled) { transform: none; }
+}

@@ -87,6 +87,8 @@ describe('Faz 54 mobile surface lifecycle', () => {
     expect(settings.scrollTop).toBe(7);
     expect(historyBack).toHaveBeenCalledTimes(1);
 
+    // Deliver the previous programmatic history.back before a fresh user back.
+    window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
     openSettingsOverlay();
     window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
 

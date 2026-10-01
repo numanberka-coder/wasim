@@ -29,7 +29,7 @@ import { runUndoable, setRestoreHook, undoLast, redoLast } from './features/hist
 // Phone Modules
 import { syncHeader, applyTheme, setTheme, setHeaderColor, setHeaderTextColor, setHeaderIconColor, applyHeaderTextColor, applyHeaderIconColor, applyBubbleColors, setBubbleOutColor, setBubbleInColor, resetBubbleColors, setGroupPhotoData, clearGroupPhoto } from './phone/header.js';
 import { initStatusBar, setStatusTime, setOperatorName, setBatteryPercent, setBatteryHealth, setBatteryVisible, setStatusBarHeight, setStatusBarFontSize, setStatusBarIconScale, setStatusBarColor } from './phone/statusbar.js';
-import { initPhoneShell, showPhoneChatDetail } from './phone/app-shell.js';
+import { initPhoneShell, showPhoneChatDetail, stopPhoneMotion } from './phone/app-shell.js';
 import { initMessageEditor } from './phone/message-editor.js';
 import { applyWallpaper, setWallpaperPreset, setWallpaperColor, setWallpaperImage, clearWallpaper } from './phone/wallpaper.js';
 import { applyAllTypography, setFontSize, setLineHeight, setBubbleSize, setBubblePaddingY } from './phone/typography.js';
@@ -161,7 +161,7 @@ function init() {
   // Initialize mobile module (Faz 8)
   initMobile();
   initRecordingView({
-    beforeEnter: returnToPreview,
+    beforeEnter: () => { returnToPreview(); stopPhoneMotion(); },
     onExit: () => { setPhoneScale(1); syncScaleButtons(1); },
   });
   document.addEventListener('workspace:record', togglePhoneOnlyMode);
@@ -996,6 +996,7 @@ function syncScaleButtons(scale) {
 async function renderPhoneCanvas() {
   const phone = document.querySelector('.phone');
   if (!phone) return null;
+  stopPhoneMotion();
 
   // Virtualize edilmiş mesajları materialize et
   materializeAllMessages();

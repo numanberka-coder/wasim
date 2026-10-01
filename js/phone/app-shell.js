@@ -7,6 +7,7 @@ import { state } from '../state.js';
 import { syncHeader } from './header.js';
 import { initPhoneHomeEditors } from './home-editors.js';
 import { rebuildChat } from './messages.js';
+import { animateElement } from '../ui/motion.js';
 
 export const PHONE_TABS = ['chats', 'updates', 'communities', 'calls'];
 export const CHAT_FILTERS = ['all', 'unread', 'groups'];
@@ -76,6 +77,32 @@ const shellState = {
 
 let shellStateListenerBound = false;
 let suppressChatOpen = false;
+let cancelShellMotion = null;
+
+function stopShellMotion() {
+  cancelShellMotion?.();
+  cancelShellMotion = null;
+}
+
+// Capture/record entry must use the settled view, not a partially translated frame.
+export function stopPhoneMotion() {
+  stopShellMotion();
+}
+
+function animateShellEntry(element, offset, token, fallbackDuration) {
+  if (!element) return;
+  const styles = getComputedStyle(element);
+  const configuredDuration = styles.getPropertyValue(token).trim();
+  const numericDuration = Number.parseFloat(configuredDuration);
+  const duration = Number.isFinite(numericDuration)
+    ? numericDuration * (configuredDuration.endsWith('ms') ? 1 : 1000)
+    : fallbackDuration;
+  const easing = styles.getPropertyValue('--motion-ease').trim() || 'cubic-bezier(.22,1,.36,1)';
+  cancelShellMotion = animateElement(element, [
+    { transform: `translate3d(${offset}px, 0, 0)`, opacity: 0.82 },
+    { transform: 'translate3d(0, 0, 0)', opacity: 1 },
+  ], { duration, easing });
+}
 
 function renderPhoneIcon(name) {
   return PHONE_ICON_SVG[name] || PHONE_ICON_SVG.search;
@@ -141,9 +168,13 @@ function syncPhoneHomeHeader(tab) {
   if (cameraButton) cameraButton.hidden = !header.camera;
 }
 
-export function setActivePhoneTab(tab) {
+export function setActivePhoneTab(tab, options = {}) {
   const activeTab = getSafeTab(tab);
   const { home, tabButtons, tabPanels } = getShellElements();
+  const previousTab = shellState.activeTab;
+  const hasChanged = previousTab !== activeTab;
+
+  if (hasChanged) stopShellMotion();
 
   shellState.activeTab = activeTab;
   if (home) home.dataset.activeTab = activeTab;
@@ -161,6 +192,12 @@ export function setActivePhoneTab(tab) {
     panel.classList.toggle('is-active', isActive);
     panel.hidden = !isActive;
   });
+
+  if (hasChanged && options.animate !== false && shellState.view === 'home') {
+    const direction = PHONE_TABS.indexOf(activeTab) > PHONE_TABS.indexOf(previousTab) ? 1 : -1;
+    animateShellEntry(tabPanels.find((panel) => panel.dataset.phoneTabPanel === activeTab),
+      direction * 18, '--motion-content-duration', 160);
+  }
 
   return activeTab;
 }
@@ -184,6 +221,8 @@ export function setActiveChatFilter(filter) {
 
 export function showPhoneHome(options = {}) {
   const { phone, home, detail } = getShellElements();
+  const hasChanged = shellState.view !== 'home';
+  if (hasChanged || options.animate === false) stopShellMotion();
   shellState.view = 'home';
   if (phone) phone.dataset.phoneView = 'home';
   if (home) {
@@ -191,15 +230,23 @@ export function showPhoneHome(options = {}) {
     if (options.focus) home.querySelector('[data-phone-open-chat].is-active, [data-phone-open-chat]')?.focus();
   }
   if (detail) detail.setAttribute('aria-hidden', 'true');
+  if (hasChanged && options.animate !== false) {
+    animateShellEntry(home, -18, '--motion-screen-duration', 240);
+  }
 }
 
 export function showPhoneChatDetail(options = {}) {
   const { phone, home, detail, backButton } = getShellElements();
+  const hasChanged = shellState.view !== 'chat';
+  if (hasChanged || options.animate === false) stopShellMotion();
   shellState.view = 'chat';
   if (phone) phone.dataset.phoneView = 'chat';
   if (home) home.setAttribute('aria-hidden', 'true');
   if (detail) detail.removeAttribute('aria-hidden');
   if (options.focus && backButton) backButton.focus();
+  if (hasChanged && options.animate !== false) {
+    animateShellEntry(detail, 24, '--motion-screen-duration', 240);
+  }
 }
 
 export function getPhoneShellState() {
@@ -630,6 +677,7 @@ function handleConversationCreated(conversation) {
 }
 
 export function initPhoneShell() {
+  stopShellMotion();
   syncPhoneIcons();
   bindPhoneShellEvents();
   bindPhoneShellStateListener();
@@ -639,7 +687,7 @@ export function initPhoneShell() {
   });
   syncHomeChatSummary();
   syncPhoneShellContent();
-  setActivePhoneTab(shellState.activeTab);
+  setActivePhoneTab(shellState.activeTab, { animate: false });
   setActiveChatFilter(shellState.activeChatFilter);
-  showPhoneHome();
+  showPhoneHome({ animate: false });
 }
