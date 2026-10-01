@@ -5,7 +5,7 @@
 - [x] Mobil çalışma yerleşimini VisualViewport yüksekliği ve offsetTop'una tek kökten bağla; sabit çubukların ayrı koordinatlarla kaymasını önle.
 - [x] Klavye/telefon alanı odaktayken uygulama çubuklarını geçici gizle; sohbet başlığı, mesaj alanı ve gönderme hedefi görünür olsun. Düzenleme formu, kayıt ve zoom davranışını koru.
 - [x] Klavye kapanışı, pan/resize, dar/yatay ekran ve temiz kayıt için regresyon testleri ve tarayıcı geometri kontrolü; fiziksel cihaz kabulünü açık bırak.
-- [ ] Tam test/PWA/portable build, ayrı branch/commit ve main üzerinden Pages yayını.
+- [x] Tam test/PWA/portable build, ayrı branch/commit ve main üzerinden Pages yayını.
 
 ### Telefon klavyesi review
 
@@ -14,6 +14,7 @@
 - 11 viewport testi; tam paket 27 dosya / 434 test başarılı. Coverage satır %75,25; viewport %100 satır. PWA ve portable build başarılı.
 - Vite-only tests/fixtures/phone-keyboard.html gerçek index/app/CSS ile VisualViewport-only resize/pan sağlar (layout viewport değişmez). Tarayıcı: 390×844 içinde height420/top120 → başlık148–209, mesaj474–540; kayıt görünümünde height420/top0 → mesaj354–420, çalışma çubukları gizli. 844×390 içinde height200 → başlık28–89, mesaj134–200; dar 360×640 → çubuklar0–86 ve582–640. Kapanışta kök ve çubuklar geri döner.
 - Bu düzenek gerçek OS klavyesi veya ana ekrana kurulu fiziksel cihaz değildir; cihaz kabulü kullanıcı tekrar testiyle açık kalır. Üretim build girişine test düzeneği eklenmez.
+- PR #73 branch/PR testleri başarılı; main `7a270bb65f55db854559edc579c2b11fa732d8a5`. Main Test `36914016733` ve Pages `36914016604` başarılı. Canlı HTML yeni `index-Ds9Lkff8.js` / `index-C7cSokMX.css` paketlerini sunuyor.
 
 ## 1 Ekim — Kurulu mobil uygulama: klavye ve geçiş temposu
 
