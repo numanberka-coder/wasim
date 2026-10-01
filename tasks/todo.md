@@ -4,7 +4,7 @@
 
 - [x] Mesaj modalını VisualViewport yüksekliği/offsetTop'una bağla; başlık ve Vazgeç/Sil/Kaydet sabit kalsın, yalnız form gövdesi kaydırılsın.
 - [x] Odaktaki metin/saat/gönderen alanını kendi modal gövdesinde görünür tut; taslak, zoom, masaüstü ve diğer modalları koru.
-- [ ] VisualViewport-only resize/pan ile gerçek uygulamada metin + saat + üç eylemi doğrula; regresyonlar, tam test/PWA/portable build, main ve Pages yayını. Fiziksel cihaz kabulünü ayrı tut.
+- [x] VisualViewport-only resize/pan ile gerçek uygulamada metin + saat + üç eylemi doğrula; regresyonlar, tam test/PWA/portable build, main ve Pages yayını. Fiziksel cihaz kabulünü ayrı tut.
 
 ### Mesaj modalı klavye review
 
@@ -13,6 +13,7 @@
 - Gerçek index/app ile kontrollü VisualViewport: 390×844 içinde height420/top120 → modal132–528, eylemler467–511 (görünür alt540); saat odakta kendi scroller'ında görünür. 844×390 içinde height200 → başlık29–50, metin66–108, eylemler127–171. 360×640 içinde height420 → üç düğme347–391 ve44px yüksekliğinde. Klavye açıkken Vazgeç metni korudu, konsol hatası yok; 1280×900 masaüstü modalı block/auto olarak değişmedi.
 - Test düzeneği modal odak ve pan desteği için genişletildi; test kontrolleri uygulama inert ağacının dışında. Yatayda klavye kapalıyken test çubuğu modal eylemlerini örtebilir; bu test düzeneği çakışması gerçek uygulama değildir, klavye açık alan ölçümü ve gerçek düğme kontrolüyle ayrıldı.
 - Fiziksel OS klavyesi/kurulu uygulama kabulü kullanıcı tekrar testiyle açık; resize/pan düzeneği eşdeğer sayılmıyor.
+- PR #75 branch/PR testleri başarılı; main `2c0e5d91b5744c922112b9d876bc14707a8e05e5`. Main Test `36917958252` ve Pages `36917958375` başarılı. Canlı HTML `index-CHfFOF5j.js` / `index-CF0q7TOw.css` ile son build'e eşleşiyor; yeni CSS HTTP 200 ve message-edit-overlay kuralı doğrulandı.
 
 ## 1 Ekim — Önizleme mesajını bilinçli düzenleme
 
