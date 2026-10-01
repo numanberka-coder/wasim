@@ -1,4 +1,4 @@
-/** Keep the editing surface and its focused control inside the software keyboard's visible area. */
+/** Keep the mobile phone and editor inside the software keyboard's visible area. */
 export function initVisualViewport() {
   const viewport = window.visualViewport;
   const root = document.documentElement;
@@ -10,14 +10,24 @@ export function initVisualViewport() {
     const zoomed = viewport && Math.abs((viewport.scale || 1) - 1) > 0.05;
     const height = zoomed ? window.innerHeight : (viewport?.height || window.innerHeight);
     const top = zoomed ? 0 : Math.max(0, viewport?.offsetTop || 0);
-    const keyboardHeight = zoomed ? 0 : Math.max(0, window.innerHeight - height - top);
+    // offsetTop is browser panning, not additional usable height. Subtracting it
+    // would lose the keyboard state when the browser pans to the bottom input.
+    const keyboardHeight = zoomed ? 0 : Math.max(0, window.innerHeight - height);
     root.style.setProperty('--visual-viewport-height', `${height}px`);
     root.style.setProperty('--visual-viewport-top', `${top}px`);
     root.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
     root.classList.toggle('keyboard-open', keyboardHeight > 100);
+    const active = document.activeElement;
+    const inPhoneComposer = !!active?.closest?.('.phone .chat-input');
+    const phoneFocused = inPhoneComposer && active.matches('input, textarea, [contenteditable="true"]');
+    // Keep the layout steady while tapping Send (which can blur the input),
+    // but restore chrome when editing elsewhere or the keyboard closes.
+    const retainPhone = root.classList.contains('phone-keyboard-open') &&
+      (inPhoneComposer || active === document.body);
+    root.classList.toggle('phone-keyboard-open', !zoomed && window.innerWidth <= 980 &&
+      keyboardHeight > 100 && (phoneFocused || retainPhone));
     if (zoomed || window.innerWidth > 980) return;
 
-    const active = document.activeElement;
     const body = active?.closest?.('.mobile-overlay-body');
     if (!body || !active.matches('input, textarea, select, [contenteditable="true"]')) return;
     const area = body.getBoundingClientRect();
@@ -41,6 +51,7 @@ export function initVisualViewport() {
   viewport?.addEventListener('scroll', schedule);
   window.addEventListener('resize', schedule);
   document.addEventListener('focusin', schedule);
+  document.addEventListener('focusout', schedule);
   update();
   return () => {
     if (frame !== null) cancelAnimationFrame(frame);
@@ -48,5 +59,6 @@ export function initVisualViewport() {
     viewport?.removeEventListener('scroll', schedule);
     window.removeEventListener('resize', schedule);
     document.removeEventListener('focusin', schedule);
+    document.removeEventListener('focusout', schedule);
   };
 }

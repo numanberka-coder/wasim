@@ -1,5 +1,10 @@
 # Lessons Learned
 
+## 1 Ekim — Cihaz görselleri kapsamı netleştirdi
+- Yeni görseller telefonun canlı Mesaj alanında ve temiz kayıt görünümünde ayrı bir klavye hatasını da gösterdi. Önceki Konuşma formu düzeltmesi bunu çözmüş sayılmaz; ikisini ayrı doğrula.
+- Mobil kök 100dvh kalırken yalnız overlay'in VisualViewport'a uyması telefon mesaj alanını kurtarmaz. Çalışma kökü ve kayıt yerleşimi görünür alanı paylaşmalı; çubuklar aynı kökte konumlanmalı.
+- Kök yüksekliğini daraltmak tek başına yetmez: miras kalan min-height:100vh bunu geçersiz kılar. CSS geometrisini gerçek uygulamayla ve layout viewport sabitken VisualViewport resize/pan düzeneğiyle ölç; pencereyi küçültmek bu hatayı gizleyebilir.
+
 ## 1 Ekim — Kurulu uygulamada yazılım klavyesi
 - “Mesaj satırı” belirsiz olduğunda telefonun canlı Mesaj alanı ile Konuşma mesaj ekleme formunu ayırt et; kullanıcı bu turda ekleme formunu kastetti. İlgisiz telefon yerleşimini değiştirme.
 - VisualViewport yüksekliği tek başına yetmez: offsetTop, son resize olayı ve odaktaki alan/eylem satırının görünürlüğü birlikte kontrol edilmeli.

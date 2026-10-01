@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Phone keyboard regression fixture (Vite dev only)</title>
+<script type="module">
+// Load the real application, with a controllable VisualViewport BEFORE boot.
+// Unlike resizing the browser window, this leaves the layout viewport unchanged.
+// This fixture is not a production build entry or a physical-device acceptance test.
+import app from '../../index.html?raw';
+const setup = `<script>
+  const viewport = Object.assign(new EventTarget(), {height: innerHeight, offsetTop: 0, scale: 1});
+  Object.defineProperty(window, 'visualViewport', {value: viewport, configurable: true});
+  window.addEventListener('DOMContentLoaded', () => {
+    const controls = document.createElement('div');
+    controls.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#eee;color:#111;padding:8px;display:flex;gap:8px;flex-wrap:wrap';
+    const status = document.createElement('span');
+    status.textContent = 'Simulated keyboard — not an OS keyboard';
+    controls.append(status);
+    for (const [label, height, top] of [['Keyboard 420',420,0],['Pan 120',420,120],['Short 200',200,0],['Close keyboard',innerHeight,0]]) {
+      const button = document.createElement('button');
+      button.textContent = label;
+      button.onclick = () => {
+        const input = document.getElementById('liveInput');
+        if (label === 'Close keyboard') input.blur(); else input.focus();
+        viewport.height = height;
+        viewport.offsetTop = top;
+        viewport.dispatchEvent(new Event('resize'));
+        viewport.dispatchEvent(new Event('scroll'));
+      };
+      controls.append(button);
+    }
+    document.body.append(controls);
+  });
+<\/script>`;
+document.open();
+document.write(app.replace('<head>', '<head><base href="/">' + setup));
+document.close();
+</script>

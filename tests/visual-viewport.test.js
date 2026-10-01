@@ -1,15 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initVisualViewport } from '../js/ui/visual-viewport.js';
 
-let viewport, frames, dispose, body, message, actions;
+let viewport, frames, dispose, body, message, actions, liveInput, sendButton;
 const flush = () => { const pending = frames.splice(0); pending.forEach(fn => fn()); };
 const rect = (top, height) => ({ top, bottom: top + height, height, left: 0, right: 390, width: 390 });
 const css = name => document.documentElement.style.getPropertyValue(name);
 beforeEach(() => {
-  document.body.innerHTML = '<div class="mobile-overlay-body"><div class="mobile-script-composer"><textarea id="message">Taslak</textarea><div class="mobile-script-composer-actions">Kaydet</div></div></div><input id="phoneInput">';
+  document.body.innerHTML = '<div class="mobile-overlay-body"><div class="mobile-script-composer"><textarea id="message">Taslak</textarea><div class="mobile-script-composer-actions">Kaydet</div></div></div><input id="phoneInput"><div class="phone"><div class="chat-input"><input id="liveInput"><button id="sendButton">Gönder</button></div></div>';
   body = document.querySelector('.mobile-overlay-body');
   message = document.getElementById('message');
   actions = document.querySelector('.mobile-script-composer-actions');
+  liveInput = document.getElementById('liveInput');
+  sendButton = document.getElementById('sendButton');
   viewport = Object.assign(new EventTarget(), { height: 800, offsetTop: 0, scale: 1 });
   Object.defineProperty(window, 'visualViewport', { configurable: true, value: viewport });
   Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
@@ -26,7 +28,7 @@ afterEach(() => {
   dispose?.();
   dispose = null;
   vi.unstubAllGlobals();
-  document.documentElement.classList.remove('keyboard-open');
+  document.documentElement.classList.remove('keyboard-open', 'phone-keyboard-open');
   for (const name of ['--visual-viewport-height', '--visual-viewport-top', '--keyboard-height']) document.documentElement.style.removeProperty(name);
 });
 
@@ -44,7 +46,7 @@ describe('software keyboard viewport', () => {
     flush();
     expect(css('--visual-viewport-height')).toBe('420px');
     expect(css('--visual-viewport-top')).toBe('24px');
-    expect(css('--keyboard-height')).toBe('356px');
+    expect(css('--keyboard-height')).toBe('380px');
     expect(document.documentElement.classList.contains('keyboard-open')).toBe(true);
     viewport.height = 800;
     viewport.offsetTop = 0;
@@ -53,6 +55,83 @@ describe('software keyboard viewport', () => {
     expect(css('--visual-viewport-height')).toBe('800px');
     expect(css('--visual-viewport-top')).toBe('0px');
     expect(document.documentElement.classList.contains('keyboard-open')).toBe(false);
+  });
+
+  it('keeps the phone keyboard open when the visual viewport pans and restores it on close', () => {
+    dispose = initVisualViewport();
+    liveInput.focus();
+    viewport.height = 420;
+    viewport.offsetTop = 380;
+    viewport.dispatchEvent(new Event('resize'));
+    viewport.dispatchEvent(new Event('scroll'));
+    flush();
+    expect(css('--visual-viewport-height')).toBe('420px');
+    expect(css('--visual-viewport-top')).toBe('380px');
+    expect(css('--keyboard-height')).toBe('380px');
+    expect(document.documentElement.classList.contains('keyboard-open')).toBe(true);
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    expect(body.scrollTop).toBe(0);
+    viewport.height = 800;
+    viewport.offsetTop = 0;
+    viewport.dispatchEvent(new Event('resize'));
+    flush();
+    expect(css('--keyboard-height')).toBe('0px');
+    expect(css('--visual-viewport-height')).toBe('800px');
+    expect(css('--visual-viewport-top')).toBe('0px');
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(false);
+  });
+
+  it('preserves the phone keyboard layout during blur and send-button focus', () => {
+    dispose = initVisualViewport();
+    viewport.height = 420;
+    liveInput.focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    liveInput.blur();
+    expect(frames).toHaveLength(1);
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    sendButton.focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+  });
+
+  it('clears the phone keyboard layout when an editor or unrelated input receives focus', () => {
+    dispose = initVisualViewport();
+    viewport.height = 420;
+    liveInput.focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    message.focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(false);
+    expect(document.documentElement.classList.contains('keyboard-open')).toBe(true);
+    liveInput.focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    document.getElementById('phoneInput').focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(false);
+  });
+
+  it('clears the phone keyboard layout during pinch zoom or desktop resize', () => {
+    dispose = initVisualViewport();
+    viewport.height = 420;
+    liveInput.focus();
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    viewport.scale = 1.5;
+    viewport.dispatchEvent(new Event('resize'));
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(false);
+    viewport.scale = 1;
+    viewport.dispatchEvent(new Event('resize'));
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(true);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
+    window.dispatchEvent(new Event('resize'));
+    flush();
+    expect(document.documentElement.classList.contains('phone-keyboard-open')).toBe(false);
   });
 
   it('keeps the focused message and actions above the keyboard without changing the draft', () => {
