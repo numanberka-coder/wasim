@@ -7,7 +7,7 @@
 - [x] Telefon ana ekran/sohbet ve sekme geçişlerini aynı hareket diliyle tamamla; masaüstü davranışı ve mevcut veri korunacak.
 - [x] Hareket azaltma, kayıt görünümü, taslak/kaydırma ve odak/arka plan kilidi için regresyon testleri.
 - [x] Gerçek tarayıcıda mobil boyutlar, hızlı aç/kapat, geri dönüş ve kayıt görünümü; tam test ve PWA/portable build.
-- [ ] Testleri geçen değişikliği main'e birleştirip Pages yayınını doğrula; doğrulama sınırlarını review'e yaz.
+- [x] Testleri geçen değişikliği main'e birleştirip Pages yayınını doğrula; doğrulama sınırlarını review'e yaz.
 
 ### 1 Ekim review
 
@@ -16,6 +16,7 @@
 - Reduced-motion ve WAAPI desteklenmeyen durumda eşzamanlı tamamlanma; PNG/kayıt başlangıcında efektin temizlenmesi test edildi. Mevcut kayıt görünümü çalışma çubuklarını gizlemeye devam eder.
 - 26 dosya / 423 test, tam coverage (satır %74,90; yeni hareket yardımcı modülü %100 satır), PWA ve portable build geçti.
 - Canlı tarayıcı: 360×640, 390×844, 844×390; yatay taşma yok, panel sınırları viewport ile eşit. Kapanış sırasında transform ve portal varlığı, taslakla yeniden açma, Escape/tarayıcı geri, sekme/sohbet ve temiz tam ekran doğrulandı. Konsolda uygulama hatası yok. Fiziksel cihaz kare hızı, gerçek yazılım klavyesi ve OS ekran kaydı bu turda doğrulanmadı.
+- Yayın: PR #71 branch ve PR testleri başarılı, main `51480e22ec3f7a82ca6b8d095367f7760f335718` üzerinden birleşti. Pages koşusu `36904033536` başarılı; canlı HTML yeni `index-l9a1vsWT.js` / `index-BarADETj.css` paketleriyle yerel PWA build'ini eşleştirdi.
 
 ## 30 Eylül — Kullanıcı incelemesi sonrası UX düzeltmeleri
 
