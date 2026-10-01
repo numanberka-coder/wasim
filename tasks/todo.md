@@ -1,5 +1,22 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## 1 Ekim — Mobil hareket ve geçişler
+
+- [x] Ortak süre/eğri modeli: kısa dokunma geri bildirimi, yönlü ekran açılışı ve geri dönüş; yalnız transform/opacity animasyonu.
+- [x] Mobil düzenleyicinin kapanışında içeriği animasyon sonuna kadar koru; hızlı yeniden açma, tarayıcı geri ve zorunlu önizlemeye dönüşte eski işlem yeni ekranı kapatmasın.
+- [x] Telefon ana ekran/sohbet ve sekme geçişlerini aynı hareket diliyle tamamla; masaüstü davranışı ve mevcut veri korunacak.
+- [x] Hareket azaltma, kayıt görünümü, taslak/kaydırma ve odak/arka plan kilidi için regresyon testleri.
+- [x] Gerçek tarayıcıda mobil boyutlar, hızlı aç/kapat, geri dönüş ve kayıt görünümü; tam test ve PWA/portable build.
+- [ ] Testleri geçen değişikliği main'e birleştirip Pages yayınını doğrula; doğrulama sınırlarını review'e yaz.
+
+### 1 Ekim review
+
+- Tam ekran düzenleyiciler yatay 240 ms açılır/geri döner; telefon sohbeti 240 ms, sekmeler 160 ms giriş hareketi kullanır. Mobil çalışma kontrolleri 100 ms basılma geri bildirimi verir. Yalnız transform/opacity değişir, form/scroll DOM'u kopyalanmaz.
+- Kapanışta portal ve odak kilidi bitişe kadar korunur; yeni geçiş eski animasyonu iptal eder. Geciken history.back olayı yeni paneli kapatamaz; history dinleyicisi tekil bağlanır.
+- Reduced-motion ve WAAPI desteklenmeyen durumda eşzamanlı tamamlanma; PNG/kayıt başlangıcında efektin temizlenmesi test edildi. Mevcut kayıt görünümü çalışma çubuklarını gizlemeye devam eder.
+- 26 dosya / 423 test, tam coverage (satır %74,90; yeni hareket yardımcı modülü %100 satır), PWA ve portable build geçti.
+- Canlı tarayıcı: 360×640, 390×844, 844×390; yatay taşma yok, panel sınırları viewport ile eşit. Kapanış sırasında transform ve portal varlığı, taslakla yeniden açma, Escape/tarayıcı geri, sekme/sohbet ve temiz tam ekran doğrulandı. Konsolda uygulama hatası yok. Fiziksel cihaz kare hızı, gerçek yazılım klavyesi ve OS ekran kaydı bu turda doğrulanmadı.
+
 ## 30 Eylül — Kullanıcı incelemesi sonrası UX düzeltmeleri
 
 - [x] Kayıt/tam ekran görünümünde tüm uygulama çubuklarını gizle; tam ekran çıkışını güvenilir yap.

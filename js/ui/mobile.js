@@ -18,6 +18,7 @@ import { runUndoable } from '../features/history.js';
 import { applyAllTypography } from '../phone/typography.js';
 import { surfaceManager } from './surface-manager.js';
 import { createPanelPortal } from './panel-portal.js';
+import { animateElement } from './motion.js';
 import {
   MENU_MODE_EVENT,
   MENU_ICON_SVG,
@@ -56,6 +57,10 @@ const mobileState = {
   // Panel move referansları
   _panelPortal: null,
   _historyToken: null,
+  _pendingHistoryClose: null,
+  _cancelMotion: null,
+  _cancelBackdropMotion: null,
+  _closeOptions: null,
   panelScroll: new Map(),
   initializedPanels: new WeakSet(),
 };
@@ -200,21 +205,35 @@ function bindMobileEvents() {
     }
     if (!isMobileView()) {
       closeMobileMenu();
-      if (mobileState.overlayOpen) requestMobileOverlayClose({ restoreFocus: false });
+      if (mobileState.overlayOpen) requestMobileOverlayClose({ restoreFocus: false, immediate: true });
     }
   }, 250));
 
   // Android geri tuşu
-  window.addEventListener('popstate', (e) => {
-    if (mobileState.overlayOpen) {
-      e.preventDefault();
-      requestMobileOverlayClose({ fromHistory: true });
-    } else if (mobileState.menuOpen) {
-      e.preventDefault();
-      closeMobileMenu();
-    }
-  });
+  window.removeEventListener('popstate', handleMobileHistory);
+  window.addEventListener('popstate', handleMobileHistory);
 
+}
+
+function handleMobileHistory(e) {
+  const pending = mobileState._pendingHistoryClose;
+  if (pending && e.state?.mobileOverlayToken !== pending.token) {
+    mobileState._pendingHistoryClose = null;
+    if (mobileState.overlayOpen && mobileState._historyToken !== pending.token) {
+      // A new editor opened before the previous history.back was delivered.
+      // Its entry was deferred; attach it now instead of closing the new editor.
+      history.pushState({ ...e.state, mobileOverlayToken: mobileState._historyToken }, '');
+      return;
+    }
+  }
+  if (e.state?.mobileOverlayToken === mobileState._historyToken) return;
+  if (mobileState.overlayOpen) {
+    e.preventDefault();
+    requestMobileOverlayClose({ fromHistory: true });
+  } else if (mobileState.menuOpen) {
+    e.preventDefault();
+    closeMobileMenu();
+  }
 }
 
 /* ========================================
@@ -684,6 +703,7 @@ function openMobileOverlay(panelKey, options = {}) {
   const titleEl = $('mobileOverlayTitle');
   const body = $('mobileOverlayBody');
   if (!overlay || !body) return;
+  if (mobileState._pendingHistoryClose?.root !== overlay) mobileState._pendingHistoryClose = null;
 
   const sourcePanelId = PANEL_MAP[panelKey];
   if (!sourcePanelId) return;
@@ -692,6 +712,7 @@ function openMobileOverlay(panelKey, options = {}) {
 
   if (
     mobileState.overlayOpen &&
+    !mobileState._closeOptions &&
     mobileState.currentPanel === panelKey &&
     body.contains(sourcePanel)
   ) {
@@ -699,9 +720,9 @@ function openMobileOverlay(panelKey, options = {}) {
     return;
   }
 
-  const replacingPanel = mobileState.overlayOpen;
-  if (replacingPanel) {
-    closeMobileOverlay({ preserveHistory: true, restoreFocus: false });
+  const replacingPanel = mobileState.overlayOpen && !mobileState._closeOptions?.fromHistory;
+  if (mobileState.overlayOpen) {
+    closeMobileOverlay({ preserveHistory: true, restoreFocus: false, immediate: true });
   }
 
   // Başlık
@@ -748,10 +769,14 @@ function openMobileOverlay(panelKey, options = {}) {
     history: {
       key: 'mobileOverlayToken',
       token: mobileState._historyToken,
-      push: !replacingPanel,
+      push: !replacingPanel && !mobileState._pendingHistoryClose,
     },
   });
   body.scrollTop = mobileState.panelScroll.get(panelKey) || 0;
+  overlay.classList.add('is-entering');
+  mobileState._cancelMotion = animateElement(overlay,
+    [{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }],
+    { onFinish: () => overlay.classList.remove('is-entering') });
   document.dispatchEvent(new CustomEvent('workspace:opened', { detail: { key: panelKey } }));
 }
 
@@ -767,24 +792,57 @@ function closeMobileOverlay(options = {}) {
   // Overlay kapalıysa bile zorla temizle
   if (!overlay || !mobileState.overlayOpen) return;
 
+  if (mobileState._closeOptions && !options.immediate) {
+    Object.assign(mobileState._closeOptions, options);
+    return;
+  }
+  const closeOptions = { ...mobileState._closeOptions, ...options };
+  // Read the current animated position before cancellation (back during opening).
+  const transform = getComputedStyle(overlay).transform;
+  mobileState._cancelMotion?.();
+  mobileState._cancelBackdropMotion?.();
+  mobileState._cancelMotion = null;
+  mobileState._cancelBackdropMotion = null;
+  mobileState._closeOptions = closeOptions;
+  const finish = () => finishMobileOverlayClose(closeOptions);
+  if (options.immediate) { finish(); return; }
+  overlay.classList.remove('is-entering');
+  overlay.classList.add('is-closing');
+  if (backdrop) mobileState._cancelBackdropMotion = animateElement(backdrop, [{ opacity: 1 }, { opacity: 0 }]);
+  mobileState._cancelMotion = animateElement(overlay,
+    [{ transform: transform === 'none' ? 'translateX(0)' : transform }, { transform: 'translateX(100%)' }],
+    { onFinish: finish });
+}
+
+function finishMobileOverlayClose(options) {
+  const overlay = $('mobileOverlay');
+  const backdrop = $('mobileOverlayBackdrop');
+  mobileState._cancelBackdropMotion?.();
+  mobileState._cancelBackdropMotion = null;
+
   mobileState.panelScroll.set(mobileState.currentPanel, $('mobileOverlayBody')?.scrollTop || 0);
 
   mobileState._panelPortal?.restore();
 
   // Temizle
   mobileState._panelPortal = null;
+  mobileState._cancelMotion = null;
+  mobileState._closeOptions = null;
   mobileState.overlayOpen = false;
   mobileState.overlayTrigger = null;
   mobileState.currentPanel = null;
   syncMobileOverlayActions(null);
 
-  overlay.classList.remove('is-open');
+  overlay.classList.remove('is-open', 'is-closing', 'is-entering');
   overlay.setAttribute('aria-hidden', 'true');
   if (backdrop) backdrop.classList.remove('is-open');
 
   const body = $('mobileOverlayBody');
   if (body) body.replaceChildren();
 
+  if (!options.preserveHistory && !options.fromHistory && history.state?.mobileOverlayToken === mobileState._historyToken) {
+    mobileState._pendingHistoryClose = { token: mobileState._historyToken, root: overlay };
+  }
   surfaceManager.close('mobile-overlay', options);
   if (!options.preserveHistory) mobileState._historyToken = null;
   document.dispatchEvent(new CustomEvent('workspace:closed'));
@@ -794,7 +852,8 @@ export function openWorkspacePanel(key, trigger) {
   openMobileOverlay(key, { trigger });
 }
 export function returnToPreview() {
-  requestMobileOverlayClose();
+  // Playback, exports and recording must never capture a departing editor.
+  requestMobileOverlayClose({ immediate: true });
 }
 
 /* ========================================
