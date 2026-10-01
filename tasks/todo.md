@@ -1,5 +1,19 @@
 # Mobil Üretim UX Dönüşümü — Aktif Plan
 
+## 1 Ekim — Mesaj düzenleme penceresinde klavye
+
+- [x] Mesaj modalını VisualViewport yüksekliği/offsetTop'una bağla; başlık ve Vazgeç/Sil/Kaydet sabit kalsın, yalnız form gövdesi kaydırılsın.
+- [x] Odaktaki metin/saat/gönderen alanını kendi modal gövdesinde görünür tut; taslak, zoom, masaüstü ve diğer modalları koru.
+- [ ] VisualViewport-only resize/pan ile gerçek uygulamada metin + saat + üç eylemi doğrula; regresyonlar, tam test/PWA/portable build, main ve Pages yayını. Fiziksel cihaz kabulünü ayrı tut.
+
+### Mesaj modalı klavye review
+
+- Yalnız message-edit-overlay/modal mobil görünür alanı kullanır; başlık/footer küçülmez, form gövdesi kayar. Inputlar 16 px ve boyut animasyonu olmadan yerleşir. Metin kutusu dar görünür alana uyarlanır. Odak düzeltmesi yalnız modalın kendi scroller'ını kaydırır; küçük gövdede inset küçülür, sığmayan alan üstten sabitlenerek resize döngüsünde ileri/geri kaymaz.
+- 5 modal viewport regresyonu; toplam viewport 16 test, tam paket 28 dosya / 452 test geçti. Coverage satır %76,28, viewport %100 satır. PWA/portable build başarılı.
+- Gerçek index/app ile kontrollü VisualViewport: 390×844 içinde height420/top120 → modal132–528, eylemler467–511 (görünür alt540); saat odakta kendi scroller'ında görünür. 844×390 içinde height200 → başlık29–50, metin66–108, eylemler127–171. 360×640 içinde height420 → üç düğme347–391 ve44px yüksekliğinde. Klavye açıkken Vazgeç metni korudu, konsol hatası yok; 1280×900 masaüstü modalı block/auto olarak değişmedi.
+- Test düzeneği modal odak ve pan desteği için genişletildi; test kontrolleri uygulama inert ağacının dışında. Yatayda klavye kapalıyken test çubuğu modal eylemlerini örtebilir; bu test düzeneği çakışması gerçek uygulama değildir, klavye açık alan ölçümü ve gerçek düğme kontrolüyle ayrıldı.
+- Fiziksel OS klavyesi/kurulu uygulama kabulü kullanıcı tekrar testiyle açık; resize/pan düzeneği eşdeğer sayılmıyor.
+
 ## 1 Ekim — Önizleme mesajını bilinçli düzenleme
 
 - [x] Mesaj balonunda kısa dokunuş düzenleme açmasın; 500 ms basılı tutma açsın. Kaydırma, 10 px üstü hareket, bırakma/iptal ve çoklu dokunuş bekleyen işlemi iptal etsin; medya/bağlantı düğmelerine dokunma.

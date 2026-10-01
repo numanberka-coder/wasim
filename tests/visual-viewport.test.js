@@ -148,6 +148,104 @@ describe('software keyboard viewport', () => {
     expect(document.activeElement).toBe(message);
   });
 
+  it.each(['textarea', 'input'])('keeps a focused message-edit modal %s inside its own scroll body', tag => {
+    const modal = document.createElement('div');
+    modal.className = 'app-modal message-edit-modal';
+    modal.innerHTML = `<div class="app-modal-body"><${tag}></${tag}></div><div class="app-modal-footer">Kaydet</div>`;
+    document.body.appendChild(modal);
+    const modalBody = modal.querySelector('.app-modal-body');
+    const field = modal.querySelector(tag);
+    const footer = modal.querySelector('.app-modal-footer');
+    field.value = 'Taslak değişmeden kalmalı';
+    // The layout viewport stays fixed while the keyboard shrinks and pans the visual viewport.
+    modalBody.getBoundingClientRect = () => rect(80, 660);
+    field.getBoundingClientRect = () => rect(650 - modalBody.scrollTop, 80);
+    footer.getBoundingClientRect = () => rect(740, 60);
+    dispose = initVisualViewport();
+    field.focus();
+    viewport.height = 420;
+    viewport.offsetTop = 120;
+    viewport.dispatchEvent(new Event('resize'));
+    viewport.dispatchEvent(new Event('scroll'));
+    flush();
+    expect(field.getBoundingClientRect().top).toBeGreaterThanOrEqual(viewport.offsetTop + 12);
+    expect(field.getBoundingClientRect().bottom).toBe(viewport.offsetTop + viewport.height - 12);
+    expect(modalBody.scrollTop).toBe(202);
+    expect(modal.scrollTop).toBe(0);
+    expect(body.scrollTop).toBe(0);
+    expect(field.value).toBe('Taslak değişmeden kalmalı');
+    expect(document.activeElement).toBe(field);
+  });
+
+  it('leaves unrelated app-modal bodies untouched when their inputs receive focus', () => {
+    const modal = document.createElement('div');
+    modal.className = 'app-modal';
+    modal.innerHTML = '<div class="app-modal-body"><input value="Unrelated draft"></div>';
+    document.body.appendChild(modal);
+    const modalBody = modal.querySelector('.app-modal-body');
+    const field = modal.querySelector('input');
+    modalBody.getBoundingClientRect = () => rect(80, 660);
+    field.getBoundingClientRect = () => rect(650 - modalBody.scrollTop, 80);
+    dispose = initVisualViewport();
+    field.focus();
+    viewport.height = 420;
+    viewport.offsetTop = 120;
+    viewport.dispatchEvent(new Event('resize'));
+    flush();
+    expect(modalBody.scrollTop).toBe(0);
+    expect(modal.scrollTop).toBe(0);
+    expect(body.scrollTop).toBe(0);
+    expect(field.value).toBe('Unrelated draft');
+    expect(document.activeElement).toBe(field);
+  });
+
+  it('reduces the message-modal inset when its short scroll body can just fit the field', () => {
+    const modal = document.createElement('div');
+    modal.className = 'app-modal message-edit-modal';
+    modal.innerHTML = '<div class="app-modal-body"><input value="Short-body draft"></div>';
+    document.body.appendChild(modal);
+    const modalBody = modal.querySelector('.app-modal-body');
+    const field = modal.querySelector('input');
+    modalBody.getBoundingClientRect = () => rect(400, 49);
+    field.getBoundingClientRect = () => rect(650 - modalBody.scrollTop, 42);
+    dispose = initVisualViewport();
+    field.focus();
+    viewport.height = 420;
+    viewport.offsetTop = 120;
+    viewport.dispatchEvent(new Event('resize'));
+    flush();
+    expect(field.getBoundingClientRect().top).toBe(403.5);
+    expect(field.getBoundingClientRect().bottom).toBe(445.5);
+    expect(modalBody.scrollTop).toBe(246.5);
+    expect(body.scrollTop).toBe(0);
+    expect(field.value).toBe('Short-body draft');
+    expect(document.activeElement).toBe(field);
+  });
+
+  it('steadily anchors an oversized message-modal field at the visible top across repeated resize events', () => {
+    const modal = document.createElement('div');
+    modal.className = 'app-modal message-edit-modal';
+    modal.innerHTML = '<div class="app-modal-body"><textarea>Oversized draft</textarea></div>';
+    document.body.appendChild(modal);
+    const modalBody = modal.querySelector('.app-modal-body');
+    const field = modal.querySelector('textarea');
+    modalBody.getBoundingClientRect = () => rect(400, 49);
+    field.getBoundingClientRect = () => rect(650 - modalBody.scrollTop, 90);
+    dispose = initVisualViewport();
+    field.focus();
+    viewport.height = 420;
+    viewport.offsetTop = 120;
+    for (let i = 0; i < 3; i += 1) {
+      viewport.dispatchEvent(new Event('resize'));
+      flush();
+      expect(field.getBoundingClientRect().top).toBe(400);
+      expect(modalBody.scrollTop).toBe(250);
+    }
+    expect(body.scrollTop).toBe(0);
+    expect(field.value).toBe('Oversized draft');
+    expect(document.activeElement).toBe(field);
+  });
+
   it('adjusts an editor field above the visible top by scrolling only its own body', () => {
     body.scrollTop = 630;
     message.focus();

@@ -1,5 +1,9 @@
 # Lessons Learned
 
+## 1 Ekim — Modal düzenleyici de klavye kabulüne dahil
+- Telefon mesaj satırı ve Konuşma formu düzeltmesi, balonun “Mesajı Düzenle” modalını kapsamaz. Native klavye açıkken modal eylemleri de görünür olmalı; yalnız klavyesiz screenshot yeterli değildir.
+- İç içe yüzeyleri ayrı doğrula: modal gövdesi kaydırılabilir, başlık ve eylemler görünür alanın içinde sabit kalmalı. Pencereyi küçültme yerine layout viewport sabitken VisualViewport resize/pan testini kullan.
+
 ## 1 Ekim — Önizlemede kazara düzenlemeyi önle
 - Telefon önizlemesi çalışma kartı değildir: balona kısa dokunma düzenleme açmamalı. Düzenlemeyi bilinçli basılı tutma ve klavye eylemine bağla; kaydırma/bırakma/çoklu dokunuş jesti iptal etsin.
 - Düzenleme penceresinde yalnız Sil/Kaydet bırakma: açık “Vazgeç” eylemi bulunmalı ve taslak kapanırken veriye yazılmamalı.

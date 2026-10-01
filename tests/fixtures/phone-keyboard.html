@@ -19,16 +19,21 @@ const setup = `<script>
       const button = document.createElement('button');
       button.textContent = label;
       button.onclick = () => {
-        const input = document.getElementById('liveInput');
+        const modal = document.querySelector('.message-edit-modal');
+        const input = modal?.contains(document.activeElement) ? document.activeElement :
+          modal?.querySelector('.msg-edit-text') || document.getElementById('liveInput');
         if (label === 'Close keyboard') input.blur(); else input.focus();
         viewport.height = height;
         viewport.offsetTop = top;
         viewport.dispatchEvent(new Event('resize'));
         viewport.dispatchEvent(new Event('scroll'));
       };
+      // Keep the field's focus when operating the simulated keyboard controls.
+      button.onpointerdown = event => event.preventDefault();
       controls.append(button);
     }
-    document.body.append(controls);
+    // Test controls are outside the application/modal's inert background tree.
+    document.documentElement.append(controls);
   });
 <\/script>`;
 document.open();

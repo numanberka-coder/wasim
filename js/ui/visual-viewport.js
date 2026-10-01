@@ -28,7 +28,7 @@ export function initVisualViewport() {
       keyboardHeight > 100 && (phoneFocused || retainPhone));
     if (zoomed || window.innerWidth > 980) return;
 
-    const body = active?.closest?.('.mobile-overlay-body');
+    const body = active?.closest?.('.mobile-overlay-body, .message-edit-modal .app-modal-body');
     if (!body || !active.matches('input, textarea, select, [contenteditable="true"]')) return;
     const area = body.getBoundingClientRect();
     const field = active.getBoundingClientRect();
@@ -36,10 +36,13 @@ export function initVisualViewport() {
     const actions = active.closest('.mobile-script-composer')?.querySelector('.mobile-script-composer-actions');
     const reserve = actions?.getBoundingClientRect().height || 0;
     const paddingBottom = parseFloat(getComputedStyle(body).paddingBottom) || 0;
-    const visibleBottom = Math.min(area.bottom, top + height) - paddingBottom - reserve - 12;
-    const visibleTop = Math.max(area.top, top) + 12;
+    const inset = body.closest('.message-edit-modal') ?
+      Math.min(12, Math.max(0, (area.height - field.height - paddingBottom) / 2)) : 12;
+    const visibleBottom = Math.min(area.bottom, top + height) - paddingBottom - reserve - inset;
+    const visibleTop = Math.max(area.top, top) + inset;
     // Scroll only the editing body; scrollIntoView would also pan the iOS page.
-    if (field.bottom > visibleBottom) body.scrollTop += field.bottom - visibleBottom;
+    if (field.height > visibleBottom - visibleTop) body.scrollTop += field.top - visibleTop;
+    else if (field.bottom > visibleBottom) body.scrollTop += field.bottom - visibleBottom;
     else if (field.top < visibleTop) body.scrollTop -= visibleTop - field.top;
   }
 
