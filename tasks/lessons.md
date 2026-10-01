@@ -1,5 +1,9 @@
 # Lessons Learned
 
+## 1 Ekim — Önizlemede kazara düzenlemeyi önle
+- Telefon önizlemesi çalışma kartı değildir: balona kısa dokunma düzenleme açmamalı. Düzenlemeyi bilinçli basılı tutma ve klavye eylemine bağla; kaydırma/bırakma/çoklu dokunuş jesti iptal etsin.
+- Düzenleme penceresinde yalnız Sil/Kaydet bırakma: açık “Vazgeç” eylemi bulunmalı ve taslak kapanırken veriye yazılmamalı.
+
 ## 1 Ekim — Cihaz görselleri kapsamı netleştirdi
 - Yeni görseller telefonun canlı Mesaj alanında ve temiz kayıt görünümünde ayrı bir klavye hatasını da gösterdi. Önceki Konuşma formu düzeltmesi bunu çözmüş sayılmaz; ikisini ayrı doğrula.
 - Mobil kök 100dvh kalırken yalnız overlay'in VisualViewport'a uyması telefon mesaj alanını kurtarmaz. Çalışma kökü ve kayıt yerleşimi görünür alanı paylaşmalı; çubuklar aynı kökte konumlanmalı.

@@ -1,6 +1,6 @@
 /* ========================================
    MESSAGE EDITOR - Telefonda WYSIWYG düzenleme
-   #chatBody üzerinde baloncuğa tıklayınca metin/saat/gönderen
+   #chatBody üzerinde baloncuğa basılı tutunca metin/saat/gönderen
    düzenleme ve silme popover'ı açar. state.messages üzerinde
    çalışır; ekran görüntüsü değişikliği yakalar.
    ======================================== */
@@ -11,6 +11,9 @@ import { openModal } from '../ui/modal.js';
 import { editMessage, removeMessage } from './messages.js';
 import { runUndoable } from '../features/history.js';
 import { showSuccess } from '../ui/toast.js';
+
+const bindings = new WeakMap();
+const interactive = '.msg-voice-play, .msg-media-img, .msg-video, a, button, input, textarea, select';
 
 /** Düzenleme formu için gönderen seçenekleri (kişiler + Ben) */
 function buildSpeakerOptions(current) {
@@ -55,10 +58,13 @@ function openEditor(msg) {
     timeInput,
   ]);
 
+  let focusTimer = null;
   openModal({
     title: 'Mesajı Düzenle',
     bodyNode: body,
+    onClose: () => clearTimeout(focusTimer),
     buttons: [
+      { label: 'Vazgeç', className: 'secondary', value: 'cancel' },
       {
         label: 'Sil',
         icon: 'trash',
@@ -85,28 +91,74 @@ function openEditor(msg) {
       },
     ],
   });
-  // Metin alanına odaklan
-  setTimeout(() => textArea.focus(), 50);
+  // A quick cancellation must not refocus a detached editor.
+  focusTimer = setTimeout(() => { if (textArea.isConnected) textArea.focus(); }, 50);
 }
 
-/** #chatBody tıklama delegasyonu — baloncuğu düzenle */
+/** Deliberate 500 ms hold, or keyboard activation; normal taps do not edit. */
 export function initMessageEditor() {
   const chatBody = $('chatBody');
   if (!chatBody) return;
-
-  chatBody.addEventListener('click', (e) => {
-    // Mevcut etkileşimli öğelere dokunma (ses oynatma, medya, bağlantı vb.)
-    if (e.target.closest('.msg-voice-play, .msg-media-img, .msg-video, a, button')) return;
-
-    const row = e.target.closest('.msg-row[data-msg-id]');
-    if (!row || !chatBody.contains(row)) return;
-
-    const id = Number(row.dataset.msgId);
+  bindings.get(chatBody)?.();
+  let press = null;
+  const listeners = [];
+  const listen = (target, type, handler, options) => {
+    target.addEventListener(type, handler, options);
+    listeners.push(() => target.removeEventListener(type, handler, options));
+  };
+  const cancel = () => {
+    if (press) clearTimeout(press.timer);
+    press = null;
+  };
+  const bubbleFor = (target) => {
+    if (target?.closest?.(interactive)) return null;
+    const bubble = target?.closest?.('.msg-row[data-msg-id] .msg-bubble');
+    return bubble && chatBody.contains(bubble) ? bubble : null;
+  };
+  const editBubble = (bubble) => {
+    if (!chatBody.contains(bubble)) return;
+    const id = Number(bubble.closest('.msg-row').dataset.msgId);
     if (!Number.isFinite(id)) return;
-
     const msg = (state.get('messages') || []).find((m) => String(m.id) === String(id));
-    if (!msg) return;
+    if (msg) openEditor(msg);
+  };
 
-    openEditor(msg);
+  listen(chatBody, 'pointerdown', (event) => {
+    cancel();
+    if (event.button !== 0 || event.isPrimary === false) return;
+    const bubble = bubbleFor(event.target);
+    if (!bubble) return;
+    press = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    press.timer = setTimeout(() => { cancel(); editBubble(bubble); }, 500);
   });
+  // Do not block native scrolling or capture the pointer.
+  listen(document, 'pointerdown', (event) => {
+    if (press && (event.isPrimary === false || event.pointerId !== press.id)) cancel();
+  }, true);
+  listen(document, 'pointermove', (event) => {
+    if (press && event.pointerId === press.id &&
+      Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10) cancel();
+  }, { passive: true });
+  for (const type of ['pointerup', 'pointercancel']) listen(document, type, cancel);
+  listen(chatBody, 'pointerleave', cancel);
+  listen(chatBody, 'scroll', cancel, { passive: true, capture: true });
+  listen(window, 'blur', cancel);
+  listen(document, 'visibilitychange', cancel);
+  listen(chatBody, 'contextmenu', (event) => {
+    if (bubbleFor(event.target)) event.preventDefault();
+  });
+  listen(chatBody, 'keydown', (event) => {
+    const bubble = bubbleFor(event.target);
+    if (!bubble || event.target !== bubble || event.repeat || !['Enter', ' '].includes(event.key)) return;
+    event.preventDefault();
+    cancel();
+    editBubble(bubble);
+  });
+  const dispose = () => {
+    cancel();
+    listeners.forEach(remove => remove());
+    if (bindings.get(chatBody) === dispose) bindings.delete(chatBody);
+  };
+  bindings.set(chatBody, dispose);
+  return dispose;
 }

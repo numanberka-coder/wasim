@@ -694,6 +694,12 @@ function buildMessageRow(msg) {
   // Bubble
   const bubble = document.createElement('div');
   bubble.className = `msg-bubble ${isMe ? 'out' : 'in'}`;
+  bubble.tabIndex = 0;
+  bubble.setAttribute('role', 'group');
+  bubble.setAttribute('aria-label', `${msg.speaker || 'Mesaj'} mesajı`);
+  bubble.setAttribute('aria-description', 'Düzenlemek için basılı tutun veya Enter tuşuna basın.');
+  bubble.setAttribute('aria-haspopup', 'dialog');
+  bubble.setAttribute('aria-keyshortcuts', 'Enter Space');
 
   if (!group.isFirst) bubble.classList.add('no-tail');
   if (group.isFirst && !group.isLast) bubble.classList.add('group-top');
